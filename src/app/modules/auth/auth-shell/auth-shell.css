@@ -1,11 +1,70 @@
 /*
- * Kept as CSS (not Tailwind): the drenched brand-panel wash is a multi-layer
- * radial + linear gradient over custom OKLCH tokens — far more readable here
- * than as an arbitrary `bg-[...]` value. Everything else lives in the template
- * as Tailwind utilities.
+ * Kept as CSS (not Tailwind): the ground colour has to reach past <main> so an
+ * overscroll never flashes a different surface behind the sheet, and Kit's
+ * crop is sprite arithmetic that arbitrary utilities would make unreadable.
+ * Everything else lives in the template as utilities.
  */
-.auth-brand-surface {
-  background:
-    radial-gradient(115% 90% at 12% 8%, var(--auth-panel-glow) 0%, transparent 52%),
-    linear-gradient(158deg, var(--auth-panel-from) 0%, var(--auth-panel-to) 100%);
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  background-color: var(--surface);
+}
+
+/*
+ * Kit, standing on the sheet itself.
+ *
+ * The dashboard gives him a bordered stage because it drops him into a dense
+ * page of data and he needs a frame to be read as a figure rather than an
+ * illustration in a table. The sign-in sheet is quiet enough that the frame
+ * would only add a box; the drawing's own black contour holds him against
+ * Panel Surface unaided.
+ *
+ * Source PNGs are 1536x2048 with transparent padding; the opaque artwork sits
+ * at x 404-1145, y 84-2009 (741 x 1925), identical across every mood file.
+ * --kit-px is one source pixel. Resize Kit by changing --kit-w alone.
+ */
+.auth-kit-face {
+  --kit-w: 2.5rem;
+  --kit-px: calc(var(--kit-w) / 741);
+
+  display: block;
+  flex-shrink: 0;
+  width: var(--kit-w);
+  height: calc(1925 * var(--kit-px));
+  /* Neutral, not happy: Kit is at rest and watching, and no event has been
+     computed yet. Moods are semantic here as everywhere else. */
+  background-image: url('/kit/kit-neutral.png');
+  background-repeat: no-repeat;
+  background-size: calc(1536 * var(--kit-px)) calc(2048 * var(--kit-px));
+  background-position: calc(-404 * var(--kit-px)) calc(-84 * var(--kit-px));
+  /* Pivot at the key tip so the idle reads as a lean, not a spin. */
+  transform-origin: bottom center;
+}
+
+@media (min-width: 1024px) {
+  .auth-kit-face {
+    --kit-w: 3.25rem;
+  }
+}
+
+/*
+ * Speech-bubble notch: the bubble's own 1px border with one corner turned into
+ * an arrow, held level with Kit's head. Matches the dashboard card's idiom.
+ */
+.auth-kit-bubble {
+  position: relative;
+}
+
+.auth-kit-bubble::before {
+  content: '';
+  position: absolute;
+  top: 1.3rem;
+  left: -0.3125rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--background);
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
 }

@@ -60,16 +60,6 @@
   --sidebar-width: 240px;
   --header-height: 56px;
 
-  /* Auth brand panel — the one drenched deep-slate surface (sign-in only) */
-  --auth-panel-from:     oklch(0.31 0.11 262);  /* top of the tonal wash */
-  --auth-panel-to:       oklch(0.22 0.09 262);  /* bottom of the tonal wash */
-  --auth-panel-glow:     oklch(0.40 0.12 262);  /* soft top-left light */
-  --auth-panel-fg:       oklch(0.98 0.005 262); /* primary text on slate */
-  --auth-panel-fg-muted: oklch(0.82 0.020 262); /* secondary text on slate — ≥4.5:1 */
-  --auth-panel-line:     oklch(1 0 0 / 0.11);   /* hairline dividers / borders on slate */
-  --auth-panel-inset:    oklch(1 0 0 / 0.05);   /* subtle raised rows on slate */
-  --auth-panel-neutral:  oklch(0.72 0.09 262);  /* neutral status dot on slate */
-  --auth-panel-danger:   oklch(0.63 0.19 22);   /* status dot — brightened to read on slate */
 }
 
 /* ─── Tailwind @theme mapping ───────────────────────────── */
@@ -97,14 +87,6 @@
   --color-border-strong:      var(--border-strong);
   --color-ring:               var(--ring);
   --color-ring-destructive:   var(--ring-destructive);
-
-  /* Auth brand panel (sign-in) — exposed as utilities: bg/text/border-auth-panel-* */
-  --color-auth-panel-fg:       var(--auth-panel-fg);
-  --color-auth-panel-fg-muted: var(--auth-panel-fg-muted);
-  --color-auth-panel-line:     var(--auth-panel-line);
-  --color-auth-panel-inset:    var(--auth-panel-inset);
-  --color-auth-panel-neutral:  var(--auth-panel-neutral);
-  --color-auth-panel-danger:   var(--auth-panel-danger);
 
   --font-heading: 'Poppins', sans-serif;
   --font-body:    'Work Sans', sans-serif;
@@ -285,6 +267,40 @@
   outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: var(--radius);
+}
+
+/* ─── Sign-in composite fields ──────────────────────────── */
+
+/*
+ * Global rather than component-scoped on purpose: the fields are projected
+ * from the page into <app-auth-shell>, so they carry the page's encapsulation
+ * attribute and the shell's own stylesheet cannot reach them.
+ *
+ * These fields wrap a bare <input> in a bordered box with an icon, so focus is
+ * drawn on the wrapper. Without this the global :focus-visible outline lands
+ * on the input instead — inside the box, hugging the text, stacked on top of
+ * the wrapper's own indicator, and still primary-coloured while the wrapper
+ * has gone destructive. Unlayered on purpose: Tailwind's `outline-none` sits
+ * in @layer utilities and loses to the unlayered :focus-visible rule.
+ */
+.auth-field input:focus,
+.auth-field input:focus-visible {
+  outline: none;
+}
+
+/*
+ * Chromium paints its own pale-yellow ground on an autofilled input and
+ * ignores background-color. The inset shadow is the only way to repaint it,
+ * and the absurd transition delay stops the yellow flashing through on focus.
+ */
+.auth-field input:-webkit-autofill,
+.auth-field input:-webkit-autofill:hover,
+.auth-field input:-webkit-autofill:focus,
+.auth-field input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text-body);
+  -webkit-box-shadow: 0 0 0 100px var(--background) inset;
+  caret-color: var(--text-body);
+  transition: background-color 600000s 0s;
 }
 
 /* ─── PrimeNG layer order (Tailwind v4 compat) ─────────── */

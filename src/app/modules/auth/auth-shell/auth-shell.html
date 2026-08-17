@@ -1,53 +1,109 @@
-<main class="grid min-h-[100dvh] grid-cols-1 bg-background min-[900px]:grid-cols-[1.05fr_1fr]">
-  <!-- Brand panel — one drenched deep-slate surface. Decorative; hidden ≤900px. -->
-  <aside
-    class="auth-brand-surface relative hidden overflow-hidden text-auth-panel-fg min-[900px]:flex min-[900px]:flex-col min-[900px]:justify-between min-[900px]:gap-12 min-[900px]:p-12"
-    aria-hidden="true"
-  >
-    <app-brand-logo variant="lockup-on-dark" [decorative]="true" />
+<!--
+  DIRECTION — Leaseting sign-in, "the morning brief"
 
-    <div class="max-w-[30rem]">
-      <h2 class="text-balance font-heading text-[30px] font-semibold leading-[1.2] tracking-[-0.02em] text-auth-panel-fg">
-        Never lose track of a lease, a repair, or a spot.
+  THESIS: The threshold is a dated brief, not a decorative split. It refuses the
+  SaaS default of a drenched panel holding a slogan and three feature bullets.
+  OWN-WORLD: The product's own light system, one step of tonal layering — Panel
+  Surface sheet, pure-white card, hue-262 hairlines, the app's real status
+  chips, Poppins/Work Sans, 4px corners. No second palette; no dark surface.
+  STORY: A manager sees what the product watches while nobody is logged in,
+  meets Kit, and signs in — the card is the brightest thing on the page.
+  FIRST VIEWPORT: masthead lockup + dateline over a rule; left, the claim, Kit
+  standing on the sheet with one line, and a three-row ledger marked Example;
+  right, the white sign-in card, vertically centred. Foot rule closes the sheet.
+  FORM: two-column document under a masthead (candidate 5; seed a5743128).
+-->
+<main
+  class="mx-auto flex min-h-[100dvh] w-full max-w-[30rem] flex-col px-6 py-8 sm:px-8 lg:max-w-[69rem] lg:px-10 lg:py-10"
+>
+  <!-- Masthead. The lockup is the page's only brand identification, so it is
+       announced rather than decorative. -->
+  <header class="flex items-center justify-between gap-4 border-b border-border pb-5">
+    <app-brand-logo
+      class="[--brand-logo-height:26px] sm:[--brand-logo-height:30px] lg:[--brand-logo-height:34px]"
+    />
+    <p class="shrink-0 text-[12.5px] text-muted">{{ today() | date: 'EEEE, MMMM d' }}</p>
+  </header>
+
+  <div
+    class="grid flex-1 grid-cols-1 content-center gap-y-12 py-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,23.5rem)] lg:items-center lg:gap-x-16 lg:py-8 xl:gap-x-24"
+  >
+    <!-- The task, first in the DOM: keyboard and screen-reader users reach
+         sign-in before the brief. Grid placement moves it right on desktop, so
+         reading order and visual order can differ without an order utility. -->
+    <div class="lg:col-start-2 lg:row-start-1">
+      <div
+        class="animate-form-in rounded-base border border-border bg-background p-6 motion-reduce:animate-none sm:p-7"
+      >
+        <ng-content></ng-content>
+      </div>
+    </div>
+
+    <!-- The brief -->
+    <section class="min-w-0 lg:col-start-1 lg:row-start-1">
+      <h2
+        class="font-heading text-[27px] font-semibold leading-[1.15] tracking-[-0.02em] text-heading sm:text-[30px] lg:max-w-[21ch] lg:text-[40px] lg:leading-[1.1]"
+      >
+        Nothing waits for you to remember it.
       </h2>
-      <p class="mt-3.5 max-w-[36ch] text-[15px] leading-[1.6] text-auth-panel-fg-muted">
-        The operating system your property team runs on — surfacing what needs
-        attention before you think to ask.
+      <p class="mt-4 max-w-[50ch] text-[14.5px] leading-[1.65] text-muted lg:text-[15px]">
+        Kit watches every lease, bill, and unit in your portfolio and puts what
+        needs attention in front of you — before you think to look for it.
       </p>
 
-      <div class="mt-10 border-t border-auth-panel-line pt-7">
-        <span class="mb-3.5 block text-xs font-medium tracking-[0.01em] text-auth-panel-fg-muted">Surfaced for you this morning</span>
-        <ul class="m-0 flex list-none flex-col gap-2 p-0" role="list">
-          <li class="flex items-center gap-3 rounded-base border border-auth-panel-line bg-auth-panel-inset px-3.5 py-[11px] text-[13.5px]">
-            <span class="h-2 w-2 shrink-0 rounded-full bg-warning"></span>
-            <span class="flex-1 text-auth-panel-fg">4 leases expire within 30 days</span>
-            <span class="shrink-0 text-[11.5px] text-auth-panel-fg-muted">Renewals</span>
-          </li>
-          <li class="flex items-center gap-3 rounded-base border border-auth-panel-line bg-auth-panel-inset px-3.5 py-[11px] text-[13.5px]">
-            <span class="h-2 w-2 shrink-0 rounded-full bg-auth-panel-danger"></span>
-            <span class="flex-1 text-auth-panel-fg">Unit 204 repair is 3 days overdue</span>
-            <span class="shrink-0 text-[11.5px] text-auth-panel-fg-muted">Maintenance</span>
-          </li>
-          <li class="flex items-center gap-3 rounded-base border border-auth-panel-line bg-auth-panel-inset px-3.5 py-[11px] text-[13.5px]">
-            <span class="h-2 w-2 shrink-0 rounded-full bg-auth-panel-neutral"></span>
-            <span class="flex-1 text-auth-panel-fg">Spot B-12 is still unassigned</span>
-            <span class="shrink-0 text-[11.5px] text-auth-panel-fg-muted">Parking</span>
-          </li>
+      <div class="mt-8 flex items-start gap-4 lg:gap-5">
+        <span class="auth-kit-face animate-kit-idle motion-reduce:animate-none" aria-hidden="true"></span>
+
+        <div class="auth-kit-bubble min-w-0 flex-1 rounded-base border border-border bg-background px-4 py-3.5">
+          <!-- Attribution, not decoration: this is the only thing that names him. -->
+          <span class="font-heading text-[12.5px] font-semibold text-primary">Kit</span>
+          <p class="mt-1.5 text-[13.5px] leading-[1.6] text-body">
+            I check rent, renewals, and vacancies on a schedule. Anything that
+            needs a decision is on your dashboard when you land.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 border-t border-border pt-5">
+        <div class="flex items-center justify-between gap-4">
+          <h3 class="font-heading text-[13.5px] font-semibold text-heading">What that looks like</h3>
+          <!-- Nobody is signed in yet: this must never read as their portfolio. -->
+          <span
+            class="shrink-0 rounded-full border border-border bg-background px-2 py-[3px] text-[11px] font-medium text-muted"
+          >Example</span>
+        </div>
+
+        <ul class="m-0 mt-2 flex list-none flex-col p-0" role="list">
+          @for (item of watchExamples; track item.headline) {
+            <li
+              class="flex flex-col gap-2 border-t border-border py-3 first:border-t-0 sm:flex-row sm:items-start sm:justify-between sm:gap-5"
+            >
+              <span class="min-w-0">
+                <span class="block text-[13.5px] font-medium text-heading">
+                  {{ item.headline }}@if (item.amount) {<span class="tabular-nums"> · {{ item.amount }}</span>}
+                </span>
+                <span class="mt-1 block text-[12.5px] leading-[1.5] text-muted">{{ item.detail }}</span>
+              </span>
+
+              <!-- Colour never travels alone: dot-shaped icon plus the label. -->
+              <span
+                class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11.5px] font-medium"
+                [class]="severityChip[item.severity]"
+              >
+                <svg [pIcon]="severityIcons[item.severity]" [size]="11" aria-hidden="true"></svg>
+                <span>{{ severityLabels[item.severity] }}</span>
+              </span>
+            </li>
+          }
         </ul>
       </div>
-    </div>
-
-    <span class="text-xs text-auth-panel-fg-muted">© 2026 Leaseting</span>
-  </aside>
-
-  <!-- Form panel — page content is projected here -->
-  <div class="flex items-center justify-center bg-background px-6 py-10">
-    <div class="w-full max-w-[380px] animate-form-in motion-reduce:animate-none">
-      <div class="mb-7 flex items-center gap-2.5 min-[900px]:hidden">
-        <app-brand-logo [decorative]="true" />
-        <span class="font-heading text-base font-semibold text-heading">Leaseting</span>
-      </div>
-      <ng-content></ng-content>
-    </div>
+    </section>
   </div>
+
+  <footer
+    class="flex flex-wrap items-center justify-between gap-x-8 gap-y-1.5 border-t border-border pt-5 text-[12.5px] text-muted"
+  >
+    <span>© {{ today() | date: 'yyyy' }} Leaseting</span>
+    <span>Property operations for Philippine teams.</span>
+  </footer>
 </main>

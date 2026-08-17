@@ -1,15 +1,15 @@
 <app-auth-shell>
   <header class="mb-6">
-    <h1 class="text-[28px] font-semibold leading-[1.2] text-heading">Sign in</h1>
-    <p class="mt-1.5 text-sm text-muted">Enter your credentials to access your workspace.</p>
+    <h1 class="font-heading text-2xl font-semibold leading-[1.2] tracking-[-0.01em] text-heading">Sign in</h1>
+    <p class="mt-1.5 text-[13.5px] leading-[1.55] text-muted">Use your Leaseting workspace account.</p>
   </header>
 
   @if (errorMessage(); as message) {
     <div
-      class="mb-5 flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body animate-error-in motion-reduce:animate-none"
+      class="mb-5 flex items-start gap-2.5 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] leading-[1.5] text-body animate-error-in motion-reduce:animate-none"
       role="alert"
     >
-      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <svg pIcon="exclamation-circle" class="mt-[3px] shrink-0 text-destructive" [size]="15" aria-hidden="true"></svg>
       <span>{{ message }}</span>
     </div>
   }
@@ -18,10 +18,15 @@
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="email">Email</label>
       <div
-        class="group flex h-[42px] items-center gap-2 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-[oklch(0.78_0.010_262)] focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring data-[invalid]:border-destructive data-[invalid]:focus-within:ring-ring-destructive motion-reduce:transition-none"
+        class="auth-field group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong focus-within:border-primary focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary data-[invalid]:border-destructive data-[invalid]:hover:border-destructive data-[invalid]:focus-within:border-destructive data-[invalid]:focus-within:outline-destructive motion-reduce:transition-none"
         [attr.data-invalid]="emailError() ? '' : null"
       >
-        <svg pIcon="envelope" class="shrink-0 text-muted group-focus-within:text-primary" [size]="15" aria-hidden="true"></svg>
+        <svg
+          pIcon="envelope"
+          class="shrink-0 text-muted transition-colors duration-150 ease-out group-focus-within:text-primary group-data-[invalid]:text-destructive motion-reduce:transition-none"
+          [size]="15"
+          aria-hidden="true"
+        ></svg>
         <input
           #emailInput
           id="email"
@@ -30,24 +35,37 @@
           formControlName="email"
           autocomplete="email"
           inputmode="email"
+          autocapitalize="none"
           spellcheck="false"
           placeholder="you@company.com"
+          aria-required="true"
           [attr.aria-invalid]="!!emailError()"
           [attr.aria-describedby]="emailError() ? 'email-error' : null"
         />
       </div>
       @if (emailError(); as message) {
-        <p class="text-[12.5px] text-destructive" id="email-error">{{ message }}</p>
+        <p class="text-[12.5px] leading-[1.4] text-destructive" id="email-error">{{ message }}</p>
       }
     </div>
 
     <div class="flex flex-col gap-1.5">
-      <label class="text-[13px] font-medium text-heading" for="password">Password</label>
+      <div class="flex items-baseline justify-between gap-3">
+        <label class="text-[13px] font-medium text-heading" for="password">Password</label>
+        <a
+          class="rounded-[2px] text-[12.5px] font-medium text-primary transition-colors duration-150 ease-out hover:text-primary-hover hover:underline hover:underline-offset-2 motion-reduce:transition-none"
+          routerLink="/login/forgot-password"
+        >Forgot password?</a>
+      </div>
       <div
-        class="group flex h-[42px] items-center gap-2 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-[oklch(0.78_0.010_262)] focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring data-[invalid]:border-destructive data-[invalid]:focus-within:ring-ring-destructive motion-reduce:transition-none"
+        class="auth-field group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong focus-within:border-primary focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary data-[invalid]:border-destructive data-[invalid]:hover:border-destructive data-[invalid]:focus-within:border-destructive data-[invalid]:focus-within:outline-destructive motion-reduce:transition-none"
         [attr.data-invalid]="passwordError() ? '' : null"
       >
-        <svg pIcon="lock" class="shrink-0 text-muted group-focus-within:text-primary" [size]="15" aria-hidden="true"></svg>
+        <svg
+          pIcon="lock"
+          class="shrink-0 text-muted transition-colors duration-150 ease-out group-focus-within:text-primary group-data-[invalid]:text-destructive motion-reduce:transition-none"
+          [size]="15"
+          aria-hidden="true"
+        ></svg>
         <input
           id="password"
           class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
@@ -55,6 +73,7 @@
           formControlName="password"
           autocomplete="current-password"
           placeholder="Enter your password"
+          aria-required="true"
           [attr.aria-invalid]="!!passwordError()"
           [attr.aria-describedby]="passwordError() ? 'password-error' : null"
         />
@@ -69,32 +88,41 @@
         </button>
       </div>
       @if (passwordError(); as message) {
-        <p class="text-[12.5px] text-destructive" id="password-error">{{ message }}</p>
+        <p class="text-[12.5px] leading-[1.4] text-destructive" id="password-error">{{ message }}</p>
       }
     </div>
 
-    <div class="-mt-0.5 flex items-center justify-between gap-3">
-      <label class="inline-flex cursor-pointer select-none items-center gap-2">
-        <input type="checkbox" class="m-0 h-[15px] w-[15px] cursor-pointer accent-primary" formControlName="rememberMe" />
-        <span class="text-[13px] text-body">Remember me</span>
-      </label>
-      <a
-        class="rounded-[2px] text-[13px] font-medium text-primary transition-colors duration-150 ease-out hover:text-primary-hover hover:underline hover:underline-offset-2 motion-reduce:transition-none"
-        routerLink="/login/forgot-password"
-      >Forgot password?</a>
-    </div>
+    <label class="-mt-1 inline-flex w-fit cursor-pointer select-none items-center gap-2">
+      <input type="checkbox" class="m-0 h-[15px] w-[15px] cursor-pointer accent-primary" formControlName="rememberMe" />
+      <span class="text-[13px] text-body">Keep me signed in</span>
+    </label>
 
+    <!--
+      Disabled here only ever means "in flight", so it darkens to the pressed
+      shade instead of dimming. An opacity fade would drop "Signing in…" to
+      roughly 2.5:1 — and that label is status the user has to be able to read,
+      not an inactive control the contrast rules exempt. The spinner and
+      cursor carry the not-clickable cue.
+    -->
     <button
       type="submit"
-      class="mt-1.5 inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-base border-none bg-primary text-sm font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      class="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-base border-none bg-primary text-sm font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:bg-primary-active motion-reduce:transition-none"
       [disabled]="loading()"
+      [attr.aria-busy]="loading() ? 'true' : null"
     >
       @if (loading()) {
-        <span class="h-[15px] w-[15px] rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner motion-reduce:[animation-duration:1300ms]" aria-hidden="true"></span>
+        <span
+          class="h-[15px] w-[15px] rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner motion-reduce:[animation-duration:1300ms]"
+          aria-hidden="true"
+        ></span>
         <span>Signing in…</span>
       } @else {
         <span>Sign in</span>
       }
     </button>
   </form>
+
+  <p class="mt-6 border-t border-border pt-5 text-[12.5px] leading-[1.55] text-muted">
+    No account yet? Workspaces are invite-only — ask your administrator to add you.
+  </p>
 </app-auth-shell>

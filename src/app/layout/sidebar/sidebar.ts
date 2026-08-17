@@ -1,7 +1,7 @@
-import { NgOptimizedImage } from '@angular/common';
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { BrandLogo } from '../../shared/ui/brand-logo/brand-logo';
 
 export interface NavItem {
   label: string;
@@ -73,7 +73,7 @@ const SETTINGS_NAV: NavItem = {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [NgOptimizedImage, RouterLink, RouterLinkActive, PIcon],
+  imports: [BrandLogo, RouterLink, RouterLinkActive, PIcon],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

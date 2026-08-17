@@ -24,10 +24,6 @@ colors:
   muted-vacant: "oklch(0.94 0.03 230)"
   ring: "oklch(0.50 0.16 262 / 0.35)"
   ring-destructive: "oklch(0.54 0.22 15 / 0.25)"
-  auth-panel-from: "oklch(0.31 0.11 262)"
-  auth-panel-to: "oklch(0.22 0.09 262)"
-  auth-panel-fg: "oklch(0.98 0.005 262)"
-  auth-panel-fg-muted: "oklch(0.82 0.020 262)"
 typography:
   display:
     fontFamily: "Poppins, sans-serif"
@@ -150,12 +146,12 @@ components:
 
 Leaseting is a professional ops instrument — the kind a property manager opens at 9am and doesn't close until end of day. Every surface is built for that shift: pure white ground so status signals never compete with decoration, hairline borders instead of shadows, 4px corners everywhere, and a single geometric type family that disappears into the data. Chrome recedes; the numbers are the interface. Nothing on screen is there to be admired.
 
-And then there is Kit. In exactly two places — a dashboard card and a bottom-right badge — the instrument has a face: a drawn character who idles at 1.5°, hops three times when a payment is recorded, and slumps five degrees on bad news. This is not a lapse in the system's discipline; it is the one deliberate exception the discipline exists to protect. Kit is legible precisely because nothing else moves, and Kit is trustworthy precisely because his facts are templated and deterministic while only his commentary comes from a model. The severity is always readable as text. The face never carries meaning alone.
+And then there is Kit. In exactly three places — a dashboard card, a bottom-right badge, and the sign-in sheet — the instrument has a face: a drawn character who idles at 1.5°, hops three times when a payment is recorded, and slumps five degrees on bad news. This is not a lapse in the system's discipline; it is the one deliberate exception the discipline exists to protect. Kit is legible precisely because nothing else moves, and Kit is trustworthy precisely because his facts are templated and deterministic while only his commentary comes from a model. The severity is always readable as text. The face never carries meaning alone.
 
 The system rejects Buildium and AppFolio's corporate-beige forms, generic SaaS template-land's icon-grid dashboards and gradient hero metrics, Airtable and Notion's database-block personal-project energy, and enterprise ERP's gray-on-gray 2008 density. Density is welcome here; airlessness is not. A manager fluent in Linear, Stripe, or GitHub should sit down and trust this interface inside a second — then be mildly, pleasantly surprised that something in the corner is watching out for them.
 
 **Key Characteristics:**
-- Pure white ground (`oklch(1.000 0.000 0)`) — UI color lives in primary and status layers, while the supplied logo keeps its embedded green
+- Light everywhere, no exceptions — pure white ground (`oklch(1.000 0.000 0)`), Panel Surface as the only other ground; UI color lives in the primary and status layers
 - One hue family: everything neutral is tinted toward 262, so "gray" is never actually gray
 - Flat at rest — depth is tonal layering and 1px hairlines; shadows only for genuinely floating layers
 - 4px corners on everything except pills, which are fully round
@@ -191,19 +187,25 @@ The status vocabulary. These four are not decorative accents; each one names a c
 
 ### Tertiary
 
-- **Deep Slate Wash** (`auth-panel-from` `oklch(0.31 0.11 262)` → `auth-panel-to` `oklch(0.22 0.09 262)`): The single drenched surface in the entire product, on the sign-in brand panel only. It carries its own foreground set (`auth-panel-fg`, `auth-panel-fg-muted` at ≥4.5:1, plus hairline and inset alphas) because white-ground tokens do not survive on dark. It exists to make the one pre-authentication screen feel like a threshold. Do not reach for it anywhere inside the app.
+There is no third ground. The sign-in sheet — historically the one place tempted into a drenched panel — uses the same two neutrals as everything else, just inverted in emphasis: the sheet sits on **Panel Surface** and the form card steps up to **Pure White**, so the action is the brightest thing on screen. That single tonal step is the whole device. No wash, no gradient, no dark panel.
 
 ### Brand Artwork
 
-- **Leaseting green/white logo:** The logo's green is embedded in the supplied raster artwork and is the one non-semantic identity color. Render `public/brand/leaseting-lockup-on-dark.png` directly in the persistent sidebar brand row and on the sign-in panel. Do not synthesize a backing, recolor, filter, crop, or substitute the asset. Never place product branding inside dashboard page content. Do not sample this green into interface tokens or use it as a success state; the indigo interface palette remains unchanged.
+- **Leaseting logo:** One official asset, everywhere: **`public/brand/leaseting-lockup-on-dark.png`** — deep navy artwork on transparency. The filename is misleading; it needs a *light* surface, which under the Light-Only Rule is every surface in the product. Sidebar brand row, compact header, sign-in masthead — all the same file.
+
+  The green files in `public/brand/` (`leaseting-mark-green.png`, `leaseting-lockup-on-black.png`) are **legacy and slated for disposal or replacement**. Nothing references them; do not introduce a reference.
+
+  It renders through `app-brand-logo`, which crops the artboard padding with measured ratios so `--brand-logo-height` means the height of the *visible artwork*, not the padded box. Never synthesize a backing, recolor, filter, or substitute. Never place product branding inside dashboard page content. The navy is embedded in the artwork and is the one non-semantic identity color: do not sample it into interface tokens.
 
 ### Named Rules
 
 **The Semantic Monopoly Rule.** If a color appears in the interface, it means something. Ledger Indigo on interactive and active states only. Amber on cautionary status only. Red on error, overdue, terminated, and destructive only. Green on resolved and healthy only. Azure on vacancy only. The sole exception is the fixed green embedded in the canonical Leaseting logo artwork; it identifies the product and never communicates application state. Any other decorative use is wrong. Test: remove the color — if neither meaning nor brand identity breaks, it should not have been there.
 
-**The Logo Asset Rule.** Use the exact transparent `public/brand/leaseting-lockup-on-dark.png` asset in the persistent sidebar brand row and sign-in panel. Render it directly at its native aspect ratio with only ordinary sizing—no generated backing, CSS filters, recoloring, cropping, or alternate asset. Branding belongs to persistent application chrome, never inside dashboard page content.
+**The Logo Asset Rule.** One asset — `public/brand/leaseting-lockup-on-dark.png` — rendered directly at its native aspect ratio with only ordinary sizing. No generated backing, CSS filter, recolor, blend mode, or substitute. A plate behind the lockup is always the wrong answer: the artwork is navy and every surface is light, so it is legible unaided. Branding belongs to persistent application chrome and the sign-in sheet, never inside dashboard page content.
 
-**The Pure Surface Rule.** Page backgrounds are `oklch(1.000 0.000 0)`. No warmth, no linen, no tint. Cream grounds hide contrast failures and read as generated regardless of intent. The brand hue belongs to the primary and status layers, not the surface.
+**The Light-Only Rule.** *Binding, no exceptions, including pre-authentication.* This product is light. There is no dark theme, no dark mode toggle, no drenched dark panel, no "just the sign-in screen" carve-out — a dark surface anywhere is a defect, not a variant. Every ground is Pure White or Panel Surface; depth comes from that one tonal step plus hairlines. Anything a proposal calls a hero, a threshold, or a moment still renders light. This rule also fixes the logo question permanently: the canonical artwork is deep navy, so a light ground is the only ground it can sit on, and a plate behind it can never be needed.
+
+**The Pure Surface Rule.** Page backgrounds are `oklch(1.000 0.000 0)`, with **Panel Surface** as the one sanctioned alternative where a page is composed *around* a card rather than filled with data — the sign-in sheet is the only such page today. No warmth, no linen, no tint. Cream grounds hide contrast failures and read as generated regardless of intent. The brand hue belongs to the primary and status layers, not the surface.
 
 **The Label-Always Rule.** A status color never travels alone. Every tone is accompanied by a text label or a shaped icon in the same element — the status chip pairs a dot with a word, Kit's severity always renders as words even when the icon is the only thing visible at small widths, and overdue dates carry a weight change alongside the red. Color is reinforcement, never the signal.
 
@@ -232,6 +234,8 @@ The status vocabulary. These four are not decorative accents; each one names a c
 
 **The No-Display-in-Data Rule.** Display and Headline sizes are forbidden inside tables, form inputs, and inline labels. Data is information, not announcement. A table cell in semibold 24px is a design error, and so is a metric rendered at hero scale because it felt important.
 
+**The Threshold Exception.** The sign-in sheet is the one surface outside the ramp: its claim runs 27px on phones, 30px on tablets, 40px on desktop, above Display's fixed 24px. It is pre-authentication, holds a single sentence, and is never viewed alongside data — the conditions the fixed ramp exists to protect do not apply. Nowhere else earns a size off the ramp.
+
 **The Uppercase Containment Rule.** Uppercase with tracking is reserved for the Eyebrow role. It degrades badly below 11px and destroys the scanability of anything a user reads word-by-word, so it never appears on table headers, buttons, badges, or labels.
 
 **The Tabular Numbers Rule.** Any figure that appears in a column — currency, counts, page ranges, meter readings — carries `tabular-nums`. Columns of proportional digits do not align, and a manager comparing amounts down a column is doing the thing this product exists for.
@@ -243,6 +247,8 @@ The status vocabulary. These four are not decorative accents; each one names a c
 **Density.** Comfortable, not compressed. Page sections stack at 20px. Table cells run 16px horizontal / 12px vertical, header cells 10px vertical. Form fields group at 6px between label and control, 12px between fields. The rule of thumb: rows can be tight, but the gutters around a data region are never negotiable.
 
 **Responsive.** One structural breakpoint at **1024px**: below it the sidebar stops being a grid column and becomes a fixed drawer that slides in over the content at 200ms, behind a 40% ink scrim, with `visibility` animated alongside the transform so offscreen links are not tab stops. Content padding drops to 16px. A second breakpoint at **640px** handles phone chrome: the header loses its search placeholder and keyboard hint (there is no physical keyboard to press `Ctrl+K` on), the user's name gives way to the avatar that already carries their initials, and the stepper collapses from a vertical rail to a row of progress bars.
+
+**The sign-in sheet** is the one page outside the shell, so it carries its own structure: a Panel Surface ground with a centred document that runs `max-w-30rem` as a single column and opens to `max-w-69rem` at **1024px**, where it splits into a `1fr` brief column and a `23.5rem` form column. The form card is first in the DOM and grid-placed to the right, so keyboard and screen-reader users reach the task before the brief while desktop still reads brief-then-form. Below 1024px the single column stacks masthead → form → brief, action first. Masthead rule above, foot rule below; at 1440×900 the whole sheet fits without scrolling.
 
 **Bottom clearance.** Kit's badge owns the bottom-right corner permanently. The scroll container reserves `scroll-padding-bottom: 5rem` and the mobile content area adds 5.5rem of bottom padding, so the last table row is never trapped underneath him. Toasts are lifted to 5.5rem for the same reason.
 
@@ -319,7 +325,9 @@ The primary display surface of the product, and the one place density is allowed
 - Fields stack at 6px: a 13px medium ink `<label>` bound by `for`/`inputId`, the control, then the error.
 - PrimeNG owns the control chrome (`p-select`, `p-datepicker`, `p-inputnumber`) via `AppPreset`; the radius override guarantees 4px. Do not restyle PrimeNG controls inline — extend the preset's semantic block instead.
 - **Focus:** the global `:focus-visible` outline, 2px Ledger Indigo at 2px offset.
-- **Error:** a 12.5px Overdue Red message below the field. Error banners use the muted-destructive ground with a 28% tinted border, an `exclamation-circle` icon, `role="alert"`, and a Retry affordance when the failure is recoverable.
+- **Composite fields** (a bare `<input>` inside a bordered box with a leading icon, as on sign-in) draw that same outline on the **wrapper** via `focus-within`, and the input's own outline is suppressed by an unlayered rule. One indicator, on the box the user perceives as the control. Two cascade traps make this non-obvious, and both bite anywhere in the app: Angular ships component styles *unlayered*, so a `:host` declaration silently beats any Tailwind utility on the host, and Tailwind's `outline-none` sits in `@layer utilities`, so it loses to the unlayered global `:focus-visible`.
+- **Error:** a 12.5px Overdue Red message below the field. When a field is invalid, *every* cue goes destructive together — border, leading icon, focus outline, message — so a focused invalid field never shows an indigo indicator over a red border. Error banners use the muted-destructive ground with a 28% tinted border, an `exclamation-circle` icon, `role="alert"`, and a Retry affordance when the failure is recoverable.
+- **Submitting:** a primary button whose `disabled` only ever means "request in flight" darkens to `primary-active` rather than fading. An opacity dim drops the status label ("Signing in…") to roughly 2.5:1, and that label is state the user must read, not an inactive control the contrast rules exempt. The spinner and `cursor-not-allowed` carry the not-clickable cue.
 - Checkboxes use `accent-primary` at 15px inside a clickable label.
 
 ### Navigation
@@ -335,10 +343,11 @@ The keyboard-first promise made visible. A 560px sheet at 14vh with the Modal sh
 
 ### Kit
 
-The one place the system permits a face and sustained motion — and the rules that keep it from becoming Clippy are part of the design, not a caveat.
+The only places the system permits a face and sustained motion — and the rules that keep it from becoming Clippy are part of the design, not a caveat.
 
 - **Dashboard card:** a 7–8rem stage on Panel Surface carrying the office backdrop image, with the live sprite composited on top so mood can change independently of the scene. Beside it, a speech bubble — an ordinary hairline card with one corner rotated 45° into a notch — pinned so the notch lands level with Kit's head. The bubble names him in Ledger Indigo (the only thing that attributes the character), shows the severity chip, the templated message as a link to the entity, the optional model-written flavor line in muted ink, and an "Also waiting" pill row behind a top hairline.
 - **Badge:** a 3.25rem round trigger anchored bottom-right at z-1000, with a count bubble and a panel that lists events and ends with a "Talk to Kit" link — the badge carries reminders; a real conversation gets its own page.
+- **Sign-in sheet:** the third and last sanctioned place, where Kit introduces what the product does before anyone is authenticated. He stands directly on the Panel Surface sheet at 2.5–3.25rem wide with no stage — the dashboard frames him because it drops him into a dense page of data; the sign-in sheet is quiet enough that a border would only add a box. Beside him, the same notched white bubble on a hairline, naming him in Ledger Indigo. Mood is `neutral` — at rest and watching, because no event has been computed. The example rows he introduces are labelled **Example**: nobody is signed in, so they must never be readable as the visitor's own portfolio.
 - **Motion:** `kit-idle` (6s, ±1.5° lean), `kit-hop` (780ms, capped at exactly 3 iterations, with anticipation squash and apex hold — the squash-and-stretch is what makes a flat PNG read as having weight), `kit-sulk` (400ms, 5° shoulders-down, then holds). All three pivot at `transform-origin: bottom center` so rotation reads as a body leaning rather than a sprite spinning.
 
 ### Named Rules
@@ -380,4 +389,6 @@ The one place the system permits a face and sustained motion — and the rules t
 - **Don't** reach for a modal first. Exhaust inline editing, drawers, and progressive disclosure before blocking the surface — and when a dialog is right, route every close path through a dirty-check.
 - **Don't** animate anything in a table, a form, or a data view beyond the 150ms color transition and the row flash. Kit is not a precedent.
 - **Don't** let color be the only carrier of meaning, and don't let a model-written line carry information the templated message lacks.
-- **Don't** use the sign-in panel's Deep Slate Wash anywhere inside the authenticated app.
+- **Don't** introduce a dark surface anywhere, for any reason — no dark mode, no drenched panel, no dark sign-in, no dark "moment". The Light-Only Rule has no exceptions.
+- **Don't** put a plate, wash, or filter behind the lockup to make it legible; on a light ground it never needs one.
+- **Don't** reference the legacy green brand files — they are being disposed of or replaced.

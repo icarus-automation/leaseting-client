@@ -1,0 +1,64 @@
+<div class="flex flex-col gap-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="font-heading text-2xl font-semibold text-heading">Properties</h1>
+      <p class="mt-0.5 text-sm text-muted">
+        Your portfolio — every building, its floors, and unit status at a glance.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+      (click)="openCreate()"
+    >
+      <svg pIcon="plus" [size]="14" aria-hidden="true"></svg>
+      <span>New property</span>
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+      @for (s of skeletons; track $index) {
+        <app-skeleton variant="card" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load(1)">
+        Retry
+      </button>
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      icon="building"
+      heading="No properties yet"
+      description="Register your first property to start tracking floors, units, tenants, and rent — all in one place."
+      ctaLabel="New property"
+      (cta)="openCreate()"
+    />
+  } @else {
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+      @for (property of items(); track property.id) {
+        <app-property-card
+          [property]="property"
+          (edit)="openEdit(property)"
+          (archive)="confirmArchive(property)"
+        />
+      }
+    </div>
+
+    <app-pagination [meta]="meta()" (pageChange)="load($event)" />
+  }
+</div>
+
+<app-property-form-dialog
+  [visible]="drawerVisible()"
+  (visibleChange)="drawerVisible.set($event)"
+  [property]="editTarget()"
+  (saved)="onSaved($event)"
+/>

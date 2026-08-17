@@ -1,0 +1,92 @@
+<div class="flex min-w-0 items-center gap-1.5">
+  @if (canScrollLeft()) {
+    <button
+      type="button"
+      class="flex h-8 w-7 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+      aria-label="Scroll floors left"
+      (click)="scrollByPage(-1)"
+    >
+      <svg pIcon="chevron-left" [size]="12" aria-hidden="true"></svg>
+    </button>
+  }
+
+  <div class="relative min-w-0 flex-1">
+    <div
+      #scroller
+      role="tablist"
+      aria-label="Floors"
+      class="flex flex-nowrap items-center gap-1.5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      (scroll)="updateScrollState()"
+      (keydown)="onTablistKeydown($event)"
+    >
+      @for (floorItem of floors(); track floorItem.id; let index = $index) {
+        <button
+          #tab
+          type="button"
+          role="tab"
+          class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-base border px-3 text-[13px] font-medium transition-colors duration-150 ease-out motion-reduce:transition-none"
+          [class]="floorItem.id === selectedFloorId()
+            ? 'border-primary bg-primary text-primary-foreground'
+            : 'border-border bg-background text-body hover:bg-surface'"
+          [id]="'floor-tab-' + floorItem.id"
+          [attr.data-floor-id]="floorItem.id"
+          aria-controls="floor-panel"
+          [attr.aria-selected]="floorItem.id === selectedFloorId()"
+          [attr.tabindex]="tabIndexFor(floorItem, index)"
+          (click)="floorSelected.emit(floorItem.id)"
+        >
+          <span>Floor {{ floorItem.level }}</span>
+          @if (floorItem.name; as name) {
+            <span
+              class="max-w-[10rem] truncate"
+              [class]="floorItem.id === selectedFloorId() ? 'opacity-80' : 'text-muted'"
+            >· {{ name }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    @if (canScrollLeft()) {
+      <div class="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-background to-transparent" aria-hidden="true"></div>
+    }
+    @if (canScrollRight()) {
+      <div class="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-background to-transparent" aria-hidden="true"></div>
+    }
+  </div>
+
+  @if (canScrollRight()) {
+    <button
+      type="button"
+      class="flex h-8 w-7 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+      aria-label="Scroll floors right"
+      (click)="scrollByPage(1)"
+    >
+      <svg pIcon="chevron-right" [size]="12" aria-hidden="true"></svg>
+    </button>
+  }
+
+  @if (showJump()) {
+    <p-select
+      class="shrink-0"
+      [options]="jumpOptions()"
+      optionLabel="label"
+      optionValue="id"
+      [filter]="true"
+      filterBy="label"
+      [ngModel]="selectedFloorId()"
+      (onChange)="floorSelected.emit($event.value)"
+      placeholder="Jump to floor"
+      ariaLabel="Jump to floor"
+      appendTo="body"
+    />
+  }
+
+  <button
+    type="button"
+    class="inline-flex h-8 shrink-0 items-center gap-1 rounded-base border border-dashed border-border bg-background px-2.5 text-[13px] font-medium text-muted transition-colors duration-150 ease-out hover:border-primary hover:text-primary motion-reduce:transition-none"
+    (click)="addFloorRequested.emit()"
+  >
+    <svg pIcon="plus" [size]="12" aria-hidden="true"></svg>
+    <span>Floor</span>
+  </button>
+</div>

@@ -1,0 +1,81 @@
+<aside class="flex h-fit flex-col gap-3 rounded-base border border-border bg-surface p-4" aria-label="Units to map">
+  <div class="flex items-baseline justify-between gap-2">
+    <h2 class="font-heading text-[15px] font-semibold text-heading">Units to map</h2>
+    <span class="text-[12.5px] font-medium tabular-nums text-muted">{{ mappedCount() }}/{{ totalCount() }} mapped</span>
+  </div>
+
+  <div
+    class="h-1.5 overflow-hidden rounded-full bg-background"
+    role="progressbar"
+    [attr.aria-valuenow]="mappedCount()"
+    [attr.aria-valuemin]="0"
+    [attr.aria-valuemax]="totalCount()"
+    [attr.aria-label]="mappedCount() + ' of ' + totalCount() + ' units mapped'"
+  >
+    <div
+      class="h-full rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
+      [style.width.%]="progressPercent()"
+    ></div>
+  </div>
+
+  @if (totalCount() === 0) {
+    <p class="rounded-base border border-dashed border-border px-3 py-4 text-center text-[12.5px] text-muted">
+      No units on this floor yet — add one first, then outline it here.
+    </p>
+  } @else {
+    <ul class="m-0 flex list-none flex-col gap-1 p-0">
+      @for (unit of units(); track unit.id) {
+        <li>
+          <button
+            type="button"
+            class="flex w-full items-center gap-2.5 rounded-base border px-2.5 py-2 text-left transition-colors duration-150 ease-out motion-reduce:transition-none"
+            [class]="unit.id === targetId()
+              ? 'border-primary bg-background ring-[3px] ring-ring'
+              : 'border-transparent bg-transparent hover:bg-background'"
+            [attr.aria-pressed]="unit.id === targetId()"
+            (click)="unitPicked.emit(unit)"
+          >
+            @if (isMapped(unit)) {
+              <svg pIcon="check-circle" class="shrink-0 text-success" [size]="15" aria-hidden="true"></svg>
+            } @else {
+              <span class="h-[13px] w-[13px] shrink-0 rounded-full border-[1.5px] border-[var(--border-strong)]" aria-hidden="true"></span>
+            }
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-[13.5px] font-medium text-heading">Unit {{ unit.unitNo }}</span>
+              <span class="block text-[12px] text-muted">
+                {{ unit.id === targetId() ? 'Outlining now — click the plan to drop corners' : isMapped(unit) ? 'Mapped — click to re-edit' : 'Not mapped' }}
+              </span>
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="border-t border-border pt-2.5">
+    <button
+      type="button"
+      class="flex w-full items-center justify-between gap-2 rounded-base text-[12.5px] font-medium text-muted transition-colors duration-150 ease-out hover:text-body motion-reduce:transition-none"
+      [attr.aria-expanded]="helpOpen()"
+      (click)="helpOpen.set(!helpOpen())"
+    >
+      <span>How mapping works</span>
+      <svg [pIcon]="helpOpen() ? 'chevron-up' : 'chevron-down'" [size]="12" aria-hidden="true"></svg>
+    </button>
+    @if (helpOpen()) {
+      <ol class="mt-2 flex list-decimal flex-col gap-1.5 pl-4 text-[12.5px] leading-relaxed text-body">
+        <li>Pick a unit above, or click an existing shape to re-do it.</li>
+        <li>Click the plan to drop a corner at each corner of the room.</li>
+        <li>Click the <strong class="font-semibold">first corner</strong> — or double-click — to close the shape.</li>
+        <li>Drag corners to fine-tune, or drag the whole shape to move it.</li>
+        <li>Hit <strong class="font-semibold">Save shape</strong> — the next unmapped unit is picked for you.</li>
+      </ol>
+      <p class="mt-2 text-[12px] leading-relaxed text-muted">
+        Shortcuts: <kbd class="rounded-[2px] border border-border bg-background px-1">Ctrl+Z</kbd> undo ·
+        <kbd class="rounded-[2px] border border-border bg-background px-1">Ctrl+Y</kbd> redo ·
+        <kbd class="rounded-[2px] border border-border bg-background px-1">Esc</kbd> reset draft ·
+        <kbd class="rounded-[2px] border border-border bg-background px-1">Ctrl+Enter</kbd> save shape
+      </p>
+    }
+  </div>
+</aside>

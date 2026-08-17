@@ -1,0 +1,225 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="New bill"
+  subheading="Charge a lease for rent or utilities."
+  [dirty]="errors.dirty()"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="bill-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    @if (!presetLeaseId()) {
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="bill-lease">Lease</label>
+        <p-select
+          inputId="bill-lease"
+          formControlName="leaseId"
+          [options]="leaseOptions()"
+          optionLabel="label"
+          optionValue="id"
+          [filter]="true"
+          filterBy="label"
+          [loading]="loadingLeases()"
+          placeholder="Pick an active lease"
+          emptyMessage="No active leases yet — create a lease first."
+          emptyFilterMessage="No leases match."
+          styleClass="w-full"
+          appendTo="body"
+        />
+        @if (errors.fieldError('leaseId'); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+        @if (!loadingLeases() && leaseOptions().length === 0) {
+          <p class="text-[12.5px] text-muted">
+            No active leases to bill.
+            <a routerLink="/tenants" class="font-medium text-primary hover:underline" (click)="visible.set(false)">
+              Onboard a tenant
+            </a>
+            to start one.
+          </p>
+        }
+      </div>
+    }
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="bill-type">Type</label>
+      <p-select
+        inputId="bill-type"
+        formControlName="type"
+        [options]="typeOptions"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+
+    @if (isUtilityType()) {
+      <label class="flex w-fit cursor-pointer items-center gap-2 text-[13px] font-medium text-heading">
+        <input
+          type="checkbox"
+          class="m-0 h-[15px] w-[15px] cursor-pointer accent-primary"
+          [checked]="readingMode()"
+          (change)="toggleReadingMode(!readingMode())"
+        />
+        Compute from meter reading
+      </label>
+    }
+
+    @if (readingMode() && isUtilityType()) {
+      <div [formGroup]="readingForm" class="flex flex-col gap-3 rounded-base border border-border bg-surface p-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="reading-from">Period from</label>
+            <p-datepicker inputId="reading-from" formControlName="periodFrom" dateFormat="yy-mm-dd" appendTo="body" styleClass="w-full" [showIcon]="true" />
+            @if (readingErrors.fieldError('periodFrom'); as message) {
+              <p class="text-[12.5px] text-destructive">{{ message }}</p>
+            }
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="reading-to">Period to</label>
+            <p-datepicker inputId="reading-to" formControlName="periodTo" dateFormat="yy-mm-dd" appendTo="body" styleClass="w-full" [showIcon]="true" />
+            @if (readingErrors.fieldError('periodTo'); as message) {
+              <p class="text-[12.5px] text-destructive">{{ message }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="reading-prev">Previous</label>
+            <p-inputnumber inputId="reading-prev" formControlName="previousReading" [min]="0" [maxFractionDigits]="2" placeholder="0" styleClass="w-full" />
+            @if (readingErrors.fieldError('previousReading'); as message) {
+              <p class="text-[12.5px] text-destructive">{{ message }}</p>
+            }
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="reading-present">Present</label>
+            <p-inputnumber inputId="reading-present" formControlName="presentReading" [min]="0" [maxFractionDigits]="2" placeholder="0" styleClass="w-full" />
+            @if (readingErrors.fieldError('presentReading'); as message) {
+              <p class="text-[12.5px] text-destructive">{{ message }}</p>
+            }
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="reading-rate">Rate / unit</label>
+            <p-inputnumber inputId="reading-rate" formControlName="multiplier" [min]="0" [maxFractionDigits]="4" placeholder="₱/kWh" styleClass="w-full" />
+            @if (readingErrors.fieldError('multiplier'); as message) {
+              <p class="text-[12.5px] text-destructive">{{ message }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="reading-admin-fee">Admin fee %</label>
+            <p-inputnumber inputId="reading-admin-fee" formControlName="adminFeePct" [min]="0" [max]="100" [maxFractionDigits]="2" styleClass="w-full" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="reading-vat">VAT %</label>
+            <p-inputnumber inputId="reading-vat" formControlName="vatPct" [min]="0" [max]="100" [maxFractionDigits]="2" styleClass="w-full" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="reading-wht">Withholding tax %</label>
+            <p-inputnumber inputId="reading-wht" formControlName="whtPct" [min]="0" [max]="100" [maxFractionDigits]="2" styleClass="w-full" />
+          </div>
+        </div>
+
+        @if (breakdown(); as b) {
+          <dl class="grid grid-cols-2 gap-x-4 gap-y-1 rounded-base bg-background px-3 py-2 text-[12.5px] tabular-nums">
+            <dt class="text-muted">Consumed</dt>
+            <dd class="text-right text-body">{{ b.consumed }}</dd>
+            <dt class="text-muted">Total</dt>
+            <dd class="text-right text-body">{{ b.total | phpCurrency }}</dd>
+            <dt class="text-muted">Admin fee</dt>
+            <dd class="text-right text-body">+ {{ b.adminFee | phpCurrency }}</dd>
+            <dt class="text-muted">VAT</dt>
+            <dd class="text-right text-body">+ {{ b.vat | phpCurrency }}</dd>
+            <dt class="text-muted">Withholding tax</dt>
+            <dd class="text-right text-body">− {{ b.wht | phpCurrency }}</dd>
+            <dt class="font-semibold text-heading">Net due</dt>
+            <dd class="text-right font-semibold text-primary">{{ b.netDue | phpCurrency }}</dd>
+          </dl>
+        }
+      </div>
+    }
+
+    <div class="grid grid-cols-2 gap-3">
+      @if (!readingMode() || !isUtilityType()) {
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-medium text-heading" for="bill-amount">Amount</label>
+          <p-inputnumber
+            inputId="bill-amount"
+            formControlName="amount"
+            mode="currency"
+            currency="PHP"
+            locale="en-PH"
+            [min]="0.01"
+            placeholder="₱0.00"
+            styleClass="w-full"
+          />
+          @if (errors.fieldError('amount', { min: 'Amount must be at least ₱0.01.' }); as message) {
+            <p class="text-[12.5px] text-destructive">{{ message }}</p>
+          }
+        </div>
+      }
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="bill-due">Due date</label>
+        <p-datepicker
+          inputId="bill-due"
+          formControlName="dueDate"
+          dateFormat="yy-mm-dd"
+          appendTo="body"
+          styleClass="w-full"
+          [showIcon]="true"
+        />
+        @if (errors.fieldError('dueDate'); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="bill-notes">
+        Notes <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <textarea
+        id="bill-notes"
+        rows="2"
+        class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="notes"
+      ></textarea>
+    </div>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+      (click)="onSubmit(true)"
+    >
+      Save & add another
+    </button>
+    <button
+      type="submit"
+      form="bill-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      @if (saving()) {
+        <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+      }
+      <span>Create bill</span>
+    </button>
+  </ng-container>
+</app-form-dialog>

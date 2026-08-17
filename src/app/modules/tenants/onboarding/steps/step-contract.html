@@ -1,0 +1,78 @@
+<div class="flex flex-col gap-4">
+  <p class="text-[13px] text-muted">
+    Upload the signed lease contract (scan or photo). It files itself on the tenant's profile as
+    “Onboarding — Signed contract”.
+  </p>
+
+  @if (errorMessage(); as message) {
+    <p class="rounded-base border border-destructive/30 bg-muted-destructive px-3 py-2 text-[13px] text-destructive">
+      {{ message }}
+    </p>
+  }
+
+  <input #fileInput type="file" class="hidden" [accept]="acceptedTypes" (change)="onFilePicked($event)" />
+
+  @if (documentId()) {
+    <div class="flex items-center justify-between rounded-base border border-border bg-surface px-3.5 py-3">
+      <div class="flex items-center gap-2.5">
+        <span class="flex h-8 w-8 items-center justify-center rounded-base bg-muted-success">
+          <svg pIcon="check" class="text-success" [size]="13" aria-hidden="true"></svg>
+        </span>
+        <div class="flex flex-col">
+          <span class="text-[13px] font-medium text-heading">{{ uploadedName() ?? 'Signed contract on file' }}</span>
+          <span class="text-[12px] text-muted">Filed on the tenant's documents</span>
+        </div>
+      </div>
+      <button type="button" class="text-[12.5px] font-medium text-primary hover:underline" (click)="attach()">
+        Replace
+      </button>
+    </div>
+  } @else {
+    <button
+      type="button"
+      class="flex flex-col items-center gap-2 rounded-base border border-dashed border-border px-4 py-8 text-center transition-colors duration-150 ease-out hover:border-primary hover:bg-surface motion-reduce:transition-none"
+      [disabled]="uploading()"
+      (click)="attach()"
+    >
+      @if (uploading()) {
+        <span class="h-5 w-5 rounded-full border-2 border-border border-t-primary animate-spinner" aria-hidden="true"></span>
+        <span class="text-[13px] text-muted">Uploading…</span>
+      } @else {
+        <svg pIcon="upload" class="text-primary" [size]="18" aria-hidden="true"></svg>
+        <span class="text-[13px] font-medium text-body">Upload the signed contract</span>
+        <span class="text-[12px] text-muted">PDF or photo, up to 10 MB</span>
+      }
+    </button>
+
+    <label class="flex cursor-pointer items-center gap-2.5 rounded-base border border-border px-3.5 py-3">
+      <input type="checkbox" class="accent-primary" [checked]="deferred()" (change)="toggleDeferred()" />
+      <span class="flex flex-col">
+        <span class="text-[13px] font-medium text-heading">Contract to follow</span>
+        <span class="text-[12px] text-muted">Signing happens at turnover — upload it from the tenant's profile later.</span>
+      </span>
+    </label>
+  }
+
+  <div class="flex items-center justify-between border-t border-border pt-4">
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="back.emit()"
+    >
+      <svg pIcon="arrow-left" [size]="12" aria-hidden="true"></svg>
+      <span>Back</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="!canProceed() || busy()"
+      [title]="canProceed() ? '' : 'Upload the contract or mark it as deferred'"
+      (click)="submit()"
+    >
+      <span>{{ busy() ? 'Saving…' : 'Next: Move-in payment' }}</span>
+      @if (!busy()) {
+        <svg pIcon="arrow-right" [size]="12" aria-hidden="true"></svg>
+      }
+    </button>
+  </div>
+</div>

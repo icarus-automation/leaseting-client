@@ -1,0 +1,174 @@
+<div class="flex flex-col gap-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="font-heading text-2xl font-semibold text-heading">Tenants</h1>
+      <p class="mt-0.5 text-sm text-muted">Everyone renting from you, with their contact details and lease history.</p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+      [disabled]="startingOnboarding()"
+      (click)="startOnboarding()"
+    >
+      <svg pIcon="user-plus" [size]="13" aria-hidden="true"></svg>
+      <span>{{ startingOnboarding() ? 'Starting…' : 'Start onboarding' }}</span>
+    </button>
+  </header>
+
+  <!-- Resumable onboardings — continue where the move-in left off -->
+  @if (inProgressOnboardings().length > 0) {
+    <section class="flex flex-col gap-2" aria-label="Onboardings in progress">
+      <h2 class="text-[12.5px] font-medium uppercase tracking-wide text-muted">Onboardings in progress</h2>
+      <div class="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        @for (item of inProgressOnboardings(); track item.id) {
+          <article class="flex flex-col gap-2.5 rounded-base border border-border bg-background px-3.5 py-3">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex min-w-0 flex-col">
+                <span class="truncate text-[13.5px] font-medium text-heading">
+                  {{ item.tenant ? item.tenant.firstName + ' ' + item.tenant.lastName : 'New tenant' }}
+                </span>
+                <span class="truncate text-[12px] text-muted">
+                  {{ item.unit ? item.unit.property.name + ' — Unit ' + item.unit.unitNo : 'Unit not picked yet' }}
+                </span>
+              </div>
+              <span class="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                {{ onboardingStepChip(item) }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <a
+                [routerLink]="['/tenants/onboarding', item.id]"
+                class="inline-flex h-8 items-center gap-1.5 rounded-base border-none bg-primary px-2.5 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover motion-reduce:transition-none"
+              >
+                <span>Continue</span>
+                <svg pIcon="arrow-right" [size]="10" aria-hidden="true"></svg>
+              </a>
+              <button
+                type="button"
+                class="inline-flex h-8 items-center rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-destructive hover:text-destructive motion-reduce:transition-none"
+                (click)="confirmCancelOnboarding(item)"
+              >
+                Cancel
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <div class="flex h-10 max-w-sm items-center gap-2 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring motion-reduce:transition-none">
+    <svg pIcon="search" class="shrink-0 text-muted" [size]="14" aria-hidden="true"></svg>
+    <input
+      type="search"
+      class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
+      placeholder="Search by name…"
+      aria-label="Search tenants by name"
+      [value]="search()"
+      (input)="onSearchInput($event)"
+    />
+  </div>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (s of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load(1)">
+        Retry
+      </button>
+    </div>
+  } @else if (items().length === 0) {
+    @if (search().trim()) {
+      <app-empty-state
+        icon="search"
+        heading="No tenants match"
+        [description]="'Nothing found for “' + search() + '”. Try another name, or onboard them as a new tenant.'"
+        ctaLabel="Start onboarding"
+        (cta)="startOnboarding()"
+      />
+    } @else {
+      <app-empty-state
+        icon="users"
+        heading="No tenants yet"
+        description="Every tenant starts with onboarding — pick or create the person, collect requirements, and move them into a unit."
+        ctaLabel="Start onboarding"
+        (cta)="startOnboarding()"
+      />
+    }
+  } @else {
+    <div class="overflow-x-auto rounded-base border border-border">
+      <table class="w-full border-collapse text-left">
+        <thead>
+          <tr class="border-b border-border bg-surface">
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Name</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Contact</th>
+            <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted md:table-cell">Email</th>
+            <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted lg:table-cell">Added</th>
+            <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tenant of items(); track tenant.id) {
+            <tr
+              class="border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+              [class.animate-row-flash]="tenant.id === flashId()"
+              (animationend)="flashId.set(null)"
+            >
+              <td class="px-4 py-3">
+                <a
+                  [routerLink]="['/tenants', tenant.id]"
+                  class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                >
+                  {{ tenant.firstName }} {{ tenant.lastName }}
+                </a>
+              </td>
+              <td class="px-4 py-3 text-[13px] text-body">{{ tenant.contactNo }}</td>
+              <td class="hidden px-4 py-3 text-[13px] text-body md:table-cell">{{ tenant.email ?? '—' }}</td>
+              <td class="hidden px-4 py-3 text-[13px] text-muted lg:table-cell">{{ tenant.createdAt | date: 'MMM d, y' }}</td>
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-end gap-1">
+                  <button
+                    type="button"
+                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                    [attr.aria-label]="'Edit ' + tenant.firstName + ' ' + tenant.lastName"
+                    (click)="openEdit(tenant)"
+                  >
+                    <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+                    [attr.aria-label]="'Archive ' + tenant.firstName + ' ' + tenant.lastName"
+                    (click)="confirmArchive(tenant)"
+                  >
+                    <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [meta]="meta()" (pageChange)="load($event)" />
+  }
+</div>
+
+<app-tenant-form-dialog
+  [visible]="drawerVisible()"
+  (visibleChange)="drawerVisible.set($event)"
+  [tenant]="editTarget()"
+  (saved)="onSaved($event)"
+/>

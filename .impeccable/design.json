@@ -1,0 +1,412 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-05T00:00:00.000Z",
+  "title": "Design System: Leaseting",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Ledger Indigo",
+        "canonical": "oklch(0.50 0.16 262)",
+        "tonalRamp": [
+          "oklch(0.17 0.080 262)",
+          "oklch(0.24 0.100 262)",
+          "oklch(0.31 0.130 262)",
+          "oklch(0.38 0.150 262)",
+          "oklch(0.50 0.160 262)",
+          "oklch(0.74 0.120 262)",
+          "oklch(0.90 0.060 262)",
+          "oklch(0.95 0.030 262)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Panel Surface",
+        "canonical": "oklch(0.975 0.005 262)",
+        "tonalRamp": [
+          "oklch(0.140 0.008 262)",
+          "oklch(0.220 0.010 262)",
+          "oklch(0.320 0.012 262)",
+          "oklch(0.460 0.015 262)",
+          "oklch(0.720 0.015 262)",
+          "oklch(0.880 0.012 262)",
+          "oklch(0.955 0.008 262)",
+          "oklch(1.000 0.000 0)"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Pure White",
+        "canonical": "oklch(1.000 0.000 0)",
+        "tonalRamp": [
+          "oklch(0.140 0.008 262)",
+          "oklch(0.320 0.012 262)",
+          "oklch(0.460 0.015 262)",
+          "oklch(0.720 0.015 262)",
+          "oklch(0.880 0.012 262)",
+          "oklch(0.955 0.008 262)",
+          "oklch(0.975 0.005 262)",
+          "oklch(1.000 0.000 0)"
+        ]
+      },
+      "heading": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.14 0.008 262)",
+        "tonalRamp": [
+          "oklch(0.14 0.008 262)",
+          "oklch(0.24 0.010 262)",
+          "oklch(0.34 0.012 262)",
+          "oklch(0.44 0.014 262)",
+          "oklch(0.56 0.014 262)",
+          "oklch(0.70 0.012 262)",
+          "oklch(0.84 0.008 262)",
+          "oklch(0.95 0.004 262)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "oklch(0.52 0.015 262)",
+        "tonalRamp": [
+          "oklch(0.18 0.012 262)",
+          "oklch(0.28 0.014 262)",
+          "oklch(0.38 0.015 262)",
+          "oklch(0.52 0.015 262)",
+          "oklch(0.64 0.014 262)",
+          "oklch(0.76 0.012 262)",
+          "oklch(0.87 0.008 262)",
+          "oklch(0.95 0.004 262)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(0.880 0.006 262)",
+        "tonalRamp": [
+          "oklch(0.20 0.008 262)",
+          "oklch(0.32 0.009 262)",
+          "oklch(0.46 0.010 262)",
+          "oklch(0.60 0.010 262)",
+          "oklch(0.72 0.010 262)",
+          "oklch(0.82 0.008 262)",
+          "oklch(0.880 0.006 262)",
+          "oklch(0.955 0.004 262)"
+        ]
+      },
+      "success": {
+        "role": "secondary",
+        "displayName": "Settled Green",
+        "canonical": "oklch(0.52 0.18 145)",
+        "tonalRamp": [
+          "oklch(0.20 0.07 145)",
+          "oklch(0.30 0.11 145)",
+          "oklch(0.40 0.15 145)",
+          "oklch(0.52 0.18 145)",
+          "oklch(0.64 0.16 145)",
+          "oklch(0.76 0.12 145)",
+          "oklch(0.86 0.08 145)",
+          "oklch(0.95 0.03 145)"
+        ]
+      },
+      "destructive": {
+        "role": "secondary",
+        "displayName": "Overdue Red",
+        "canonical": "oklch(0.54 0.22 15)",
+        "tonalRamp": [
+          "oklch(0.22 0.09 15)",
+          "oklch(0.32 0.14 15)",
+          "oklch(0.43 0.19 15)",
+          "oklch(0.54 0.22 15)",
+          "oklch(0.66 0.19 15)",
+          "oklch(0.78 0.13 15)",
+          "oklch(0.88 0.07 15)",
+          "oklch(0.96 0.03 15)"
+        ]
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "Due Amber",
+        "canonical": "oklch(0.72 0.15 68)",
+        "tonalRamp": [
+          "oklch(0.26 0.06 68)",
+          "oklch(0.38 0.09 68)",
+          "oklch(0.50 0.12 68)",
+          "oklch(0.62 0.14 68)",
+          "oklch(0.72 0.15 68)",
+          "oklch(0.82 0.11 68)",
+          "oklch(0.90 0.07 68)",
+          "oklch(0.96 0.03 68)"
+        ]
+      },
+      "vacant": {
+        "role": "secondary",
+        "displayName": "Available Azure",
+        "canonical": "oklch(0.55 0.13 230)",
+        "tonalRamp": [
+          "oklch(0.20 0.05 230)",
+          "oklch(0.30 0.08 230)",
+          "oklch(0.42 0.11 230)",
+          "oklch(0.55 0.13 230)",
+          "oklch(0.67 0.11 230)",
+          "oklch(0.79 0.08 230)",
+          "oklch(0.89 0.05 230)",
+          "oklch(0.96 0.02 230)"
+        ]
+      },
+      "auth-panel-from": {
+        "role": "tertiary",
+        "displayName": "Deep Slate Wash",
+        "canonical": "oklch(0.31 0.11 262)",
+        "tonalRamp": [
+          "oklch(0.17 0.080 262)",
+          "oklch(0.22 0.090 262)",
+          "oklch(0.31 0.110 262)",
+          "oklch(0.40 0.120 262)",
+          "oklch(0.52 0.130 262)",
+          "oklch(0.68 0.110 262)",
+          "oklch(0.82 0.070 262)",
+          "oklch(0.94 0.030 262)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles. One per screen. Fixed size, never fluid." },
+      "headline": { "displayName": "Headline", "purpose": "Dialog headings and major section titles." },
+      "title": { "displayName": "Title", "purpose": "Card headers, empty-state headlines, panel titles, sidebar brand name." },
+      "body": { "displayName": "Body", "purpose": "Default text, set globally on body. Prose caps at ~70ch." },
+      "label": { "displayName": "Label", "purpose": "Form labels, buttons, nav items, primary table cell text. The workhorse size." },
+      "micro": { "displayName": "Micro", "purpose": "Table column headers, row metadata, field errors, chip text, timestamps." },
+      "eyebrow": { "displayName": "Eyebrow", "purpose": "Sidebar section labels and the dashboard date line. The only sanctioned uppercase treatment." }
+    },
+    "shadows": [
+      {
+        "name": "lifted",
+        "value": "0 2px 8px oklch(0.14 0.008 262 / 0.10)",
+        "purpose": "Genuinely floating layers: Kit's badge panel, dropdowns, popovers, tooltips. Reads as 'above the content', nothing more."
+      },
+      {
+        "name": "modal",
+        "value": "0 8px 32px oklch(0.14 0.008 262 / 0.18)",
+        "purpose": "Command palette and dialogs. The heavier weight signals full-attention capture and pairs with a backdrop."
+      }
+    ],
+    "motion": [
+      { "name": "state-transition", "value": "150ms ease-out", "purpose": "The default. Color only — never size, position, or shadow. Always paired with motion-reduce:transition-none." },
+      { "name": "ease-emphasis", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Entrances with character: form-in (420ms), pop-in (200ms), row-flash (1.8s), drawer slide (200ms)." },
+      { "name": "ease-dialog", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Centered form dialogs, 150ms, origin-center scale from 0.96." },
+      { "name": "form-in", "value": "form-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both", "purpose": "Auth and multi-step form entrance: 8px rise with fade." },
+      { "name": "error-in", "value": "error-in 180ms ease-out both", "purpose": "Validation and error banner arrival: 4px drop with fade." },
+      { "name": "pop-in", "value": "pop-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both", "purpose": "Command palette and Kit panel: 0.98 scale and -4px." },
+      { "name": "row-flash", "value": "row-flash 1.8s cubic-bezier(0.22, 1, 0.36, 1) both", "purpose": "Confirms a newly created or updated table row: primary at 16% fading to transparent." },
+      { "name": "kit-idle", "value": "kit-idle 6s ease-in-out infinite", "purpose": "Kit only. +/-1.5 degree lean, amplitude low enough to read as alive without pulling focus off the numbers." },
+      { "name": "kit-hop", "value": "kit-hop 780ms cubic-bezier(0.33, 0, 0.35, 1) 3", "purpose": "Kit only, on a recorded payment. Anticipation squash, stretch, apex hold, landing squash. Hard-capped at three iterations." },
+      { "name": "kit-sulk", "value": "kit-sulk 400ms ease-out both", "purpose": "Kit only, on bad news. 5 degree shoulders-down, then holds. Sympathy, not a telling-off." }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "640px" },
+      { "name": "sidebar", "value": "1024px" }
+    ],
+    "zIndex": [
+      { "name": "dropdown", "value": 1000 },
+      { "name": "sticky", "value": 1100 },
+      { "name": "modal-backdrop", "value": 1200 },
+      { "name": "modal", "value": 1300 },
+      { "name": "overlay", "value": 1350 },
+      { "name": "toast", "value": 1400 },
+      { "name": "tooltip", "value": 1500 }
+    ],
+    "chrome": [
+      { "name": "sidebar-width", "value": "240px" },
+      { "name": "header-height", "value": "56px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single call to action on a surface. Fill steps darker on hover and active — never a shadow or a lift.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\"><svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\" fill=\"none\" aria-hidden=\"true\"><path d=\"M8 3.2v9.6M3.2 8h9.6\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\"/></svg><span>New bill</span></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: none; border-radius: var(--radius, 4px); background: var(--primary, oklch(0.50 0.16 262)); color: var(--primary-foreground, oklch(1 0 0)); font-family: 'Work Sans', sans-serif; font-size: 13px; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background: var(--primary-hover, oklch(0.44 0.16 262)); } .ds-btn-primary:active { background: var(--primary-active, oklch(0.38 0.15 262)); } .ds-btn-primary:focus-visible { outline: 2px solid var(--primary, oklch(0.50 0.16 262)); outline-offset: 2px; } @media (prefers-reduced-motion: reduce) { .ds-btn-primary { transition: none; } }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Hairline-bordered white button for navigation and non-committal actions. Hover is gated behind :enabled so a disabled control never previews a state it cannot enter.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\"><svg viewBox=\"0 0 16 16\" width=\"12\" height=\"12\" fill=\"none\" aria-hidden=\"true\"><path d=\"M9.8 3.5L5.3 8l4.5 4.5\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span>Prev</span></button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; border: 1px solid var(--border, oklch(0.880 0.006 262)); border-radius: var(--radius, 4px); background: var(--background, oklch(1 0 0)); color: var(--text-body, oklch(0.14 0.008 262)); font-family: 'Work Sans', sans-serif; font-size: 13px; font-weight: 500; line-height: 1; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-secondary:enabled:hover { background: var(--surface, oklch(0.975 0.005 262)); } .ds-btn-secondary:disabled { opacity: 0.45; cursor: not-allowed; } .ds-btn-secondary:focus-visible { outline: 2px solid var(--primary, oklch(0.50 0.16 262)); outline-offset: 2px; } @media (prefers-reduced-motion: reduce) { .ds-btn-secondary { transition: none; } }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "The Label-Always Rule made physical: a saturated dot for scanning, the state named in words for everyone else, and an optional tabular count.",
+      "html": "<span class=\"ds-badge ds-badge--overdue\"><span class=\"ds-badge__dot\" aria-hidden=\"true\"></span><span class=\"ds-badge__label\">Overdue</span><span class=\"ds-badge__count\">3</span></span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid; border-radius: 9999px; font-family: 'Work Sans', sans-serif; font-size: 12px; font-weight: 500; line-height: 1; color: var(--text-body, oklch(0.14 0.008 262)); } .ds-badge__dot { width: 6px; height: 6px; flex-shrink: 0; border-radius: 9999px; } .ds-badge__count { font-weight: 600; color: var(--text-heading, oklch(0.14 0.008 262)); font-variant-numeric: tabular-nums; } .ds-badge--overdue { background: var(--muted-destructive, oklch(0.94 0.04 15)); border-color: color-mix(in oklab, var(--destructive, oklch(0.54 0.22 15)) 30%, transparent); } .ds-badge--overdue .ds-badge__dot { background: var(--destructive, oklch(0.54 0.22 15)); }"
+    },
+    {
+      "name": "Sidebar Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Active state is a primary tint at 8% plus an indigo label — a tint and a color change, never a left stripe.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" href=\"#\"><svg class=\"ds-nav-item__icon\" viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M2.5 6.8L8 2.5l5.5 4.3v6.2a.8.8 0 01-.8.8H3.3a.8.8 0 01-.8-.8V6.8z\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linejoin=\"round\"/></svg><span>Properties</span></a><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\" aria-current=\"page\"><svg class=\"ds-nav-item__icon\" viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M2.5 4.5h11v8h-11zM2.5 7.2h11\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linejoin=\"round\"/></svg><span>Bills</span></a></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 1px; padding: 8px; width: 200px; background: var(--surface, oklch(0.975 0.005 262)); } .ds-nav-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: var(--radius, 4px); color: var(--text-muted, oklch(0.52 0.015 262)); font-family: 'Work Sans', sans-serif; font-size: 13.5px; font-weight: 500; line-height: 1; text-decoration: none; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-nav-item__icon { flex-shrink: 0; opacity: 0.8; } .ds-nav-item:hover { background: color-mix(in oklab, var(--text-heading, oklch(0.14 0.008 262)) 5%, transparent); color: var(--text-heading, oklch(0.14 0.008 262)); } .ds-nav-item--active { background: color-mix(in oklab, var(--primary, oklch(0.50 0.16 262)) 8%, transparent); color: var(--primary, oklch(0.50 0.16 262)); } .ds-nav-item--active .ds-nav-item__icon { opacity: 1; } .ds-nav-item--active:hover { background: color-mix(in oklab, var(--primary, oklch(0.50 0.16 262)) 12%, transparent); color: var(--primary, oklch(0.50 0.16 262)); } .ds-nav-item:focus-visible { outline: 2px solid var(--primary, oklch(0.50 0.16 262)); outline-offset: 1px; } @media (prefers-reduced-motion: reduce) { .ds-nav-item { transition: none; } }"
+    },
+    {
+      "name": "Search Trigger",
+      "kind": "nav",
+      "refersTo": "search-trigger",
+      "description": "The keyboard-first promise advertised in the header. Hover raises the border to Border Strong; the keycaps state the shortcut rather than hiding it in a tooltip.",
+      "html": "<button class=\"ds-search\" type=\"button\" aria-label=\"Search (Ctrl+K)\" aria-keyshortcuts=\"Control+K\"><svg viewBox=\"0 0 16 16\" width=\"13\" height=\"13\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.3\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M10.3 10.3L14 14\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></svg><span class=\"ds-search__placeholder\">Search...</span><span class=\"ds-search__kbd\" aria-hidden=\"true\"><span>Ctrl</span><span>K</span></span></button>",
+      "css": ".ds-search { display: flex; align-items: center; gap: 8px; min-width: 220px; padding: 6px 12px; border: 1px solid var(--border, oklch(0.880 0.006 262)); border-radius: var(--radius, 4px); background: var(--surface, oklch(0.975 0.005 262)); color: var(--text-muted, oklch(0.52 0.015 262)); font-family: 'Work Sans', sans-serif; font-size: 13px; cursor: pointer; transition: border-color 150ms ease-out, background-color 150ms ease-out, color 150ms ease-out; } .ds-search__placeholder { flex: 1; text-align: left; } .ds-search:hover { border-color: var(--border-strong, oklch(0.720 0.010 262)); background: var(--surface-hover, oklch(0.965 0.006 262)); color: var(--text-body, oklch(0.14 0.008 262)); } .ds-search:focus-visible { outline: 2px solid var(--primary, oklch(0.50 0.16 262)); outline-offset: 1px; border-color: var(--primary, oklch(0.50 0.16 262)); } .ds-search__kbd { display: flex; gap: 1px; margin-left: auto; font-size: 11px; color: var(--text-muted, oklch(0.52 0.015 262)); } .ds-search__kbd span { display: inline-flex; align-items: center; justify-content: center; padding: 1px 4px; border-radius: 2px; background: var(--border, oklch(0.880 0.006 262)); line-height: 1.4; } @media (prefers-reduced-motion: reduce) { .ds-search { transition: none; } }"
+    },
+    {
+      "name": "Data Table",
+      "kind": "custom",
+      "refersTo": "table-row",
+      "description": "The primary display surface. Panel Surface header, hairline row separators, a stacked identifying cell, and tabular currency. Overdue dates shift weight and color together.",
+      "html": "<div class=\"ds-table-wrap\"><table class=\"ds-table\"><thead><tr><th scope=\"col\">Tenant &middot; Unit</th><th scope=\"col\">Type</th><th scope=\"col\">Amount</th><th scope=\"col\">Due</th></tr></thead><tbody><tr><td><a class=\"ds-table__link\" href=\"#\">Maria Santos</a><p class=\"ds-table__sub\">Unit 4B &middot; Sunrise Residences</p></td><td class=\"ds-table__cell\">Electricity</td><td class=\"ds-table__num\">&#8369;2,480.00</td><td class=\"ds-table__overdue\">Jul 5, 2026</td></tr><tr><td><a class=\"ds-table__link\" href=\"#\">Ramon Cruz</a><p class=\"ds-table__sub\">Unit 2A &middot; Sunrise Residences</p></td><td class=\"ds-table__cell\">Rent</td><td class=\"ds-table__num\">&#8369;18,000.00</td><td class=\"ds-table__cell\">Aug 15, 2026</td></tr></tbody></table></div>",
+      "css": ".ds-table-wrap { overflow-x: auto; border: 1px solid var(--border, oklch(0.880 0.006 262)); border-radius: var(--radius, 4px); background: var(--background, oklch(1 0 0)); font-family: 'Work Sans', sans-serif; } .ds-table { width: 100%; border-collapse: collapse; text-align: left; } .ds-table thead tr { background: var(--surface, oklch(0.975 0.005 262)); border-bottom: 1px solid var(--border, oklch(0.880 0.006 262)); } .ds-table th { padding: 10px 16px; font-size: 12.5px; font-weight: 500; color: var(--text-muted, oklch(0.52 0.015 262)); } .ds-table tbody tr { border-bottom: 1px solid var(--border, oklch(0.880 0.006 262)); transition: background-color 150ms ease-out; } .ds-table tbody tr:last-child { border-bottom: none; } .ds-table tbody tr:hover { background: var(--surface, oklch(0.975 0.005 262)); } .ds-table td { padding: 12px 16px; } .ds-table__link { font-size: 13.5px; font-weight: 500; color: var(--text-heading, oklch(0.14 0.008 262)); text-decoration: none; } .ds-table__link:hover { color: var(--primary, oklch(0.50 0.16 262)); text-decoration: underline; } .ds-table__sub { margin: 0; font-size: 12px; color: var(--text-muted, oklch(0.52 0.015 262)); } .ds-table__cell { font-size: 13px; color: var(--text-body, oklch(0.14 0.008 262)); } .ds-table__num { font-size: 13px; font-weight: 500; color: var(--text-heading, oklch(0.14 0.008 262)); font-variant-numeric: tabular-nums; } .ds-table__overdue { font-size: 13px; font-weight: 500; color: var(--destructive, oklch(0.54 0.22 15)); } @media (prefers-reduced-motion: reduce) { .ds-table tbody tr { transition: none; } }"
+    },
+    {
+      "name": "Empty State",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Teaching empty state: names what will appear here, explains how it gets there, and offers the primary action inline. Dashed hairline marks it as a placeholder rather than content.",
+      "html": "<div class=\"ds-empty\"><div class=\"ds-empty__icon\"><svg viewBox=\"0 0 20 20\" width=\"18\" height=\"18\" fill=\"none\" aria-hidden=\"true\"><path d=\"M2.8 11.2h3.6l1 2h5.2l1-2h3.6M2.8 11.2l2.4-6.4h9.6l2.4 6.4v4a1 1 0 01-1 1H3.8a1 1 0 01-1-1v-4z\" stroke=\"currentColor\" stroke-width=\"1.3\" stroke-linejoin=\"round\"/></svg></div><div class=\"ds-empty__text\"><h3>No bills found</h3><p>Create rent or utility bills against an active lease &mdash; overdue ones turn the unit red on the floor plan.</p></div><button class=\"ds-empty__cta\" type=\"button\"><svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\" fill=\"none\" aria-hidden=\"true\"><path d=\"M8 3.2v9.6M3.2 8h9.6\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\"/></svg><span>New bill</span></button></div>",
+      "css": ".ds-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 48px 24px; border: 1px dashed var(--border, oklch(0.880 0.006 262)); border-radius: var(--radius, 4px); background: var(--background, oklch(1 0 0)); text-align: center; font-family: 'Work Sans', sans-serif; } .ds-empty__icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 9999px; background: var(--surface, oklch(0.975 0.005 262)); color: var(--text-muted, oklch(0.52 0.015 262)); } .ds-empty__text { display: flex; flex-direction: column; gap: 4px; } .ds-empty__text h3 { margin: 0; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; color: var(--text-heading, oklch(0.14 0.008 262)); } .ds-empty__text p { margin: 0; max-width: 42ch; font-size: 13px; line-height: 1.6; color: var(--text-muted, oklch(0.52 0.015 262)); } .ds-empty__cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; height: 36px; padding: 0 14px; border: none; border-radius: var(--radius, 4px); background: var(--primary, oklch(0.50 0.16 262)); color: var(--primary-foreground, oklch(1 0 0)); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background-color 150ms ease-out; } .ds-empty__cta:hover { background: var(--primary-hover, oklch(0.44 0.16 262)); } .ds-empty__cta:focus-visible { outline: 2px solid var(--primary, oklch(0.50 0.16 262)); outline-offset: 2px; } @media (prefers-reduced-motion: reduce) { .ds-empty__cta { transition: none; } }"
+    },
+    {
+      "name": "Kit Speech Bubble",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "The signature component. A hairline card with one corner rotated into a notch, level with Kit's head. Names him in indigo, states severity as words, links the templated fact, and carries the model-written flavor as an optional second line that can simply be absent.",
+      "html": "<div class=\"ds-kit\"><div class=\"ds-kit__head\"><span class=\"ds-kit__name\">Kit</span><span class=\"ds-kit__sev\"><svg viewBox=\"0 0 16 16\" width=\"11\" height=\"11\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"5.8\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M8 5.2v3.4M8 10.6v.1\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></svg><span>Needs attention now</span></span></div><a class=\"ds-kit__msg\" href=\"#\">Maria Santos is 12 days overdue on Unit 4B electricity.</a><p class=\"ds-kit__flavor\">That&rsquo;s the third month running &mdash; might be worth a call rather than another text.</p></div>",
+      "css": ".ds-kit { position: relative; max-width: 26rem; padding: 12px 14px; border: 1px solid var(--border, oklch(0.880 0.006 262)); border-radius: var(--radius, 4px); background: var(--background, oklch(1 0 0)); font-family: 'Work Sans', sans-serif; } .ds-kit::before { content: ''; position: absolute; top: 20px; left: -5px; width: 8px; height: 8px; background: var(--background, oklch(1 0 0)); border-left: 1px solid var(--border, oklch(0.880 0.006 262)); border-bottom: 1px solid var(--border, oklch(0.880 0.006 262)); transform: rotate(45deg); } .ds-kit__head { display: flex; align-items: center; gap: 8px; } .ds-kit__name { font-family: 'Poppins', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--primary, oklch(0.50 0.16 262)); } .ds-kit__sev { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 9999px; border: 1px solid color-mix(in oklab, var(--destructive, oklch(0.54 0.22 15)) 30%, transparent); background: var(--muted-destructive, oklch(0.94 0.04 15)); color: var(--text-body, oklch(0.14 0.008 262)); font-size: 11.5px; font-weight: 500; line-height: 1; } .ds-kit__msg { display: block; margin-top: 6px; font-size: 13.5px; line-height: 1.6; color: var(--text-body, oklch(0.14 0.008 262)); text-decoration: none; } .ds-kit__msg:hover { color: var(--primary, oklch(0.50 0.16 262)); text-decoration: underline; } .ds-kit__flavor { margin: 4px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--text-muted, oklch(0.52 0.015 262)); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Instrument With a Face",
+    "overview": "Leaseting is a professional ops instrument — the kind a property manager opens at 9am and doesn't close until end of day. Every surface is built for that shift: pure white ground so status signals never compete with decoration, hairline borders instead of shadows, 4px corners everywhere, and a single geometric type family that disappears into the data. Chrome recedes; the numbers are the interface. Nothing on screen is there to be admired.\n\nAnd then there is Kit. In exactly two places — a dashboard card and a bottom-right badge — the instrument has a face: a drawn character who idles at 1.5°, hops three times when a payment is recorded, and slumps five degrees on bad news. This is not a lapse in the system's discipline; it is the one deliberate exception the discipline exists to protect. Kit is legible precisely because nothing else moves, and Kit is trustworthy precisely because his facts are templated and deterministic while only his commentary comes from a model. The severity is always readable as text. The face never carries meaning alone.\n\nThe system rejects Buildium and AppFolio's corporate-beige forms, generic SaaS template-land's icon-grid dashboards and gradient hero metrics, Airtable and Notion's database-block personal-project energy, and enterprise ERP's gray-on-gray 2008 density. Density is welcome here; airlessness is not. A manager fluent in Linear, Stripe, or GitHub should sit down and trust this interface inside a second — then be mildly, pleasantly surprised that something in the corner is watching out for them.",
+    "keyCharacteristics": [
+      "Pure white ground (oklch(1.000 0.000 0)) — UI color lives in primary and status layers, while the supplied logo keeps its embedded green",
+      "One hue family: everything neutral is tinted toward 262, so \"gray\" is never actually gray",
+      "Flat at rest — depth is tonal layering and 1px hairlines; shadows only for genuinely floating layers",
+      "4px corners on everything except pills, which are fully round",
+      "Two families, no third: Poppins for headings, Work Sans for everything else",
+      "Status is a vocabulary, never a color — every tone ships with a label",
+      "Motion confirms and then stops, at 150ms — with Kit as the one scoped, documented exception",
+      "Keyboard-first: Ctrl+K palette, outline-based focus rings that never shift layout"
+    ],
+    "rules": [
+      {
+        "name": "The Semantic Monopoly Rule",
+        "body": "If a color appears in the interface, it means something. Ledger Indigo on interactive and active states only. Amber on cautionary status only. Red on error, overdue, terminated, and destructive only. Green on resolved and healthy only. Azure on vacancy only. The sole exception is the fixed green embedded in the canonical Leaseting logo artwork; it identifies the product and never communicates application state. Any other decorative use is wrong. Test: remove the color — if neither meaning nor brand identity breaks, it should not have been there.",
+        "section": "colors"
+      },
+      {
+        "name": "The Logo Asset Rule",
+        "body": "Use the exact transparent public/brand/leaseting-lockup-on-dark.png asset in the persistent sidebar brand row and sign-in panel. Render it directly at its native aspect ratio with only ordinary sizing—no generated backing, CSS filters, recoloring, cropping, or alternate asset. Branding belongs to persistent application chrome, never inside dashboard page content.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pure Surface Rule",
+        "body": "Page backgrounds are oklch(1.000 0.000 0). No warmth, no linen, no tint. Cream grounds hide contrast failures and read as generated regardless of intent. The brand hue belongs to the primary and status layers, not the surface.",
+        "section": "colors"
+      },
+      {
+        "name": "The Label-Always Rule",
+        "body": "A status color never travels alone. Every tone is accompanied by a text label or a shaped icon in the same element — the status chip pairs a dot with a word, Kit's severity always renders as words even when the icon is the only thing visible at small widths, and overdue dates carry a weight change alongside the red. Color is reinforcement, never the signal.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Neutral Hue Rule",
+        "body": "Every neutral in the system is tinted toward hue 262 at low chroma. Introducing a true #808080-family gray, or a neutral tinted toward a different hue, breaks the family resemblance that makes the palette read as designed rather than assembled.",
+        "section": "colors"
+      },
+      {
+        "name": "The Scale Ratio Rule",
+        "body": "Adjacent steps sit at roughly 1.15–1.2. A dashboard holds more simultaneous type roles than a marketing page, and exaggerated size contrast reads as noise rather than hierarchy. When two levels feel too close, the fix is weight or color — never a bigger jump in size.",
+        "section": "typography"
+      },
+      {
+        "name": "The No-Display-in-Data Rule",
+        "body": "Display and Headline sizes are forbidden inside tables, form inputs, and inline labels. Data is information, not announcement. A table cell in semibold 24px is a design error, and so is a metric rendered at hero scale because it felt important.",
+        "section": "typography"
+      },
+      {
+        "name": "The Uppercase Containment Rule",
+        "body": "Uppercase with tracking is reserved for the Eyebrow role. It degrades badly below 11px and destroys the scanability of anything a user reads word-by-word, so it never appears on table headers, buttons, badges, or labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Any figure that appears in a column — currency, counts, page ranges, meter readings — carries tabular-nums. Columns of proportional digits do not align, and a manager comparing amounts down a column is doing the thing this product exists for.",
+        "section": "typography"
+      },
+      {
+        "name": "The Print Is The Export Rule",
+        "body": "What a manager sees on screen is what comes out of the printer. Any new report surface must survive @media print — if a region needs its own scroll container, it must release it in print, and any control that cannot be operated on paper must carry print:hidden.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Cards, panels, table rows, and inputs are flat at rest. Separation comes from a hairline or a tonal step — never a drop shadow. A shadow is a response to elevation state (floating, capturing focus), and a decorative shadow on a static element is prohibited.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Outline-Not-Border Rule",
+        "body": "Focus is drawn with outline: 2px solid var(--primary) at a 1–2px offset, never by swapping a border color or width. An outline does not participate in layout, so focus can never nudge a row or reflow a toolbar. Every interactive element in this system has a visible :focus-visible treatment; shipping without one is shipping broken UI.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Tight Radius Rule",
+        "body": "4px on every component, pills fully round, 2px for sub-16px internals. Nothing else. This product has precise edges, not soft ones — a 12px or 16px radius anywhere reads as a different product, and 32px+ is prohibited outright.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Kit Containment Rule",
+        "body": "Kit's animation is a scoped, deliberate exception to \"motion confirms, never entertains.\" It is confined to his own card and badge, is hard-capped at three hop iterations, and never appears inside a table, a form, or a data view. Do not cite Kit as licence to animate anything else — perpetual motion in the corner of an all-day screen is precisely how Clippy earned its reputation.",
+        "section": "components"
+      },
+      {
+        "name": "The Degrade-To-Facts Rule",
+        "body": "Kit's templated message is the deliverable and always stands alone; the model-written flavor line is an additive second paragraph in muted ink that simply does not render when it is absent. Never make a layout depend on the flavor being there, never let it carry information the message lacks, and never let a mood or a color be the only expression of severity.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do keep branding in persistent application chrome and render the exact supplied transparent lockup directly in the sidebar brand row and sign-in panel.",
+      "Do reserve Ledger Indigo for interactive and active states — primary buttons, active nav, focus rings, current step, link hover. Its rarity is its signal strength.",
+      "Do keep every page ground oklch(1.000 0.000 0) and every neutral tinted toward hue 262 at low chroma.",
+      "Do pair every status color with a text label or a shaped icon in the same element. Overdue gets red and a weight change; Kit's severity gets an icon and words.",
+      "Do give every interactive element the full state set: default, hover, focus-visible, active, disabled — and gate hover behind enabled: so a disabled control never previews a state it cannot enter.",
+      "Do draw focus with outline at a 2px offset, never by swapping a border, so focus never shifts layout.",
+      "Do add motion-reduce:transition-none / motion-reduce:animate-none to anything that moves, on top of the global prefers-reduced-motion reset.",
+      "Do apply tabular-nums to every figure that appears in a column.",
+      "Do write empty states that teach: name what will appear, explain how it gets there, and offer the primary action inline. \"No bills found — create rent or utility bills against an active lease\" beats \"Nothing here.\"",
+      "Do ship the four load states for every data surface: skeleton, error banner with Retry, teaching empty state, and content.",
+      "Do keep transitions at 150ms ease-out on color only. Entrances that need more character use cubic-bezier(0.22, 1, 0.36, 1) and stay under 420ms.",
+      "Do name the specific target in every icon-button aria-label (\"Dismiss: rent overdue for Unit 4B\"), never a bare verb.",
+      "Do verify new report surfaces under @media print and mark unusable controls print:hidden."
+    ],
+    "donts": [
+      "Don't promote the logo's green into the interface palette or use it as a decorative accent; it remains isolated inside the canonical Leaseting artwork.",
+      "Don't ship Buildium/AppFolio corporate-beige grounds, crowded toolbars, or 2010-era form chrome.",
+      "Don't use the generic SaaS template vocabulary: icon-heading-text card grids, hero-metric dashboards with gradient big numbers, numbered eyebrows (01 / 02 / 03) on every panel.",
+      "Don't borrow Airtable/Notion database-block aesthetics or emoji as UI decoration. Kit is the product's personality budget, and it is fully spent.",
+      "Don't recreate enterprise ERP density: 11px body text, zero gutters, gray-on-gray rows. Rows may be tight; the air around a data region may not be removed.",
+      "Don't use gradient text, glassmorphism, colored left-stripe accents, animated metric counters, or a shadow on a resting element.",
+      "Don't introduce a radius other than 4px, full, or 2px-for-small-internals — and never 32px+.",
+      "Don't import a third font family or a new weight. Poppins and Work Sans are loaded; hierarchy comes from weight and size within them.",
+      "Don't introduce a true gray or a neutral tinted toward a hue other than 262.",
+      "Don't override PrimeNG component colors inline. Extend app.preset.ts's semantic block so the change lands everywhere at once.",
+      "Don't reach for a modal first. Exhaust inline editing, drawers, and progressive disclosure before blocking the surface — and when a dialog is right, route every close path through a dirty-check.",
+      "Don't animate anything in a table, a form, or a data view beyond the 150ms color transition and the row flash. Kit is not a precedent.",
+      "Don't let color be the only carrier of meaning, and don't let a model-written line carry information the templated message lacks.",
+      "Don't use the sign-in panel's Deep Slate Wash anywhere inside the authenticated app."
+    ]
+  }
+}

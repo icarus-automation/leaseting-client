@@ -1,0 +1,208 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  [subheading]="subheading()"
+  [dirty]="errors.dirty()"
+  width="34rem"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  @if (bill(); as b) {
+    <div class="mb-4 grid grid-cols-3 gap-2 rounded-base border border-border bg-surface px-3 py-2.5">
+      <div>
+        <p class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Billed</p>
+        <p class="text-[14px] font-semibold text-heading tabular-nums">{{ b.amount | phpCurrency }}</p>
+      </div>
+      <div>
+        <p class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Paid</p>
+        <p class="text-[14px] font-semibold text-heading tabular-nums">{{ paidAmount() | phpCurrency }}</p>
+      </div>
+      <div>
+        <p class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Balance</p>
+        <p class="text-[14px] font-semibold text-primary tabular-nums">{{ balance() | phpCurrency }}</p>
+      </div>
+    </div>
+  }
+
+  <form id="payment-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="payment-amount">Amount received</label>
+        <p-inputnumber
+          inputId="payment-amount"
+          formControlName="amount"
+          mode="currency"
+          currency="PHP"
+          locale="en-PH"
+          [min]="0.01"
+          placeholder="₱0.00"
+          styleClass="w-full"
+        />
+        @if (errors.fieldError('amount', { min: 'Amount must be at least ₱0.01.' }); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="payment-date">Date received</label>
+        <p-datepicker
+          inputId="payment-date"
+          formControlName="paidOn"
+          dateFormat="yy-mm-dd"
+          appendTo="body"
+          styleClass="w-full"
+          [showIcon]="true"
+        />
+        @if (errors.fieldError('paidOn'); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="payment-method">Method</label>
+        <p-select
+          inputId="payment-method"
+          formControlName="method"
+          [options]="methodOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="payment-ref">
+          Reference № <span class="font-normal text-muted">(optional)</span>
+        </label>
+        <input
+          id="payment-ref"
+          type="text"
+          maxlength="80"
+          placeholder="OR / transaction №"
+          class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+          formControlName="referenceNo"
+        />
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[13px] font-medium text-heading">
+        Receipt <span class="font-normal text-muted">(optional — PDF or photo, up to 10 MB)</span>
+      </span>
+      @if (receipt(); as file) {
+        <div class="flex items-center gap-2 rounded-base border border-border bg-surface px-3 py-2">
+          <svg pIcon="paperclip" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+          <span class="min-w-0 flex-1 truncate text-[13px] text-body">{{ file.name }}</span>
+          <button
+            type="button"
+            class="text-muted transition-colors duration-150 ease-out hover:text-destructive motion-reduce:transition-none"
+            aria-label="Remove receipt"
+            (click)="clearReceipt()"
+          >
+            <svg pIcon="times" [size]="12" aria-hidden="true"></svg>
+          </button>
+        </div>
+      } @else {
+        <button
+          type="button"
+          class="inline-flex h-9 w-fit items-center gap-2 rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          (click)="receiptInput.click()"
+        >
+          <svg pIcon="upload" [size]="13" aria-hidden="true"></svg>
+          <span>Attach receipt</span>
+        </button>
+      }
+      <input
+        #receiptInput
+        type="file"
+        class="hidden"
+        [accept]="acceptedReceiptTypes"
+        (change)="onReceiptPicked($event)"
+      />
+      @if (receiptError(); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="payment-notes">
+        Notes <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <textarea
+        id="payment-notes"
+        rows="2"
+        class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="notes"
+      ></textarea>
+    </div>
+  </form>
+
+  @if (payments().length > 0) {
+    <div class="mt-5 flex flex-col gap-2">
+      <h3 class="text-[13px] font-semibold text-heading">Recorded payments</h3>
+      <ul class="flex flex-col overflow-hidden rounded-base border border-border">
+        @for (payment of payments(); track payment.id) {
+          <li class="flex items-center gap-3 border-b border-border bg-background px-3 py-2 last:border-b-0">
+            <div class="min-w-0 flex-1">
+              <p class="text-[13px] font-medium text-heading tabular-nums">
+                {{ payment.amount | phpCurrency }}
+                <span class="font-normal text-muted">· {{ methodLabels[payment.method] }}</span>
+              </p>
+              <p class="truncate text-[12px] text-muted">
+                {{ payment.paidOn | date: 'MMM d, y' }}
+                @if (payment.referenceNo) {
+                  · Ref {{ payment.referenceNo }}
+                }
+              </p>
+            </div>
+            @if (payment.receiptUrl; as url) {
+              <a
+                [href]="url"
+                target="_blank"
+                rel="noopener"
+                class="text-[12.5px] font-medium text-primary hover:underline"
+              >
+                Receipt
+              </a>
+            }
+            <button
+              type="button"
+              class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+              [disabled]="deletingId() === payment.id"
+              aria-label="Remove payment"
+              (click)="confirmDeletePayment(payment)"
+            >
+              <svg pIcon="trash" [size]="12" aria-hidden="true"></svg>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Close
+    </button>
+    <button
+      type="submit"
+      form="payment-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving() || loading()"
+    >
+      @if (saving()) {
+        <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+      }
+      <span>Record payment</span>
+    </button>
+  </ng-container>
+</app-form-dialog>

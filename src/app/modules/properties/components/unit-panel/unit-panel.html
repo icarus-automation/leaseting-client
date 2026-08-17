@@ -1,0 +1,178 @@
+<aside
+  class="flex h-fit flex-col gap-4 rounded-base border border-border bg-background p-4"
+  aria-label="Unit details"
+>
+  @if (!unitId()) {
+    <div class="flex flex-col items-center gap-2 py-10 text-center">
+      <svg pIcon="map" class="text-muted" [size]="22" aria-hidden="true"></svg>
+      <p class="text-[13px] font-medium text-heading">No unit selected</p>
+      <p class="max-w-[26ch] text-[12.5px] text-muted">
+        Click a unit on the floor plan to see its tenant, lease, and bills.
+      </p>
+    </div>
+  } @else if (loading()) {
+    <app-skeleton variant="panel" />
+  } @else if (error(); as message) {
+    <div class="flex flex-col gap-2">
+      <p class="text-[13px] text-destructive" role="alert">{{ message }}</p>
+      <button type="button" class="self-start text-[13px] font-medium text-primary hover:underline" (click)="refetch()">
+        Retry
+      </button>
+    </div>
+  } @else if (unit(); as u) {
+    <header class="flex items-start justify-between gap-2">
+      <div class="flex flex-col gap-1.5">
+        <h2 class="font-heading text-lg font-semibold leading-tight text-heading">Unit {{ u.unitNo }}</h2>
+        <app-status-badge [tone]="statusTone()" [label]="statusLabel()" />
+      </div>
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+          aria-label="Edit unit"
+          (click)="editRequested.emit(u)"
+        >
+          <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+        </button>
+        @if (u.status === 'VACANT') {
+          <button
+            type="button"
+            class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+            aria-label="Archive unit"
+            (click)="confirmArchive()"
+          >
+            <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+          </button>
+        }
+        <button
+          type="button"
+          class="flex h-7 w-7 items-center justify-center rounded-base border-none bg-transparent text-muted transition-colors duration-150 ease-out hover:text-body motion-reduce:transition-none"
+          aria-label="Close unit panel"
+          (click)="closeRequested.emit()"
+        >
+          <svg pIcon="times" [size]="14" aria-hidden="true"></svg>
+        </button>
+      </div>
+    </header>
+
+    @if (u.activeLease; as lease) {
+      <section class="flex flex-col gap-2 border-t border-border pt-3" aria-label="Lease">
+        <h3 class="text-[12px] font-semibold uppercase tracking-wide text-muted">Lease</h3>
+        <dl class="flex flex-col gap-1.5 text-[13px]">
+          <div class="flex justify-between gap-2">
+            <dt class="text-muted">Occupied since</dt>
+            <dd class="font-medium text-body">{{ lease.startDate | date: 'MMM d, y' }}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-muted">Ends</dt>
+            <dd class="font-medium text-body">{{ lease.endDate | date: 'MMM d, y' }}</dd>
+          </div>
+          @if (leaseTerm(); as term) {
+            <div class="flex justify-between gap-2">
+              <dt class="text-muted">Term</dt>
+              <dd class="font-medium text-body">{{ term }}</dd>
+            </div>
+          }
+          <div class="flex justify-between gap-2">
+            <dt class="text-muted">Monthly rent</dt>
+            <dd class="font-medium text-body">{{ lease.monthlyRent | phpCurrency }}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-muted">Rent due</dt>
+            <dd class="font-medium text-body">Every {{ ordinal(lease.dueDay) }} of the month</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="flex flex-col gap-2 border-t border-border pt-3" aria-label="Tenant">
+        <h3 class="text-[12px] font-semibold uppercase tracking-wide text-muted">Tenant</h3>
+        <div class="flex flex-col gap-1 text-[13px]">
+          <p class="font-medium text-heading">{{ lease.tenant.firstName }} {{ lease.tenant.lastName }}</p>
+          <p class="flex items-center gap-1.5 text-body">
+            <svg pIcon="phone" class="text-muted" [size]="12" aria-hidden="true"></svg>
+            {{ lease.tenant.contactNo }}
+          </p>
+          @if (lease.tenant.email; as email) {
+            <p class="flex items-center gap-1.5 break-all text-body">
+              <svg pIcon="envelope" class="text-muted" [size]="12" aria-hidden="true"></svg>
+              {{ email }}
+            </p>
+          }
+        </div>
+      </section>
+
+      <section class="flex flex-col gap-2 border-t border-border pt-3" aria-label="Outstanding bills">
+        <h3 class="text-[12px] font-semibold uppercase tracking-wide text-muted">Outstanding bills</h3>
+        @if (lease.outstandingBills.length === 0) {
+          <p class="flex items-center gap-1.5 text-[13px] text-body">
+            <svg pIcon="check-circle" class="text-success" [size]="14" aria-hidden="true"></svg>
+            All settled — nothing due.
+          </p>
+        } @else {
+          <ul class="flex flex-col gap-1.5">
+            @for (bill of lease.outstandingBills; track bill.id) {
+              <li
+                class="flex items-center gap-2 rounded-base border px-2.5 py-2"
+                [class]="isOverdue(bill) ? 'border-[color-mix(in_oklab,var(--destructive)_30%,transparent)] bg-muted-destructive' : 'border-border bg-background'"
+              >
+                <div class="flex min-w-0 flex-1 flex-col">
+                  <span class="text-[13px] font-medium text-heading">{{ billTypeLabels[bill.type] }}</span>
+                  <span class="text-[12px]" [class]="isOverdue(bill) ? 'font-medium text-destructive' : 'text-muted'">
+                    {{ isOverdue(bill) ? 'Overdue since' : 'Due' }} {{ bill.dueDate | date: 'MMM d' }}
+                  </span>
+                </div>
+                <span class="text-[13px] font-semibold text-heading tabular-nums">{{ bill.amount | phpCurrency }}</span>
+                <button
+                  type="button"
+                  class="shrink-0 rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--success)_45%,transparent)] hover:bg-muted-success motion-reduce:transition-none"
+                  [attr.aria-label]="'Mark ' + billTypeLabels[bill.type] + ' bill paid'"
+                  (click)="markPaid(bill)"
+                >
+                  Mark paid
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <div class="border-t border-border pt-3">
+        <button
+          type="button"
+          class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+          (click)="confirmEndLease()"
+        >
+          <svg pIcon="sign-out" [size]="12" aria-hidden="true"></svg>
+          <span>End lease (move out)</span>
+        </button>
+      </div>
+    } @else {
+      <section class="flex flex-col gap-3 border-t border-border pt-3">
+        <dl class="flex flex-col gap-1.5 text-[13px]">
+          @if (u.monthlyRent !== null) {
+            <div class="flex justify-between gap-2">
+              <dt class="text-muted">Asking rent</dt>
+              <dd class="font-medium text-body">{{ u.monthlyRent | phpCurrency }}/mo</dd>
+            </div>
+          }
+          @if (u.notes; as notes) {
+            <div class="flex flex-col gap-0.5">
+              <dt class="text-muted">Notes</dt>
+              <dd class="whitespace-pre-line text-body">{{ notes }}</dd>
+            </div>
+          }
+        </dl>
+        <p class="text-[12.5px] text-muted">This unit is vacant and ready for a tenant.</p>
+        <button
+          type="button"
+          class="inline-flex h-9 items-center justify-center gap-2 rounded-base border-none bg-primary px-3 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+          [disabled]="startingOnboarding()"
+          (click)="startOnboarding()"
+        >
+          <svg pIcon="user-plus" [size]="14" aria-hidden="true"></svg>
+          <span>{{ startingOnboarding() ? 'Starting…' : 'Onboard tenant' }}</span>
+        </button>
+      </section>
+    }
+  }
+</aside>

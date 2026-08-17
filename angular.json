@@ -1,0 +1,88 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm",
+    "analytics": "6d14886b-941a-43ce-9787-62640c5f6e28"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "leaseting": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "node_modules/filepond/dist/filepond.min.css",
+              "node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css",
+              "src/styles.css"
+            ],
+            "allowedCommonJsDependencies": [
+              "filepond",
+              "filepond-plugin-image-preview",
+              "filepond-plugin-file-validate-type",
+              "filepond-plugin-file-validate-size"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "700kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "leaseting:build:production"
+            },
+            "development": {
+              "buildTarget": "leaseting:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    }
+  }
+}

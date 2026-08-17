@@ -1,0 +1,118 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  [subheading]="isEdit() ? 'Update contact details and photo.' : 'Add a tenant you can attach to leases.'"
+  [dirty]="errors.dirty() || photoTouched()"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="tenant-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="tenant-first">First name</label>
+        <input
+          id="tenant-first"
+          type="text"
+          class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+          formControlName="firstName"
+          [attr.aria-invalid]="!!errors.fieldError('firstName')"
+        />
+        @if (errors.fieldError('firstName'); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="tenant-last">Last name</label>
+        <input
+          id="tenant-last"
+          type="text"
+          class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+          formControlName="lastName"
+          [attr.aria-invalid]="!!errors.fieldError('lastName')"
+        />
+        @if (errors.fieldError('lastName'); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="tenant-contact">Contact number</label>
+      <input
+        id="tenant-contact"
+        type="tel"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="contactNo"
+        placeholder="09xx xxx xxxx"
+        [attr.aria-invalid]="!!errors.fieldError('contactNo')"
+      />
+      @if (errors.fieldError('contactNo', { pattern: 'Enter a valid phone number (digits, spaces, dashes).' }); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="tenant-email">
+        Email <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <input
+        id="tenant-email"
+        type="email"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="email"
+        placeholder="tenant@email.com"
+        [attr.aria-invalid]="!!errors.fieldError('email')"
+      />
+      @if (errors.fieldError('email'); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="tenant-notes">
+        Notes <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <textarea
+        id="tenant-notes"
+        rows="3"
+        class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="notes"
+      ></textarea>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[13px] font-medium text-heading">Photo <span class="font-normal text-muted">(optional)</span></span>
+      <app-image-dropzone
+        [currentImageUrl]="tenant()?.photoUrl ?? null"
+        idleHint="PNG, JPG, or WebP — up to 5 MB"
+        [imagePreviewHeight]="140"
+        (fileChange)="onPhotoChange($event)"
+      />
+    </div>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="tenant-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      @if (saving()) {
+        <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+      }
+      <span>{{ isEdit() ? 'Save changes' : 'Create tenant' }}</span>
+    </button>
+  </ng-container>
+</app-form-dialog>

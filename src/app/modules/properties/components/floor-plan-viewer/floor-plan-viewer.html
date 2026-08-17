@@ -1,0 +1,107 @@
+<div class="flex flex-col gap-4">
+  @if (!floor().planImageUrl && floor().units.length === 0) {
+    <!-- Brand-new floor: one combined empty state instead of two stacked cards. -->
+    <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border px-6 py-10 text-center">
+      <span class="flex h-11 w-11 items-center justify-center rounded-full bg-surface">
+        <svg pIcon="map" class="text-muted" [size]="18" aria-hidden="true"></svg>
+      </span>
+      <div>
+        <h3 class="font-heading text-[15px] font-semibold text-heading">Set up this floor</h3>
+        <p class="mx-auto mt-1 max-w-[46ch] text-[13px] leading-relaxed text-muted">
+          Add the rooms or units on this floor, and upload a plan image to lay them out visually —
+          in either order.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <button
+          type="button"
+          class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+          (click)="addUnitRequested.emit()"
+        >
+          <svg pIcon="plus" [size]="12" aria-hidden="true"></svg>
+          <span>Add unit</span>
+        </button>
+        <button
+          type="button"
+          class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          (click)="uploadPlanRequested.emit()"
+        >
+          <svg pIcon="image" [size]="12" aria-hidden="true"></svg>
+          <span>Upload floor plan</span>
+        </button>
+      </div>
+    </div>
+  } @else if (floor().planImageUrl; as planUrl) {
+    <div class="relative self-start overflow-hidden rounded-base border border-border bg-white">
+      <img
+        [src]="planUrl"
+        alt=""
+        class="block w-full select-none"
+        draggable="false"
+      />
+      <svg
+        class="pointer-events-none absolute inset-0 h-full w-full"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        role="group"
+        [attr.aria-label]="'Units on floor ' + floor().level"
+      >
+        @for (unit of mappedUnits(); track unit.id) {
+          <polygon
+            [attr.points]="pointsAttr(unit)"
+            vector-effect="non-scaling-stroke"
+            class="pointer-events-auto cursor-pointer outline-none [fill-opacity:0.75] [stroke-width:1.5] transition-[fill-opacity] duration-150 ease-out hover:[fill-opacity:0.95] focus-visible:[fill-opacity:0.95] focus-visible:stroke-primary focus-visible:[stroke-width:2.5] data-[selected]:[fill-opacity:1] data-[selected]:stroke-primary data-[selected]:[stroke-width:2.5] motion-reduce:transition-none"
+            [class]="fillClass(unit)"
+            [attr.data-selected]="unit.id === selectedUnitId() ? '' : null"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="unitTitle(unit)"
+            [attr.aria-pressed]="unit.id === selectedUnitId()"
+            (click)="unitClicked.emit(unit)"
+            (keydown)="onPolygonKeydown($event, unit)"
+          >
+            <title>{{ unitTitle(unit) }}</title>
+          </polygon>
+        }
+      </svg>
+    </div>
+  } @else {
+    <app-empty-state
+      icon="image"
+      heading="No floor plan yet"
+      description="Upload a plan image for this floor to see units laid out visually. You can still manage units from the list below."
+      ctaLabel="Upload floor plan"
+      (cta)="uploadPlanRequested.emit()"
+    />
+  }
+
+  @if (floor().planImageUrl && floor().units.length === 0) {
+    <app-empty-state
+      icon="table"
+      heading="No units on this floor"
+      description="Add the rooms or units on this floor — you can map them onto the plan afterwards."
+      ctaLabel="Add unit"
+      (cta)="addUnitRequested.emit()"
+    />
+  } @else if (chipUnits().length > 0) {
+    <section class="flex flex-col gap-2">
+      <h3 class="text-[13px] font-medium text-muted">
+        {{ floor().planImageUrl ? 'Not mapped on the plan' : 'Units on this floor' }}
+      </h3>
+      <div class="flex flex-wrap gap-1.5">
+        @for (unit of chipUnits(); track unit.id) {
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface aria-pressed:border-primary aria-pressed:ring-[3px] aria-pressed:ring-ring motion-reduce:transition-none"
+            [attr.aria-pressed]="unit.id === selectedUnitId()"
+            (click)="unitClicked.emit(unit)"
+          >
+            <span class="h-1.5 w-1.5 rounded-full" [class]="dotClass(unit)" aria-hidden="true"></span>
+            <span>{{ unit.unitNo }}</span>
+            <span class="sr-only">— {{ statusLabel(unit) }}</span>
+          </button>
+        }
+      </div>
+    </section>
+  }
+</div>

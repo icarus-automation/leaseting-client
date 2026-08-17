@@ -1,0 +1,61 @@
+@if (property(); as p) {
+  <article
+    class="group relative flex flex-col overflow-hidden rounded-base border border-border bg-background transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] focus-within:border-primary motion-reduce:transition-none"
+  >
+    <a
+      [routerLink]="['/properties', p.id]"
+      class="flex min-w-0 flex-col outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary"
+      [attr.aria-label]="p.name + ' — open floor plans'"
+    >
+      <div class="flex h-36 items-center justify-center overflow-hidden bg-surface">
+        @if (p.imageUrl && !imageFailed()) {
+          <img
+            [src]="p.imageUrl"
+            [alt]="''"
+            class="h-full w-full object-cover"
+            loading="lazy"
+            (error)="imageFailed.set(true)"
+          />
+        } @else {
+          <svg pIcon="building" class="text-muted" [size]="32" aria-hidden="true"></svg>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1 p-3.5 pb-2">
+        <div class="flex items-baseline justify-between gap-2">
+          <h3 class="truncate font-heading text-[15px] font-semibold leading-snug text-heading">{{ p.name }}</h3>
+          <span class="shrink-0 text-xs text-muted">{{ p.type.name }}</span>
+        </div>
+        <p class="truncate text-[13px] text-muted">{{ p.addressLine }}, {{ p.city }}</p>
+      </div>
+    </a>
+
+    <div class="flex items-center justify-between gap-2 px-3.5 pb-3.5 pt-1">
+      <div class="flex flex-wrap items-center gap-1.5" aria-label="Unit summary">
+        <app-status-badge tone="success" label="Settled" [count]="p.unitSummary.settled" />
+        <app-status-badge tone="destructive" label="Overdue" [count]="p.unitSummary.overdue" />
+        <app-status-badge tone="vacant" label="Vacant" [count]="p.unitSummary.vacant" />
+      </div>
+
+      <!-- Always visible: hover-only actions hid Edit so well nobody found it. -->
+      <div class="relative z-10 flex shrink-0 items-center gap-1">
+        <button
+          type="button"
+          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+          [attr.aria-label]="'Edit ' + p.name"
+          (click)="edit.emit()"
+        >
+          <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+        </button>
+        <button
+          type="button"
+          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+          [attr.aria-label]="'Archive ' + p.name"
+          (click)="archive.emit()"
+        >
+          <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+        </button>
+      </div>
+    </div>
+  </article>
+}

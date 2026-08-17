@@ -1,0 +1,122 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="Portfolio Overview"
+    description="Collections, overdue aging, and occupancy across every property."
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  @if (loading()) {
+    <app-skeleton variant="panel" />
+    <app-skeleton variant="panel" />
+  } @else if (loadFailed()) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>Could not load the reports.</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else {
+    <div class="grid gap-3 sm:grid-cols-3">
+      <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+        <span class="text-[12.5px] font-medium text-muted">Collected (12 months)</span>
+        <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ collectionsTotal() | phpCurrency }}</span>
+      </div>
+      <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+        <span class="text-[12.5px] font-medium text-muted">Outstanding overdue</span>
+        <span class="font-heading text-xl font-semibold tabular-nums" [class]="agingTotal() > 0 ? 'text-destructive' : 'text-heading'">
+          {{ agingTotal() | phpCurrency }}
+        </span>
+      </div>
+      <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+        <span class="text-[12.5px] font-medium text-muted">Portfolio occupancy</span>
+        <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ portfolioOccupancy() }}%</span>
+      </div>
+    </div>
+
+    <section class="flex flex-col gap-3 rounded-base border border-border bg-background p-4" aria-label="Monthly collections">
+      <div>
+        <h2 class="font-heading text-[15px] font-semibold text-heading">Monthly collections</h2>
+        <p class="mt-0.5 text-[12.5px] text-muted">Payments received per month, last 12 months.</p>
+      </div>
+      <ul class="flex flex-col gap-1.5">
+        @for (month of collections(); track month.month) {
+          <li class="grid grid-cols-[84px_minmax(0,1fr)_130px_60px] items-center gap-3">
+            <span class="text-[12.5px] text-muted">{{ monthLabel(month.month) }}</span>
+            <div class="h-4 overflow-hidden rounded-[2px] bg-surface" aria-hidden="true">
+              <div class="h-full rounded-[2px] bg-primary" [style.width.%]="barWidth(month.total)"></div>
+            </div>
+            <span class="text-right text-[13px] font-medium text-heading tabular-nums">{{ month.total | phpCurrency }}</span>
+            <span class="text-right text-[12px] text-muted tabular-nums">{{ month.count }} pmt{{ month.count === 1 ? '' : 's' }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <div class="grid gap-5 min-[1100px]:grid-cols-2">
+      <section class="flex flex-col gap-3 rounded-base border border-border bg-background p-4" aria-label="Overdue aging">
+        <div>
+          <h2 class="font-heading text-[15px] font-semibold text-heading">Overdue aging</h2>
+          <p class="mt-0.5 text-[12.5px] text-muted">Outstanding unpaid amounts by days overdue.</p>
+        </div>
+        <table class="w-full border-collapse text-left">
+          <thead>
+            <tr class="border-b border-border">
+              <th scope="col" class="py-2 text-[12.5px] font-medium text-muted">Days overdue</th>
+              <th scope="col" class="py-2 text-right text-[12.5px] font-medium text-muted">Bills</th>
+              <th scope="col" class="py-2 text-right text-[12.5px] font-medium text-muted">Outstanding</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (bucket of aging(); track bucket.bucket) {
+              <tr class="border-b border-border last:border-b-0">
+                <td class="py-2.5 text-[13px] text-body">{{ bucket.bucket }}</td>
+                <td class="py-2.5 text-right text-[13px] text-body tabular-nums">{{ bucket.count }}</td>
+                <td class="py-2.5 text-right text-[13px] font-medium tabular-nums" [class]="+bucket.amount > 0 ? 'text-destructive' : 'text-heading'">
+                  {{ bucket.amount | phpCurrency }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="flex flex-col gap-3 rounded-base border border-border bg-background p-4" aria-label="Occupancy per property">
+        <div>
+          <h2 class="font-heading text-[15px] font-semibold text-heading">Occupancy</h2>
+          <p class="mt-0.5 text-[12.5px] text-muted">Units under an active lease, per property.</p>
+        </div>
+        @if (occupancy().length === 0) {
+          <p class="text-[13px] text-muted">No properties yet.</p>
+        } @else {
+          <ul class="flex flex-col gap-2.5">
+            @for (property of occupancy(); track property.propertyId) {
+              <li class="flex flex-col gap-1">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="min-w-0 truncate text-[13px] font-medium text-heading">{{ property.propertyName }}</span>
+                  <span class="shrink-0 text-[12.5px] text-muted tabular-nums">
+                    {{ property.occupiedUnits }}/{{ property.totalUnits }} · {{ property.rate }}%
+                  </span>
+                </div>
+                <div class="h-2 overflow-hidden rounded-full bg-surface" aria-hidden="true">
+                  <div class="h-full rounded-full bg-primary" [style.width.%]="property.rate"></div>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  }
+</div>

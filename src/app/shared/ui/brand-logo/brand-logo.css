@@ -1,0 +1,40 @@
+:host {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.brand-mark-frame,
+.brand-lockup-frame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.brand-mark-frame {
+  width: 28px;
+  height: 28px;
+}
+
+.brand-mark-frame img {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 34px;
+  height: 34px;
+  max-width: none;
+}
+
+.brand-lockup-frame {
+  width: 122px;
+  height: 38px;
+}
+
+.brand-lockup-frame img {
+  position: absolute;
+  top: -16px;
+  left: -31px;
+  width: 180px;
+  height: 72px;
+  max-width: none;
+}

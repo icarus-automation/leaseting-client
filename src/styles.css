@@ -1,0 +1,405 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+/* ─── Design tokens ─────────────────────────────────────── */
+
+:root {
+  /* Brand */
+  --primary:            oklch(0.50 0.16 262);
+  --primary-hover:      oklch(0.44 0.16 262);
+  --primary-active:     oklch(0.38 0.15 262);
+  --primary-foreground: oklch(1.000 0.000 0);
+
+  /* Surfaces */
+  --background: oklch(1.000 0.000 0);
+  --surface:    oklch(0.975 0.005 262);
+  --border:     oklch(0.880 0.006 262);
+
+  /* Text */
+  --text-heading: oklch(0.14 0.008 262);
+  --text-body:    oklch(0.14 0.008 262);
+  --text-muted:   oklch(0.52 0.015 262);
+
+  /* Status — always pair with label or icon, never color alone */
+  --success:          oklch(0.52 0.18 145);
+  --muted-success:    oklch(0.92 0.05 145);
+  --destructive:      oklch(0.54 0.22 15);
+  --muted-destructive: oklch(0.94 0.04 15);
+  --warning:          oklch(0.72 0.15 68);
+  --muted-warning:    oklch(0.95 0.04 68);
+  /* Vacant = "available", not an alarm — azure, analogous to primary (h262),
+     clearly visible on white plans/badges where the old white fill vanished. */
+  --vacant:           oklch(0.55 0.13 230);
+  --muted-vacant:     oklch(0.94 0.03 230);
+
+  /* Layout chrome (sidebar/header hover + strong borders) */
+  --surface-hover: oklch(0.965 0.006 262);
+  --border-strong: oklch(0.72 0.010 262);
+
+  /* Ring / focus */
+  --ring:             oklch(0.50 0.16 262 / 0.35);
+  --ring-destructive: oklch(0.54 0.22 15 / 0.25);
+
+  /* Radius — 4px everywhere, pills use full */
+  --radius: 4px;
+
+  /* Z-index scale */
+  --z-dropdown:      1000;
+  --z-sticky:        1100;
+  --z-modal-backdrop:1200;
+  --z-modal:         1300;
+  --z-overlay:       1350;
+  --z-toast:         1400;
+  --z-tooltip:       1500;
+
+  /* Elevation */
+  --shadow-lifted: 0 2px 8px oklch(0.14 0.008 262 / 0.10);
+  --shadow-modal:  0 8px 32px oklch(0.14 0.008 262 / 0.18);
+
+  /* Sidebar */
+  --sidebar-width: 240px;
+  --header-height: 56px;
+
+  /* Auth brand panel — the one drenched deep-slate surface (sign-in only) */
+  --auth-panel-from:     oklch(0.31 0.11 262);  /* top of the tonal wash */
+  --auth-panel-to:       oklch(0.22 0.09 262);  /* bottom of the tonal wash */
+  --auth-panel-glow:     oklch(0.40 0.12 262);  /* soft top-left light */
+  --auth-panel-fg:       oklch(0.98 0.005 262); /* primary text on slate */
+  --auth-panel-fg-muted: oklch(0.82 0.020 262); /* secondary text on slate — ≥4.5:1 */
+  --auth-panel-line:     oklch(1 0 0 / 0.11);   /* hairline dividers / borders on slate */
+  --auth-panel-inset:    oklch(1 0 0 / 0.05);   /* subtle raised rows on slate */
+  --auth-panel-neutral:  oklch(0.72 0.09 262);  /* neutral status dot on slate */
+  --auth-panel-danger:   oklch(0.63 0.19 22);   /* status dot — brightened to read on slate */
+}
+
+/* ─── Tailwind @theme mapping ───────────────────────────── */
+
+@theme {
+  --color-primary:            var(--primary);
+  --color-primary-hover:      var(--primary-hover);
+  --color-primary-active:     var(--primary-active);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-background:         var(--background);
+  --color-surface:            var(--surface);
+  --color-border:             var(--border);
+  --color-body:               var(--text-body);
+  --color-heading:            var(--text-heading);
+  --color-muted:              var(--text-muted);
+  --color-success:            var(--success);
+  --color-muted-success:      var(--muted-success);
+  --color-destructive:        var(--destructive);
+  --color-muted-destructive:  var(--muted-destructive);
+  --color-warning:            var(--warning);
+  --color-muted-warning:      var(--muted-warning);
+  --color-vacant:             var(--vacant);
+  --color-muted-vacant:       var(--muted-vacant);
+  --color-surface-hover:      var(--surface-hover);
+  --color-border-strong:      var(--border-strong);
+  --color-ring:               var(--ring);
+  --color-ring-destructive:   var(--ring-destructive);
+
+  /* Auth brand panel (sign-in) — exposed as utilities: bg/text/border-auth-panel-* */
+  --color-auth-panel-fg:       var(--auth-panel-fg);
+  --color-auth-panel-fg-muted: var(--auth-panel-fg-muted);
+  --color-auth-panel-line:     var(--auth-panel-line);
+  --color-auth-panel-inset:    var(--auth-panel-inset);
+  --color-auth-panel-neutral:  var(--auth-panel-neutral);
+  --color-auth-panel-danger:   var(--auth-panel-danger);
+
+  --font-heading: 'Poppins', sans-serif;
+  --font-body:    'Work Sans', sans-serif;
+
+  --radius-base: var(--radius);
+
+  --shadow-lifted: var(--shadow-lifted);
+  --shadow-modal:  var(--shadow-modal);
+
+  /* Animations — used as animate-* utilities; keyframes defined below */
+  --animate-form-in:   form-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-error-in:  error-in 180ms ease-out both;
+  --animate-spinner:   spinner 650ms linear infinite;
+  --animate-row-flash: row-flash 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop-in:    pop-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  /* Kit the mascot — see keyframes below for the motion rules. */
+  --animate-kit-idle:  kit-idle 6s ease-in-out infinite;
+  --animate-kit-hop:   kit-hop 780ms cubic-bezier(0.33, 0, 0.35, 1) 3;
+  --animate-kit-sulk:  kit-sulk 400ms ease-out both;
+}
+
+/* ─── Keyframes (referenced by the @theme animations above) ── */
+
+@keyframes form-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes error-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Confirms "your row is right here" after create/update, then gets out of the way. */
+@keyframes row-flash {
+  0%   { background-color: color-mix(in oklab, var(--primary) 16%, transparent); }
+  100% { background-color: transparent; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.98) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Kit ──
+   All three pivot at the key tip (transform-origin: bottom center), so
+   rotation reads as the whole body leaning rather than a sprite spinning.
+   Kit is a deliberate, scoped exception to the "motion confirms, never
+   entertains" rule — it is confined to its own card and never appears inside
+   a table or form. Do not cite it as licence to animate a data view. */
+
+/* Barely-there idle. Low enough amplitude to read as "alive" without ever
+   pulling focus off the numbers next to it. */
+@keyframes kit-idle {
+  0%, 100% { transform: rotate(-1.5deg) translateY(0); }
+  50%      { transform: rotate(1.5deg) translateY(-2%); }
+}
+
+/* One hop, run three times on a recorded payment. Anticipation squash, stretch
+   on the way up, a beat at the apex, squash on landing — the shape is what
+   makes a flat PNG read as weight. Hard-capped at three: perpetual motion in
+   the corner of an all-day screen is exactly how Clippy earned its reputation. */
+@keyframes kit-hop {
+  0%   { transform: translateY(0) scale(1, 1); }
+  10%  { transform: translateY(2%) scale(1.06, 0.92); }
+  35%  { transform: translateY(-18%) scale(0.96, 1.06); }
+  55%  { transform: translateY(-20%) scale(1, 1); }
+  80%  { transform: translateY(0) scale(1.08, 0.90); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+/* Shoulders down on bad news, then holds — sympathy for the situation, not a
+   telling-off. Kept shallow for the same reason. */
+@keyframes kit-sulk {
+  from { transform: rotate(0deg) translateY(0); }
+  to   { transform: rotate(5deg) translateY(3%); }
+}
+
+/* Centered form dialogs (shared FormDialog wrapper). Modal, so the scale
+   stays origin-center; 150ms strong ease-out per the motion rules. */
+@keyframes dialog-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* PrimeNG 21.2's Dialog skips its enter lifecycle (no body re-append, no
+   ZIndexUtils inline z-index), leaving modal masks at z-index auto — so the
+   sticky app header (z 1100) painted above the backdrop. Pin masks to the
+   backdrop token; if PrimeNG resumes assigning inline z-indexes they win. */
+.p-overlay-mask {
+  z-index: var(--z-modal-backdrop);
+}
+
+/* Same skipped-lifecycle bug: appendTo="body" overlay panels (selects,
+   datepickers, popovers) get no inline z-index either, so they land under the
+   pinned modal mask and option clicks hit the mask instead. Pin them above
+   modals; if PrimeNG resumes assigning inline z-indexes those win. */
+.p-select-overlay,
+.p-multiselect-overlay,
+.p-cascadeselect-overlay,
+.p-autocomplete-overlay,
+.p-datepicker-panel,
+.p-popover {
+  z-index: var(--z-overlay);
+}
+
+/* Toasts must clear pinned masks even without PrimeNG's inline z-index. */
+.p-toast {
+  z-index: var(--z-toast);
+}
+
+/* Kit's badge owns the bottom-right corner; lift the toast stack clear of it
+   so a toast never lands on top of the mascot (or vice versa). */
+.p-toast.p-toast-bottom-right {
+  bottom: 5.5rem;
+}
+
+.app-form-dialog.p-dialog {
+  animation: dialog-in 150ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Header is part of the content (see form-dialog.ts) — no .p-dialog-header. */
+.app-form-dialog .p-dialog-content {
+  padding: 1.125rem;
+}
+
+/* ─── Base resets ───────────────────────────────────────── */
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-body);
+    background: var(--background);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-heading);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  p { margin: 0; }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+}
+
+/* ─── Focus ring ─────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* ─── PrimeNG layer order (Tailwind v4 compat) ─────────── */
+
+@layer primeng;
+
+/* ─── FilePond theming (image dropzones) ────────────────── */
+
+.filepond--root {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+.filepond--panel-root {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.filepond--drop-label {
+  color: var(--text-body);
+  font-size: 13px;
+}
+
+.filepond--drop-label .filepond--label-action {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration-color: color-mix(in oklab, var(--primary) 45%, transparent);
+}
+
+.filepond--drop-label .image-dropzone-hint {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.filepond--item-panel {
+  background: oklch(0.32 0.012 262);
+  border-radius: var(--radius);
+}
+
+.filepond--file-action-button {
+  cursor: pointer;
+}
+
+.filepond--image-preview {
+  background: oklch(0.22 0.01 262);
+}
+
+/* ─── Print ─────────────────────────────────────────────── */
+
+/*
+ * Reports are printed (and "Saved as PDF") straight from the page, so there is
+ * no separate export renderer to keep in sync with what people actually see.
+ * That only works if the app chrome gets out of the way: the shell is a fixed
+ * 100dvh grid with its own scroll container, which without this prints exactly
+ * one viewport and drops every row below the fold.
+ *
+ * Toolbars and filters opt out per-component with Tailwind's `print:hidden` —
+ * a control that cannot be clicked on paper is noise.
+ */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  html, body {
+    height: auto;
+    background: #fff;
+  }
+
+  app-sidebar,
+  app-header,
+  app-kit-badge,
+  .nav-scrim,
+  .p-toast {
+    display: none !important;
+  }
+
+  .app-shell {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  .main-area,
+  .content-area {
+    overflow: visible;
+  }
+
+  .content-area {
+    padding: 0;
+  }
+
+  /* Repeat column headers on every sheet and keep a row whole. */
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  /* Hairlines survive the printer's colour management; tinted fills may not. */
+  th, td {
+    border-color: #d4d4d8;
+  }
+}
+
+/* ─── Reduced motion ────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

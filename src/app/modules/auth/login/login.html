@@ -1,0 +1,100 @@
+<app-auth-shell>
+  <header class="mb-6">
+    <h1 class="text-[28px] font-semibold leading-[1.2] text-heading">Sign in</h1>
+    <p class="mt-1.5 text-sm text-muted">Enter your credentials to access your workspace.</p>
+  </header>
+
+  @if (errorMessage(); as message) {
+    <div
+      class="mb-5 flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body animate-error-in motion-reduce:animate-none"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  <form class="flex flex-col gap-[18px]" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="email">Email</label>
+      <div
+        class="group flex h-[42px] items-center gap-2 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-[oklch(0.78_0.010_262)] focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring data-[invalid]:border-destructive data-[invalid]:focus-within:ring-ring-destructive motion-reduce:transition-none"
+        [attr.data-invalid]="emailError() ? '' : null"
+      >
+        <svg pIcon="envelope" class="shrink-0 text-muted group-focus-within:text-primary" [size]="15" aria-hidden="true"></svg>
+        <input
+          #emailInput
+          id="email"
+          type="email"
+          class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
+          formControlName="email"
+          autocomplete="email"
+          inputmode="email"
+          spellcheck="false"
+          placeholder="you@company.com"
+          [attr.aria-invalid]="!!emailError()"
+          [attr.aria-describedby]="emailError() ? 'email-error' : null"
+        />
+      </div>
+      @if (emailError(); as message) {
+        <p class="text-[12.5px] text-destructive" id="email-error">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="password">Password</label>
+      <div
+        class="group flex h-[42px] items-center gap-2 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-[oklch(0.78_0.010_262)] focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring data-[invalid]:border-destructive data-[invalid]:focus-within:ring-ring-destructive motion-reduce:transition-none"
+        [attr.data-invalid]="passwordError() ? '' : null"
+      >
+        <svg pIcon="lock" class="shrink-0 text-muted group-focus-within:text-primary" [size]="15" aria-hidden="true"></svg>
+        <input
+          id="password"
+          class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="Enter your password"
+          [attr.aria-invalid]="!!passwordError()"
+          [attr.aria-describedby]="passwordError() ? 'password-error' : null"
+        />
+        <button
+          type="button"
+          class="-mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-base border-none bg-transparent p-0 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+          (click)="togglePassword()"
+          [attr.aria-pressed]="showPassword()"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        >
+          <svg [pIcon]="showPassword() ? 'eye-slash' : 'eye'" [size]="15" aria-hidden="true"></svg>
+        </button>
+      </div>
+      @if (passwordError(); as message) {
+        <p class="text-[12.5px] text-destructive" id="password-error">{{ message }}</p>
+      }
+    </div>
+
+    <div class="-mt-0.5 flex items-center justify-between gap-3">
+      <label class="inline-flex cursor-pointer select-none items-center gap-2">
+        <input type="checkbox" class="m-0 h-[15px] w-[15px] cursor-pointer accent-primary" formControlName="rememberMe" />
+        <span class="text-[13px] text-body">Remember me</span>
+      </label>
+      <a
+        class="rounded-[2px] text-[13px] font-medium text-primary transition-colors duration-150 ease-out hover:text-primary-hover hover:underline hover:underline-offset-2 motion-reduce:transition-none"
+        routerLink="/login/forgot-password"
+      >Forgot password?</a>
+    </div>
+
+    <button
+      type="submit"
+      class="mt-1.5 inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-base border-none bg-primary text-sm font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading()"
+    >
+      @if (loading()) {
+        <span class="h-[15px] w-[15px] rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner motion-reduce:[animation-duration:1300ms]" aria-hidden="true"></span>
+        <span>Signing in…</span>
+      } @else {
+        <span>Sign in</span>
+      }
+    </button>
+  </form>
+</app-auth-shell>

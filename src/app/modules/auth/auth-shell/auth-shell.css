@@ -1,0 +1,11 @@
+/*
+ * Kept as CSS (not Tailwind): the drenched brand-panel wash is a multi-layer
+ * radial + linear gradient over custom OKLCH tokens — far more readable here
+ * than as an arbitrary `bg-[...]` value. Everything else lives in the template
+ * as Tailwind utilities.
+ */
+.auth-brand-surface {
+  background:
+    radial-gradient(115% 90% at 12% 8%, var(--auth-panel-glow) 0%, transparent 52%),
+    linear-gradient(158deg, var(--auth-panel-from) 0%, var(--auth-panel-to) 100%);
+}

@@ -1,0 +1,122 @@
+<!--
+  Anchored bottom-right. Sits below the toast stack in z-order and the toast
+  container is lifted clear of it in styles.css, so a toast never lands on Kit.
+-->
+<div class="fixed bottom-4 right-4 z-[var(--z-dropdown)] flex flex-col items-end gap-2 sm:bottom-6 sm:right-6">
+  @if (open()) {
+    <div
+      id="kit-panel"
+      role="dialog"
+      aria-label="Kit"
+      class="w-[min(21rem,calc(100vw-2rem))] origin-bottom-right animate-pop-in overflow-hidden rounded-base border border-border bg-background shadow-lifted motion-reduce:animate-none"
+    >
+      <div class="flex items-center gap-2.5 border-b border-border bg-surface px-3.5 py-3">
+        <app-kit-head variant="panel" [mood]="mood()" class="shrink-0" />
+        <div class="min-w-0 flex-1">
+          <p class="font-heading text-[13px] font-semibold text-heading">Kit</p>
+          <p class="text-[12px] text-muted">
+            {{ count() === 0 ? 'Nothing needs you right now' : label() }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="shrink-0 rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-background hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+          aria-label="Close Kit"
+          (click)="close()"
+        >
+          <svg pIcon="times" [size]="12" aria-hidden="true"></svg>
+        </button>
+      </div>
+
+      @if (loading()) {
+        <p class="px-3.5 py-6 text-[13px] text-muted">Checking…</p>
+      } @else if (items().length === 0) {
+        <p class="flex items-center gap-2 px-3.5 py-6 text-[13px] text-body">
+          <svg pIcon="check-circle" class="shrink-0 text-success" [size]="15" aria-hidden="true"></svg>
+          All caught up.
+        </p>
+      } @else {
+        <ul class="flex max-h-[min(24rem,50vh)] flex-col overflow-y-auto overscroll-contain" role="list">
+          @for (item of items(); track item.event.id) {
+            <li class="flex items-start gap-2 border-b border-border px-3.5 py-2.5 last:border-b-0">
+              <svg
+                [pIcon]="severityIcons[item.event.severity]"
+                class="mt-0.5 shrink-0"
+                [class.text-destructive]="item.event.severity === 'URGENT'"
+                [class.text-muted]="item.event.severity !== 'URGENT'"
+                [size]="13"
+                aria-hidden="true"
+              ></svg>
+
+              <div class="min-w-0 flex-1">
+                <a
+                  [routerLink]="item.link.commands"
+                  class="block text-[13px] leading-relaxed text-body hover:text-primary hover:underline"
+                  (click)="close()"
+                >
+                  {{ item.event.message }}
+                </a>
+                <!-- Severity as text, never colour or mascot mood alone. -->
+                <p class="mt-0.5 text-[11.5px] text-muted">
+                  {{ severityLabels[item.event.severity] }}
+                  @if (item.event.flavor) {
+                    · {{ item.event.flavor }}
+                  }
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="-mr-1 shrink-0 rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+                [attr.aria-label]="'Dismiss: ' + item.event.message"
+                (click)="dismiss(item.event)"
+              >
+                <svg pIcon="times" [size]="11" aria-hidden="true"></svg>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- The badge carries reminders only; a real conversation deserves a
+           page you can re-read, search and come back to. -->
+      <a
+        routerLink="/kit"
+        class="flex items-center justify-center gap-2 border-t border-border px-3.5 py-2.5 text-[13px] font-medium text-primary transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+        (click)="close()"
+      >
+        <svg pIcon="comments" [size]="13" aria-hidden="true"></svg>
+        Talk to Kit
+      </a>
+    </div>
+  }
+
+  <button
+    #trigger
+    type="button"
+    class="relative flex h-[3.25rem] w-[3.25rem] items-center justify-center rounded-full border bg-background transition-colors duration-150 ease-out hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
+    [class]="ringClass()"
+    [attr.aria-label]="label()"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="dialog"
+    [attr.aria-controls]="open() ? 'kit-panel' : null"
+    (click)="toggle()"
+  >
+    <app-kit-head
+      variant="badge"
+      [mood]="mood()"
+      class="motion-reduce:animate-none"
+      [class.animate-kit-hop]="celebrating()"
+    />
+
+    @if (count() > 0) {
+      <span
+        class="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10.5px] font-semibold leading-none text-primary-foreground"
+        [class]="countClass()"
+        aria-hidden="true"
+      >
+        {{ count() }}
+      </span>
+    }
+  </button>
+</div>

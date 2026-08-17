@@ -1,0 +1,138 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="Generate statement of account"
+  subheading="Bundle a lease's pending bills into a printable SOA."
+  width="36rem"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  @if (result(); as statement) {
+    <div class="flex flex-col items-center gap-3 py-6 text-center">
+      <span class="flex h-12 w-12 items-center justify-center rounded-full bg-muted-success">
+        <svg pIcon="check" class="text-success" [size]="22" aria-hidden="true"></svg>
+      </span>
+      <div>
+        <p class="text-[15px] font-semibold text-heading">{{ statement.soaNo }}</p>
+        <p class="text-[13px] text-muted">
+          {{ statement.lease.tenant.firstName }} {{ statement.lease.tenant.lastName }} · Unit
+          {{ statement.lease.unit.unitNo }} — total due {{ statement.totalDue | phpCurrency }}
+        </p>
+        @if (statement.smsStatus === 'SENT') {
+          <p class="mt-1 text-[12.5px] text-success">SMS summary sent to the tenant.</p>
+        } @else if (statement.smsStatus === 'FAILED') {
+          <p class="mt-1 text-[12.5px] text-destructive">
+            SMS failed — you can resend it from the SOA history.
+          </p>
+        }
+      </div>
+      <a
+        [href]="downloadUrl(statement)"
+        class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover motion-reduce:transition-none"
+      >
+        <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+        <span>Download .xlsx</span>
+      </a>
+    </div>
+  } @else {
+    <div class="flex flex-col gap-4">
+      @if (!presetLeaseId()) {
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-medium text-heading" for="soa-lease">Lease</label>
+          <p-select
+            inputId="soa-lease"
+            [options]="leaseOptions()"
+            optionLabel="label"
+            optionValue="id"
+            [filter]="true"
+            filterBy="label"
+            [loading]="loadingLeases()"
+            [ngModel]="selectedLeaseId()"
+            (ngModelChange)="onLeasePicked($event)"
+            placeholder="Pick an active lease"
+            styleClass="w-full"
+            appendTo="body"
+          />
+        </div>
+      }
+
+      @if (loadingBills()) {
+        <p class="py-4 text-center text-[13px] text-muted">Loading unpaid bills…</p>
+      } @else if (selectedLeaseId() && unpaidBills().length === 0) {
+        <p class="rounded-base border border-border bg-surface px-3 py-4 text-center text-[13px] text-muted">
+          No unpaid bills on this lease — nothing to put on a statement.
+        </p>
+      } @else if (unpaidBills().length > 0) {
+        <fieldset class="flex flex-col gap-1.5">
+          <legend class="pb-1.5 text-[13px] font-medium text-heading">Bills to include</legend>
+          <ul class="flex max-h-64 flex-col overflow-y-auto rounded-base border border-border">
+            @for (bill of unpaidBills(); track bill.id) {
+              <li class="border-b border-border last:border-b-0">
+                <label class="flex cursor-pointer items-center gap-3 px-3 py-2 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
+                  <input
+                    type="checkbox"
+                    class="m-0 h-[15px] w-[15px] shrink-0 cursor-pointer accent-primary"
+                    [checked]="checkedBillIds().has(bill.id)"
+                    (change)="toggleBill(bill.id)"
+                  />
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-[13px] font-medium text-heading">{{ billTypeLabels[bill.type] }}</span>
+                    <span class="block text-[12px] text-muted">Due {{ bill.dueDate | date: 'MMM d, y' }}</span>
+                  </span>
+                  <span class="text-[13px] font-medium text-heading tabular-nums">{{ bill.balance | phpCurrency }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        </fieldset>
+
+        <div class="flex items-center justify-between rounded-base border border-border bg-surface px-3 py-2.5">
+          <span class="text-[13px] font-medium text-heading">Total due</span>
+          <span class="text-[15px] font-semibold text-primary tabular-nums">{{ totalDue() | phpCurrency }}</span>
+        </div>
+
+        <label
+          class="flex w-fit items-center gap-2 text-[13px] font-medium"
+          [class]="smsAvailable() ? 'cursor-pointer text-heading' : 'cursor-not-allowed text-muted'"
+          [title]="smsAvailable() ? '' : 'SMS gateway not configured — add the Semaphore keys to enable'"
+        >
+          <input
+            type="checkbox"
+            class="m-0 h-[15px] w-[15px] accent-primary"
+            [class]="smsAvailable() ? 'cursor-pointer' : 'cursor-not-allowed'"
+            [disabled]="!smsAvailable()"
+            [checked]="sendSms()"
+            (change)="sendSms.set(!sendSms())"
+          />
+          Text the tenant a summary (1 SMS)
+        </label>
+      }
+    </div>
+  }
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      {{ result() ? 'Done' : 'Cancel' }}
+    </button>
+    @if (!result()) {
+      <button
+        type="button"
+        class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+        [disabled]="!canGenerate()"
+        (click)="generate()"
+      >
+        @if (generating()) {
+          <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+        }
+        <span>Generate SOA</span>
+      </button>
+    }
+  </ng-container>
+</app-form-dialog>

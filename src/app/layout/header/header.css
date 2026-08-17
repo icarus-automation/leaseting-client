@@ -1,0 +1,265 @@
+:host {
+  display: block;
+  flex-shrink: 0;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--header-height);
+  padding: 0 32px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+/* Skip link — visible only on focus */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: calc(var(--z-tooltip) + 1);
+  padding: 6px 12px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 16px;
+}
+
+.header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-brand {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  color: var(--text-heading);
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.header-brand:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Drawer toggle — hidden while the sidebar is permanent (see media queries). */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.nav-toggle:hover {
+  background: var(--surface);
+}
+
+.nav-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* Search trigger */
+.search-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 220px;
+  transition: border-color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.search-trigger:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  color: var(--text-body);
+}
+
+.search-trigger:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  border-color: var(--primary);
+}
+
+.search-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.search-placeholder {
+  flex: 1;
+  text-align: left;
+}
+
+.search-kbd {
+  display: flex;
+  gap: 1px;
+  margin-left: auto;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.search-kbd span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 4px;
+  background: var(--border);
+  border-radius: 2px;
+  line-height: 1.4;
+}
+
+/* User avatar */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+.user-org {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.signout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 150ms ease-out, border-color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.signout-btn:hover {
+  color: var(--destructive);
+  border-color: color-mix(in oklab, var(--destructive) 35%, transparent);
+  background: var(--muted-destructive);
+}
+
+.signout-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  user-select: none;
+}
+
+/*
+ * Below the sidebar breakpoint the drawer toggle becomes the way in.
+ */
+@media (max-width: 1023px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .nav-toggle {
+    display: flex;
+  }
+
+  .header-brand {
+    display: flex;
+  }
+}
+
+/*
+ * Phone widths. The search trigger keeps its icon and its accessible name but
+ * drops the placeholder and the keyboard hint — a physical keyboard is not
+ * there to press Ctrl+K anyway — and the user's name gives way to the avatar,
+ * which already carries their initials.
+ */
+@media (max-width: 639px) {
+  .app-header {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .search-trigger {
+    min-width: 0;
+    padding: 6px;
+  }
+
+  .search-placeholder,
+  .search-kbd {
+    display: none;
+  }
+
+  .user-info {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-trigger,
+  .user-avatar {
+    transition: none;
+  }
+}

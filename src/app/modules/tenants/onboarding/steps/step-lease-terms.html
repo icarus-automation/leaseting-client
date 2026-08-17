@@ -1,0 +1,97 @@
+<form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()">
+  @if (errorMessage(); as message) {
+    <p class="rounded-base border border-destructive/30 bg-muted-destructive px-3 py-2 text-[13px] text-destructive">
+      {{ message }}
+    </p>
+  }
+
+  <div class="flex flex-col gap-1.5">
+    <label class="text-[13px] font-medium text-heading" for="ob-unit">Unit</label>
+    <p-select
+      inputId="ob-unit"
+      formControlName="unitId"
+      [options]="unitOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [filter]="true"
+      [loading]="loadingUnits()"
+      placeholder="Pick a vacant unit"
+      styleClass="w-full"
+      appendTo="body"
+    />
+    @if (form.controls.unitId.invalid && form.controls.unitId.touched) {
+      <p class="text-[12px] text-destructive">Pick the unit this tenant is moving into.</p>
+    }
+  </div>
+
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-start">Lease starts</label>
+      <p-datepicker inputId="ob-start" formControlName="startDate" dateFormat="M d, yy" [showIcon]="true" appendTo="body" styleClass="w-full" />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-end">Lease ends</label>
+      <p-datepicker inputId="ob-end" formControlName="endDate" dateFormat="M d, yy" [showIcon]="true" appendTo="body" styleClass="w-full" />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-rent">Monthly rent</label>
+      <p-inputnumber
+        inputId="ob-rent"
+        formControlName="monthlyRent"
+        mode="currency"
+        currency="PHP"
+        locale="en-PH"
+        [min]="0"
+        styleClass="w-full"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-due-day">Rent due every</label>
+      <div class="flex items-center gap-2">
+        <p-inputnumber inputId="ob-due-day" formControlName="dueDay" [min]="1" [max]="31" [showButtons]="true" styleClass="w-24" inputStyleClass="w-full" />
+        <span class="text-[13px] text-muted">day of the month</span>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-advance">Advance (months)</label>
+      <p-inputnumber inputId="ob-advance" formControlName="advanceMonths" [min]="0" [max]="12" [showButtons]="true" styleClass="w-24" inputStyleClass="w-full" />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-deposit">Security deposit (months)</label>
+      <p-inputnumber inputId="ob-deposit" formControlName="depositMonths" [min]="0" [max]="12" [showButtons]="true" styleClass="w-24" inputStyleClass="w-full" />
+    </div>
+  </div>
+
+  <!-- Live totals the move-in payment step will bill against -->
+  <div class="grid gap-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-2">
+    <div class="flex flex-col">
+      <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Advance due at move-in</span>
+      <span class="font-heading text-[15px] font-semibold text-heading">{{ advanceTotal() | phpCurrency }}</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Security deposit due</span>
+      <span class="font-heading text-[15px] font-semibold text-heading">{{ depositTotal() | phpCurrency }}</span>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between border-t border-border pt-4">
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="back.emit()"
+    >
+      <svg pIcon="arrow-left" [size]="12" aria-hidden="true"></svg>
+      <span>Back</span>
+    </button>
+    <button
+      type="submit"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="busy()"
+    >
+      <span>{{ busy() ? 'Saving…' : 'Next: Contract' }}</span>
+      @if (!busy()) {
+        <svg pIcon="arrow-right" [size]="12" aria-hidden="true"></svg>
+      }
+    </button>
+  </div>
+</form>

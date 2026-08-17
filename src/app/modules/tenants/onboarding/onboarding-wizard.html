@@ -1,0 +1,163 @@
+<div class="flex flex-col gap-5">
+  <!-- Page header -->
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="flex flex-col gap-1">
+      <nav class="flex items-center gap-1.5 text-[12.5px] text-muted" aria-label="Breadcrumb">
+        <a routerLink="/tenants" class="hover:text-body hover:underline">Tenants</a>
+        <svg pIcon="chevron-right" [size]="10" aria-hidden="true"></svg>
+        <span class="text-body">Onboarding</span>
+      </nav>
+      <h1 class="font-heading text-xl font-semibold text-heading">
+        Tenant onboarding
+        @if (tenantName(); as name) {
+          <span class="font-normal text-muted">— {{ name }}</span>
+        }
+      </h1>
+    </div>
+    @if (detail()?.status === 'IN_PROGRESS') {
+      <button
+        type="button"
+        class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:border-destructive hover:text-destructive motion-reduce:transition-none"
+        (click)="confirmCancel()"
+      >
+        <svg pIcon="times" [size]="11" aria-hidden="true"></svg>
+        <span>Cancel onboarding</span>
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="grid gap-5 md:grid-cols-[220px_1fr]">
+      <app-skeleton class="hidden h-72 md:block" />
+      <app-skeleton class="h-96" />
+    </div>
+  } @else if (loadError(); as message) {
+    <app-error-banner [message]="message" />
+  } @else if (detail(); as onboarding) {
+    @if (onboarding.status === 'COMPLETED') {
+      <!-- Success panel -->
+      <div class="flex flex-col items-center gap-4 rounded-base border border-border bg-background px-6 py-14 text-center">
+        <span class="flex h-12 w-12 items-center justify-center rounded-full bg-muted-success">
+          <svg pIcon="check" class="text-success" [size]="20" aria-hidden="true"></svg>
+        </span>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-lg font-semibold text-heading">Onboarding complete</h2>
+          <p class="max-w-md text-[13.5px] text-muted">
+            The lease is active{{ onboarding.unit ? ' on unit ' + onboarding.unit.unitNo : '' }} and the opening
+            bills and move-in payments are posted. Documents are filed on the tenant's profile.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          @if (onboarding.tenant; as tenant) {
+            <a
+              [routerLink]="['/tenants', tenant.id]"
+              class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover motion-reduce:transition-none"
+            >
+              View tenant profile
+            </a>
+          }
+          <a
+            routerLink="/tenants"
+            class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          >
+            Back to tenants
+          </a>
+        </div>
+      </div>
+    } @else if (onboarding.status === 'CANCELLED') {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-border bg-background px-6 py-14 text-center">
+        <p class="text-[13.5px] text-muted">This onboarding was cancelled.</p>
+        <a
+          routerLink="/tenants"
+          class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+        >
+          Back to tenants
+        </a>
+      </div>
+    } @else {
+      <div class="grid items-start gap-5 md:grid-cols-[220px_1fr]">
+        <!-- Left rail: stepper + context -->
+        <aside class="flex flex-col gap-4 md:sticky md:top-20">
+          <app-stepper [steps]="stepperSteps()" (stepClick)="jumpTo($event)" />
+          @if (onboarding.tenant || onboarding.unit) {
+            <div class="hidden flex-col gap-2 rounded-base border border-border bg-surface px-3.5 py-3 md:flex">
+              @if (onboarding.tenant; as tenant) {
+                <div class="flex flex-col">
+                  <span class="text-[11px] font-medium uppercase tracking-wide text-muted">Tenant</span>
+                  <span class="text-[13px] font-medium text-heading">{{ tenant.firstName }} {{ tenant.lastName }}</span>
+                </div>
+              }
+              @if (onboarding.unit; as unit) {
+                <div class="flex flex-col">
+                  <span class="text-[11px] font-medium uppercase tracking-wide text-muted">Unit</span>
+                  <span class="text-[13px] font-medium text-heading">{{ unit.unitNo }}</span>
+                  <span class="text-[12px] text-muted">{{ unit.property.name }}</span>
+                </div>
+              }
+            </div>
+          }
+        </aside>
+
+        <!-- Step content -->
+        <section class="flex min-w-0 flex-col gap-4 rounded-base border border-border bg-background p-5">
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">
+              Step {{ stepIndex() }} of {{ onboarding.totalSteps }}
+            </span>
+            <h2 class="font-heading text-[17px] font-semibold text-heading">{{ stepLabels[activeStep()] }}</h2>
+          </div>
+
+          @if (stepError(); as message) {
+            <app-error-banner [message]="message" />
+          }
+
+          @switch (activeStep()) {
+            @case ('tenant') {
+              <app-step-tenant [detail]="onboarding" [busy]="saving()" (next)="saveStep('tenant', $event)" />
+            }
+            @case ('requirements') {
+              <app-step-requirements
+                [detail]="onboarding"
+                [busy]="saving()"
+                (next)="saveStep('requirements', $event)"
+                (back)="goBack()"
+              />
+            }
+            @case ('lease-terms') {
+              <app-step-lease-terms
+                [detail]="onboarding"
+                [busy]="saving()"
+                (next)="saveStep('lease-terms', $event)"
+                (back)="goBack()"
+              />
+            }
+            @case ('contract') {
+              <app-step-contract
+                [detail]="onboarding"
+                [busy]="saving()"
+                (next)="saveStep('contract', $event)"
+                (back)="goBack()"
+              />
+            }
+            @case ('move-in-payment') {
+              <app-step-move-in-payment
+                [detail]="onboarding"
+                [busy]="saving()"
+                (next)="saveStep('move-in-payment', $event)"
+                (back)="goBack()"
+              />
+            }
+            @case ('turnover') {
+              <app-step-turnover
+                [detail]="onboarding"
+                [busy]="saving()"
+                (complete)="completeFlow($event)"
+                (back)="goBack()"
+              />
+            }
+          }
+        </section>
+      </div>
+    }
+  }
+</div>

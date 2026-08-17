@@ -1,0 +1,227 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  [subheading]="isEdit() ? 'Update the property details and photo.' : 'Register a property you own or manage.'"
+  [dirty]="errors.dirty() || imageTouched()"
+  width="32rem"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  @if (isEdit() && property(); as p) {
+    <div class="mb-5 flex items-start gap-3 rounded-base border border-border bg-surface p-3">
+      <div class="flex h-16 w-20 shrink-0 items-center justify-center overflow-hidden rounded-base border border-border bg-white">
+        @if (p.imageUrl) {
+          <img [src]="p.imageUrl" alt="" class="h-full w-full object-cover" />
+        } @else {
+          <svg pIcon="building" class="text-muted" [size]="22" aria-hidden="true"></svg>
+        }
+      </div>
+      <div class="min-w-0 pt-1">
+        <p class="truncate font-heading text-[15px] font-semibold text-heading">{{ p.name }}</p>
+        <p class="mt-0.5 truncate text-[12.5px] text-muted">{{ p.type.name }}</p>
+        <p class="mt-0.5 truncate text-[12.5px] text-muted">{{ p.addressLine }}, {{ p.city }}</p>
+      </div>
+    </div>
+  }
+
+  <form id="property-form" class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="flex flex-col gap-4">
+      <p class="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted">Property info</p>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="property-name">Name</label>
+        <input
+          id="property-name"
+          type="text"
+          class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+          formControlName="name"
+          placeholder="e.g. Brickstone Boarding House"
+          [attr.aria-invalid]="!!errors.fieldError('name')"
+          [attr.aria-describedby]="errors.fieldError('name') ? 'property-name-error' : null"
+        />
+        @if (errors.fieldError('name'); as message) {
+          <p class="text-[12.5px] text-destructive" id="property-name-error">{{ message }}</p>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[13px] font-medium text-heading" id="property-type-label">Type</span>
+          @if (!newTypeMode() && !typesError() && typeList() !== null) {
+            <button
+              type="button"
+              class="rounded-[2px] text-[12px] font-medium text-primary hover:underline"
+              (click)="openNewType()"
+            >
+              + New type
+            </button>
+          }
+        </div>
+
+        @if (typesError(); as message) {
+          <div class="flex items-center justify-between gap-2 rounded-base border border-border bg-surface px-3 py-2 text-[12.5px] text-body">
+            <span>{{ message }}</span>
+            <button type="button" class="shrink-0 font-medium text-primary hover:underline" (click)="loadTypes()">
+              Retry
+            </button>
+          </div>
+        } @else if (typeList() === null) {
+          <div class="grid grid-cols-3 gap-1.5" aria-hidden="true">
+            @for (placeholder of [0, 1, 2, 3, 4, 5]; track placeholder) {
+              <div class="h-[30px] animate-pulse rounded-base bg-surface"></div>
+            }
+          </div>
+        } @else if (pickerOptions().length === 0) {
+          <p class="rounded-base border border-dashed border-border px-3 py-2.5 text-[12.5px] text-muted">
+            No property types yet — add the first one with “+ New type”.
+          </p>
+        } @else if (useSelect()) {
+          <p-select
+            [options]="pickerOptions()"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            filterBy="name"
+            placeholder="Pick a type"
+            formControlName="propertyTypeId"
+            ariaLabelledBy="property-type-label"
+            styleClass="w-full"
+            appendTo="body"
+          />
+        } @else {
+          <div class="grid grid-cols-3 gap-1.5" role="group" aria-labelledby="property-type-label">
+            @for (option of pickerOptions(); track option.id) {
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-base border px-1.5 py-1.5 text-[12px] font-medium transition-colors duration-150 ease-out motion-reduce:transition-none"
+                [class]="form.controls.propertyTypeId.value === option.id
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-background text-body hover:bg-surface'"
+                [attr.aria-pressed]="form.controls.propertyTypeId.value === option.id"
+                (click)="selectType(option.id)"
+              >
+                <span class="truncate">{{ option.name }}</span>
+              </button>
+            }
+          </div>
+        }
+
+        @if (newTypeMode()) {
+          <div class="mt-1 flex items-center gap-1.5">
+            <input
+              #newTypeInput
+              type="text"
+              class="h-8 min-w-0 flex-1 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+              placeholder="e.g. Dormitory"
+              aria-label="New type name"
+              [value]="newTypeName()"
+              (input)="newTypeName.set($any($event.target).value)"
+              (keydown.enter)="$event.preventDefault(); submitNewType()"
+              (keydown.escape)="$event.stopPropagation(); closeNewType()"
+            />
+            <button
+              type="button"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-base border-none bg-primary text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+              aria-label="Add type"
+              [disabled]="creatingType()"
+              (click)="submitNewType()"
+            >
+              @if (creatingType()) {
+                <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+              } @else {
+                <svg pIcon="check" [size]="13" aria-hidden="true"></svg>
+              }
+            </button>
+            <button
+              type="button"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+              aria-label="Cancel new type"
+              (click)="closeNewType()"
+            >
+              <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+            </button>
+          </div>
+          @if (newTypeError(); as message) {
+            <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+          }
+        }
+
+        @if (errors.fieldError('propertyTypeId', { required: 'Pick a property type.' }); as message) {
+          <p class="text-[12.5px] text-destructive" id="property-type-error">{{ message }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <p class="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted">Location</p>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="property-address">Address line</label>
+        <input
+          id="property-address"
+          type="text"
+          class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+          formControlName="addressLine"
+          placeholder="Street, barangay"
+          [attr.aria-invalid]="!!errors.fieldError('addressLine')"
+          [attr.aria-describedby]="errors.fieldError('addressLine') ? 'property-address-error' : null"
+        />
+        @if (errors.fieldError('addressLine'); as message) {
+          <p class="text-[12.5px] text-destructive" id="property-address-error">{{ message }}</p>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="property-city">City</label>
+        <input
+          id="property-city"
+          type="text"
+          class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+          formControlName="city"
+          placeholder="e.g. Quezon City"
+          [attr.aria-invalid]="!!errors.fieldError('city')"
+          [attr.aria-describedby]="errors.fieldError('city') ? 'property-city-error' : null"
+        />
+        @if (errors.fieldError('city'); as message) {
+          <p class="text-[12.5px] text-destructive" id="property-city-error">{{ message }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <p class="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted">Photo</p>
+
+      <app-image-dropzone
+        [currentImageUrl]="property()?.imageUrl ?? null"
+        idleHint="PNG, JPG, or WebP — up to 5 MB"
+        [imagePreviewHeight]="170"
+        (fileChange)="onImageChange($event)"
+      />
+    </div>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="property-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      @if (saving()) {
+        <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+      }
+      <span>{{ isEdit() ? 'Save changes' : 'Create property' }}</span>
+    </button>
+  </ng-container>
+</app-form-dialog>

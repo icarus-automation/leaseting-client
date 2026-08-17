@@ -1,0 +1,64 @@
+<aside class="sidebar" id="app-nav" aria-label="Main navigation">
+  <a class="sidebar-brand" routerLink="/dashboard" aria-label="Leaseting dashboard">
+    <img
+      class="sidebar-brand-lockup"
+      ngSrc="/brand/leaseting-lockup-on-dark.png"
+      width="4500"
+      height="1800"
+      alt="Leaseting"
+      priority
+    />
+  </a>
+
+  <nav class="sidebar-nav">
+    @for (section of sections; track section.label) {
+      <div class="nav-section" [class.nav-section--apps]="section.type === 'apps'">
+        <span class="nav-section-label" aria-hidden="true">{{ section.label }}</span>
+        <ul class="nav-list" role="list">
+          @for (item of section.items; track item.label) {
+            <li>
+              @if (item.external) {
+                <a
+                  class="nav-item nav-item--external"
+                  [href]="item.href"
+                  rel="noreferrer"
+                  [attr.aria-label]="item.label + ' — opens Parking app'"
+                >
+                  <svg [pIcon]="item.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
+                  <span class="nav-label">{{ item.label }}</span>
+                  <svg pIcon="external-link" class="nav-external-icon" [size]="11" aria-hidden="true"></svg>
+                </a>
+              } @else {
+                <a
+                  class="nav-item"
+                  [routerLink]="item.route"
+                  routerLinkActive="nav-item--active"
+                  [routerLinkActiveOptions]="{ exact: false }"
+                  #rla="routerLinkActive"
+                  [attr.aria-current]="rla.isActive ? 'page' : null"
+                >
+                  <svg [pIcon]="item.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
+                  <span class="nav-label">{{ item.label }}</span>
+                </a>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </nav>
+
+  <div class="sidebar-bottom">
+    <a
+      class="nav-item"
+      [routerLink]="settingsNav.route"
+      routerLinkActive="nav-item--active"
+      [routerLinkActiveOptions]="{ exact: false }"
+      #rlaSettings="routerLinkActive"
+      [attr.aria-current]="rlaSettings.isActive ? 'page' : null"
+    >
+      <svg [pIcon]="settingsNav.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
+      <span class="nav-label">{{ settingsNav.label }}</span>
+    </a>
+  </div>
+</aside>

@@ -1,0 +1,54 @@
+<header class="app-header" role="banner">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Drawer toggle. Only rendered as visible below the sidebar breakpoint;
+       above it the sidebar is permanent and this would be a dead control. -->
+  <button
+    type="button"
+    class="nav-toggle"
+    aria-label="Open navigation"
+    aria-controls="app-nav"
+    [attr.aria-expanded]="drawerOpen()"
+    (click)="toggleDrawer()"
+  >
+    <svg pIcon="bars" [size]="16" aria-hidden="true"></svg>
+  </button>
+
+  <div class="header-left">
+    <a class="header-brand" routerLink="/dashboard" aria-label="Leaseting dashboard">
+      <app-brand-logo [decorative]="true" />
+      <span>Leaseting</span>
+    </a>
+  </div>
+
+  <button
+    type="button"
+    class="search-trigger"
+    aria-label="Search (Ctrl+K)"
+    aria-keyshortcuts="Control+K"
+    (click)="openPalette()"
+  >
+    <svg pIcon="search" class="search-icon" [size]="13" aria-hidden="true"></svg>
+    <span class="search-placeholder">Search...</span>
+    <kbd class="search-kbd" aria-hidden="true">
+      <span>Ctrl</span><span>K</span>
+    </kbd>
+  </button>
+
+  <div class="header-right">
+    @if (user(); as currentUser) {
+      <div class="user-info">
+        <span class="user-name">{{ currentUser.name }}</span>
+        @if (organization(); as org) {
+          <span class="user-org">{{ org.name }}</span>
+        }
+      </div>
+    }
+    <div class="user-avatar" [attr.title]="user()?.name ?? null" aria-hidden="true">
+      <span>{{ initials() }}</span>
+    </div>
+    <button type="button" class="signout-btn" (click)="signOut()" aria-label="Sign out" title="Sign out">
+      <svg pIcon="sign-out" [size]="15" aria-hidden="true"></svg>
+    </button>
+  </div>
+</header>

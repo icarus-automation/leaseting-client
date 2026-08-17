@@ -1,0 +1,325 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="Revenue by Tenant — Detail"
+    description="Every charge or payment in a period, grouped under the tenant it came from."
+    [caption]="caption()"
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="exportCsv()"
+    >
+      <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+      <span>Export CSV</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  <!-- ── Controls ──────────────────────────────────────────── -->
+  <section
+    class="flex flex-col gap-4 rounded-base border border-border bg-background p-4 print:hidden"
+    aria-label="Report filters"
+  >
+    <div class="grid gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="revenue-preset">Period</label>
+        <p-select
+          inputId="revenue-preset"
+          [options]="presets"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="preset()"
+          (ngModelChange)="onPresetChange($event)"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="revenue-from">From</label>
+        <p-datepicker
+          inputId="revenue-from"
+          [ngModel]="range().from"
+          (ngModelChange)="setFrom($event)"
+          dateFormat="M d, yy"
+          [maxDate]="range().to"
+          [showIcon]="true"
+          appendTo="body"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="revenue-to">To</label>
+        <p-datepicker
+          inputId="revenue-to"
+          [ngModel]="range().to"
+          (ngModelChange)="setTo($event)"
+          dateFormat="M d, yy"
+          [minDate]="range().from"
+          [showIcon]="true"
+          appendTo="body"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="revenue-property">Property</label>
+        <p-select
+          inputId="revenue-property"
+          [options]="propertyOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="propertyId()"
+          (ngModelChange)="propertyId.set($event); onPropertyChange()"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <fieldset class="flex flex-col gap-1.5">
+        <legend class="mb-1.5 text-[13px] font-medium text-heading">Basis</legend>
+        <div class="flex items-center gap-1 rounded-base border border-border bg-surface p-1">
+          @for (option of basisOptions; track option.value) {
+            <button
+              type="button"
+              class="rounded-[3px] px-3 py-1 text-[12.5px] font-medium transition-colors duration-150 ease-out motion-reduce:transition-none"
+              [class]="basis() === option.value ? 'bg-primary text-primary-foreground' : 'text-body hover:bg-background'"
+              [attr.aria-pressed]="basis() === option.value"
+              [attr.title]="option.hint"
+              (click)="onBasisChange(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </fieldset>
+
+      <p class="max-w-[52ch] text-[12.5px] leading-relaxed text-muted">
+        @if (accrual()) {
+          <strong class="font-medium text-body">Billed</strong> lists the charges raised in this period —
+          what tenants owed, settled or not.
+        } @else {
+          <strong class="font-medium text-body">Collected</strong> lists the payments received in this period,
+          whatever period the bill belonged to.
+        }
+      </p>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (row of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else if (report(); as data) {
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-muted">
+          <svg pIcon="users" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-[15px] font-semibold text-heading">
+            No {{ accrual() ? 'charges' : 'payments' }} in this period
+          </h2>
+          <p class="max-w-[46ch] text-[13px] leading-relaxed text-muted">
+            Nothing was {{ accrual() ? 'billed' : 'received' }} over
+            {{ rangeText() }}{{ propertyId() ? ' for this property' : '' }}. Widen the period or switch the basis.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <!-- ── Totals strip ────────────────────────────────────── -->
+      <div class="grid gap-3" [class]="accrual() ? 'sm:grid-cols-3' : 'sm:grid-cols-2'">
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">
+            {{ accrual() ? 'Total billed' : 'Total collected' }}
+          </span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.total | phpCurrency }}</span>
+          <span class="text-[12px] text-muted tabular-nums">
+            {{ data.groups.length }} tenant{{ data.groups.length === 1 ? '' : 's' }} · {{ rangeText() }}
+          </span>
+        </div>
+        @if (accrual()) {
+          <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+            <span class="text-[12.5px] font-medium text-muted">Settled</span>
+            <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totalPaid | phpCurrency }}</span>
+            <span class="text-[12px] text-muted">Paid against these bills</span>
+          </div>
+          <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+            <span class="text-[12.5px] font-medium text-muted">Still outstanding</span>
+            <span
+              class="font-heading text-xl font-semibold tabular-nums"
+              [class]="+data.totalBalance! > 0 ? 'text-destructive' : 'text-heading'"
+            >
+              {{ data.totalBalance | phpCurrency }}
+            </span>
+            <span class="text-[12px] text-muted">Balance left on these bills</span>
+          </div>
+        } @else {
+          <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+            <span class="text-[12.5px] font-medium text-muted">Payments recorded</span>
+            <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.rowCount }}</span>
+            <span class="text-[12px] text-muted">Dated by when the money landed</span>
+          </div>
+        }
+      </div>
+
+      <div class="flex items-center justify-between gap-3 print:hidden">
+        <h2 class="font-heading text-[15px] font-semibold text-heading">
+          {{ accrual() ? 'Charges' : 'Payments' }} by tenant
+        </h2>
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-base border border-border bg-background px-2.5 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          (click)="allCollapsed() ? expandAll() : collapseAll()"
+        >
+          <svg [pIcon]="allCollapsed() ? 'chevron-down' : 'chevron-up'" [size]="12" aria-hidden="true"></svg>
+          <span>{{ allCollapsed() ? 'Expand all' : 'Collapse all' }}</span>
+        </button>
+      </div>
+
+      <!-- ── Report table ────────────────────────────────────── -->
+      <div class="overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">
+            {{ accrual() ? 'Charges raised' : 'Payments received' }} between {{ data.from }} and {{ data.to }},
+            grouped by tenant.
+          </caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Date</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">
+                {{ accrual() ? 'Type' : 'Method' }}
+              </th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Unit</th>
+              @if (!accrual()) {
+                <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Reference</th>
+              }
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Memo</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Amount</th>
+              @if (accrual()) {
+                <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Paid</th>
+                <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Balance</th>
+              }
+            </tr>
+          </thead>
+
+          @for (group of data.groups; track group.tenantId) {
+            <tbody class="border-b border-border last:border-b-0">
+              <tr class="bg-surface">
+                <th [attr.colspan]="labelColumnSpan()" scope="colgroup" class="px-2 py-2 text-left">
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1.5 rounded-base px-2 py-1 text-[13.5px] font-semibold text-heading transition-colors duration-150 ease-out hover:bg-background motion-reduce:transition-none"
+                    [attr.aria-expanded]="!isCollapsed(group.tenantId)"
+                    (click)="toggleGroup(group.tenantId)"
+                  >
+                    <svg
+                      pIcon="chevron-down"
+                      class="shrink-0 text-muted transition-transform duration-150 ease-out motion-reduce:transition-none"
+                      [class.-rotate-90]="isCollapsed(group.tenantId)"
+                      [size]="12"
+                      aria-hidden="true"
+                    ></svg>
+                    <span>{{ group.tenantName }}</span>
+                    <span class="font-normal text-muted tabular-nums">
+                      · {{ group.rows.length }} {{ group.rows.length === 1 ? 'row' : 'rows' }}
+                    </span>
+                  </button>
+                </th>
+                <td class="px-4 py-2 text-right text-[13px] font-semibold text-heading tabular-nums">
+                  {{ group.subtotal | phpCurrency }}
+                </td>
+                @if (accrual()) {
+                  <td class="px-4 py-2 text-right text-[13px] font-semibold text-heading tabular-nums">
+                    {{ group.subtotalPaid | phpCurrency }}
+                  </td>
+                  <td
+                    class="px-4 py-2 text-right text-[13px] font-semibold tabular-nums"
+                    [class]="+group.subtotalBalance! > 0 ? 'text-destructive' : 'text-heading'"
+                  >
+                    {{ group.subtotalBalance | phpCurrency }}
+                  </td>
+                }
+              </tr>
+
+              @if (!isCollapsed(group.tenantId)) {
+                @for (row of group.rows; track row.id) {
+                  <tr class="border-t border-border transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
+                    <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body tabular-nums">{{ row.date }}</td>
+                    <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body">{{ row.kind }}</td>
+                    <td class="px-4 py-2.5 text-[12.5px] text-muted">{{ row.unitLabel }}</td>
+                    @if (!accrual()) {
+                      <td class="px-4 py-2.5 text-[12.5px] text-muted tabular-nums">{{ row.referenceNo || '—' }}</td>
+                    }
+                    <td class="px-4 py-2.5 text-[13px] text-body">{{ row.memo }}</td>
+                    <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] font-medium text-heading tabular-nums">
+                      {{ row.amount | phpCurrency }}
+                    </td>
+                    @if (accrual()) {
+                      <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] text-body tabular-nums">
+                        {{ row.paid | phpCurrency }}
+                      </td>
+                      <td
+                        class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] font-medium tabular-nums"
+                        [class]="+row.balance! > 0 ? 'text-destructive' : 'text-muted'"
+                      >
+                        {{ row.balance | phpCurrency }}
+                      </td>
+                    }
+                  </tr>
+                }
+              }
+            </tbody>
+          }
+
+          <tfoot>
+            <tr class="border-t-2 border-border-strong bg-surface">
+              <th [attr.colspan]="labelColumnSpan()" scope="row" class="px-4 py-3 text-left text-[13.5px] font-semibold text-heading">
+                {{ accrual() ? 'Total billed' : 'Total collected' }}
+              </th>
+              <td class="px-4 py-3 text-right text-[13.5px] font-semibold text-heading tabular-nums">
+                {{ data.total | phpCurrency }}
+              </td>
+              @if (accrual()) {
+                <td class="px-4 py-3 text-right text-[13.5px] font-semibold text-heading tabular-nums">
+                  {{ data.totalPaid | phpCurrency }}
+                </td>
+                <td
+                  class="px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums"
+                  [class]="+data.totalBalance! > 0 ? 'text-destructive' : 'text-heading'"
+                >
+                  {{ data.totalBalance | phpCurrency }}
+                </td>
+              }
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+  }
+</div>

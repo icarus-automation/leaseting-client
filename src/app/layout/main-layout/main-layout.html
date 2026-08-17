@@ -1,0 +1,28 @@
+<div class="app-shell">
+  <app-sidebar [class.sidebar-host--open]="drawerOpen()" />
+
+  <!-- Drawer scrim. Only exists below the breakpoint, where the sidebar floats
+       over the page; Escape and the nav links close it too. -->
+  @if (drawerOpen()) {
+    <button
+      type="button"
+      class="nav-scrim"
+      tabindex="-1"
+      aria-label="Close navigation"
+      (click)="drawer.close()"
+    ></button>
+  }
+
+  <div class="main-area">
+    <app-header />
+    <main class="content-area" id="main-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+@if (showKitBadge()) {
+  <app-kit-badge />
+}
+
+<app-command-palette />

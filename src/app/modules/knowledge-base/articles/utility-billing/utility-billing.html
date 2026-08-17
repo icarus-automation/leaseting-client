@@ -1,0 +1,259 @@
+<div class="mx-auto flex max-w-5xl flex-col gap-6">
+  <nav class="flex items-center gap-1.5 text-[13px]" aria-label="Breadcrumb">
+    <a routerLink="/knowledge-base" class="rounded-[2px] font-medium text-muted transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none">Knowledge Base</a>
+    <svg pIcon="chevron-right" class="text-muted" [size]="11" aria-hidden="true"></svg>
+    <span class="font-medium text-heading" aria-current="page">Utility billing</span>
+  </nav>
+
+  <header class="flex flex-col gap-3 rounded-base border border-border bg-background p-5 sm:p-6">
+    <p class="text-[12.5px] font-semibold uppercase tracking-wide text-primary">Billing · 5 min read</p>
+    <h1 class="font-heading text-2xl font-semibold text-heading sm:text-3xl">Utility billing, explained simply</h1>
+    <p class="max-w-2xl text-sm leading-relaxed text-body">
+      Bill tenants for electricity (Meralco) and water (Maynilad) — in plain language.
+      The app does the math; you just type the meter readings.
+    </p>
+    <div class="mt-1 flex flex-wrap gap-2">
+      <a
+        routerLink="/bills/utility-run"
+        class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+      >
+        <svg pIcon="bolt" [size]="14" aria-hidden="true"></svg>
+        Open a utility billing run
+      </a>
+      <a
+        routerLink="/bills"
+        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-4 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      >
+        Go to Bills
+      </a>
+    </div>
+  </header>
+
+  <div class="grid gap-6 min-[1024px]:grid-cols-[210px_minmax(0,1fr)]">
+    <aside class="min-[1024px]:sticky min-[1024px]:top-4 min-[1024px]:self-start">
+      <nav
+        class="flex flex-col gap-1 rounded-base border border-border bg-background p-3"
+        aria-label="On this page"
+      >
+        <p class="px-2 pb-1 text-[11.5px] font-semibold uppercase tracking-wide text-muted">On this page</p>
+        @for (section of sections; track section.id) {
+          <button
+            type="button"
+            class="rounded-[3px] px-2 py-1.5 text-left text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface hover:text-primary motion-reduce:transition-none"
+            (click)="scrollTo(section.id)"
+          >
+            {{ section.label }}
+          </button>
+        }
+      </nav>
+    </aside>
+
+    <article class="flex min-w-0 flex-col gap-6">
+      <!-- 1. Overview -->
+      <section id="overview" class="scroll-mt-4 flex flex-col gap-3 rounded-base border border-border bg-background p-5">
+        <h2 class="font-heading text-lg font-semibold text-heading">What this does</h2>
+        <p class="text-sm leading-relaxed text-body">
+          Every month each tenant owes their share of the building's electricity and water. Doing that math by hand is slow and easy to get wrong.
+          This module does it for you — <strong class="font-medium text-heading">you type the meter numbers, it makes the bills.</strong>
+        </p>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="flex flex-col gap-1.5 rounded-base border border-border bg-surface p-4">
+            <div class="flex items-center gap-2">
+              <svg pIcon="bolt" class="text-primary" [size]="15" aria-hidden="true"></svg>
+              <p class="text-[13.5px] font-semibold text-heading">Utility billing run</p>
+            </div>
+            <p class="text-[13px] leading-relaxed text-body">
+              Bill a <strong class="font-medium text-heading">whole property at once</strong> — the normal monthly path.
+            </p>
+          </div>
+          <div class="flex flex-col gap-1.5 rounded-base border border-border bg-surface p-4">
+            <div class="flex items-center gap-2">
+              <svg pIcon="file-edit" class="text-primary" [size]="15" aria-hidden="true"></svg>
+              <p class="text-[13.5px] font-semibold text-heading">New bill dialog</p>
+            </div>
+            <p class="text-[13px] leading-relaxed text-body">
+              Bill <strong class="font-medium text-heading">one unit</strong> — a late reading or a correction.
+            </p>
+          </div>
+        </div>
+        <p class="rounded-base border border-border bg-muted-success p-3 text-[13px] leading-relaxed text-body">
+          <strong class="font-semibold text-heading">Why it matters:</strong> bills go out on time, the numbers are right, and tenants get reminded automatically — so you don't lose money to missed payments.
+        </p>
+      </section>
+
+      <!-- 2. The three dates -->
+      <section id="dates" class="scroll-mt-4 flex flex-col gap-3 rounded-base border border-border bg-background p-5">
+        <h2 class="font-heading text-lg font-semibold text-heading">The three dates (and why they differ)</h2>
+        <p class="text-sm leading-relaxed text-body">Easy to mix up — they answer three different questions:</p>
+        <div class="flex flex-col divide-y divide-border overflow-hidden rounded-base border border-border">
+          <div class="grid gap-1 bg-surface px-4 py-3 sm:grid-cols-[170px_minmax(0,1fr)] sm:gap-4">
+            <p class="text-[13.5px] font-semibold text-heading">Period from → to</p>
+            <p class="text-[13px] leading-relaxed text-body">Which <strong class="font-medium text-heading">days the usage covers</strong> (e.g. Jun 18 → Jul 18). Printed on the tenant's receipt.</p>
+          </div>
+          <div class="grid gap-1 px-4 py-3 sm:grid-cols-[170px_minmax(0,1fr)] sm:gap-4">
+            <p class="text-[13.5px] font-semibold text-heading">Billing month</p>
+            <p class="text-[13px] leading-relaxed text-body">Which <strong class="font-medium text-heading">month the bill belongs to</strong>. Defaults to this month; you can go back one month, but not forward.</p>
+          </div>
+          <div class="grid gap-1 bg-surface px-4 py-3 sm:grid-cols-[170px_minmax(0,1fr)] sm:gap-4">
+            <p class="text-[13.5px] font-semibold text-heading">Due date</p>
+            <p class="text-[13px] leading-relaxed text-body">When the tenant <strong class="font-medium text-heading">must pay</strong>. Set automatically to their own due day — same as rent.</p>
+          </div>
+        </div>
+        <p class="text-[13px] leading-relaxed text-muted">
+          On the run page the dates are filled in for you and tucked under “Billing period”. Most months you never touch them.
+        </p>
+      </section>
+
+      <!-- 3. Readings & carry-over -->
+      <section id="readings" class="scroll-mt-4 flex flex-col gap-3 rounded-base border border-border bg-background p-5">
+        <h2 class="font-heading text-lg font-semibold text-heading">Meter readings &amp; the automatic carry-over</h2>
+        <p class="text-sm leading-relaxed text-body">
+          A meter only counts up. What a tenant used = today's number (<strong class="font-medium text-heading">present</strong>) minus last month's (<strong class="font-medium text-heading">previous</strong>):
+        </p>
+        <p class="rounded-base bg-surface px-4 py-3 text-center text-[15px] font-medium text-heading tabular-nums">
+          Present − Previous = Consumed
+        </p>
+        <p class="text-sm leading-relaxed text-body">
+          The part that saves you work: <strong class="font-medium text-heading">this month's present becomes next month's previous, automatically.</strong> You never re-type it.
+        </p>
+        <div class="flex flex-col items-stretch gap-2 rounded-base border border-border bg-surface p-4 sm:flex-row sm:items-center">
+          <div class="flex-1 rounded-base border border-border bg-background p-3">
+            <p class="text-[12px] font-medium uppercase tracking-wide text-muted">June bill</p>
+            <p class="mt-1 text-[13px] text-body">Unit 101 · present = <strong class="font-semibold text-heading tabular-nums">520</strong></p>
+          </div>
+          <svg pIcon="arrow-right" class="mx-auto shrink-0 rotate-90 text-primary sm:rotate-0" [size]="18" aria-hidden="true"></svg>
+          <div class="flex-1 rounded-base border border-border bg-background p-3">
+            <p class="text-[12px] font-medium uppercase tracking-wide text-muted">July bill</p>
+            <p class="mt-1 text-[13px] text-body">previous = <strong class="font-semibold text-heading tabular-nums">520</strong> (already there) · present = <strong class="font-semibold text-heading tabular-nums">590</strong> → used <strong class="font-semibold text-heading tabular-nums">70</strong></p>
+          </div>
+        </div>
+        <p class="rounded-base border border-border bg-surface p-3 text-[13px] leading-relaxed text-body">
+          <strong class="font-semibold text-heading">First time for a property?</strong> Nothing to carry yet, so Previous shows 0. Type each meter's real previous and present once — from next month, Previous fills itself in.
+        </p>
+      </section>
+
+      <!-- 4. Two ways to price -->
+      <section id="rates" class="scroll-mt-4 flex flex-col gap-3 rounded-base border border-border bg-background p-5">
+        <h2 class="font-heading text-lg font-semibold text-heading">Two ways to price it — pick one</h2>
+        <p class="text-sm leading-relaxed text-body">
+          The app needs the <strong class="font-medium text-heading">price per unit</strong> (₱/kWh or ₱/cu.m). Two ways to give it; you use one at a time, switched by a toggle.
+        </p>
+        <div class="grid gap-3 min-[720px]:grid-cols-2">
+          <div class="flex flex-col gap-2 rounded-base border border-border bg-surface p-4">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[13.5px] font-semibold text-heading">① From total bill</p>
+              <span class="rounded-full bg-muted-success px-2 py-0.5 text-[11px] font-medium text-heading">Default</span>
+            </div>
+            <p class="text-[13px] leading-relaxed text-body">
+              The usual choice. You have the provider's <strong class="font-medium text-heading">one bill for the whole building</strong> but not the per-unit price — the app works it out and splits it by each unit's usage.
+            </p>
+            <div class="mt-1 rounded-base border border-border bg-background p-3 text-[13px] text-body">
+              <p class="font-medium text-heading">Example</p>
+              <ul class="mt-1 flex flex-col gap-0.5 tabular-nums">
+                <li>Provider bill: <strong class="text-heading">₱18,000</strong> for <strong class="text-heading">200 cu.m</strong></li>
+                <li>Rate = 18,000 ÷ 200 = <strong class="text-heading">₱90.00 / cu.m</strong></li>
+                <li>Unit used 24 cu.m → 24 × 90 = <strong class="text-heading">₱2,160.00</strong></li>
+              </ul>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2 rounded-base border border-border bg-surface p-4">
+            <p class="text-[13.5px] font-semibold text-heading">② Rate per unit</p>
+            <p class="text-[13px] leading-relaxed text-body">
+              When you charge a <strong class="font-medium text-heading">fixed price you set</strong> — a flat ₱/kWh or ₱/cu.m — regardless of the provider's bill.
+            </p>
+            <div class="mt-1 rounded-base border border-border bg-background p-3 text-[13px] text-body">
+              <p class="font-medium text-heading">Example</p>
+              <ul class="mt-1 flex flex-col gap-0.5 tabular-nums">
+                <li>Rate you set: <strong class="text-heading">₱13.00 / kWh</strong></li>
+                <li>Unit used: <strong class="text-heading">70 kWh</strong></li>
+                <li>70 × 13.00 = <strong class="text-heading">₱910.00</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="text-[13px] leading-relaxed text-muted">
+          You never fill in both. The run page opens on <strong class="font-medium text-heading">From total bill</strong> — switch to a per-unit rate only when you have a fixed price.
+        </p>
+      </section>
+
+      <!-- 5. Admin fee, VAT & tax -->
+      <section id="extras" class="scroll-mt-4 flex flex-col gap-3 rounded-base border border-border bg-background p-5">
+        <h2 class="font-heading text-lg font-semibold text-heading">Admin fee, VAT &amp; withholding tax</h2>
+        <p class="text-sm leading-relaxed text-body">
+          Three optional add-ons stack on the usage charge. All are percentages, all default to <strong class="font-medium text-heading">0</strong> — leave them unless they apply to you.
+        </p>
+        <div class="flex flex-col gap-2">
+          <p class="text-[13px] leading-relaxed text-body"><strong class="font-medium text-heading">Admin fee</strong> — your handling charge, added on top.</p>
+          <p class="text-[13px] leading-relaxed text-body"><strong class="font-medium text-heading">VAT</strong> — sales tax, added on top. Most residential sub-meters leave this 0.</p>
+          <p class="text-[13px] leading-relaxed text-body"><strong class="font-medium text-heading">Withholding tax</strong> — subtracted from the charge. Leave 0 unless you withhold.</p>
+        </div>
+        <div class="rounded-base border border-border bg-surface p-4 text-[13px] text-body">
+          <p class="font-medium text-heading">Worked example — ₱910 usage, admin 10%, VAT 12%, WHT 2%</p>
+          <ul class="mt-1.5 flex flex-col gap-0.5 tabular-nums">
+            <li>Usage charge <span class="text-muted">(70 kWh × ₱13)</span> = <strong class="text-heading">₱910.00</strong></li>
+            <li>+ Admin fee 10% = ₱91.00</li>
+            <li>+ VAT 12% = ₱109.20</li>
+            <li>− Withholding 2% = ₱18.20</li>
+            <li class="mt-1 border-t border-border pt-1">Tenant pays = <strong class="text-heading">₱1,092.00</strong></li>
+          </ul>
+        </div>
+        <p class="text-[13px] leading-relaxed text-muted">
+          At 0% the tenant just pays the ₱910 usage charge. Admin fee sits on the main form; VAT and withholding hide under “Taxes (optional)”.
+        </p>
+      </section>
+
+      <!-- 6. Bill a whole property -->
+      <section id="monthly-run" class="scroll-mt-4 flex flex-col gap-3 rounded-base border border-border bg-background p-5">
+        <h2 class="font-heading text-lg font-semibold text-heading">Bill a whole property in one pass</h2>
+        <p class="text-sm leading-relaxed text-body">
+          The normal monthly routine. From <span class="font-medium text-heading">Bills → Utility run</span>:
+        </p>
+        <ol class="flex flex-col gap-2.5">
+          @for (step of runSteps; track step; let i = $index) {
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[12px] font-semibold text-primary-foreground tabular-nums">{{ i + 1 }}</span>
+              <p class="pt-0.5 text-[13.5px] leading-relaxed text-body" [innerHTML]="step"></p>
+            </li>
+          }
+        </ol>
+        <p class="rounded-base border border-border bg-surface p-3 text-[13px] leading-relaxed text-body">
+          <strong class="font-semibold text-heading">Shortcut — scan the bill:</strong> tap “Scan bill photo” and snap the Meralco/Maynilad receipt. The app reads the rate, totals and dates and fills them in. Always double-check before saving. (The photo is sent to an AI service to be read.)
+        </p>
+        <p class="text-[13px] leading-relaxed text-muted">
+          Re-running the same month is safe — units already billed are skipped, never charged twice. Blank rows are skipped too.
+        </p>
+      </section>
+
+      <!-- 7. Bill one unit -->
+      <section id="single-bill" class="scroll-mt-4 flex flex-col gap-3 rounded-base border border-border bg-background p-5">
+        <h2 class="font-heading text-lg font-semibold text-heading">Bill just one unit</h2>
+        <p class="text-sm leading-relaxed text-body">
+          For a one-off — a late reading or a fix — use <span class="font-medium text-heading">Bills → New bill</span> instead of a full run:
+        </p>
+        <ol class="flex flex-col gap-2">
+          <li class="flex gap-2.5 text-[13.5px] leading-relaxed text-body"><span class="font-semibold text-heading">1.</span> Pick the lease, then set the type to Electricity or Water.</li>
+          <li class="flex gap-2.5 text-[13.5px] leading-relaxed text-body"><span class="font-semibold text-heading">2.</span> Switch on meter-reading entry — previous reading and rate carry over from the unit's last bill.</li>
+          <li class="flex gap-2.5 text-[13.5px] leading-relaxed text-body"><span class="font-semibold text-heading">3.</span> Type the present reading. The amount is computed live — you never type the peso figure.</li>
+        </ol>
+        <p class="text-[13px] leading-relaxed text-muted">Same formulas as the batch run, one bill at a time.</p>
+      </section>
+
+      <!-- 8. FAQ -->
+      <section id="faq" class="scroll-mt-4 flex flex-col gap-3 rounded-base border border-border bg-background p-5">
+        <h2 class="font-heading text-lg font-semibold text-heading">Questions &amp; quick fixes</h2>
+        <div class="flex flex-col divide-y divide-border">
+          @for (item of faqs; track item.q) {
+            <div class="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
+              <p class="text-[13.5px] font-semibold text-heading">{{ item.q }}</p>
+              <p class="text-[13px] leading-relaxed text-body" [innerHTML]="item.a"></p>
+            </div>
+          }
+        </div>
+      </section>
+
+      <p class="text-center text-[12.5px] text-muted">
+        Something here unclear or missing? Tell us — this guide is meant to answer real questions.
+      </p>
+    </article>
+  </div>
+</div>

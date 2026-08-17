@@ -1,0 +1,81 @@
+@switch (state()) {
+  @case ('pending') {
+    <div
+      class="flex items-center gap-2.5 rounded-base border border-dashed border-border bg-surface px-3 py-2.5"
+      aria-live="polite"
+    >
+      <span
+        class="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-[color-mix(in_oklab,var(--primary)_40%,transparent)] border-t-[var(--primary)] animate-spinner motion-reduce:[animation-duration:1300ms]"
+        aria-hidden="true"
+      ></span>
+      <span class="min-w-0">
+        <span class="block text-[13px] font-medium text-body">Building your document…</span>
+        <span class="block truncate text-[12px] text-muted">{{ document().title }}</span>
+      </span>
+    </div>
+  }
+
+  @case ('ready') {
+    <div class="rounded-base border border-border bg-surface">
+      <div class="flex items-center gap-3 px-3 py-2.5">
+        <svg
+          [pIcon]="icon()"
+          [size]="18"
+          class="shrink-0 text-primary"
+          aria-hidden="true"
+        ></svg>
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-[13px] font-medium text-heading">{{ document().title }}</span>
+          <span class="block truncate text-[11.5px] text-muted">
+            {{ formatLabel() }} · {{ document().fileName }}
+          </span>
+        </span>
+        <!-- A plain link, not a fetch: navigation carries the session cookie,
+             and the browser handles the save dialog natively. -->
+        <a
+          [href]="downloadUrl()"
+          [attr.aria-label]="downloadLabel()"
+          class="inline-flex shrink-0 items-center gap-1.5 rounded-base bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+        >
+          <svg pIcon="download" [size]="12" aria-hidden="true"></svg>
+          Download
+        </a>
+      </div>
+      <p class="border-t border-border px-3 py-1.5 text-[11.5px] text-muted">
+        Kept until {{ document().expiresAt | date: 'h:mm a' }} — Kit does not store it after that.
+      </p>
+    </div>
+  }
+
+  @case ('expired') {
+    <div class="flex items-start gap-2.5 rounded-base border border-border bg-surface px-3 py-2.5">
+      <svg pIcon="clock" [size]="14" class="mt-0.5 shrink-0 text-muted" aria-hidden="true"></svg>
+      <span class="min-w-0">
+        <span class="block truncate text-[13px] font-medium text-body">{{ document().title }}</span>
+        <span class="block text-[12px] text-muted">
+          This file has expired. Ask Kit to build it again.
+        </span>
+      </span>
+    </div>
+  }
+
+  @case ('failed') {
+    <div
+      class="flex items-start gap-2.5 rounded-base border border-border bg-muted-destructive px-3 py-2.5"
+      role="alert"
+    >
+      <svg
+        pIcon="exclamation-triangle"
+        [size]="14"
+        class="mt-0.5 shrink-0 text-destructive"
+        aria-hidden="true"
+      ></svg>
+      <span class="min-w-0">
+        <span class="block text-[13px] font-medium text-body">Kit could not build this</span>
+        <span class="block text-[12px] text-body">
+          {{ document().error ?? 'Something went wrong. Try asking again.' }}
+        </span>
+      </span>
+    </div>
+  }
+}

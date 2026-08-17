@@ -1,0 +1,68 @@
+<div class="mx-auto flex max-w-5xl flex-col gap-5">
+  <header class="flex flex-col gap-1.5">
+    <h1 class="font-heading text-2xl font-semibold text-heading">Knowledge Base</h1>
+    <p class="text-sm text-muted">Guides, how-tos, and company info — search or browse below.</p>
+  </header>
+
+  <div class="relative">
+    <svg pIcon="search" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" [size]="15" aria-hidden="true"></svg>
+    <input
+      type="search"
+      [value]="query()"
+      (input)="onSearch($event)"
+      placeholder="Search articles…"
+      aria-label="Search the knowledge base"
+      class="h-10 w-full rounded-base border border-border bg-background pl-9 pr-3 text-sm text-body transition-colors duration-150 ease-out placeholder:text-muted focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+    />
+  </div>
+
+  @if (articles().length === 0) {
+    <div class="rounded-base border border-border bg-background p-10 text-center">
+      <p class="text-sm text-muted">No articles match “{{ query() }}”.</p>
+    </div>
+  } @else {
+    <div class="grid gap-4 sm:grid-cols-2 min-[1024px]:grid-cols-3">
+      @for (article of articles(); track article.title) {
+        @if (article.slug) {
+          <a
+            [routerLink]="article.slug"
+            class="group flex flex-col gap-2 rounded-base border border-border bg-background p-5 transition-colors duration-150 ease-out hover:border-primary hover:bg-surface motion-reduce:transition-none"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <span class="flex h-9 w-9 items-center justify-center rounded-base border border-border bg-surface text-primary">
+                <svg [pIcon]="article.icon" [size]="16" aria-hidden="true"></svg>
+              </span>
+              <span class="rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-muted">{{ article.category }}</span>
+            </div>
+            <h2 class="font-heading text-[15px] font-semibold text-heading transition-colors duration-150 ease-out group-hover:text-primary motion-reduce:transition-none">
+              {{ article.title }}
+            </h2>
+            <p class="text-[13px] leading-relaxed text-body">{{ article.summary }}</p>
+            <div class="mt-auto flex items-center gap-1.5 pt-2 text-[12.5px] font-medium text-primary">
+              <span>Read guide</span>
+              <svg pIcon="arrow-right" class="transition-transform duration-150 ease-out group-hover:translate-x-0.5 motion-reduce:transition-none" [size]="12" aria-hidden="true"></svg>
+              @if (article.readMinutes) {
+                <span class="ml-auto font-normal text-muted">{{ article.readMinutes }} min read</span>
+              }
+            </div>
+          </a>
+        } @else {
+          <div class="flex flex-col gap-2 rounded-base border border-dashed border-border bg-background p-5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="flex h-9 w-9 items-center justify-center rounded-base border border-border bg-surface text-muted">
+                <svg [pIcon]="article.icon" [size]="16" aria-hidden="true"></svg>
+              </span>
+              <span class="rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-muted">{{ article.category }}</span>
+            </div>
+            <h2 class="font-heading text-[15px] font-semibold text-heading">{{ article.title }}</h2>
+            <p class="text-[13px] leading-relaxed text-body">{{ article.summary }}</p>
+            <div class="mt-auto flex items-center gap-1.5 pt-2 text-[12.5px] font-medium text-muted">
+              <svg pIcon="clock" [size]="12" aria-hidden="true"></svg>
+              <span>Coming soon</span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

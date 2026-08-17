@@ -1,0 +1,89 @@
+<div class="flex flex-col gap-6">
+  <header class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="font-heading text-2xl font-semibold text-heading">Reports</h1>
+      <p class="mt-0.5 max-w-[70ch] text-sm text-muted">
+        Everything the portfolio can be measured by. Star the ones you run often.
+      </p>
+    </div>
+    <p class="text-[12.5px] text-muted tabular-nums">
+      {{ availableCount }} of {{ totalCount }} available
+    </p>
+  </header>
+
+  <div class="relative">
+    <svg pIcon="search" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" [size]="15" aria-hidden="true"></svg>
+    <input
+      type="search"
+      [value]="query()"
+      (input)="onSearch($event)"
+      placeholder="Search reports…"
+      aria-label="Search reports"
+      class="h-10 w-full rounded-base border border-border bg-background pl-9 pr-3 text-sm text-body transition-colors duration-150 ease-out placeholder:text-muted focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+    />
+  </div>
+
+  <p class="sr-only" role="status" aria-live="polite">
+    {{ resultCount() }} report{{ resultCount() === 1 ? '' : 's' }} match your search.
+  </p>
+
+  @if (resultCount() === 0) {
+    <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-muted">
+        <svg pIcon="search" [size]="18" aria-hidden="true"></svg>
+      </div>
+      <div class="flex flex-col gap-1">
+        <h2 class="font-heading text-[15px] font-semibold text-heading">No report matches “{{ query() }}”</h2>
+        <p class="max-w-[46ch] text-[13px] leading-relaxed text-muted">
+          Try a broader term, or clear the search to browse everything on offer.
+        </p>
+      </div>
+      <button
+        type="button"
+        class="mt-1 inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+        (click)="clearSearch()"
+      >
+        <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+        <span>Clear search</span>
+      </button>
+    </div>
+  } @else {
+    @if (favoriteEntries().length > 0) {
+      <section class="flex flex-col gap-3" aria-labelledby="reports-favorites">
+        <div class="flex items-center gap-2">
+          <svg pIcon="star-fill" class="text-warning" [size]="14" aria-hidden="true"></svg>
+          <h2 id="reports-favorites" class="font-heading text-[15px] font-semibold text-heading">Favorites</h2>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 min-[1280px]:grid-cols-3">
+          @for (entry of favoriteEntries(); track entry.key) {
+            <app-report-card
+              [entry]="entry"
+              [favorite]="true"
+              (favoriteToggled)="toggleFavorite(entry)"
+            />
+          }
+        </div>
+      </section>
+    }
+
+    @for (group of groups(); track group.key) {
+      <section class="flex flex-col gap-3" [attr.aria-labelledby]="'reports-' + group.key">
+        <div>
+          <h2 [id]="'reports-' + group.key" class="font-heading text-[15px] font-semibold text-heading">
+            {{ group.label }}
+          </h2>
+          <p class="mt-0.5 text-[12.5px] text-muted">{{ group.description }}</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 min-[1280px]:grid-cols-3">
+          @for (entry of group.entries; track entry.key) {
+            <app-report-card
+              [entry]="entry"
+              [favorite]="isFavorite(entry)"
+              (favoriteToggled)="toggleFavorite(entry)"
+            />
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

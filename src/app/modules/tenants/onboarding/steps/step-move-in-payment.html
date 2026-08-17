@@ -1,0 +1,111 @@
+<form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()">
+  @if (errorMessage(); as message) {
+    <p class="rounded-base border border-destructive/30 bg-muted-destructive px-3 py-2 text-[13px] text-destructive">
+      {{ message }}
+    </p>
+  }
+
+  @if (terms(); as billed) {
+    <div class="grid gap-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-2">
+      <div class="flex flex-col">
+        <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">
+          Advance billed ({{ billed.advanceMonths }} mo)
+        </span>
+        <span class="font-heading text-[15px] font-semibold text-heading">{{ billed.advanceDue | phpCurrency }}</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">
+          Deposit billed ({{ billed.depositMonths }} mo)
+        </span>
+        <span class="font-heading text-[15px] font-semibold text-heading">{{ billed.depositDue | phpCurrency }}</span>
+      </div>
+    </div>
+  }
+
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-advance-paid">Advance received</label>
+      <p-inputnumber inputId="ob-advance-paid" formControlName="advanceAmount" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-deposit-paid">Deposit received</label>
+      <p-inputnumber inputId="ob-deposit-paid" formControlName="depositAmount" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-paid-on">Paid on</label>
+      <p-datepicker inputId="ob-paid-on" formControlName="paidOn" dateFormat="M d, yy" [showIcon]="true" appendTo="body" styleClass="w-full" />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-method">Payment method</label>
+      <p-select
+        inputId="ob-method"
+        formControlName="method"
+        [options]="methodOptions"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-ref">Reference № <span class="font-normal text-muted">(optional)</span></label>
+      <input
+        id="ob-ref"
+        type="text"
+        formControlName="referenceNo"
+        placeholder="OR / GCash ref"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-notes">Notes <span class="font-normal text-muted">(optional)</span></label>
+      <input
+        id="ob-notes"
+        type="text"
+        formControlName="notes"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+      />
+    </div>
+  </div>
+
+  <input #fileInput type="file" class="hidden" [accept]="acceptedTypes" (change)="onFilePicked($event)" />
+  <div class="flex items-center justify-between rounded-base border border-dashed border-border px-3.5 py-2.5">
+    <div class="flex items-center gap-2 text-[12.5px] text-muted">
+      <svg pIcon="paperclip" [size]="12" aria-hidden="true"></svg>
+      @if (receiptName(); as name) {
+        <span class="text-body">{{ name }} — filed on the tenant's documents</span>
+      } @else {
+        <span>Receipt / deposit slip (optional) — files on the tenant's profile</span>
+      }
+    </div>
+    <button
+      type="button"
+      class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+      [disabled]="uploading()"
+      (click)="attachReceipt()"
+    >
+      {{ uploading() ? 'Uploading…' : receiptName() ? 'Replace' : 'Attach' }}
+    </button>
+  </div>
+
+  <div class="flex items-center justify-between border-t border-border pt-4">
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="back.emit()"
+    >
+      <svg pIcon="arrow-left" [size]="12" aria-hidden="true"></svg>
+      <span>Back</span>
+    </button>
+    <button
+      type="submit"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="busy()"
+    >
+      <span>{{ busy() ? 'Saving…' : 'Next: Turnover' }}</span>
+      @if (!busy()) {
+        <svg pIcon="arrow-right" [size]="12" aria-hidden="true"></svg>
+      }
+    </button>
+  </div>
+</form>

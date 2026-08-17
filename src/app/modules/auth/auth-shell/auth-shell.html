@@ -1,0 +1,53 @@
+<main class="grid min-h-[100dvh] grid-cols-1 bg-background min-[900px]:grid-cols-[1.05fr_1fr]">
+  <!-- Brand panel — one drenched deep-slate surface. Decorative; hidden ≤900px. -->
+  <aside
+    class="auth-brand-surface relative hidden overflow-hidden text-auth-panel-fg min-[900px]:flex min-[900px]:flex-col min-[900px]:justify-between min-[900px]:gap-12 min-[900px]:p-12"
+    aria-hidden="true"
+  >
+    <app-brand-logo variant="lockup-on-dark" [decorative]="true" />
+
+    <div class="max-w-[30rem]">
+      <h2 class="text-balance font-heading text-[30px] font-semibold leading-[1.2] tracking-[-0.02em] text-auth-panel-fg">
+        Never lose track of a lease, a repair, or a spot.
+      </h2>
+      <p class="mt-3.5 max-w-[36ch] text-[15px] leading-[1.6] text-auth-panel-fg-muted">
+        The operating system your property team runs on — surfacing what needs
+        attention before you think to ask.
+      </p>
+
+      <div class="mt-10 border-t border-auth-panel-line pt-7">
+        <span class="mb-3.5 block text-xs font-medium tracking-[0.01em] text-auth-panel-fg-muted">Surfaced for you this morning</span>
+        <ul class="m-0 flex list-none flex-col gap-2 p-0" role="list">
+          <li class="flex items-center gap-3 rounded-base border border-auth-panel-line bg-auth-panel-inset px-3.5 py-[11px] text-[13.5px]">
+            <span class="h-2 w-2 shrink-0 rounded-full bg-warning"></span>
+            <span class="flex-1 text-auth-panel-fg">4 leases expire within 30 days</span>
+            <span class="shrink-0 text-[11.5px] text-auth-panel-fg-muted">Renewals</span>
+          </li>
+          <li class="flex items-center gap-3 rounded-base border border-auth-panel-line bg-auth-panel-inset px-3.5 py-[11px] text-[13.5px]">
+            <span class="h-2 w-2 shrink-0 rounded-full bg-auth-panel-danger"></span>
+            <span class="flex-1 text-auth-panel-fg">Unit 204 repair is 3 days overdue</span>
+            <span class="shrink-0 text-[11.5px] text-auth-panel-fg-muted">Maintenance</span>
+          </li>
+          <li class="flex items-center gap-3 rounded-base border border-auth-panel-line bg-auth-panel-inset px-3.5 py-[11px] text-[13.5px]">
+            <span class="h-2 w-2 shrink-0 rounded-full bg-auth-panel-neutral"></span>
+            <span class="flex-1 text-auth-panel-fg">Spot B-12 is still unassigned</span>
+            <span class="shrink-0 text-[11.5px] text-auth-panel-fg-muted">Parking</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <span class="text-xs text-auth-panel-fg-muted">© 2026 Leaseting</span>
+  </aside>
+
+  <!-- Form panel — page content is projected here -->
+  <div class="flex items-center justify-center bg-background px-6 py-10">
+    <div class="w-full max-w-[380px] animate-form-in motion-reduce:animate-none">
+      <div class="mb-7 flex items-center gap-2.5 min-[900px]:hidden">
+        <app-brand-logo [decorative]="true" />
+        <span class="font-heading text-base font-semibold text-heading">Leaseting</span>
+      </div>
+      <ng-content></ng-content>
+    </div>
+  </div>
+</main>

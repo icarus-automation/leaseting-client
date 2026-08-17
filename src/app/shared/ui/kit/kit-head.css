@@ -1,0 +1,22 @@
+:host {
+  --kit-head-size: 1.5rem;
+
+  display: block;
+  width: var(--kit-head-size);
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+:host([data-variant='badge']) {
+  --kit-head-size: 2.5rem;
+}
+
+:host([data-variant='hero']) {
+  --kit-head-size: 4rem;
+}
+
+:host([data-variant='panel']) {
+  --kit-head-size: 2.75rem;
+}

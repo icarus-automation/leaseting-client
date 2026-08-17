@@ -1,0 +1,76 @@
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 z-(--z-modal-backdrop) bg-[color-mix(in_oklab,var(--text-heading)_32%,transparent)]"
+    aria-hidden="true"
+    (click)="close()"
+  ></div>
+
+  <div
+    class="fixed inset-x-0 top-[14vh] z-(--z-modal) mx-auto w-[min(560px,calc(100vw-2rem))] overflow-hidden rounded-base border border-border bg-background shadow-modal animate-pop-in motion-reduce:animate-none"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Command palette"
+    cdkTrapFocus
+    (keydown)="onKeydown($event)"
+    (animationend)="onOpenAnimationEnd($event)"
+  >
+    <div class="flex h-12 items-center gap-2.5 border-b border-border px-4">
+      <svg pIcon="search" class="shrink-0 text-muted" [size]="15" aria-hidden="true"></svg>
+      <input
+        #searchInput
+        type="text"
+        class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
+        placeholder="Search pages, actions, or tenants…"
+        aria-label="Search pages, actions, or tenants"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="palette-results"
+        [attr.aria-activedescendant]="items().length > 0 ? 'palette-item-' + activeIndex() : null"
+        [value]="query()"
+        (input)="onInput($event)"
+      />
+      <kbd class="rounded-[3px] border border-border bg-surface px-1.5 py-0.5 text-[11px] font-medium text-muted">Esc</kbd>
+    </div>
+
+    <ul id="palette-results" role="listbox" aria-label="Results" class="max-h-[46vh] overflow-y-auto py-1.5">
+      @for (item of items(); track item.id; let index = $index) {
+        @if (showGroupHeader(index)) {
+          <li aria-hidden="true" class="px-4 pb-1 pt-2.5 text-[11.5px] font-medium text-muted">{{ item.group }}</li>
+        }
+        <li
+          [id]="'palette-item-' + index"
+          role="option"
+          [attr.aria-selected]="index === activeIndex()"
+          class="mx-1.5 flex cursor-pointer items-center gap-2.5 rounded-base px-2.5 py-2 text-[13.5px] text-body aria-selected:bg-surface aria-selected:text-heading"
+          (mouseenter)="activeIndex.set(index)"
+          (click)="execute(item)"
+        >
+          <svg [pIcon]="item.icon" class="shrink-0 text-muted" [size]="14" aria-hidden="true"></svg>
+          <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+          @if (item.hint; as hint) {
+            <span class="shrink-0 text-[12px] text-muted">{{ hint }}</span>
+          }
+          @if (index === activeIndex()) {
+            <svg pIcon="arrow-right" class="shrink-0 text-muted" [size]="12" aria-hidden="true"></svg>
+          }
+        </li>
+      } @empty {
+        <li class="px-4 py-6 text-center text-[13px] text-muted">
+          Nothing matches “{{ query() }}” — try a page name, an action, or a tenant.
+        </li>
+      }
+    </ul>
+
+    <div class="flex items-center gap-3 border-t border-border bg-surface px-4 py-2 text-[11.5px] text-muted">
+      <span class="flex items-center gap-1">
+        <kbd class="rounded-[3px] border border-border bg-background px-1 py-px font-medium">↑↓</kbd> navigate
+      </span>
+      <span class="flex items-center gap-1">
+        <kbd class="rounded-[3px] border border-border bg-background px-1 py-px font-medium">↵</kbd> open
+      </span>
+      <span class="ml-auto flex items-center gap-1">
+        <kbd class="rounded-[3px] border border-border bg-background px-1 py-px font-medium">Ctrl K</kbd> toggle
+      </span>
+    </div>
+  </div>
+}

@@ -1,0 +1,334 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="Delinquency & Reminders"
+    description="Chronically late tenants alongside the reminders already sent to them."
+    [caption]="caption()"
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="exportCsv()"
+    >
+      <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+      <span>Export CSV</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  <!-- ── Controls ──────────────────────────────────────────── -->
+  <section
+    class="grid gap-4 rounded-base border border-border bg-background p-4 print:hidden min-[1100px]:grid-cols-4"
+    aria-label="Report filters"
+  >
+    <app-as-of-filter idPrefix="delinquency" [value]="asOf()" (valueChange)="onAsOfChange($event)" />
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="delinquency-window">Look back over</label>
+      <p-select
+        inputId="delinquency-window"
+        [options]="windowOptions"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="months()"
+        (ngModelChange)="months.set($event); onFilterChange()"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="delinquency-property">Property</label>
+      <p-select
+        inputId="delinquency-property"
+        [options]="propertyOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="propertyId()"
+        (ngModelChange)="propertyId.set($event); onFilterChange()"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+  </section>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (row of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else if (report(); as data) {
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted-success text-success">
+          <svg pIcon="check-circle" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-[15px] font-semibold text-heading">Nobody needs chasing</h2>
+          <p class="max-w-[48ch] text-[13px] leading-relaxed text-muted">
+            Over the last {{ data.months }} months nobody has been late more than once, and nothing is
+            overdue as of {{ asOfText() }}. Tenants appear here once they owe something past its due date,
+            or slip twice.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <!-- ── Totals ──────────────────────────────────────────── -->
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Needs attention</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ data.totals.tenantCount }}
+          </span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.totals.criticalCount }} critical · {{ data.totals.chronicCount }} chronic
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Overdue right now</span>
+          <span
+            class="font-heading text-xl font-semibold tabular-nums"
+            [class]="+data.totals.openOverdue > 0 ? 'text-destructive' : 'text-heading'"
+          >
+            {{ data.totals.openOverdue | phpCurrency }}
+          </span>
+          <span class="text-[12px] text-muted">Across everyone listed</span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Reminders delivered</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ data.totals.remindersSent }}
+          </span>
+          <span class="text-[12px] text-muted">Since {{ asOfLabelFor(data.windowFrom) }}</span>
+        </div>
+      </div>
+
+      <!-- ── Does chasing actually work? ──────────────────────── -->
+      @if (hasReminders()) {
+        <section class="flex flex-col gap-3 rounded-base border border-border bg-background p-4">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 class="font-heading text-[15px] font-semibold text-heading">Which reminders actually work</h2>
+            <p class="text-[12.5px] text-muted">
+              A text counts as answered when a payment lands on that bill within
+              {{ data.effectivenessWindowDays }} days.
+            </p>
+          </div>
+
+          <table class="w-full border-collapse text-left">
+            <caption class="sr-only">
+              Reminder ladder stages, how many were delivered, and how many were followed by a payment.
+            </caption>
+            <thead>
+              <tr class="border-b border-border">
+                <th scope="col" class="py-2 pr-4 text-[12.5px] font-medium text-muted">Stage</th>
+                <th scope="col" class="px-4 py-2 text-right text-[12.5px] font-medium text-muted">Sent</th>
+                <th scope="col" class="px-4 py-2 text-right text-[12.5px] font-medium text-muted">Answered</th>
+                <th scope="col" class="w-[45%] py-2 pl-4 text-[12.5px] font-medium text-muted">Success rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (stat of data.effectiveness; track stat.stage) {
+                <tr class="border-b border-border last:border-b-0">
+                  <th scope="row" class="py-2.5 pr-4 text-left text-[13px] font-medium text-body">
+                    {{ stat.stageLabel }}
+                  </th>
+                  <td class="px-4 py-2.5 text-right text-[13px] tabular-nums text-body">{{ stat.sent }}</td>
+                  <td class="px-4 py-2.5 text-right text-[13px] tabular-nums text-body">{{ stat.converted }}</td>
+                  <td class="py-2.5 pl-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-surface">
+                        <div
+                          class="h-full rounded-full"
+                          [class]="stat.rate > 0 ? 'bg-success' : 'bg-border-strong'"
+                          [style.width.%]="stat.rate"
+                        ></div>
+                      </div>
+                      <span class="w-12 shrink-0 text-right text-[12.5px] font-medium tabular-nums text-heading">
+                        {{ stat.rate }}%
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+
+      <!-- ── Who to chase ─────────────────────────────────────── -->
+      <h2 class="font-heading text-[15px] font-semibold text-heading">Who to chase</h2>
+
+      <div class="overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">
+            Tenants who are behind or repeatedly late, worst first, with the reminders already sent to them.
+          </caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Tenant</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Payment pattern</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Overdue now</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Last contact</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">
+                <span class="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+
+          @for (tenant of data.tenants; track tenant.tenantId) {
+            <tbody class="border-b border-border last:border-b-0">
+              <tr class="transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
+                <th scope="row" class="px-4 py-3 text-left font-normal">
+                  <span class="flex flex-wrap items-center gap-2">
+                    <span
+                      class="inline-flex items-center gap-1.5 rounded-full border px-2 py-[3px] text-xs font-medium leading-none"
+                      [class]="tierChipClass(tenant)"
+                      [attr.title]="tierOf(tenant).hint"
+                    >
+                      <span class="h-1.5 w-1.5 shrink-0 rounded-full" [class]="tierDotClass(tenant)" aria-hidden="true"></span>
+                      <span class="text-body">{{ tierOf(tenant).label }}</span>
+                    </span>
+                    <a
+                      [routerLink]="['/tenants', tenant.tenantId]"
+                      class="rounded-[2px] text-[13.5px] font-medium text-body transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none"
+                    >
+                      {{ tenant.tenantName }}
+                    </a>
+                  </span>
+                  <span class="mt-0.5 block text-[12px] text-muted">{{ tenant.units.join(' · ') }}</span>
+                </th>
+
+                <td class="px-4 py-3">
+                  <span class="block text-[13px] text-body">{{ patternText(tenant) }}</span>
+                  <span class="block text-[12px] tabular-nums text-muted">
+                    @if (tenant.avgDaysLate !== null) {
+                      Averages {{ tenant.avgDaysLate }} days late · worst {{ tenant.maxDaysLate }}
+                    } @else {
+                      Nothing late has settled yet
+                    }
+                  </span>
+                </td>
+
+                <td class="whitespace-nowrap px-4 py-3 text-right">
+                  <span
+                    class="block text-[13px] font-medium tabular-nums"
+                    [class]="+tenant.openOverdueAmount > 0 ? 'text-destructive' : 'text-muted'"
+                  >
+                    {{ +tenant.openOverdueAmount > 0 ? (tenant.openOverdueAmount | phpCurrency) : 'All settled' }}
+                  </span>
+                  @if (tenant.oldestDaysOverdue > 0) {
+                    <span class="block text-[12px] tabular-nums text-muted">
+                      oldest {{ tenant.oldestDaysOverdue }} days
+                    </span>
+                  }
+                </td>
+
+                <td class="px-4 py-3">
+                  <span class="block text-[13px] text-body">{{ lastContactText(tenant) }}</span>
+                  <span class="block text-[12px] tabular-nums text-muted">
+                    {{ tenant.remindersSent }} delivered
+                  </span>
+                </td>
+
+                <td class="px-4 py-3 text-right">
+                  <span class="inline-flex items-center gap-1.5">
+                    @if (canSend(tenant)) {
+                      <button
+                        type="button"
+                        class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none print:hidden"
+                        [disabled]="sending() !== null"
+                        [attr.aria-label]="'Send a payment reminder to ' + tenant.tenantName"
+                        (click)="confirmSend(tenant)"
+                      >
+                        <svg [pIcon]="sending() === tenant.tenantId ? 'spinner' : 'send'" [size]="12" aria-hidden="true"></svg>
+                        <span>{{ sending() === tenant.tenantId ? 'Sending' : 'Remind' }}</span>
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      class="inline-flex h-8 items-center gap-1.5 rounded-base px-2 text-[12.5px] font-medium text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none print:hidden"
+                      [attr.aria-expanded]="isExpanded(tenant.tenantId)"
+                      [attr.aria-label]="
+                        (isExpanded(tenant.tenantId) ? 'Hide' : 'Show') + ' the chase history for ' + tenant.tenantName
+                      "
+                      (click)="toggle(tenant.tenantId)"
+                    >
+                      <span>History</span>
+                      <svg
+                        pIcon="chevron-down"
+                        class="shrink-0 transition-transform duration-150 ease-out motion-reduce:transition-none"
+                        [class.-rotate-180]="isExpanded(tenant.tenantId)"
+                        [size]="11"
+                        aria-hidden="true"
+                      ></svg>
+                    </button>
+                  </span>
+                </td>
+              </tr>
+
+              @if (isExpanded(tenant.tenantId)) {
+                <tr class="bg-surface">
+                  <td colspan="5" class="px-4 py-3">
+                    @if (tenant.reminders.length === 0) {
+                      <p class="text-[12.5px] text-muted">
+                        Nothing has been sent to {{ tenant.tenantName }} yet. The nightly ladder starts three
+                        days before a bill falls due.
+                      </p>
+                    } @else {
+                      <ol class="flex flex-col gap-1.5">
+                        @for (entry of tenant.reminders; track entry.id) {
+                          <li class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12.5px]">
+                            <span class="w-[5.5rem] shrink-0 tabular-nums text-muted">{{ entry.sentAt }}</span>
+                            <span class="w-[8.5rem] shrink-0 font-medium text-body">{{ entry.stageLabel }}</span>
+                            <app-status-badge [tone]="statusTone(entry)" [label]="statusLabel(entry)" />
+                            @if (entry.origin === 'MANUAL') {
+                              <app-status-badge tone="neutral" label="By hand" />
+                            }
+                            <span class="min-w-0 text-muted">{{ entry.billLabel }}</span>
+                          </li>
+                        }
+                      </ol>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          }
+        </table>
+      </div>
+
+      <div class="flex flex-col gap-1.5 text-[12.5px] leading-relaxed text-muted print:hidden">
+        <p>
+          Lateness is measured from settled bills, so it describes behaviour rather than one bad month. A
+          tenant is listed once they owe something past its due date, or have slipped twice in the period.
+        </p>
+        @if (!data.smsEnabled) {
+          <p>
+            Sending is unavailable: the SMS gateway is not configured for this environment. The history
+            above is still the real record of what the nightly ladder sent.
+          </p>
+        }
+      </div>
+    }
+  }
+</div>

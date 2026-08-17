@@ -1,0 +1,255 @@
+<div class="flex flex-col gap-4">
+  <nav class="flex items-center gap-1.5 text-[13px]" aria-label="Breadcrumb">
+    <a routerLink="/properties" class="rounded-[2px] font-medium text-muted transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none">Properties</a>
+    <svg pIcon="chevron-right" class="text-muted" [size]="11" aria-hidden="true"></svg>
+    <span class="font-medium text-heading" aria-current="page">{{ property()?.name ?? '…' }}</span>
+  </nav>
+
+  @if (propertyLoading()) {
+    <app-skeleton variant="panel" />
+  } @else if (propertyError(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+    </div>
+  } @else if (property(); as p) {
+    <header class="flex flex-wrap items-end justify-between gap-3">
+      <div class="flex min-w-0 items-center gap-3.5">
+        @if (p.imageUrl) {
+          <img
+            [src]="p.imageUrl"
+            alt=""
+            class="hidden h-14 w-20 shrink-0 rounded-base border border-border object-cover sm:block"
+          />
+        }
+        <div class="min-w-0">
+          <div class="flex min-w-0 items-center gap-2">
+            <h1 class="min-w-0 truncate font-heading text-2xl font-semibold text-heading">{{ p.name }}</h1>
+            <button
+              type="button"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+              aria-label="Edit property details and photo"
+              (click)="propertyDrawerVisible.set(true)"
+            >
+              <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+            </button>
+          </div>
+          <p class="mt-0.5 truncate text-sm text-muted">{{ p.type.name }} · {{ p.addressLine }}, {{ p.city }}</p>
+        </div>
+      </div>
+      @if (floor(); as f) {
+        <div class="flex items-center gap-1.5" aria-label="Floor status summary">
+          <app-status-badge tone="success" label="Settled" [count]="f.summary.settled" />
+          <app-status-badge tone="destructive" label="Overdue" [count]="f.summary.overdue" />
+          <app-status-badge tone="vacant" label="Vacant" [count]="f.summary.vacant" />
+        </div>
+      }
+    </header>
+
+    @if (p.floors.length === 0) {
+      <app-empty-state
+        icon="building"
+        heading="No floors yet"
+        description="Add the first floor of this property, upload its plan image, and start mapping units."
+        ctaLabel="Add floor"
+        (cta)="openCreateFloor()"
+      />
+    } @else {
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <app-floor-tabs
+          class="min-w-0 flex-1"
+          [floors]="p.floors"
+          [selectedFloorId]="selectedFloorId()"
+          (floorSelected)="selectFloor($event)"
+          (addFloorRequested)="openCreateFloor()"
+        />
+
+        <div class="flex items-center gap-1.5">
+          <button
+            type="button"
+            class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+            (click)="openCreateUnit()"
+          >
+            <svg pIcon="plus" [size]="12" aria-hidden="true"></svg>
+            <span>Unit</span>
+          </button>
+          <button
+            type="button"
+            class="inline-flex h-8 items-center gap-1.5 rounded-base border px-2.5 text-[13px] font-medium transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+            [class]="mapMode()
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-background text-body enabled:hover:bg-surface'"
+            [attr.aria-pressed]="mapMode()"
+            [disabled]="!mapMode() && !canMapUnits()"
+            [title]="canMapUnits() || mapMode() ? '' : 'Upload a plan image for this floor first'"
+            (click)="toggleMapMode()"
+          >
+            <svg pIcon="pencil" [size]="12" aria-hidden="true"></svg>
+            <span>{{ mapMode() ? 'Done mapping' : 'Map units' }}</span>
+          </button>
+          <button
+            type="button"
+            class="flex h-8 w-8 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+            aria-label="Edit this floor"
+            (click)="openEditFloor()"
+          >
+            <svg pIcon="cog" [size]="13" aria-hidden="true"></svg>
+          </button>
+          <button
+            type="button"
+            class="flex h-8 w-8 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+            aria-label="Delete this floor"
+            (click)="confirmDeleteFloor()"
+          >
+            <svg pIcon="trash" [size]="13" aria-hidden="true"></svg>
+          </button>
+        </div>
+      </div>
+
+      @if (mapMode()) {
+        <div
+          class="flex flex-wrap items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] bg-surface px-3 py-2.5 text-[13px] text-body"
+          role="status"
+        >
+          <svg pIcon="info-circle" class="shrink-0 text-primary" [size]="14" aria-hidden="true"></svg>
+          @if (mapTarget(); as target) {
+            <span>
+              Outlining <strong class="font-semibold">Unit {{ target.unitNo }}</strong>
+              — {{ mapEditor()?.points()?.length ?? 0 }} corner{{ (mapEditor()?.points()?.length ?? 0) === 1 ? '' : 's' }}{{ mapDrawHint() }}
+            </span>
+            <div class="ml-auto flex items-center gap-1.5">
+              <button
+                type="button"
+                class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+                [disabled]="!(mapEditor()?.canUndo())"
+                (click)="undoPoint()"
+              >
+                Undo
+              </button>
+              <button
+                type="button"
+                class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+                [disabled]="!(mapEditor()?.canRedo())"
+                (click)="redoPoint()"
+              >
+                Redo
+              </button>
+              <button
+                type="button"
+                class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+                [disabled]="(mapEditor()?.points()?.length ?? 0) === 0"
+                (click)="resetDraft()"
+              >
+                Reset
+              </button>
+              @if ((target.mapCoordinates?.points?.length ?? 0) >= 3) {
+                <button
+                  type="button"
+                  class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+                  [disabled]="savingCoordinates()"
+                  (click)="clearMapping()"
+                >
+                  Remove shape
+                </button>
+              }
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-base border-none bg-primary px-2.5 py-1 text-[12px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                [disabled]="!(mapEditor()?.canSave()) || savingCoordinates()"
+                (click)="saveMapping()"
+              >
+                @if (savingCoordinates()) {
+                  <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+                }
+                <span>Save shape</span>
+              </button>
+            </div>
+          } @else {
+            <span>Pick a unit from the “Units to map” list — or click an existing shape on the plan to adjust it.</span>
+          }
+        </div>
+      }
+
+      <div
+        class="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1fr)_340px]"
+        id="floor-panel"
+        role="tabpanel"
+        [attr.aria-labelledby]="selectedFloorId() ? 'floor-tab-' + selectedFloorId() : null"
+      >
+        @if (floorLoading()) {
+          <app-skeleton variant="panel" />
+        } @else if (floor(); as f) {
+          @if (mapMode() && f.planImageUrl) {
+            <app-floor-map-editor
+              [floor]="f"
+              [target]="mapTarget()"
+              (unitPicked)="onUnitClicked($event)"
+              (saveRequested)="saveMapping()"
+              (clearRequested)="clearMapping()"
+              (hintRequested)="onMappingHint()"
+            />
+          } @else {
+            <app-floor-plan-viewer
+              [floor]="f"
+              [selectedUnitId]="selectedUnitId()"
+              (unitClicked)="onUnitClicked($event)"
+              (uploadPlanRequested)="openEditFloor()"
+              (addUnitRequested)="openCreateUnit()"
+            />
+          }
+        }
+
+        @if (mapMode()) {
+          <div
+            class="rounded-base"
+            [class.animate-row-flash]="pickerHint()"
+            (animationend)="pickerHint.set(false)"
+          >
+            <app-map-units-panel
+              [units]="floor()?.units ?? []"
+              [targetId]="mapTarget()?.id ?? null"
+              (unitPicked)="onUnitClicked($event)"
+            />
+          </div>
+        } @else {
+          <app-unit-panel
+            [unitId]="selectedUnitId()"
+            (changed)="refreshFloor()"
+            (editRequested)="openEditUnit($event)"
+            (closeRequested)="selectedUnitId.set(null)"
+            (archived)="onUnitArchived()"
+          />
+        }
+      </div>
+    }
+  }
+</div>
+
+@if (property(); as p) {
+  <app-property-form-dialog
+    [visible]="propertyDrawerVisible()"
+    (visibleChange)="propertyDrawerVisible.set($event)"
+    [property]="p"
+    (saved)="onPropertySaved()"
+  />
+  <app-floor-form-dialog
+    [visible]="floorDrawerVisible()"
+    (visibleChange)="floorDrawerVisible.set($event)"
+    [propertyId]="p.id"
+    [floor]="floorEditTarget()"
+    (saved)="onFloorSaved($event)"
+  />
+}
+
+@if (selectedFloorId(); as floorId) {
+  <app-unit-form-dialog
+    [visible]="unitDrawerVisible()"
+    (visibleChange)="unitDrawerVisible.set($event)"
+    [floorId]="floorId"
+    [unit]="unitEditTarget()"
+    (saved)="onUnitSaved($event)"
+  />
+}

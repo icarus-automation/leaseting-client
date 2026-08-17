@@ -1,0 +1,77 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  [subheading]="isEdit() ? 'Update this floor and its plan image.' : 'Add a floor, then map its units on the plan.'"
+  [dirty]="errors.dirty() || planTouched()"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="floor-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="floor-level">Level</label>
+      <input
+        id="floor-level"
+        type="number"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="level"
+        min="-5"
+        max="200"
+        [attr.aria-invalid]="!!errors.fieldError('level')"
+        [attr.aria-describedby]="errors.fieldError('level') ? 'floor-level-error' : null"
+      />
+      <p class="text-[12px] text-muted">1 = ground floor. Basements go negative.</p>
+      @if (errors.fieldError('level', { required: 'Floor level is required.', min: 'Level must be between -5 and 200.', max: 'Level must be between -5 and 200.' }); as message) {
+        <p class="text-[12.5px] text-destructive" id="floor-level-error">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="floor-name">
+        Name <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <input
+        id="floor-name"
+        type="text"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="name"
+        placeholder="e.g. Mezzanine"
+        maxlength="80"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[13px] font-medium text-heading">Floor plan image <span class="font-normal text-muted">(optional)</span></span>
+      <app-image-dropzone
+        [currentImageUrl]="floor()?.planImageUrl ?? null"
+        idleHint="PNG, JPG, or WebP up to 5 MB — a top-down floor plan works best"
+        [imagePreviewHeight]="200"
+        (fileChange)="onPlanChange($event)"
+      />
+    </div>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="floor-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      @if (saving()) {
+        <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+      }
+      <span>{{ isEdit() ? 'Save changes' : 'Add floor' }}</span>
+    </button>
+  </ng-container>
+</app-form-dialog>

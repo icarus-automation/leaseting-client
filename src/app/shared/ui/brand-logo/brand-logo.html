@@ -1,0 +1,21 @@
+@if (variant() === 'lockup-on-dark') {
+  <span class="brand-lockup-frame">
+    <img
+      ngSrc="/brand/leaseting-lockup-on-dark.png"
+      width="4500"
+      height="1800"
+      [alt]="decorative() ? '' : 'Leaseting'"
+      priority
+    />
+  </span>
+} @else {
+  <span class="brand-mark-frame">
+    <img
+      ngSrc="/brand/leaseting-mark-green.png"
+      width="3000"
+      height="3000"
+      [alt]="decorative() ? '' : 'Leaseting'"
+      priority
+    />
+  </span>
+}

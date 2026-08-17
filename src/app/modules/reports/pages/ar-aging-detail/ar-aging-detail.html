@@ -1,0 +1,269 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="A/R Aging — Detail"
+    description="Every unpaid bill with its days overdue and remaining balance."
+    [caption]="caption()"
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="exportCsv()"
+    >
+      <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+      <span>Export CSV</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  <!-- ── Controls ──────────────────────────────────────────── -->
+  <section
+    class="grid gap-4 rounded-base border border-border bg-background p-4 print:hidden min-[1100px]:grid-cols-4"
+    aria-label="Report filters"
+  >
+    <app-as-of-filter idPrefix="aging-detail" [value]="asOf()" (valueChange)="onAsOfChange($event)" />
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="aging-detail-property">Property</label>
+      <p-select
+        inputId="aging-detail-property"
+        [options]="propertyOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="propertyId()"
+        (ngModelChange)="propertyId.set($event); onFilterChange()"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="aging-detail-bucket">Aging band</label>
+      <p-select
+        inputId="aging-detail-bucket"
+        [options]="bucketOptions"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="bucket()"
+        (ngModelChange)="bucket.set($event); onFilterChange()"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+  </section>
+
+  @if (bucket()) {
+    <div class="flex flex-wrap items-center gap-2 print:hidden">
+      <span class="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_oklab,var(--primary)_30%,transparent)] bg-surface py-[3px] pl-2.5 pr-1 text-xs font-medium">
+        <span class="text-body">Showing {{ bucketLabel() }} only</span>
+        <button
+          type="button"
+          class="flex h-5 w-5 items-center justify-center rounded-full text-muted transition-colors duration-150 ease-out hover:bg-background hover:text-body motion-reduce:transition-none"
+          [attr.aria-label]="'Clear the ' + bucketLabel() + ' filter'"
+          (click)="clearBucket()"
+        >
+          <svg pIcon="times" [size]="10" aria-hidden="true"></svg>
+        </button>
+      </span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (row of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else if (report(); as data) {
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted-success text-success">
+          <svg pIcon="check-circle" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-[15px] font-semibold text-heading">Nothing open here</h2>
+          <p class="max-w-[46ch] text-[13px] leading-relaxed text-muted">
+            @if (bucket()) {
+              No bill sat in the {{ bucketLabel() }} band as of {{ asOfText() }}. Clear the band filter to
+              see every open bill.
+            } @else {
+              Every bill raised on or before {{ asOfText() }} was settled by that date.
+            }
+          </p>
+        </div>
+      </div>
+    } @else {
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Outstanding</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.total | phpCurrency }}</span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.billCount }} bill{{ data.billCount === 1 ? '' : 's' }} · {{ data.tenantCount }}
+            tenant{{ data.tenantCount === 1 ? '' : 's' }}
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Already overdue</span>
+          <span
+            class="font-heading text-xl font-semibold tabular-nums"
+            [class]="+data.overdue > 0 ? 'text-destructive' : 'text-heading'"
+          >
+            {{ data.overdue | phpCurrency }}
+          </span>
+          <span class="text-[12px] text-muted">Past its due date</span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Not yet due</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ data.buckets.current | phpCurrency }}
+          </span>
+          <span class="text-[12px] text-muted">Still inside its terms</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 print:hidden">
+        <h2 class="font-heading text-[15px] font-semibold text-heading">Open bills by tenant</h2>
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-base border border-border bg-background px-2.5 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          (click)="allCollapsed() ? expandAll() : collapseAll()"
+        >
+          <svg [pIcon]="allCollapsed() ? 'chevron-down' : 'chevron-up'" [size]="12" aria-hidden="true"></svg>
+          <span>{{ allCollapsed() ? 'Expand all' : 'Collapse all' }}</span>
+        </button>
+      </div>
+
+      <!-- ── Report table ────────────────────────────────────── -->
+      <div class="overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">
+            Bills outstanding as of {{ data.asOf }}, grouped by tenant, oldest debt first.
+          </caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Due</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Age</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Charge</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Unit</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Billed</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Paid</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Balance</th>
+            </tr>
+          </thead>
+
+          @for (group of data.groups; track group.tenantId) {
+            <tbody class="border-b border-border last:border-b-0">
+              <tr class="bg-surface">
+                <th colspan="6" scope="colgroup" class="px-2 py-2 text-left">
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <button
+                      type="button"
+                      class="inline-flex items-center gap-1.5 rounded-base px-2 py-1 text-[13.5px] font-semibold text-heading transition-colors duration-150 ease-out hover:bg-background motion-reduce:transition-none"
+                      [attr.aria-expanded]="!isCollapsed(group.tenantId)"
+                      (click)="toggleGroup(group.tenantId)"
+                    >
+                      <svg
+                        pIcon="chevron-down"
+                        class="shrink-0 text-muted transition-transform duration-150 ease-out motion-reduce:transition-none"
+                        [class.-rotate-90]="isCollapsed(group.tenantId)"
+                        [size]="12"
+                        aria-hidden="true"
+                      ></svg>
+                      <span>{{ group.tenantName }}</span>
+                    </button>
+
+                    <span class="text-[12px] tabular-nums text-muted">
+                      {{ group.billCount }} bill{{ group.billCount === 1 ? '' : 's' }}
+                      @if (group.oldestDaysOverdue > 0) {
+                        · oldest {{ group.oldestDaysOverdue }} days late
+                      }
+                    </span>
+
+                    <span class="flex items-center gap-2 text-[12px] font-normal print:hidden">
+                      <a
+                        [routerLink]="['/tenants', group.tenantId]"
+                        class="rounded-[2px] text-muted transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none"
+                      >
+                        Tenant
+                      </a>
+                      <a
+                        [routerLink]="billsLink(group).path"
+                        [queryParams]="billsLink(group).params"
+                        class="rounded-[2px] text-muted transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none"
+                      >
+                        Open bills
+                      </a>
+                    </span>
+                  </div>
+                </th>
+                <td class="px-4 py-2 text-right text-[13px] font-semibold tabular-nums text-heading">
+                  {{ group.total | phpCurrency }}
+                </td>
+              </tr>
+
+              @if (!isCollapsed(group.tenantId)) {
+                @for (row of group.rows; track row.billId) {
+                  <tr class="border-t border-border transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
+                    <td class="whitespace-nowrap px-4 py-2.5 text-[13px] tabular-nums text-body">{{ row.dueDate }}</td>
+                    <td class="whitespace-nowrap px-4 py-2.5 text-[13px] tabular-nums" [class]="ageClass(row)">
+                      {{ ageLabel(row) }}
+                    </td>
+                    <td class="px-4 py-2.5">
+                      <span class="block text-[13px] text-body">{{ row.typeLabel }}</span>
+                      <span class="block text-[12px] text-muted">{{ row.memo }}</span>
+                    </td>
+                    <td class="px-4 py-2.5 text-[12.5px] text-muted">{{ row.unitLabel }}</td>
+                    <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-body">
+                      {{ row.amount | phpCurrency }}
+                    </td>
+                    <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-muted">
+                      {{ +row.paid > 0 ? (row.paid | phpCurrency) : '—' }}
+                    </td>
+                    <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] font-medium tabular-nums text-heading">
+                      {{ row.balance | phpCurrency }}
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          }
+
+          <tfoot>
+            <tr class="border-t-2 border-border-strong bg-surface">
+              <th colspan="6" scope="row" class="px-4 py-3 text-left text-[13.5px] font-semibold text-heading">
+                Total outstanding
+              </th>
+              <td class="px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ data.total | phpCurrency }}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <p class="text-[12.5px] leading-relaxed text-muted print:hidden">
+        Balances are net of payments recorded on or before {{ asOfText() }}. Tenants are ordered by overdue
+        exposure, and bills by age within each.
+      </p>
+    }
+  }
+</div>

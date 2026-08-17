@@ -1,0 +1,92 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  [subheading]="isEdit() ? 'Update the unit details.' : 'Add a room or unit to this floor.'"
+  [dirty]="errors.dirty()"
+  width="28rem"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="unit-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="unit-no">Unit number</label>
+      <input
+        id="unit-no"
+        type="text"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="unitNo"
+        placeholder="e.g. 103 or 1A"
+        [attr.aria-invalid]="!!errors.fieldError('unitNo')"
+        [attr.aria-describedby]="errors.fieldError('unitNo') ? 'unit-no-error' : null"
+      />
+      @if (errors.fieldError('unitNo', { required: 'Unit number is required.', maxlength: 'Keep it under 20 characters.' }); as message) {
+        <p class="text-[12.5px] text-destructive" id="unit-no-error">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="unit-rent">
+        Asking monthly rent <span class="font-normal text-muted">(optional, ₱)</span>
+      </label>
+      <p-inputnumber
+        inputId="unit-rent"
+        formControlName="monthlyRent"
+        mode="currency"
+        currency="PHP"
+        locale="en-PH"
+        [min]="0"
+        placeholder="e.g. ₱3,900.00"
+        styleClass="w-full"
+      />
+      <p class="text-[12px] text-muted">Listing price for vacant units. The lease sets the contracted rent.</p>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="unit-notes">
+        Notes <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <textarea
+        id="unit-notes"
+        rows="3"
+        class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="notes"
+        placeholder="Anything worth remembering about this unit"
+      ></textarea>
+    </div>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    @if (!isEdit()) {
+      <button
+        type="button"
+        class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+        [disabled]="saving()"
+        (click)="onSubmit(true)"
+      >
+        Save & add another
+      </button>
+    }
+    <button
+      type="submit"
+      form="unit-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      @if (saving()) {
+        <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+      }
+      <span>{{ isEdit() ? 'Save changes' : 'Add unit' }}</span>
+    </button>
+  </ng-container>
+</app-form-dialog>

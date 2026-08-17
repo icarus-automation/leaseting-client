@@ -1,0 +1,54 @@
+.not-found-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 32px;
+}
+
+.not-found-code {
+  font-size: 72px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  color: var(--border);
+  line-height: 1;
+  margin: 0 0 16px;
+  letter-spacing: -0.03em;
+}
+
+.not-found-heading {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin-bottom: 8px;
+}
+
+.not-found-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.not-found-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 150ms ease-out;
+}
+
+.not-found-link:hover {
+  background: var(--primary-hover);
+}
+
+.not-found-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}

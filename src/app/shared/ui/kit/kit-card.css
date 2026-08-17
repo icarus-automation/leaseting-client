@@ -1,0 +1,76 @@
+/*
+ * Kit's dashboard stage.
+ *
+ * This is the one place the full key appears. The quiet office backdrop gives
+ * the narrow drawing enough visual presence without baking Kit into the image,
+ * so the live sprite can still change mood and animate independently.
+ */
+.kit-stage {
+  display: flex;
+  width: 7rem;
+  min-height: 7rem;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: visible;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  background-image: url('/kit/kit-dashboard-backdrop.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/*
+ * Source PNGs are 1536x2048 with transparent padding; the opaque artwork sits
+ * at x 404-1145, y 84-2009 (741 x 1925), verified identical in every mood file.
+ * Cropping to that box keeps mood changes pixel-aligned.
+ *
+ * --kit-px is one source pixel. Resize Kit by changing --kit-w alone.
+ */
+.kit-face {
+  --kit-w: 2.5rem;
+  --kit-px: calc(var(--kit-w) / 741);
+
+  width: var(--kit-w);
+  height: calc(1925 * var(--kit-px));
+  margin-bottom: 0.5rem;
+  /* background-image is bound per mood in the template. */
+  background-repeat: no-repeat;
+  background-size: calc(1536 * var(--kit-px)) calc(2048 * var(--kit-px));
+  background-position: calc(-404 * var(--kit-px)) calc(-84 * var(--kit-px));
+  /* Pivot at the key tip so rotation reads as a lean, not a spin. */
+  transform-origin: bottom center;
+}
+
+@media (min-width: 640px) {
+  .kit-stage {
+    width: 8rem;
+    min-height: 8rem;
+  }
+
+  .kit-face {
+    --kit-w: 2.875rem;
+  }
+}
+
+/*
+ * Speech-bubble notch. A 1px-bordered card with one corner turned into an
+ * arrow. It stays level with Kit's head inside the stage.
+ */
+.kit-bubble {
+  position: relative;
+}
+
+.kit-bubble::before {
+  content: '';
+  position: absolute;
+  top: 1.25rem;
+  left: -0.3125rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--background);
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+}

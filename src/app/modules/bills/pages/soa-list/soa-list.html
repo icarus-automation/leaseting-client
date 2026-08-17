@@ -1,0 +1,123 @@
+<div class="flex flex-col gap-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <div class="flex items-center gap-2">
+        <a
+          routerLink="/bills"
+          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+          aria-label="Back to bills"
+        >
+          <svg pIcon="arrow-left" [size]="13" aria-hidden="true"></svg>
+        </a>
+        <h1 class="font-heading text-2xl font-semibold text-heading">Statements of account</h1>
+      </div>
+      <p class="mt-0.5 text-sm text-muted">Every generated SOA — download the file again or resend the SMS summary.</p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+      (click)="dialogVisible.set(true)"
+    >
+      <svg pIcon="file-excel" [size]="14" aria-hidden="true"></svg>
+      <span>Generate SOA</span>
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (s of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load(1)">
+        Retry
+      </button>
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      icon="file-excel"
+      heading="No statements yet"
+      description="Generate a statement of account from a lease's unpaid bills — it lands here for re-download."
+      ctaLabel="Generate SOA"
+      (cta)="dialogVisible.set(true)"
+    />
+  } @else {
+    <div class="overflow-x-auto rounded-base border border-border">
+      <table class="w-full border-collapse text-left">
+        <thead>
+          <tr class="border-b border-border bg-surface">
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">SOA №</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Tenant · Unit</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Total due</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Generated</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">SMS</th>
+            <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (statement of items(); track statement.id) {
+            <tr class="border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
+              <td class="px-4 py-3 text-[13.5px] font-medium text-heading">{{ statement.soaNo }}</td>
+              <td class="px-4 py-3">
+                <a
+                  [routerLink]="['/tenants', statement.lease.tenant.id]"
+                  class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                >
+                  {{ statement.lease.tenant.firstName }} {{ statement.lease.tenant.lastName }}
+                </a>
+                <p class="text-[12px] text-muted">
+                  Unit {{ statement.lease.unit.unitNo }} · {{ statement.lease.unit.property.name }}
+                </p>
+              </td>
+              <td class="px-4 py-3 text-[13px] font-medium text-heading tabular-nums">
+                {{ statement.totalDue | phpCurrency }}
+              </td>
+              <td class="px-4 py-3 text-[13px] text-body">{{ statement.createdAt | date: 'MMM d, y h:mm a' }}</td>
+              <td class="px-4 py-3">
+                <app-status-badge [tone]="smsBadge(statement).tone" [label]="smsBadge(statement).label" />
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-end gap-1">
+                  <a
+                    [href]="downloadUrl(statement)"
+                    class="inline-flex items-center gap-1.5 rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                  >
+                    <svg pIcon="download" [size]="12" aria-hidden="true"></svg>
+                    <span>Download</span>
+                  </a>
+                  @if (smsAvailable().sms) {
+                    <button
+                      type="button"
+                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+                      [disabled]="resendingId() === statement.id"
+                      (click)="resendSms(statement)"
+                    >
+                      {{ statement.smsStatus === 'FAILED' ? 'Retry SMS' : 'Resend SMS' }}
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [meta]="meta()" (pageChange)="load($event)" />
+  }
+</div>
+
+<app-generate-soa-dialog
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  (generated)="onGenerated()"
+/>

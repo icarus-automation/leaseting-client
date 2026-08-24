@@ -1,10 +1,13 @@
 import type { BillStatus, BillType } from './enums';
+import type { ChargeLine } from './charge-item.types';
 
 export interface LeaseResponse {
   id: string;
   startDate: string;
   endDate: string;
   monthlyRent: string;
+  /** null for older, hand-entered, or malformed rent charge snapshots. */
+  rentCharges: ChargeLine[] | null;
   dueDay: number;
   terminatedAt: string | null;
   notes: string | null;
@@ -42,5 +45,14 @@ export interface LeaseListFilters {
   limit?: number;
   unitId?: string;
   tenantId?: string;
+  propertyId?: string;
+  /** Part of the tenant's name. */
+  q?: string;
+  /** true = in force now; false = past, ended or future. */
   active?: boolean;
+  /** The renewal horizon in days, at most 365. */
+  expiringInDays?: number;
+  /** Inclusive end-date window (yyyy-MM-dd). */
+  endFrom?: string;
+  endTo?: string;
 }

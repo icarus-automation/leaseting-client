@@ -29,6 +29,7 @@
           </p>
         }
       </div>
+      <app-soa-lines class="block w-full text-left" [lines]="statement.lines" />
       <a
         [href]="downloadUrl(statement)"
         class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover motion-reduce:transition-none"

@@ -32,12 +32,21 @@
       </div>
     </div>
   } @else if (floor().planImageUrl; as planUrl) {
-    <div class="relative self-start overflow-hidden rounded-base border border-border bg-white">
+    <!--
+      The frame takes the plan's own aspect ratio and is capped by the viewport,
+      so the image fills it exactly: nothing to letterbox, nothing to scroll.
+    -->
+    <div
+      class="relative mx-auto w-full overflow-hidden rounded-base border border-border bg-white"
+      [style.aspect-ratio]="planAspect()"
+      [style.max-width.px]="maxPlanWidth()"
+    >
       <img
         [src]="planUrl"
         alt=""
-        class="block w-full select-none"
+        class="block h-full w-full select-none"
         draggable="false"
+        (load)="onPlanLoad($event)"
       />
       <svg
         class="pointer-events-none absolute inset-0 h-full w-full"

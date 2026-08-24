@@ -38,7 +38,12 @@ Tenant: name, email, contactNo, photo, notes, documents. Detail rolls up leases,
 **Not built:** emergency contact.
 
 **Tenant Onboarding (move-in)** **[built]** — `/tenants/onboarding/:id`
-Move-in is a guided walk, not a form. Six ordered steps: **Tenant → Requirements → Lease terms → Contract → Move-in payment → Turnover**. Steps persist individually; contract step can be explicitly deferred. Status: `IN_PROGRESS` / `COMPLETED` / `CANCELLED`. Completing the walk produces the lease.
+Move-in is a guided walk, not a form. Eight ordered steps: **Overview → Tenant → Requirements → Lease terms → Deposit → Contract → Move-in payment → Turnover**. Steps persist individually; contract step can be explicitly deferred. Status: `IN_PROGRESS` / `COMPLETED` / `CANCELLED`. Completing the walk produces the lease.
+- **Overview** anchors the lease: property → unit → start/end dates.
+- **Requirements** pre-ticks anything already filed on the tenant's profile from an earlier onboarding, and links the document.
+- **Lease terms** is a free list of rent charge lines drawn from the org's charge catalogue; their sum becomes `monthlyRent`, and the breakdown is snapshotted onto `lease.rentCharges`.
+- **Deposit** asks the same question twice — "collecting advance rent?" and "holding a security deposit?" — each a Yes/No with a month count. Both are multiples of the monthly rent above, so neither restates the charge lines behind it; answering Yes requires at least 1 month.
+- Completion posts one advance RENT bill and one security-deposit bill, each with the move-in payment applied against it.
 
 **Lease Mgmt** **[built]** — `/leases`
 Lease: unit, tenant, startDate, endDate, monthlyRent, `dueDay`, `terminatedAt`, notes, bills.
@@ -73,7 +78,12 @@ Event types shipped: `RENT_OVERDUE` · `LEASE_EXPIRING` · `UNIT_VACANT`. Severi
 **Not built:** per-org configurable thresholds · guided actions w/ confirmation (e.g. draft renewal notice) · configurable tone · global unread badge.
 
 **Settings** **[partial]** — `/settings`
-Org-curated property types: create, rename, archive (archived types stay attached to existing properties, hidden from pickers). Nothing else yet — no org profile, members, roles, or Kit thresholds.
+A grouped index of cards, one per configurable area, each on its own child route.
+- **General → Organization** — listed, marked *Soon*, not built.
+- **Configuration → Property types** (`/settings/property-types`): create, rename, archive (archived types stay attached to existing properties, hidden from pickers).
+- **Configuration → Charge items** (`/settings/charge-items`): the catalogue behind the onboarding wizard's rent charge lines — name, bill type, optional default amount; create, edit, archive. Also addable inline from the wizard.
+Catch-all names ("Other") sort last in both lists rather than alphabetically.
+Nothing else yet — no org profile, members, roles, or Kit thresholds.
 
 **Tenant / Owner Portal** **[planned]**
 Committed scope, no routes. Tenants are reached today by SMS'd statements, not a login.

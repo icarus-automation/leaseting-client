@@ -6,7 +6,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { OnboardingDetail, TenantStepData } from '../../../../core/models/onboarding.types';
-import type { TenantResponse } from '../../../../core/models/tenant.types';
+import type { TenantListItem, TenantResponse } from '../../../../core/models/tenant.types';
 import { TenantsService } from '../../services/tenants.service';
 
 interface PickedTenant {
@@ -15,7 +15,7 @@ interface PickedTenant {
   lastName: string;
 }
 
-/** Step 1 — pick an existing tenant or create one on the spot. */
+/** Step 2 — pick an existing tenant or create one on the spot. */
 @Component({
   selector: 'app-step-tenant',
   imports: [ReactiveFormsModule, PIcon],
@@ -30,6 +30,7 @@ export class StepTenant {
   readonly detail = input.required<OnboardingDetail>();
   readonly busy = input(false);
   readonly next = output<TenantStepData>();
+  readonly back = output<void>();
 
   readonly selected = signal<PickedTenant | null>(null);
   readonly creating = signal(false);
@@ -44,7 +45,7 @@ export class StepTenant {
       switchMap((q) => this.tenants.list({ q: q.trim() || undefined, limit: 8 })),
       map((result) => result.data),
     ),
-    { initialValue: [] as TenantResponse[] },
+    { initialValue: [] as TenantListItem[] },
   );
 
   readonly picked = computed(() => this.selected() ?? this.detail().tenant);

@@ -1,0 +1,55 @@
+@if (count() > 0) {
+  <div class="min-w-0">
+    <button
+      type="button"
+      class="inline-flex items-center gap-1.5 rounded-base text-[11.5px] text-muted transition-colors duration-150 ease-out hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+      [attr.aria-expanded]="open()"
+      (click)="toggle()"
+    >
+      <svg
+        pIcon="chevron-right"
+        [size]="9"
+        class="shrink-0 transition-transform duration-150 ease-out motion-reduce:transition-none"
+        [class.rotate-90]="open()"
+        aria-hidden="true"
+      ></svg>
+      {{ count() }} set aside — still open
+    </button>
+
+    @if (open()) {
+      <ul class="mt-1.5 flex flex-col gap-1" role="list">
+        @for (item of items(); track item.id) {
+          <li class="flex items-start gap-2 rounded-base px-1 py-0.5 text-[11.5px] leading-relaxed transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
+            <svg
+              [pIcon]="severityIcons[item.severity]"
+              class="mt-[3px] shrink-0"
+              [class]="severityToneClass(item.severity)"
+              [size]="11"
+              aria-hidden="true"
+            ></svg>
+            <span class="sr-only">{{ severityLabels[item.severity] }}:</span>
+            <span class="min-w-0 flex-1 text-muted">{{ item.message }}</span>
+            <button
+              type="button"
+              class="shrink-0 rounded-base px-1.5 py-px font-medium text-primary transition-colors duration-150 ease-out hover:bg-[color-mix(in_oklab,var(--primary)_12%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+              [attr.aria-label]="'Bring back: ' + item.message"
+              (click)="restore(item)"
+            >
+              Bring back
+            </button>
+          </li>
+        }
+      </ul>
+
+      @if (hidden() > 0) {
+        <button
+          type="button"
+          class="mt-1 rounded-base px-1 text-[11.5px] font-medium text-primary transition-colors duration-150 ease-out hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+          (click)="expand()"
+        >
+          Show {{ hidden() }} more
+        </button>
+      }
+    }
+  </div>
+}

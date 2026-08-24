@@ -10,9 +10,11 @@ import { Select } from 'primeng/select';
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
 import type { BillListFilters, BillListItem, BillsSummary } from '../../core/models/bill.types';
+import type { GridFilters } from '../../core/models/grid-query.types';
 import { BILL_TYPE_LABELS, BILL_TYPE_OPTIONS, BillType } from '../../core/models/enums';
 import { PhpCurrencyPipe } from '../../shared/pipes/php-currency-pipe';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+import { NlFilterBar } from '../../shared/ui/nl-filter-bar/nl-filter-bar';
 import { Pagination } from '../../shared/ui/pagination/pagination';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../shared/ui/status-badge/status-badge';
@@ -57,6 +59,7 @@ const TYPE_OPTIONS: { label: string; value: BillType | null }[] = [
     Select,
     PhpCurrencyPipe,
     EmptyState,
+    NlFilterBar,
     Pagination,
     Skeleton,
     StatusBadge,
@@ -94,6 +97,16 @@ export class Bills {
   readonly tenantIdFilter = signal<string | null>(
     this.route.snapshot.queryParamMap.get('tenantId'),
   );
+
+  /**
+   * Filters produced by the natural-language bar.
+   *
+   * These and the quick filters are one setting, not two: whichever was used
+   * last wins and the other is cleared. Two visible controls that silently
+   * intersect is how a manager ends up staring at an empty table with both of
+   * them looking switched on.
+   */
+  readonly nlFilters = signal<GridFilters>({});
 
   readonly drawerVisible = signal(false);
   readonly paymentDialogVisible = signal(false);
@@ -147,6 +160,10 @@ export class Bills {
         limit: 10,
         ...QUICK_FILTER_PARAMS[this.quickFilter()],
         type: this.typeFilter ?? undefined,
+        ...(this.nlFilters() as BillListFilters),
+        // Deep links from a tenant profile or a lease outrank both: the user
+        // arrived here asking about one record, and widening that silently
+        // would answer a question they did not ask.
         leaseId: this.leaseIdFilter() ?? undefined,
         tenantId: this.tenantIdFilter() ?? undefined,
       })
@@ -167,6 +184,17 @@ export class Bills {
   setQuickFilter(filter: QuickFilter): void {
     if (this.quickFilter() === filter) return;
     this.quickFilter.set(filter);
+    this.nlFilters.set({});
+    this.load(1);
+  }
+
+  /** A new parse from the filter bar — it owns the view from here. */
+  onFiltersChange(filters: GridFilters): void {
+    this.nlFilters.set(filters);
+    if (Object.keys(filters).length > 0) {
+      this.quickFilter.set('all');
+      this.typeFilter = null;
+    }
     this.load(1);
   }
 

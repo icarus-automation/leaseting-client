@@ -47,7 +47,7 @@
           <button
             type="button"
             class="-mr-1 ml-auto shrink-0 rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
-            [attr.aria-label]="'Dismiss: ' + event.message"
+            [attr.aria-label]="'Set aside: ' + event.message"
             (click)="dismiss()"
           >
             <svg pIcon="times" [size]="12" aria-hidden="true"></svg>
@@ -68,7 +68,7 @@
           {{ event.message }}
         </a>
 
-        <!-- Kit's own commentary. Absent whenever DeepSeek is off or failed. -->
+        <!-- Kit's own commentary. Absent whenever the flavour model is off or failed. -->
         @if (event.flavor) {
           <p class="mt-1 text-[12.5px] leading-relaxed text-muted">{{ event.flavor }}</p>
         }
@@ -81,9 +81,11 @@
                 [routerLink]="item.link.commands"
                 class="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-surface px-2 py-[3px] text-[11.5px] text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] hover:text-primary motion-reduce:transition-none sm:max-w-[34ch]"
               >
+                <!-- Red is late money, amber a date approaching, blue context. -->
                 <svg
                   [pIcon]="severityIcons[item.event.severity]"
                   class="shrink-0"
+                  [class]="severityToneClass(item.event.severity)"
                   [size]="10"
                   aria-hidden="true"
                 ></svg>
@@ -92,7 +94,7 @@
             }
           </div>
         }
-      } @else {
+      } @else if (allClear()) {
         <p class="mt-1.5 flex items-center gap-2 text-[13.5px] text-body">
           <svg pIcon="check-circle" class="shrink-0 text-success" [size]="15" aria-hidden="true"></svg>
           All caught up — nothing needs you right now.
@@ -100,6 +102,25 @@
         @if (summary()) {
           <p class="mt-1 text-[12.5px] leading-relaxed text-muted">{{ summary() }}</p>
         }
+      } @else {
+        <!--
+          Nothing active, but things were set aside. Saying "all caught up"
+          here is the lie the tester caught: cards clicked away, none of them
+          acted on, and Kit congratulating them for it.
+        -->
+        <p class="mt-1.5 flex items-center gap-2 text-[13.5px] text-body">
+          <svg pIcon="inbox" class="shrink-0 text-muted" [size]="15" aria-hidden="true"></svg>
+          Nothing new — but you have set some things aside.
+        </p>
+        @if (summary()) {
+          <p class="mt-1 text-[12.5px] leading-relaxed text-muted">{{ summary() }}</p>
+        }
+      }
+
+      @if (!loading() && setAsideCount() > 0) {
+        <div class="mt-2.5 border-t border-border pt-2">
+          <app-kit-set-aside />
+        </div>
       }
     </div>
   </div>

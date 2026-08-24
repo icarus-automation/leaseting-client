@@ -5,10 +5,13 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { KitService } from '../../../core/kit/kit.service';
+import { KitSetAside } from './kit-set-aside/kit-set-aside';
 import {
   KIT_ART,
   KIT_SEVERITY_ICONS,
   KIT_SEVERITY_LABELS,
+  KIT_SEVERITY_TONES,
+  type KitSeverity,
   kitEventLink,
 } from '../../../core/kit/kit.model';
 
@@ -23,7 +26,7 @@ import {
  */
 @Component({
   selector: 'app-kit-card',
-  imports: [DatePipe, RouterLink, PIcon],
+  imports: [DatePipe, RouterLink, PIcon, KitSetAside],
   templateUrl: './kit-card.html',
   styleUrl: './kit-card.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,11 +46,24 @@ export class KitCard {
   readonly severityLabels = KIT_SEVERITY_LABELS;
   readonly severityIcons = KIT_SEVERITY_ICONS;
 
+  /** Icon colour by severity. Reinforcement only — the label carries the meaning. */
+  severityToneClass(severity: KitSeverity): string {
+    return KIT_SEVERITY_TONES[severity];
+  }
+
   readonly loading = this.kit.loading;
   readonly today = this.kit.loadedAt;
   readonly topEvent = this.kit.topEvent;
   readonly remainingCount = this.kit.remainingCount;
   readonly celebrating = this.kit.celebrating;
+
+  /**
+   * Only true when there is nothing active *and* nothing set aside. Kit's good
+   * news has to be earned: an empty active list on its own means the user
+   * clicked things away, not that the work is done.
+   */
+  readonly allClear = this.kit.allClear;
+  readonly setAsideCount = this.kit.setAsideCount;
 
   readonly art = computed(() => KIT_ART[this.kit.mood()]);
 

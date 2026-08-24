@@ -198,6 +198,27 @@
   z-index: var(--z-overlay);
 }
 
+/* PrimeNG form fields ship at 1rem text with 0.5rem vertical padding, which
+   computes to ~42px. The app's own inputs are `h-10 text-sm` — 40px at 14px.
+   Two pixels and two points is exactly enough to read as misaligned when a
+   p-select sits beside a plain input in the same row, so normalise the
+   third-party controls to the app's shape once here rather than patching
+   heights onto every call site. */
+.p-inputtext,
+.p-select,
+.p-multiselect,
+.p-inputnumber,
+.p-datepicker {
+  font-size: 0.875rem;
+}
+
+.p-select,
+.p-multiselect,
+.p-inputnumber-input,
+.p-inputtext:not(textarea) {
+  min-height: 2.5rem;
+}
+
 /* Toasts must clear pinned masks even without PrimeNG's inline z-index. */
 .p-toast {
   z-index: var(--z-toast);

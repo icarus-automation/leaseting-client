@@ -19,6 +19,7 @@ import { StatusBadge, BadgeTone } from '../../../../shared/ui/status-badge/statu
 import { isPastDue, ordinal } from '../../../../shared/utils/date.util';
 import { isLeaseActive, leaseStatus } from '../../../../shared/utils/lease-status.util';
 import { TenantFormDialog } from '../../components/tenant-form-dialog/tenant-form-dialog';
+import { TenantRiskPanel } from '../../components/tenant-risk-panel/tenant-risk-panel';
 import { TenantsService } from '../../services/tenants.service';
 
 /** A bill row flattened with its lease context for the billing-history table. */
@@ -31,7 +32,17 @@ const ACCEPTED_DOCUMENT_TYPES = 'application/pdf,image/png,image/jpeg,image/webp
 
 @Component({
   selector: 'app-tenant-detail',
-  imports: [DatePipe, DecimalPipe, RouterLink, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge, TenantFormDialog],
+  imports: [
+    DatePipe,
+    DecimalPipe,
+    RouterLink,
+    PIcon,
+    PhpCurrencyPipe,
+    Skeleton,
+    StatusBadge,
+    TenantFormDialog,
+    TenantRiskPanel,
+  ],
   templateUrl: './tenant-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

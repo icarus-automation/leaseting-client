@@ -57,17 +57,11 @@
     </section>
   }
 
-  <div class="flex h-10 max-w-sm items-center gap-2 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring motion-reduce:transition-none">
-    <svg pIcon="search" class="shrink-0 text-muted" [size]="14" aria-hidden="true"></svg>
-    <input
-      type="search"
-      class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
-      placeholder="Search by name…"
-      aria-label="Search tenants by name"
-      [value]="search()"
-      (input)="onSearchInput($event)"
-    />
-  </div>
+  <app-nl-filter-bar
+    grid="tenants"
+    placeholder="Try: tenants in Mabini with unpaid water bills over ₱1,000"
+    (filtersChange)="onFiltersChange($event)"
+  />
 
   @if (loading()) {
     <div class="overflow-hidden rounded-base border border-border">
@@ -87,11 +81,11 @@
       </button>
     </div>
   } @else if (items().length === 0) {
-    @if (search().trim()) {
+    @if (isFiltered()) {
       <app-empty-state
         icon="search"
         heading="No tenants match"
-        [description]="'Nothing found for “' + search() + '”. Try another name, or onboard them as a new tenant.'"
+        description="Nothing matches those filters. Remove one of the chips above, or clear them to see everyone."
         ctaLabel="Start onboarding"
         (cta)="startOnboarding()"
       />
@@ -112,6 +106,7 @@
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Name</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Contact</th>
             <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted md:table-cell">Email</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Balance</th>
             <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted lg:table-cell">Added</th>
             <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">
               <span class="sr-only">Actions</span>
@@ -135,6 +130,19 @@
               </td>
               <td class="px-4 py-3 text-[13px] text-body">{{ tenant.contactNo }}</td>
               <td class="hidden px-4 py-3 text-[13px] text-body md:table-cell">{{ tenant.email ?? '—' }}</td>
+              <td class="px-4 py-3">
+                @if (tenant.unpaidBillCount > 0) {
+                  <app-status-badge
+                    [tone]="balanceTone(tenant)"
+                    [label]="tenant.outstandingBalance | phpCurrency"
+                  />
+                  @if (tenant.maxDaysOverdue > 0) {
+                    <span class="ml-1.5 text-[11.5px] text-muted">{{ tenant.maxDaysOverdue }}d late</span>
+                  }
+                } @else {
+                  <span class="text-[13px] text-muted">—</span>
+                }
+              </td>
               <td class="hidden px-4 py-3 text-[13px] text-muted lg:table-cell">{{ tenant.createdAt | date: 'MMM d, y' }}</td>
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end gap-1">

@@ -1,3 +1,4 @@
+import type { ChargeLine } from './charge-item.types';
 import type { UnitStatus } from './enums';
 import type { BillType } from './enums';
 
@@ -116,6 +117,11 @@ export interface UnitActiveLease {
   startDate: string;
   endDate: string;
   monthlyRent: string;
+  /**
+   * The lines that make up `monthlyRent`, snapshotted at onboarding. null for
+   * leases written before charges were itemised, or entered by hand.
+   */
+  rentCharges: ChargeLine[] | null;
   dueDay: number;
   tenant: {
     id: string;

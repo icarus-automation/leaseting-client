@@ -45,12 +45,64 @@
 
     <div class="flex flex-col gap-1.5">
       <span class="text-[13px] font-medium text-heading">Floor plan image <span class="font-normal text-muted">(optional)</span></span>
-      <app-image-dropzone
-        [currentImageUrl]="floor()?.planImageUrl ?? null"
-        idleHint="PNG, JPG, or WebP up to 5 MB — a top-down floor plan works best"
-        [imagePreviewHeight]="200"
-        (fileChange)="onPlanChange($event)"
-      />
+
+      @if (cropSource(); as source) {
+        <!-- Cropping happens in place; the plan is framed once, here. -->
+        <app-image-cropper
+          [file]="source"
+          [aspect]="planAspect"
+          title="Frame the floor plan"
+          hint="Trim to the plan itself. This 16:9 frame is exactly how it appears on the property page, so what you see here is what you get."
+          confirmLabel="Use this plan"
+          (cropped)="onCropped($event)"
+          (cancelled)="onCropCancelled()"
+        />
+      } @else if (previewImage(); as url) {
+        <div class="flex flex-col gap-2 rounded-base border border-border p-2">
+          <!-- object-contain: plans uploaded before cropping existed are not
+               16:9 and must letterbox in the frame rather than stretch. -->
+          <img
+            [src]="url"
+            alt="Floor plan preview"
+            class="block w-full rounded-[2px] border border-border bg-white object-contain"
+            [style.aspect-ratio]="planAspect"
+          />
+          <div class="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+              (click)="replacePlan()"
+            >
+              <svg pIcon="refresh" [size]="11" aria-hidden="true"></svg>
+              <span>Replace</span>
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+              (click)="clearPlan()"
+            >
+              <svg pIcon="trash" [size]="11" aria-hidden="true"></svg>
+              <span>Remove</span>
+            </button>
+          </div>
+        </div>
+      } @else {
+        <app-image-dropzone
+          [currentImageUrl]="null"
+          idleHint="PNG, JPG, or WebP up to 5 MB — you'll frame it on the next screen"
+          [imagePreviewHeight]="200"
+          (fileChange)="onPlanPicked($event)"
+        />
+        @if (replacing()) {
+          <button
+            type="button"
+            class="self-start rounded-base border-none bg-transparent p-0 text-[12.5px] font-medium text-muted underline underline-offset-2 transition-colors duration-150 ease-out hover:text-body motion-reduce:transition-none"
+            (click)="cancelReplace()"
+          >
+            Keep the current plan
+          </button>
+        }
+      }
     </div>
   </form>
 

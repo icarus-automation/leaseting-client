@@ -77,6 +77,21 @@
             <dt class="text-muted">Monthly rent</dt>
             <dd class="font-medium text-body">{{ lease.monthlyRent | phpCurrency }}</dd>
           </div>
+          <!-- Only worth unfolding when the rent is more than one line. -->
+          @if (lease.rentCharges; as charges) {
+            @if (charges.length > 1) {
+              <div class="flex flex-col gap-0.5 pl-3">
+                @for (charge of charges; track $index) {
+                  <div class="flex justify-between gap-2 text-[12.5px]">
+                    <span class="truncate text-muted">
+                      {{ charge.name }}{{ charge.description ? ' · ' + charge.description : '' }}
+                    </span>
+                    <span class="shrink-0 text-body">{{ charge.amount | phpCurrency }}</span>
+                  </div>
+                }
+              </div>
+            }
+          }
           <div class="flex justify-between gap-2">
             <dt class="text-muted">Rent due</dt>
             <dd class="font-medium text-body">Every {{ ordinal(lease.dueDay) }} of the month</dd>

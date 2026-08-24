@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
@@ -8,21 +8,32 @@ import type {
   CreateTenantPayload,
   TenantDetail,
   TenantDocumentItem,
+  TenantListFilters,
+  TenantListItem,
   TenantResponse,
   UpdateTenantPayload,
 } from '../../../core/models/tenant.types';
+import type { TenantRiskProfile } from '../../../core/models/risk.types';
+import { toHttpParams } from '../../../shared/utils/http-params.util';
 
 @Injectable({ providedIn: 'root' })
 export class TenantsService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/tenants`;
 
-  list(options: { page?: number; limit?: number; q?: string } = {}): Observable<Paginated<TenantResponse>> {
-    let params = new HttpParams()
-      .set('page', options.page ?? 1)
-      .set('limit', options.limit ?? 10);
-    if (options.q) params = params.set('q', options.q);
-    return this.http.get<Paginated<TenantResponse>>(this.base, { params });
+  list(options: TenantListFilters = {}): Observable<Paginated<TenantListItem>> {
+    const params = toHttpParams({ page: 1, limit: 10, ...options });
+    return this.http.get<Paginated<TenantListItem>>(this.base, { params });
+  }
+
+  /**
+   * How this tenant is paying, and whether the lease looks like it will renew.
+   *
+   * A separate call from {@link get} on purpose: the bands need a year of
+   * bills and their payments, and the profile is useful before they arrive.
+   */
+  risk(id: string): Observable<TenantRiskProfile> {
+    return this.http.get<TenantRiskProfile>(`${this.base}/${id}/risk`);
   }
 
   get(id: string): Observable<TenantDetail> {

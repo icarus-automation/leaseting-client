@@ -38,7 +38,7 @@ Two things a neighboring property SaaS could not truthfully copy:
 
 **Monthly rhythm.** Bills accrue against a lease with a `dueDay` → statement generated → SMS sent → payment recorded. Kit watches the overdue tail.
 
-**Move-in is a guided walk, not a form.** Six ordered steps: Tenant → Requirements → Lease terms → Contract → Move-in payment → Turnover. Steps persist individually; the contract step can be explicitly deferred.
+**Move-in is a guided walk, not a form.** Eight ordered steps: Overview → Tenant → Requirements → Lease terms → Deposit → Contract → Move-in payment → Turnover. Steps persist individually; the contract step can be explicitly deferred. What a tenant is charged is not fixed: rent is a free list of lines drawn from a catalogue the org curates in Settings, advance and deposit are month multiples of that total, and a returning tenant does not re-submit paperwork already on file.
 
 **Multi-tenancy is org-scoped.** Better Auth with the organization plugin; the session must be scoped to an active org or domain endpoints 403. Users belong to one or more orgs and switch between them.
 
@@ -48,7 +48,7 @@ Two things a neighboring property SaaS could not truthfully copy:
 
 **Stack.** Angular 21 (standalone, signals, zoneless-era idioms), PrimeNG 21 + `@primeuix/themes`, Tailwind v4, Konva (floor-plan editor), FilePond (uploads), Fuse.js (fuzzy search), hotkeys-js (shortcuts), date-fns. Vitest for tests. Separate backend service on `:8000`, `/api/v1`, responses wrapped in a `{ statusCode, message, data }` envelope except Better Auth routes, which are raw.
 
-**Built and live:** dashboard, properties (incl. floor-plan editor and viewer), tenants, leases, bills + SOA, tenant onboarding walk, knowledge base, reports, settings (org-curated property types), Kit event feed, auth.
+**Built and live:** dashboard, properties (incl. floor-plan editor and viewer), tenants, leases, bills + SOA, tenant onboarding walk, knowledge base, reports, settings (org-curated property types and charge items), Kit event feed, auth.
 
 **Stubbed with a published feature list (`ComingSoon`):** work orders / maintenance — committed scope, status vocabulary defined (Open → In Progress → Waiting on Vendor → Resolved → Closed).
 

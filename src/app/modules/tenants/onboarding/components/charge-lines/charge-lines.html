@@ -1,0 +1,151 @@
+<div class="flex flex-col gap-2.5">
+  @if (catalogError(); as message) {
+    <p class="flex items-center justify-between gap-2 rounded-base border border-destructive/30 bg-muted-destructive px-3 py-2 text-[13px] text-destructive">
+      <span>{{ message }}</span>
+      <button type="button" class="shrink-0 font-medium text-primary hover:underline" (click)="loadCatalog()">Retry</button>
+    </p>
+  }
+
+  @if (lines().controls.length === 0) {
+    <p class="rounded-base border border-dashed border-border px-3.5 py-4 text-center text-[13px] text-muted">
+      {{ emptyMessage() }}
+    </p>
+  } @else {
+    <ul class="m-0 flex list-none flex-col gap-2 p-0">
+      @for (group of lines().controls; track group; let index = $index, last = $last) {
+        <li class="flex flex-wrap items-start gap-2" [formGroup]="group">
+          <div class="flex min-w-[11rem] flex-1 flex-col gap-1">
+            <label class="text-[11.5px] font-medium text-muted" [attr.for]="'charge-item-' + index">
+              What is this for?
+            </label>
+            <p-select
+              [inputId]="'charge-item-' + index"
+              formControlName="chargeItemId"
+              [options]="options()"
+              optionLabel="label"
+              optionValue="value"
+              [filter]="true"
+              [loading]="loadingCatalog()"
+              placeholder="Pick a charge"
+              styleClass="w-full"
+              appendTo="body"
+              (onChange)="onChargePicked(group, $event.value)"
+            />
+          </div>
+
+          <div class="flex min-w-[10rem] flex-1 flex-col gap-1">
+            <label class="text-[11.5px] font-medium text-muted" [attr.for]="'charge-note-' + index">
+              Description <span class="font-normal">(optional)</span>
+            </label>
+            <input
+              [id]="'charge-note-' + index"
+              type="text"
+              formControlName="description"
+              placeholder="e.g. Slot B2"
+              class="h-10 w-full rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+            />
+          </div>
+
+          <div class="flex w-40 flex-col gap-1">
+            <label class="text-[11.5px] font-medium text-muted" [attr.for]="'charge-amount-' + index">Amount</label>
+            <p-inputnumber
+              [inputId]="'charge-amount-' + index"
+              formControlName="amount"
+              mode="currency"
+              currency="PHP"
+              locale="en-PH"
+              [min]="0"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            />
+          </div>
+
+          <button
+            type="button"
+            class="mt-[1.35rem] flex h-10 w-8 shrink-0 items-center justify-center rounded-base border-none bg-transparent text-muted transition-colors duration-150 ease-out hover:text-destructive disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
+            [attr.aria-label]="'Remove charge ' + (index + 1)"
+            [disabled]="busy()"
+            (click)="removeLine(index)"
+          >
+            <svg pIcon="times-circle" [size]="15" aria-hidden="true"></svg>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (newItemMode()) {
+    <form
+      class="flex flex-wrap items-end gap-2 rounded-base border border-border bg-surface px-3.5 py-3"
+      [formGroup]="newItemForm"
+      (ngSubmit)="submitNewItem()"
+    >
+      <div class="flex min-w-[11rem] flex-1 flex-col gap-1">
+        <label class="text-[11.5px] font-medium text-muted" for="new-charge-name">New charge item</label>
+        <input
+          #newItemInput
+          id="new-charge-name"
+          type="text"
+          formControlName="name"
+          placeholder="e.g. Laundry"
+          class="h-10 w-full rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+          (keydown.escape)="closeNewItem()"
+        />
+      </div>
+      <div class="flex w-44 flex-col gap-1">
+        <label class="text-[11.5px] font-medium text-muted" for="new-charge-type">Bills as</label>
+        <p-select
+          inputId="new-charge-type"
+          formControlName="billType"
+          [options]="billTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+      <button
+        type="submit"
+        class="inline-flex h-10 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+        [disabled]="creatingItem()"
+      >
+        @if (creatingItem()) {
+          <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+        }
+        <span>Add &amp; use</span>
+      </button>
+      <button
+        type="button"
+        class="inline-flex h-10 items-center rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+        (click)="closeNewItem()"
+      >
+        Cancel
+      </button>
+      @if (newItemError(); as message) {
+        <p class="w-full text-[12px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+      }
+    </form>
+  }
+
+  <div class="flex flex-wrap items-center gap-3">
+    <button
+      type="button"
+      class="inline-flex items-center gap-1.5 rounded-[2px] text-[13px] font-medium text-primary transition-colors duration-150 ease-out hover:underline disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+      [disabled]="busy()"
+      (click)="addLine()"
+    >
+      <svg pIcon="plus" [size]="11" aria-hidden="true"></svg>
+      <span>{{ addLabel() }}</span>
+    </button>
+    @if (!newItemMode()) {
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-[2px] text-[13px] font-medium text-muted transition-colors duration-150 ease-out hover:text-body hover:underline motion-reduce:transition-none"
+        (click)="openNewItem()"
+      >
+        <svg pIcon="tag" [size]="11" aria-hidden="true"></svg>
+        <span>New charge item</span>
+      </button>
+    }
+  </div>
+</div>

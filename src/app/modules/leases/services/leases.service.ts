@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
@@ -10,6 +10,7 @@ import type {
   LeaseListItem,
   LeaseResponse,
 } from '../../../core/models/lease.types';
+import { toHttpParams } from '../../../shared/utils/http-params.util';
 
 @Injectable({ providedIn: 'root' })
 export class LeasesService {
@@ -17,12 +18,7 @@ export class LeasesService {
   private readonly base = `${API_BASE_URL}/leases`;
 
   list(filters: LeaseListFilters = {}): Observable<Paginated<LeaseListItem>> {
-    let params = new HttpParams()
-      .set('page', filters.page ?? 1)
-      .set('limit', filters.limit ?? 10);
-    if (filters.unitId) params = params.set('unitId', filters.unitId);
-    if (filters.tenantId) params = params.set('tenantId', filters.tenantId);
-    if (filters.active !== undefined) params = params.set('active', filters.active);
+    const params = toHttpParams({ page: 1, limit: 10, ...filters });
     return this.http.get<Paginated<LeaseListItem>>(this.base, { params });
   }
 

@@ -143,7 +143,15 @@
     }
   }
 
-  <div class="flex items-center justify-end border-t border-border pt-4">
+  <div class="flex items-center justify-between border-t border-border pt-4">
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="back.emit()"
+    >
+      <svg pIcon="arrow-left" [size]="12" aria-hidden="true"></svg>
+      <span>Back</span>
+    </button>
     <button
       type="button"
       class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"

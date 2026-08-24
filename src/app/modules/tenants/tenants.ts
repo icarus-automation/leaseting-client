@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
@@ -10,10 +9,14 @@ import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
 import { ONBOARDING_STEP_LABELS, ONBOARDING_STEP_ORDER } from '../../core/models/onboarding.types';
 import type { OnboardingListItem } from '../../core/models/onboarding.types';
-import type { TenantResponse } from '../../core/models/tenant.types';
+import type { GridFilters } from '../../core/models/grid-query.types';
+import type { TenantListFilters, TenantListItem, TenantResponse } from '../../core/models/tenant.types';
+import { PhpCurrencyPipe } from '../../shared/pipes/php-currency-pipe';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+import { NlFilterBar } from '../../shared/ui/nl-filter-bar/nl-filter-bar';
 import { Pagination } from '../../shared/ui/pagination/pagination';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
+import { BadgeTone, StatusBadge } from '../../shared/ui/status-badge/status-badge';
 import { watchCreateParam } from '../../shared/utils/create-param.util';
 import { TenantFormDialog } from './components/tenant-form-dialog/tenant-form-dialog';
 import { OnboardingsService } from './services/onboardings.service';
@@ -21,7 +24,18 @@ import { TenantsService } from './services/tenants.service';
 
 @Component({
   selector: 'app-tenants',
-  imports: [DatePipe, RouterLink, PIcon, EmptyState, Pagination, Skeleton, TenantFormDialog],
+  imports: [
+    DatePipe,
+    RouterLink,
+    PIcon,
+    PhpCurrencyPipe,
+    EmptyState,
+    NlFilterBar,
+    Pagination,
+    Skeleton,
+    StatusBadge,
+    TenantFormDialog,
+  ],
   templateUrl: './tenants.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -33,19 +47,22 @@ export class Tenants {
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly items = signal<TenantResponse[]>([]);
+  readonly items = signal<TenantListItem[]>([]);
   readonly meta = signal<PageMeta | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   /** Row to flash after a create/update so the user sees where it landed. */
   readonly flashId = signal<string | null>(null);
 
-  readonly search = signal('');
-  /** Debounced copy of the search box — drives the actual requests. */
-  private readonly debouncedSearch = toSignal(
-    toObservable(this.search).pipe(debounceTime(300), distinctUntilChanged()),
-    { initialValue: '' },
-  );
+  /**
+   * Filters produced by the natural-language bar.
+   *
+   * Held rather than folded into `load()` so paging keeps whatever narrowing
+   * is on screen — a filtered page 2 that quietly reverts to everyone is the
+   * bug this signal exists to prevent.
+   */
+  readonly filters = signal<GridFilters>({});
+  readonly isFiltered = computed(() => Object.keys(this.filters()).length > 0);
 
   readonly drawerVisible = signal(false);
   readonly editTarget = signal<TenantResponse | null>(null);
@@ -57,10 +74,7 @@ export class Tenants {
   readonly skeletons = Array.from({ length: 6 });
 
   constructor() {
-    effect(() => {
-      const q = this.debouncedSearch();
-      this.load(1, q);
-    });
+    this.load(1);
 
     // "New tenant" entry points (palette, dashboard) now start an onboarding.
     watchCreateParam(() => this.startOnboarding());
@@ -133,15 +147,23 @@ export class Tenants {
       });
   }
 
-  onSearchInput(event: Event): void {
-    this.search.set((event.target as HTMLInputElement).value);
+  /** A new parse from the filter bar — always back to page one. */
+  onFiltersChange(filters: GridFilters): void {
+    this.filters.set(filters);
+    this.load(1);
   }
 
-  load(page: number, q = this.debouncedSearch()): void {
+  /** Row emphasis: what a manager is scanning this column for. */
+  balanceTone(tenant: TenantListItem): BadgeTone {
+    if (tenant.maxDaysOverdue > 0) return 'destructive';
+    return 'warning';
+  }
+
+  load(page: number): void {
     this.loading.set(true);
     this.error.set(null);
     this.tenants
-      .list({ page, limit: 10, q: q.trim() || undefined })
+      .list({ ...(this.filters() as TenantListFilters), page, limit: 10 })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {

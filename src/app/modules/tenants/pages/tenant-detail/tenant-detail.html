@@ -19,84 +19,101 @@
     </div>
   } @else if (tenant(); as t) {
     <div class="grid items-start gap-5 min-[1100px]:grid-cols-[340px_minmax(0,1fr)]">
-      <!-- ── Profile card ─────────────────────────────────────── -->
-      <aside class="flex flex-col gap-4 rounded-base border border-border bg-background p-4" aria-label="Tenant profile">
-        <div class="flex items-start gap-3">
-          @if (t.photoUrl) {
-            <img [src]="t.photoUrl" alt="" class="h-16 w-16 shrink-0 rounded-base border border-border object-cover" />
-          } @else {
-            <span
-              class="flex h-16 w-16 shrink-0 items-center justify-center rounded-base bg-surface font-heading text-lg font-semibold text-muted"
-              aria-hidden="true"
-            >{{ initials() }}</span>
-          }
-          <div class="min-w-0 pt-0.5">
-            <h1 class="font-heading text-xl font-semibold leading-tight text-heading">{{ t.firstName }} {{ t.lastName }}</h1>
-            <div class="mt-1.5">
-              @if (activeLease()) {
-                <app-status-badge tone="success" label="Active tenant" />
-              } @else {
-                <app-status-badge tone="neutral" label="No active lease" />
-              }
+      <!--
+        Left column, as one grid child.
+        The profile card and the payment read used to be two children, with the
+        second forced back to column one — which pushed the right-hand column
+        down a row and left a hole beside the profile. Stacking them here keeps
+        the grid at two cells.
+      -->
+      <div class="flex flex-col gap-5">
+        <!-- ── Profile card ─────────────────────────────────────── -->
+        <aside class="flex flex-col gap-4 rounded-base border border-border bg-background p-4" aria-label="Tenant profile">
+          <div class="flex items-start gap-3">
+            @if (t.photoUrl) {
+              <img [src]="t.photoUrl" alt="" class="h-16 w-16 shrink-0 rounded-base border border-border object-cover" />
+            } @else {
+              <span
+                class="flex h-16 w-16 shrink-0 items-center justify-center rounded-base bg-surface font-heading text-lg font-semibold text-muted"
+                aria-hidden="true"
+              >{{ initials() }}</span>
+            }
+            <div class="min-w-0 pt-0.5">
+              <h1 class="font-heading text-xl font-semibold leading-tight text-heading">{{ t.firstName }} {{ t.lastName }}</h1>
+              <div class="mt-1.5">
+                @if (activeLease()) {
+                  <app-status-badge tone="success" label="Active tenant" />
+                } @else {
+                  <app-status-badge tone="neutral" label="No active lease" />
+                }
+              </div>
             </div>
           </div>
-        </div>
 
-        <dl class="m-0 flex flex-col gap-2 border-t border-border pt-3 text-[13px]">
-          <div class="flex items-center gap-2">
-            <dt class="sr-only">Phone</dt>
-            <svg pIcon="phone" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
-            <dd class="m-0 text-body">{{ t.contactNo }}</dd>
-          </div>
-          @if (t.email; as email) {
-            <div class="flex items-center gap-2">
-              <dt class="sr-only">Email</dt>
-              <svg pIcon="envelope" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
-              <dd class="m-0 break-all text-body">{{ email }}</dd>
-            </div>
-          }
-        </dl>
-
-        @if (activeLease(); as lease) {
           <dl class="m-0 flex flex-col gap-2 border-t border-border pt-3 text-[13px]">
-            <div class="flex items-baseline justify-between gap-2">
-              <dt class="text-muted">Current unit</dt>
-              <dd class="m-0 text-right">
-                <a
-                  [routerLink]="['/properties', lease.unit.property.id]"
-                  class="rounded-[2px] font-medium text-heading hover:text-primary hover:underline"
-                >Unit {{ lease.unit.unitNo }}</a>
-                <span class="block text-[12px] text-muted">{{ lease.unit.property.name }}</span>
-              </dd>
+            <div class="flex items-center gap-2">
+              <dt class="sr-only">Phone</dt>
+              <svg pIcon="phone" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+              <dd class="m-0 text-body">{{ t.contactNo }}</dd>
             </div>
-            <div class="flex items-baseline justify-between gap-2">
-              <dt class="text-muted">Moved in</dt>
-              <dd class="m-0 font-medium text-body">{{ lease.startDate | date: 'MMM d, y' }}</dd>
-            </div>
-            <div class="flex items-baseline justify-between gap-2">
-              <dt class="text-muted">Monthly rent</dt>
-              <dd class="m-0 font-medium text-body tabular-nums">{{ lease.monthlyRent | phpCurrency }}</dd>
-            </div>
-            <div class="flex items-baseline justify-between gap-2">
-              <dt class="text-muted">Rent due</dt>
-              <dd class="m-0 font-medium text-body">Every {{ ordinal(lease.dueDay) }}</dd>
-            </div>
+            @if (t.email; as email) {
+              <div class="flex items-center gap-2">
+                <dt class="sr-only">Email</dt>
+                <svg pIcon="envelope" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+                <dd class="m-0 break-all text-body">{{ email }}</dd>
+              </div>
+            }
           </dl>
-        }
 
-        @if (t.notes; as notes) {
-          <p class="whitespace-pre-line border-t border-border pt-3 text-[13px] leading-relaxed text-body">{{ notes }}</p>
-        }
+          @if (activeLease(); as lease) {
+            <dl class="m-0 flex flex-col gap-2 border-t border-border pt-3 text-[13px]">
+              <div class="flex items-baseline justify-between gap-2">
+                <dt class="text-muted">Current unit</dt>
+                <dd class="m-0 text-right">
+                  <a
+                    [routerLink]="['/properties', lease.unit.property.id]"
+                    class="rounded-[2px] font-medium text-heading hover:text-primary hover:underline"
+                  >Unit {{ lease.unit.unitNo }}</a>
+                  <span class="block text-[12px] text-muted">{{ lease.unit.property.name }}</span>
+                </dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-2">
+                <dt class="text-muted">Moved in</dt>
+                <dd class="m-0 font-medium text-body">{{ lease.startDate | date: 'MMM d, y' }}</dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-2">
+                <dt class="text-muted">Monthly rent</dt>
+                <dd class="m-0 font-medium text-body tabular-nums">{{ lease.monthlyRent | phpCurrency }}</dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-2">
+                <dt class="text-muted">Rent due</dt>
+                <dd class="m-0 font-medium text-body">Every {{ ordinal(lease.dueDay) }}</dd>
+              </div>
+            </dl>
+          }
 
-        <button
-          type="button"
-          class="inline-flex h-9 items-center justify-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-          (click)="drawerVisible.set(true)"
-        >
-          <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
-          <span>Edit tenant</span>
-        </button>
-      </aside>
+          @if (t.notes; as notes) {
+            <p class="whitespace-pre-line border-t border-border pt-3 text-[13px] leading-relaxed text-body">{{ notes }}</p>
+          }
+
+          <button
+            type="button"
+            class="inline-flex h-9 items-center justify-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+            (click)="drawerVisible.set(true)"
+          >
+            <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+            <span>Edit tenant</span>
+          </button>
+        </aside>
+
+        <!--
+          A second opinion about the tenant rather than another fact about
+          them, so it sits beside the profile card rather than inside it. Loads
+          on its own — the bands need a year of bills and their payments, and
+          this page is fully usable before they arrive.
+        -->
+        <app-tenant-risk-panel [tenantId]="t.id" />
+      </div>
 
       <!-- ── Right column ─────────────────────────────────────── -->
       <div class="flex min-w-0 flex-col gap-5">

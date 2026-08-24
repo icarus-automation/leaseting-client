@@ -123,6 +123,18 @@
             <div class="ml-auto flex items-center gap-1.5">
               <button
                 type="button"
+                class="inline-flex items-center gap-1.5 rounded-base border px-2 py-1 text-[12px] font-medium transition-colors duration-150 ease-out motion-reduce:transition-none"
+                [class]="tapToFillOn()
+                  ? 'border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] bg-primary text-primary-foreground'
+                  : 'border-border bg-background text-body hover:bg-surface'"
+                [attr.aria-pressed]="tapToFillOn()"
+                (click)="toggleTapToFill()"
+              >
+                <svg pIcon="sparkles" [size]="11" aria-hidden="true"></svg>
+                Tap to fill
+              </button>
+              <button
+                type="button"
                 class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
                 [disabled]="!(mapEditor()?.canUndo())"
                 (click)="undoPoint()"
@@ -190,6 +202,7 @@
               (saveRequested)="saveMapping()"
               (clearRequested)="clearMapping()"
               (hintRequested)="onMappingHint()"
+              (traceFailed)="onTraceFailed($event)"
             />
           } @else {
             <app-floor-plan-viewer

@@ -31,19 +31,32 @@
       @if (loading()) {
         <p class="px-3.5 py-6 text-[13px] text-muted">Checking…</p>
       } @else if (items().length === 0) {
-        <p class="flex items-center gap-2 px-3.5 py-6 text-[13px] text-body">
-          <svg pIcon="check-circle" class="shrink-0 text-success" [size]="15" aria-hidden="true"></svg>
-          All caught up.
-        </p>
+        <div class="px-3.5 py-5">
+          @if (allClear()) {
+            <p class="flex items-center gap-2 text-[13px] text-body">
+              <svg pIcon="check-circle" class="shrink-0 text-success" [size]="15" aria-hidden="true"></svg>
+              All caught up.
+            </p>
+          } @else {
+            <!-- Nothing active, but things were set aside without being acted
+                 on. "All caught up" over those is a claim Kit cannot make. -->
+            <p class="mb-2 flex items-center gap-2 text-[13px] text-body">
+              <svg pIcon="inbox" class="shrink-0 text-muted" [size]="15" aria-hidden="true"></svg>
+              Nothing new right now.
+            </p>
+            <app-kit-set-aside />
+          }
+        </div>
       } @else {
         <ul class="flex max-h-[min(24rem,50vh)] flex-col overflow-y-auto overscroll-contain" role="list">
           @for (item of items(); track item.event.id) {
             <li class="flex items-start gap-2 border-b border-border px-3.5 py-2.5 last:border-b-0">
+              <!-- Three tones, not two: amber for a date approaching is the
+                   distinction that was collapsing into grey alongside INFO. -->
               <svg
                 [pIcon]="severityIcons[item.event.severity]"
                 class="mt-0.5 shrink-0"
-                [class.text-destructive]="item.event.severity === 'URGENT'"
-                [class.text-muted]="item.event.severity !== 'URGENT'"
+                [class]="severityToneClass(item.event.severity)"
                 [size]="13"
                 aria-hidden="true"
               ></svg>
@@ -76,6 +89,12 @@
             </li>
           }
         </ul>
+      }
+
+      @if (items().length > 0 && setAsideCount() > 0) {
+        <div class="border-t border-border px-3.5 py-2.5">
+          <app-kit-set-aside />
+        </div>
       }
 
       <!-- The badge carries reminders only; a real conversation deserves a

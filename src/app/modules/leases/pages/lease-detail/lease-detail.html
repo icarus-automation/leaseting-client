@@ -1,0 +1,173 @@
+<div class="flex flex-col gap-5">
+  @if (loading()) {
+    <div class="flex flex-col gap-3" aria-label="Loading lease">
+      <app-skeleton variant="panel" />
+      <app-skeleton variant="row" />
+      <app-skeleton variant="row" />
+    </div>
+  } @else if (error(); as message) {
+    <div class="flex flex-col gap-3">
+      <a
+        routerLink="/leases"
+        class="inline-flex w-fit items-center gap-1.5 rounded-[2px] text-[13px] font-medium text-primary hover:underline"
+      >
+        <svg pIcon="arrow-left" [size]="12" aria-hidden="true"></svg>
+        <span>Back to leases</span>
+      </a>
+      <div
+        class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+        role="alert"
+      >
+        <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+        <span>{{ message }}</span>
+        <button type="button" class="ml-auto font-medium text-primary hover:underline" (click)="reload()">Retry</button>
+      </div>
+    </div>
+  } @else if (lease(); as lease) {
+    <header class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <a
+          routerLink="/leases"
+          class="mb-1.5 inline-flex items-center gap-1.5 rounded-[2px] text-[12.5px] font-medium text-muted hover:text-primary hover:underline"
+        >
+          <svg pIcon="arrow-left" [size]="11" aria-hidden="true"></svg>
+          <span>Leases</span>
+        </a>
+        <div class="flex flex-wrap items-center gap-2">
+          <h1 class="font-heading text-2xl font-semibold text-heading">Lease · Unit {{ lease.unit.unitNo }}</h1>
+          @if (status(); as status) {
+            <app-status-badge [tone]="status.tone" [label]="status.label" />
+          }
+        </div>
+        <p class="mt-0.5 text-sm text-muted">
+          {{ lease.tenant.firstName }} {{ lease.tenant.lastName }} · {{ lease.unit.property.name }}
+        </p>
+      </div>
+      <a
+        routerLink="/bills"
+        [queryParams]="{ leaseId: lease.id }"
+        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      >
+        <svg pIcon="receipt" [size]="13" aria-hidden="true"></svg>
+        <span>View bills</span>
+      </a>
+    </header>
+
+    <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.7fr)]">
+      <section class="rounded-base border border-border bg-background p-4" aria-labelledby="lease-terms-heading">
+        <h2 id="lease-terms-heading" class="font-heading text-base font-semibold text-heading">Lease terms</h2>
+        <dl class="mt-3 grid gap-x-6 gap-y-3 text-[13px] sm:grid-cols-2">
+          <div>
+            <dt class="text-[12px] text-muted">Tenant</dt>
+            <dd class="m-0 mt-0.5">
+              <a
+                [routerLink]="['/tenants', lease.tenant.id]"
+                class="rounded-[2px] font-medium text-heading hover:text-primary hover:underline"
+              >{{ lease.tenant.firstName }} {{ lease.tenant.lastName }}</a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[12px] text-muted">Property and unit</dt>
+            <dd class="m-0 mt-0.5">
+              <a
+                [routerLink]="['/properties', lease.unit.property.id]"
+                class="rounded-[2px] font-medium text-heading hover:text-primary hover:underline"
+              >{{ lease.unit.property.name }} · Unit {{ lease.unit.unitNo }}</a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[12px] text-muted">Starts</dt>
+            <dd class="m-0 mt-0.5 font-medium text-body">{{ lease.startDate | date: 'MMM d, y' }}</dd>
+          </div>
+          <div>
+            <dt class="text-[12px] text-muted">Ends</dt>
+            <dd class="m-0 mt-0.5 font-medium text-body">{{ lease.endDate | date: 'MMM d, y' }}</dd>
+          </div>
+          <div>
+            <dt class="text-[12px] text-muted">Term</dt>
+            <dd class="m-0 mt-0.5 font-medium text-body">{{ term() }}</dd>
+          </div>
+          <div>
+            <dt class="text-[12px] text-muted">Rent due</dt>
+            <dd class="m-0 mt-0.5 font-medium text-body">Every {{ ordinal(lease.dueDay) }}</dd>
+          </div>
+        </dl>
+
+        @if (lease.notes; as notes) {
+          <div class="mt-4 border-t border-border pt-3">
+            <h3 class="text-[12px] font-medium text-muted">Notes</h3>
+            <p class="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-body">{{ notes }}</p>
+          </div>
+        }
+      </section>
+
+      <section class="rounded-base border border-border bg-background p-4" aria-labelledby="monthly-rent-heading">
+        <h2 id="monthly-rent-heading" class="text-[12px] font-semibold uppercase tracking-wide text-muted">
+          Monthly rent
+        </h2>
+        <p class="mt-1 font-heading text-2xl font-semibold text-heading tabular-nums">
+          {{ lease.monthlyRent | phpCurrency }}
+        </p>
+        @if (lease.rentCharges; as charges) {
+          @if (charges.length > 1) {
+            <div class="mt-3 flex flex-col gap-0.5 border-t border-border pt-3 pl-3">
+              @for (charge of charges; track $index) {
+                <div class="flex justify-between gap-3 text-[12.5px] text-muted">
+                  <span class="min-w-0 truncate">
+                    {{ charge.name }}{{ charge.description ? ' · ' + charge.description : '' }}
+                  </span>
+                  <span class="shrink-0 tabular-nums">{{ charge.amount | phpCurrency }}</span>
+                </div>
+              }
+            </div>
+          }
+        }
+      </section>
+    </div>
+
+    <section class="flex flex-col gap-2" aria-labelledby="lease-bills-heading">
+      <div class="flex items-baseline justify-between gap-2">
+        <h2 id="lease-bills-heading" class="font-heading text-base font-semibold text-heading">Billing history</h2>
+        <a
+          routerLink="/bills"
+          [queryParams]="{ leaseId: lease.id }"
+          class="rounded-[2px] text-[12.5px] font-medium text-primary hover:underline"
+        >View all in Bills</a>
+      </div>
+      @if (lease.bills.length === 0) {
+        <p class="rounded-base border border-dashed border-border px-4 py-6 text-center text-[13px] text-muted">
+          No bills yet — charges appear here once this lease is billed.
+        </p>
+      } @else {
+        <div class="overflow-x-auto rounded-base border border-border">
+          <table class="w-full border-collapse text-left">
+            <thead>
+              <tr class="border-b border-border bg-surface">
+                <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Due date</th>
+                <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Type</th>
+                <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Amount</th>
+                <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Status</th>
+                <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted sm:table-cell">Paid on</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (bill of lease.bills; track bill.id) {
+                <tr class="border-b border-border last:border-b-0">
+                  <td class="px-4 py-2.5 text-[13px] text-body">{{ bill.dueDate | date: 'MMM d, y' }}</td>
+                  <td class="px-4 py-2.5 text-[13px] text-body">{{ billTypeLabels[bill.type] }}</td>
+                  <td class="px-4 py-2.5 text-[13px] text-body tabular-nums">{{ bill.amount | phpCurrency }}</td>
+                  <td class="px-4 py-2.5">
+                    <app-status-badge [tone]="billStatus(bill).tone" [label]="billStatus(bill).label" />
+                  </td>
+                  <td class="hidden px-4 py-2.5 text-[13px] text-muted sm:table-cell">
+                    {{ bill.paidAt ? (bill.paidAt | date: 'MMM d, y') : '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

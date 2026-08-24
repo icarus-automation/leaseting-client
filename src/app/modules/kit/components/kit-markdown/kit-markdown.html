@@ -1,0 +1,48 @@
+<!-- One definition of an inline run, used by every block kind below. -->
+<ng-template #spans let-runs>
+  @for (run of runs; track $index) {
+    @if (run.bold) {
+      <strong class="font-semibold text-heading">{{ run.text }}</strong>
+    } @else if (run.italic) {
+      <em class="italic">{{ run.text }}</em>
+    } @else if (run.code) {
+      <code
+        class="rounded-[3px] bg-[color-mix(in_oklab,var(--primary)_10%,transparent)] px-1 py-px text-[12.5px] text-primary"
+        >{{ run.text }}</code
+      >
+    } @else {
+      {{ run.text }}
+    }
+  }
+</ng-template>
+
+@for (block of blocks(); track $index) {
+  @switch (block.kind) {
+    @case ('paragraph') {
+      <!-- pre-line, not pre-wrap: Kit puts single newlines inside a paragraph
+           for short dashed lines, and those should survive — but the
+           template's own indentation should not. -->
+      <p class="whitespace-pre-line">
+        <ng-container [ngTemplateOutlet]="spans" [ngTemplateOutletContext]="{ $implicit: block.spans }" />
+      </p>
+    }
+    @case ('bullets') {
+      <ul class="flex list-outside list-disc flex-col gap-1 pl-4 marker:text-muted" role="list">
+        @for (item of block.items; track $index) {
+          <li>
+            <ng-container [ngTemplateOutlet]="spans" [ngTemplateOutletContext]="{ $implicit: item }" />
+          </li>
+        }
+      </ul>
+    }
+    @case ('numbered') {
+      <ol class="flex list-outside list-decimal flex-col gap-1 pl-5 marker:text-muted" role="list">
+        @for (item of block.items; track $index) {
+          <li>
+            <ng-container [ngTemplateOutlet]="spans" [ngTemplateOutletContext]="{ $implicit: item }" />
+          </li>
+        }
+      </ol>
+    }
+  }
+}

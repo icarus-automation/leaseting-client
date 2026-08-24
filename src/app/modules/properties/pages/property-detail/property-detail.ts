@@ -118,11 +118,37 @@ export class PropertyDetailPage {
   readonly mapDrawHint = computed(() => {
     const editor = this.mapEditor();
     if (!editor) return '';
+    if (editor.tapToFill()) {
+      const rooms = editor.selectedRooms();
+      // Says the quiet part out loud: a unit is usually more than one room, and
+      // the second tap is the whole trick on a plan where the ensuite door is
+      // drawn shut.
+      if (rooms === 0) return ' · tap inside a room — its ensuite comes with it';
+      return ` · ${rooms} room${rooms === 1 ? '' : 's'} — tap another to add it, tap one again to drop it`;
+    }
     if (editor.closed()) return ' · drag corners to fine-tune — press Enter to save';
     return editor.points().length >= 3
       ? ' · click the first corner or press Enter to close & save'
       : ' · click the first corner to close';
   });
+
+  readonly tapToFillOn = computed(() => this.mapEditor()?.tapToFill() ?? false);
+
+  /**
+   * Tap-to-fill traces one room from the plan image itself — no model, no
+   * upload. It stays a mode rather than becoming the default because it only
+   * works on a plan with closed walls, and a manager who taps and gets nothing
+   * should still have the hand-drawing they already know underneath.
+   */
+  toggleTapToFill(): void {
+    const editor = this.mapEditor();
+    if (!editor) return;
+    editor.tapToFill.update((on) => !on);
+  }
+
+  onTraceFailed(message: string): void {
+    this.toast.add({ severity: 'warn', summary: 'Nothing traced', detail: message });
+  }
 
   constructor() {
     effect(() => {

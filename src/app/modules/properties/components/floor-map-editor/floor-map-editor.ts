@@ -18,7 +18,16 @@ import Konva from 'konva';
 import { PIcon } from '@primeicons/angular/p-icon';
 
 import type { FloorDetail, FloorUnitItem } from '../../../../core/models/property.types';
+import { PLAN_MIN_HEIGHT_PX, PLAN_VIEWPORT_RESERVE_PX } from '../../floor-plan.constants';
 import { unitTone } from '../../../../shared/utils/unit-tone.util';
+import { readPlanLuminance, type PlanLuminance } from '../../plan-trace/plan-luminance.util';
+import {
+  TRACE_FAILURE_MESSAGE,
+  indexPlan,
+  selectAt,
+  traceRegions,
+  type PlanIndex,
+} from '../../plan-trace/plan-trace';
 
 type NormPoint = [number, number];
 
@@ -45,8 +54,9 @@ const TOKEN_FALLBACKS: Record<string, string> = {
   template: `
     <div
       #container
-      class="relative w-full touch-none overflow-hidden rounded-base border border-border bg-white"
+      class="relative mx-auto w-full touch-none overflow-hidden rounded-base border border-border bg-white"
       [style.min-height.px]="120"
+      [style.max-width.px]="maxPlanWidth()"
     >
       @if (pcOnly()) {
         <div class="flex h-40 flex-col items-center justify-center gap-1.5 px-4 text-center">
@@ -84,11 +94,49 @@ export class FloorMapEditor {
   readonly clearRequested = output<void>();
   /** Canvas clicked with no target unit picked — parent nudges the unit picker. */
   readonly hintRequested = output<void>();
+  /** A tap-to-fill attempt that produced nothing usable, in the user's words. */
+  readonly traceFailed = output<string>();
+
+  /**
+   * Tap-to-fill mode: one click inside a room traces its outline.
+   *
+   * Off by default. It is an accelerator over hand-drawing, not a replacement
+   * — the result lands as an ordinary editable draft with its own undo entry,
+   * so a trace that comes back slightly wrong is nudged rather than redone.
+   */
+  readonly tapToFill = signal(false);
+  readonly tracing = signal(false);
+  /**
+   * How many rooms the current outline is made of.
+   *
+   * Surfaced because on most plans a unit is more than one enclosure — a
+   * bedroom and its ensuite are separated by a partition with the door drawn
+   * shut, so they are two sealed areas that no single fill can return
+   * together. The count is how the manager knows whether the bathroom came
+   * along, without having to squint at the outline.
+   */
+  readonly selectedRooms = signal(0);
 
   readonly points = signal<NormPoint[]>([]);
   readonly closed = signal(false);
   readonly imageReady = signal(false);
   readonly imageError = signal(false);
+
+  /** Plan height / width, from the loaded image. 0.6 until it arrives. */
+  private readonly aspect = signal(0.6);
+  private readonly viewportHeight = signal(0);
+
+  /**
+   * Widest the canvas may be before the plan runs off the bottom of the page.
+   * The box is centred at that width, so a portrait plan stays fully visible
+   * instead of forcing a scroll for every click while mapping.
+   */
+  readonly maxPlanWidth = computed(() => {
+    const viewport = this.viewportHeight();
+    if (viewport === 0) return null;
+    const budget = Math.max(PLAN_MIN_HEIGHT_PX, viewport - PLAN_VIEWPORT_RESERVE_PX);
+    return Math.round(budget / this.aspect());
+  });
 
   readonly canSave = computed(() => this.points().length >= 3);
   readonly canUndo = computed(() => this.undoStack().length > 0);
@@ -107,7 +155,23 @@ export class FloorMapEditor {
   private unitsLayer: Konva.Layer | null = null;
   private draftLayer: Konva.Layer | null = null;
   private planImage: HTMLImageElement | null = null;
-  private aspect = 0.6;
+  /**
+   * Greyscale pixels behind the plan, sampled once per image.
+   *
+   * Cached because reading them costs a full canvas draw and a getImageData,
+   * and a manager mapping a floor taps a dozen rooms in a row.
+   */
+  private planPixels: PlanLuminance | null = null;
+  /**
+   * The plan broken into rooms, built once per image.
+   *
+   * The expensive half — threshold, close, label every enclosure — does not
+   * depend on where anyone taps, and a manager mapping a floor taps a dozen
+   * rooms in a row.
+   */
+  private planIndex: PlanIndex | null = null;
+  /** Which rooms the current outline covers, for add/remove on tap. */
+  private selectedRegions = new Set<number>();
   private cursor: { x: number; y: number } | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private loadedUrl: string | null = null;
@@ -126,6 +190,10 @@ export class FloorMapEditor {
     afterNextRender(() => {
       this.pcOnly.set(window.innerWidth < MIN_SCREEN_WIDTH);
       if (this.pcOnly()) return;
+      this.viewportHeight.set(window.innerHeight);
+      const onResize = () => this.viewportHeight.set(window.innerHeight);
+      window.addEventListener('resize', onResize);
+      this.destroyRef.onDestroy(() => window.removeEventListener('resize', onResize));
       this.initStage();
       this.loadImage();
     });
@@ -146,6 +214,9 @@ export class FloorMapEditor {
       this.floor();
       if (!this.stage) return;
       untracked(() => {
+        // A different unit means a different outline; the rooms behind the old
+        // one are no longer anything a tap should toggle.
+        this.clearRoomSelection();
         this.seedDraftFromTarget(target);
         this.renderGrid();
         this.renderUnits();
@@ -175,6 +246,7 @@ export class FloorMapEditor {
   }
 
   undo(): void {
+    this.clearRoomSelection();
     const stack = this.undoStack();
     if (stack.length === 0) {
       if (this.closed()) {
@@ -192,6 +264,7 @@ export class FloorMapEditor {
   }
 
   redo(): void {
+    this.clearRoomSelection();
     const stack = this.redoStack();
     if (stack.length === 0) return;
     const next = stack[stack.length - 1];
@@ -202,6 +275,7 @@ export class FloorMapEditor {
   }
 
   reset(): void {
+    this.clearRoomSelection();
     this.undoStack.set([]);
     this.redoStack.set([]);
     this.points.set([]);
@@ -251,7 +325,10 @@ export class FloorMapEditor {
     image.crossOrigin = 'anonymous';
     image.onload = () => {
       this.planImage = image;
-      this.aspect = image.naturalHeight / image.naturalWidth;
+      this.planPixels = null;
+      this.planIndex = null;
+      this.clearRoomSelection();
+      this.aspect.set(image.naturalHeight / image.naturalWidth);
       this.imageReady.set(true);
       this.fitStage();
     };
@@ -263,12 +340,17 @@ export class FloorMapEditor {
     image.src = url;
   }
 
+  /**
+   * The canvas fills its box, and the box is already capped by maxPlanWidth —
+   * so the stage keeps the image's exact aspect and normalized (0-1)
+   * coordinates go on mapping 1:1 whatever the viewport does.
+   */
   private fitStage(): void {
     if (!this.stage || !this.imageLayer) return;
     const host = this.container().nativeElement;
     const width = host.clientWidth;
     if (width === 0) return;
-    const height = Math.round(width * this.aspect);
+    const height = Math.round(width * this.aspect());
     this.stage.size({ width, height });
 
     this.imageLayer.destroyChildren();
@@ -358,10 +440,17 @@ export class FloorMapEditor {
       this.hintRequested.emit();
       return;
     }
-    if (this.closed()) return;
-
     const pos = this.stagePointer();
     if (!pos || !this.stage) return;
+
+    // Tap-to-fill replaces the whole draft, so it is allowed on a closed shape
+    // — retracing a room you already outlined is the common correction.
+    if (this.tapToFill()) {
+      this.traceAt(pos);
+      return;
+    }
+
+    if (this.closed()) return;
 
     const pts = this.points();
     if (pts.length >= 3) {
@@ -377,8 +466,103 @@ export class FloorMapEditor {
     this.points.update((current) => [...current, this.toNorm(pos)]);
   }
 
+  /**
+   * One tap inside a room, turned into its outline.
+   *
+   * The result goes through the same undo stack as a hand-drawn shape, so a
+   * trace is always one Ctrl-Z from whatever was there before. Failures are
+   * reported rather than swallowed: a tap that silently does nothing reads as
+   * a broken canvas, and the reason is usually something the person can fix on
+   * their next tap.
+   */
+  /**
+   * One tap, turned into part of a unit's outline.
+   *
+   * Tapping an unselected room adds it — along with any sub-room that belongs
+   * with it, which is how a bedroom brings its ensuite. Tapping a room already
+   * in the outline takes it back out. That is the whole interaction, and it is
+   * deliberately the same two gestures on every plan: the automatic half is an
+   * accelerator, not a requirement, so a drawing whose conventions this code
+   * has never seen still maps in two taps per room instead of eight drags.
+   *
+   * Nothing is committed until the trace succeeds, so a rejected selection
+   * leaves the outline exactly as it was.
+   */
+  private traceAt(pos: { x: number; y: number }): void {
+    const index = this.planIndexOrBuild();
+    if (!index || !this.stage) {
+      this.traceFailed.emit("Couldn't read the plan image. Trace this one by hand.");
+      return;
+    }
+
+    const [normX, normY] = this.toNorm(pos);
+    const selection = selectAt(index, normX * index.width, normY * index.height);
+    if (!selection) {
+      this.traceFailed.emit(TRACE_FAILURE_MESSAGE['on-a-line']);
+      return;
+    }
+
+    const wanted = new Set(this.selectedRegions);
+    const removing = wanted.has(selection.room.id);
+    for (const id of selection.regionIds) {
+      if (removing) wanted.delete(id);
+      else wanted.add(id);
+    }
+
+    if (wanted.size === 0) {
+      this.pushUndo();
+      this.selectedRegions = wanted;
+      this.selectedRooms.set(0);
+      this.points.set([]);
+      this.closed.set(false);
+      return;
+    }
+
+    this.tracing.set(true);
+    const result = traceRegions(index, [...wanted]);
+    this.tracing.set(false);
+
+    if (!result.ok) {
+      this.traceFailed.emit(TRACE_FAILURE_MESSAGE[result.reason]);
+      return;
+    }
+
+    this.pushUndo();
+    this.selectedRegions = wanted;
+    this.selectedRooms.set(wanted.size);
+    this.points.set(result.points);
+    this.closed.set(true);
+  }
+
+  /**
+   * Forgotten whenever the outline stops being the one these rooms produced —
+   * an undo, a reset, a different unit. Without that, the next tap would
+   * toggle a room out of a shape it is no longer part of.
+   */
+  private clearRoomSelection(): void {
+    this.selectedRegions = new Set();
+    this.selectedRooms.set(0);
+  }
+
+  private planIndexOrBuild(): PlanIndex | null {
+    if (this.planIndex) return this.planIndex;
+    if (!this.planImage) return null;
+
+    this.planPixels ??= readPlanLuminance(this.planImage);
+    if (!this.planPixels) return null;
+
+    this.planIndex = indexPlan(
+      this.planPixels.luminance,
+      this.planPixels.width,
+      this.planPixels.height,
+    );
+    return this.planIndex;
+  }
+
   private onStageMouseMove(): void {
-    if (this.closed() || this.points().length === 0) return;
+    // No rubber band in tap-to-fill: there is no partial shape being extended,
+    // and a line chasing the cursor would say otherwise.
+    if (this.tapToFill() || this.closed() || this.points().length === 0) return;
     this.cursor = this.stagePointer();
     this.renderDraft();
   }

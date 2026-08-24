@@ -1,0 +1,35 @@
+<section class="overflow-hidden rounded-base border border-border bg-background" aria-label="Statement lines">
+  <ul class="m-0 list-none p-0">
+    @for (line of lines(); track $index) {
+      <li class="border-b border-border px-3 py-2.5 last:border-b-0">
+        <div class="flex items-start justify-between gap-4">
+          <span class="min-w-0">
+            <span class="block text-[13px] font-medium text-heading">{{ line.label }}</span>
+            @if (line.kind === 'flat') {
+              <span class="block text-[12px] text-muted">{{ line.description }}</span>
+            } @else {
+              <span class="block text-[12px] text-muted">{{ line.coveredPeriod }}</span>
+            }
+          </span>
+          <span class="shrink-0 text-[13px] font-medium text-heading tabular-nums">
+            {{ line.netDue | phpCurrency }}
+          </span>
+        </div>
+
+        @if (line.kind === 'flat') {
+          @if (line.breakdown; as breakdown) {
+            <div class="mt-2 flex flex-col gap-0.5 border-l border-border pl-3">
+              <p class="mb-0.5 text-[11.5px] font-medium text-muted">Full monthly charge (before payments)</p>
+              @for (charge of breakdown; track $index) {
+                <div class="flex justify-between gap-3 text-[12.5px] text-muted">
+                  <span class="min-w-0 truncate">{{ charge.label }}</span>
+                  <span class="shrink-0 tabular-nums">{{ charge.amount | phpCurrency }}</span>
+                </div>
+              }
+            </div>
+          }
+        }
+      </li>
+    }
+  </ul>
+</section>

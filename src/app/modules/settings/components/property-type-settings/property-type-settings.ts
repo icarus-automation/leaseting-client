@@ -16,6 +16,7 @@ import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { PropertyTypeResponse } from '../../../../core/models/property-type.types';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
+import { sortLookupRows } from '../../../../shared/utils/lookup-order.util';
 import { PropertyTypesService } from '../../services/property-types.service';
 
 @Component({
@@ -196,15 +197,10 @@ export class PropertyTypeSettings {
       });
   }
 
-  /** Insert or update, keeping the list's active-first alphabetical order. */
+  /** Insert or update, keeping the order the server would have returned. */
   private replaceItem(item: PropertyTypeResponse): void {
-    this.items.update((items) => {
-      const next = (items ?? []).filter((existing) => existing.id !== item.id);
-      next.push(item);
-      next.sort(
-        (a, b) => Number(a.isArchived) - Number(b.isArchived) || a.name.localeCompare(b.name),
-      );
-      return next;
-    });
+    this.items.update((items) =>
+      sortLookupRows([...(items ?? []).filter((existing) => existing.id !== item.id), item]),
+    );
   }
 }

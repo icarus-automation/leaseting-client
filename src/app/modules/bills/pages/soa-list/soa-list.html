@@ -87,6 +87,15 @@
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end gap-1">
+                  <button
+                    type="button"
+                    class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                    [attr.aria-expanded]="expandedId() === statement.id"
+                    [attr.aria-controls]="'soa-lines-' + statement.id"
+                    (click)="toggleDetails(statement.id)"
+                  >
+                    {{ expandedId() === statement.id ? 'Hide details' : 'Details' }}
+                  </button>
                   <a
                     [href]="downloadUrl(statement)"
                     class="inline-flex items-center gap-1.5 rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
@@ -107,6 +116,16 @@
                 </div>
               </td>
             </tr>
+            @if (expandedId() === statement.id) {
+              <tr class="border-b border-border last:border-b-0 bg-surface/50">
+                <td colspan="6" class="px-4 py-3">
+                  <div [id]="'soa-lines-' + statement.id" class="max-w-2xl">
+                    <p class="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">Statement details</p>
+                    <app-soa-lines [lines]="statement.lines" />
+                  </div>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>

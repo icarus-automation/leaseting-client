@@ -1,0 +1,98 @@
+<form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()">
+  @if (errorMessage(); as message) {
+    <p class="rounded-base border border-destructive/30 bg-muted-destructive px-3 py-2 text-[13px] text-destructive">
+      {{ message }}
+    </p>
+  }
+
+  <div class="flex flex-col gap-1.5">
+    <label class="text-[13px] font-medium text-heading" for="ob-property">Property</label>
+    <p-select
+      inputId="ob-property"
+      formControlName="propertyId"
+      [options]="propertyOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [filter]="true"
+      [loading]="loadingUnits()"
+      placeholder="Which property is this lease for?"
+      styleClass="w-full"
+      appendTo="body"
+    />
+    @if (form.controls.propertyId.invalid && form.controls.propertyId.touched) {
+      <p class="text-[12px] text-destructive">Pick the property this tenant is moving into.</p>
+    } @else if (!loadingUnits() && propertyOptions().length === 0) {
+      <p class="text-[12px] text-muted">No property has a vacant unit right now.</p>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label class="text-[13px] font-medium text-heading" for="ob-unit">Unit</label>
+    <p-select
+      inputId="ob-unit"
+      formControlName="unitId"
+      [options]="unitOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [filter]="true"
+      [disabled]="!form.controls.propertyId.value"
+      placeholder="Choose a vacant unit"
+      styleClass="w-full"
+      appendTo="body"
+    />
+    @if (form.controls.unitId.invalid && form.controls.unitId.touched) {
+      <p class="text-[12px] text-destructive">Pick the unit this tenant is moving into.</p>
+    } @else if (askingRent(); as rent) {
+      <p class="text-[12px] text-muted">Asking rent {{ rent | phpCurrency }}/mo — you set the actual charges next.</p>
+    }
+  </div>
+
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-start">Lease starts</label>
+      <p-datepicker
+        inputId="ob-start"
+        formControlName="startDate"
+        dateFormat="M d, yy"
+        [showIcon]="true"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="ob-end">Lease ends</label>
+      <p-datepicker
+        inputId="ob-end"
+        formControlName="endDate"
+        dateFormat="M d, yy"
+        [showIcon]="true"
+        appendTo="body"
+        styleClass="w-full"
+      />
+      @if (termLabel(); as term) {
+        <p class="text-[12px] text-muted">{{ term }} term.</p>
+      } @else if (form.controls.startDate.value && !form.controls.endDate.value) {
+        <button
+          type="button"
+          class="w-fit rounded-[2px] text-[12px] font-medium text-primary hover:underline"
+          (click)="suggestOneYear()"
+        >
+          Use one year
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="flex items-center justify-end border-t border-border pt-4">
+    <button
+      type="submit"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="busy()"
+    >
+      <span>{{ busy() ? 'Saving…' : 'Next: Tenant' }}</span>
+      @if (!busy()) {
+        <svg pIcon="arrow-right" [size]="12" aria-hidden="true"></svg>
+      }
+    </button>
+  </div>
+</form>

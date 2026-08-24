@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+
 import { Observable } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
@@ -20,6 +21,7 @@ import type {
 } from '../../../core/models/bill.types';
 import type { BillType } from '../../../core/models/enums';
 import type { ManualReminderResult } from '../../../core/models/report.types';
+import { toHttpParams } from '../../../shared/utils/http-params.util';
 
 @Injectable({ providedIn: 'root' })
 export class BillsService {
@@ -27,16 +29,7 @@ export class BillsService {
   private readonly base = `${API_BASE_URL}/bills`;
 
   list(filters: BillListFilters = {}): Observable<Paginated<BillListItem>> {
-    let params = new HttpParams()
-      .set('page', filters.page ?? 1)
-      .set('limit', filters.limit ?? 10);
-    if (filters.leaseId) params = params.set('leaseId', filters.leaseId);
-    if (filters.tenantId) params = params.set('tenantId', filters.tenantId);
-    if (filters.status) params = params.set('status', filters.status);
-    if (filters.type) params = params.set('type', filters.type);
-    if (filters.dueToday) params = params.set('dueToday', true);
-    if (filters.overdue) params = params.set('overdue', true);
-    if (filters.hasReading) params = params.set('hasReading', true);
+    const params = toHttpParams({ page: 1, limit: 10, ...filters });
     return this.http.get<Paginated<BillListItem>>(this.base, { params });
   }
 

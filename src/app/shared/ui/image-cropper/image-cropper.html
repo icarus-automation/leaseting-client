@@ -1,0 +1,97 @@
+<div class="flex flex-col gap-3 rounded-base border border-border bg-surface p-3.5">
+  <div class="flex flex-col gap-0.5">
+    <span class="text-[13px] font-medium text-heading">{{ title() }}</span>
+    <span class="text-[12px] leading-relaxed text-muted">{{ hint() }}</span>
+  </div>
+
+  @if (loadError()) {
+    <p class="rounded-base border border-destructive/30 bg-muted-destructive px-3 py-2 text-[13px] text-destructive" role="alert">
+      Couldn't read that image. Pick a different file.
+    </p>
+  } @else if (sourceUrl(); as url) {
+    <div class="flex justify-center rounded-base bg-[color-mix(in_oklab,var(--text-heading)_6%,transparent)] p-3">
+      <!--
+        The stage is sized by the image itself, so the selection overlay can be
+        positioned in plain percentages of it and stays aligned at any width.
+      -->
+      <div class="relative w-fit select-none">
+        <img
+          #sourceImage
+          [src]="url"
+          alt="Image being cropped"
+          class="block max-h-[42vh] w-auto max-w-full"
+          draggable="false"
+          (load)="onImageLoad($event)"
+          (error)="onImageError()"
+        />
+
+        @if (rectStyle(); as box) {
+          <!-- Dim everything the crop will discard. -->
+          <div
+            class="pointer-events-none absolute inset-0 bg-[color-mix(in_oklab,var(--text-heading)_45%,transparent)]"
+            aria-hidden="true"
+            [style.clip-path]="maskPath()"
+          ></div>
+
+          <div
+            class="absolute cursor-move touch-none rounded-[2px] outline-none ring-2 ring-primary ring-offset-0 focus-visible:ring-[3px] focus-visible:ring-ring"
+            role="application"
+            tabindex="0"
+            aria-label="Crop selection — arrow keys move it, shift and arrow keys resize it"
+            [style.left]="box.left"
+            [style.top]="box.top"
+            [style.width]="box.width"
+            [style.height]="box.height"
+            (pointerdown)="startDrag($event, 'move')"
+            (pointermove)="onDragMove($event)"
+            (pointerup)="endDrag($event)"
+            (pointercancel)="endDrag($event)"
+            (keydown)="onSelectionKeydown($event)"
+          >
+            <!-- Thirds guides: the cheapest way to judge a crop. -->
+            <div class="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3" aria-hidden="true">
+              @for (cell of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track cell) {
+                <span class="border border-[color-mix(in_oklab,white_35%,transparent)]"></span>
+              }
+            </div>
+
+            @for (handle of handles; track handle.key) {
+              <span
+                class="absolute h-3 w-3 touch-none rounded-[2px] border border-primary bg-background"
+                [class]="handle.position"
+                aria-hidden="true"
+                (pointerdown)="startDrag($event, handle.key)"
+                (pointermove)="onDragMove($event)"
+                (pointerup)="endDrag($event)"
+                (pointercancel)="endDrag($event)"
+              ></span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="flex items-center justify-end gap-2">
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="cancel()"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="!ready() || working() || loadError()"
+      (click)="confirm()"
+    >
+      @if (working()) {
+        <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+      } @else {
+        <svg pIcon="check" [size]="12" aria-hidden="true"></svg>
+      }
+      <span>{{ confirmLabel() }}</span>
+    </button>
+  </div>
+</div>

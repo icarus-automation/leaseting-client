@@ -15,10 +15,13 @@ import { KitService } from '../../../core/kit/kit.service';
 import {
   KIT_SEVERITY_ICONS,
   KIT_SEVERITY_LABELS,
+  KIT_SEVERITY_TONES,
   type KitEvent,
+  type KitSeverity,
   kitEventLink,
 } from '../../../core/kit/kit.model';
 import { KitHead } from './kit-head';
+import { KitSetAside } from './kit-set-aside/kit-set-aside';
 
 /**
  * Kit, everywhere else in the app.
@@ -33,7 +36,7 @@ import { KitHead } from './kit-head';
  */
 @Component({
   selector: 'app-kit-badge',
-  imports: [RouterLink, PIcon, KitHead],
+  imports: [RouterLink, PIcon, KitHead, KitSetAside],
   templateUrl: './kit-badge.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -51,12 +54,20 @@ export class KitBadge {
   readonly severityLabels = KIT_SEVERITY_LABELS;
   readonly severityIcons = KIT_SEVERITY_ICONS;
 
+  /** Icon colour by severity. The label beside it still carries the meaning. */
+  severityToneClass(severity: KitSeverity): string {
+    return KIT_SEVERITY_TONES[severity];
+  }
+
   readonly open = signal(false);
   readonly loading = this.kit.loading;
   readonly celebrating = this.kit.celebrating;
   readonly mood = this.kit.mood;
 
   readonly count = computed(() => this.kit.events().length);
+  readonly setAsideCount = this.kit.setAsideCount;
+  /** Kit may only claim everything is done when nothing is merely set aside. */
+  readonly allClear = this.kit.allClear;
 
   /** Event plus its deep link, resolved once per change rather than per binding. */
   readonly items = computed(() =>
@@ -112,8 +123,9 @@ export class KitBadge {
 
   dismiss(event: KitEvent): void {
     this.kit.dismiss(event);
-    // Nothing left to look at — get out of the way rather than showing an
-    // empty panel the user has to close by hand.
-    if (this.count() === 0) this.close();
+    // Stay open when the last item was only set aside: closing on that would
+    // hide the one control that undoes it, moments after the user learned it
+    // exists.
+    if (this.allClear()) this.close();
   }
 }

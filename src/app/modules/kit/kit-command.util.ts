@@ -1,4 +1,5 @@
 import type { KitChatMessage } from './kit-chat.types';
+import { type MarkdownBlock, parseMarkdown } from './kit-markdown.util';
 
 /**
  * Where the `/document` trigger is recognised on the client.
@@ -27,16 +28,32 @@ export function splitCommand(text: string): CommandParts {
   return { lead: match[1], command: match[2], body: text.slice(match[0].length) };
 }
 
-/** A transcript row with its command split out for rendering. */
-export type KitChatMessageView = KitChatMessage & CommandParts;
+/** A transcript row, prepared for rendering. */
+export type KitChatMessageView = KitChatMessage &
+  CommandParts & {
+    /** Kit's reply as blocks. Empty for the user's own turns. */
+    blocks: MarkdownBlock[];
+  };
 
 /**
- * Only the user's own turns carry a command — Kit's replies are prose, and
- * running the pattern over them would light up a sentence that merely opens
- * with the word.
+ * The two roles are prepared differently because they are different text.
+ *
+ * The user's turn is echoed back exactly as typed, with only the `/document`
+ * trigger split out so it can be tinted — nothing else about it is
+ * interpreted, which is what makes the echo trustworthy.
+ *
+ * Kit's turn is Markdown, and is parsed. Running the command pattern over it
+ * too would light up a reply that merely opens with the word.
  */
 export function toMessageView(message: KitChatMessage): KitChatMessageView {
-  return message.role === 'USER'
-    ? { ...message, ...splitCommand(message.content) }
-    : { ...message, lead: '', command: null, body: message.content };
+  if (message.role === 'USER') {
+    return { ...message, ...splitCommand(message.content), blocks: [] };
+  }
+  return {
+    ...message,
+    lead: '',
+    command: null,
+    body: message.content,
+    blocks: message.content ? parseMarkdown(message.content) : [],
+  };
 }

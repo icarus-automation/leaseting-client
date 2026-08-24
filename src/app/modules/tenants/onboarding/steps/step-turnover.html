@@ -13,24 +13,40 @@
         <div class="flex items-center justify-between gap-4">
           <span class="text-[13px] text-muted">Rent</span>
           <span class="text-right text-[13px] font-medium text-heading">
-            {{ recap.monthlyRent | phpCurrency }} / mo · due every {{ recap.dueDay }}<sup>th</sup>
+            {{ recap.monthlyRent | phpCurrency }} / mo · due every {{ recap.dueDayLabel }}
           </span>
         </div>
-        <div class="flex items-center justify-between gap-4">
-          <span class="text-[13px] text-muted">Advance bill</span>
-          <span class="text-right text-[13px] font-medium text-heading">
-            {{ recap.advanceDue | phpCurrency }}
-            <span class="font-normal text-muted">· {{ recap.advancePaid | phpCurrency }} received</span>
-          </span>
-        </div>
-        <div class="flex items-center justify-between gap-4">
-          <span class="text-[13px] text-muted">Deposit bill</span>
-          <span class="text-right text-[13px] font-medium text-heading">
-            {{ recap.depositDue | phpCurrency }}
-            <span class="font-normal text-muted">· {{ recap.depositPaid | phpCurrency }} received</span>
-          </span>
-        </div>
+        @if (recap.advanceDue > 0) {
+          <div class="flex items-center justify-between gap-4">
+            <span class="text-[13px] text-muted">Advance bill ({{ recap.advanceMonths }} mo)</span>
+            <span class="text-right text-[13px] font-medium text-heading">
+              {{ recap.advanceDue | phpCurrency }}
+              <span class="font-normal text-muted">· {{ recap.advancePaid | phpCurrency }} received</span>
+            </span>
+          </div>
+        }
+        @if (recap.depositDue > 0) {
+          <div class="flex items-center justify-between gap-4">
+            <span class="text-[13px] text-muted">Deposit bill ({{ recap.depositMonths }} mo)</span>
+            <span class="text-right text-[13px] font-medium text-heading">
+              {{ recap.depositDue | phpCurrency }}
+              <span class="font-normal text-muted">· {{ recap.depositPaid | phpCurrency }} received</span>
+            </span>
+          </div>
+        }
       </div>
+
+      <!-- The lines behind the rent figure, so nothing is signed off unseen. -->
+      @if (recap.charges.length > 1) {
+        <ul class="m-0 flex list-none flex-col gap-0.5 border-t border-border p-0 pt-2.5">
+          @for (charge of recap.charges; track $index) {
+            <li class="flex justify-between gap-4 text-[12.5px]">
+              <span class="text-muted">{{ charge.name }}{{ charge.description ? ' · ' + charge.description : '' }}</span>
+              <span class="font-medium text-body">{{ charge.amount | phpCurrency }} / mo</span>
+            </li>
+          }
+        </ul>
+      }
     </div>
   }
 

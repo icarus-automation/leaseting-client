@@ -21,6 +21,7 @@ import type { KitMood } from '../../core/kit/kit.model';
 import { apiErrorMessage } from '../../core/models/api.types';
 import { KitHead } from '../../shared/ui/kit/kit-head';
 import { KitDocumentCard } from './components/kit-document-card/kit-document-card';
+import { KitMarkdown } from './components/kit-markdown/kit-markdown';
 import type { KitChatMessage, KitConversationSummary, KitDocumentTurn } from './kit-chat.types';
 import { splitCommand, toMessageView } from './kit-command.util';
 import { KitChatService } from './services/kit-chat.service';
@@ -55,7 +56,7 @@ const MAX_POLLS = 110;
 
 @Component({
   selector: 'app-kit-chat',
-  imports: [DatePipe, RouterLink, PIcon, KitHead, KitDocumentCard],
+  imports: [DatePipe, RouterLink, PIcon, KitHead, KitDocumentCard, KitMarkdown],
   templateUrl: './kit-chat.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -298,6 +299,16 @@ export class KitChat {
         error: () => this.watched.delete(documentId),
         complete: () => this.watched.delete(documentId),
       });
+  }
+
+  /**
+   * A refinement produced a new turn. Appended and watched exactly like any
+   * other document request, because on the server it is one.
+   */
+  onRefined(message: KitChatMessage): void {
+    this.messages.update((messages) => [...messages, message]);
+    this.refreshHistory();
+    this.watchPendingDocuments();
   }
 
   /** Replaces the turn in place, keeping its position in the transcript. */

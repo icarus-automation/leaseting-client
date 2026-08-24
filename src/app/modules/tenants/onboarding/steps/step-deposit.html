@@ -1,0 +1,150 @@
+<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="submit()">
+  @if (errorMessage(); as message) {
+    <p class="rounded-base border border-destructive/30 bg-muted-destructive px-3 py-2 text-[13px] text-destructive">
+      {{ message }}
+    </p>
+  }
+
+  <p class="text-[13px] text-muted">
+    Both are counted in months of the
+    <span class="font-medium text-body">{{ monthlyRent() | phpCurrency }}</span> monthly rent you set in
+    lease terms — there is nothing to re-enter here.
+  </p>
+
+  <!-- Advance rent — rent, collected early. -->
+  <section class="flex flex-col gap-3">
+    <div>
+      <h3 class="text-[13px] font-medium text-heading">Will you be collecting advance rent?</h3>
+    </div>
+
+    <div class="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Collecting advance rent">
+      <button
+        type="button"
+        role="radio"
+        class="flex h-[5.5rem] w-28 flex-col items-center justify-center gap-1.5 rounded-base border bg-background text-[13px] font-medium transition-[border-color,box-shadow,color] duration-150 ease-out aria-checked:ring-[3px] aria-checked:ring-ring hover:border-border-strong motion-reduce:transition-none"
+        [class]="collectsAdvance() ? 'border-primary text-primary' : 'border-border text-body'"
+        [attr.aria-checked]="collectsAdvance()"
+        (click)="setCollectsAdvance(true)"
+      >
+        <svg pIcon="calendar" [size]="19" aria-hidden="true"></svg>
+        <span>Yes</span>
+      </button>
+      <button
+        type="button"
+        role="radio"
+        class="flex h-[5.5rem] w-28 flex-col items-center justify-center gap-1.5 rounded-base border bg-background text-[13px] font-medium transition-[border-color,box-shadow,color] duration-150 ease-out aria-checked:ring-[3px] aria-checked:ring-ring hover:border-border-strong motion-reduce:transition-none"
+        [class]="!collectsAdvance() ? 'border-primary text-primary' : 'border-border text-body'"
+        [attr.aria-checked]="!collectsAdvance()"
+        (click)="setCollectsAdvance(false)"
+      >
+        <svg pIcon="ban" [size]="19" aria-hidden="true"></svg>
+        <span>No</span>
+      </button>
+    </div>
+
+    @if (collectsAdvance()) {
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="text-[13px] text-muted" for="ob-advance">How many months?</label>
+        <p-inputnumber
+          inputId="ob-advance"
+          formControlName="advanceMonths"
+          [min]="1"
+          [max]="12"
+          [showButtons]="true"
+          styleClass="w-28"
+          inputStyleClass="w-full"
+        />
+        <span class="text-[13px] text-muted">
+          = <span class="font-medium text-body">{{ advanceTotal() | phpCurrency }}</span>
+        </span>
+      </div>
+    }
+  </section>
+
+  <!-- Security deposit — same question, same shape. -->
+  <section class="flex flex-col gap-3 border-t border-border pt-4">
+    <div>
+      <h3 class="text-[13px] font-medium text-heading">Will you be holding a security deposit?</h3>
+    </div>
+
+    <div class="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Holding a security deposit">
+      <button
+        type="button"
+        role="radio"
+        class="flex h-[5.5rem] w-28 flex-col items-center justify-center gap-1.5 rounded-base border bg-background text-[13px] font-medium transition-[border-color,box-shadow,color] duration-150 ease-out aria-checked:ring-[3px] aria-checked:ring-ring hover:border-border-strong motion-reduce:transition-none"
+        [class]="holdsDeposit() ? 'border-primary text-primary' : 'border-border text-body'"
+        [attr.aria-checked]="holdsDeposit()"
+        (click)="setHoldsDeposit(true)"
+      >
+        <svg pIcon="shield" [size]="19" aria-hidden="true"></svg>
+        <span>Yes</span>
+      </button>
+      <button
+        type="button"
+        role="radio"
+        class="flex h-[5.5rem] w-28 flex-col items-center justify-center gap-1.5 rounded-base border bg-background text-[13px] font-medium transition-[border-color,box-shadow,color] duration-150 ease-out aria-checked:ring-[3px] aria-checked:ring-ring hover:border-border-strong motion-reduce:transition-none"
+        [class]="!holdsDeposit() ? 'border-primary text-primary' : 'border-border text-body'"
+        [attr.aria-checked]="!holdsDeposit()"
+        (click)="setHoldsDeposit(false)"
+      >
+        <svg pIcon="ban" [size]="19" aria-hidden="true"></svg>
+        <span>No</span>
+      </button>
+    </div>
+
+    @if (holdsDeposit()) {
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="text-[13px] text-muted" for="ob-deposit">How many months?</label>
+        <p-inputnumber
+          inputId="ob-deposit"
+          formControlName="depositMonths"
+          [min]="1"
+          [max]="12"
+          [showButtons]="true"
+          styleClass="w-28"
+          inputStyleClass="w-full"
+        />
+        <span class="text-[13px] text-muted">
+          = <span class="font-medium text-body">{{ depositTotal() | phpCurrency }}</span>
+        </span>
+      </div>
+    }
+  </section>
+
+  <!-- What the move-in payment step will bill against. -->
+  <div class="grid gap-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-3">
+    <div class="flex flex-col">
+      <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Advance</span>
+      <span class="font-heading text-[15px] font-semibold text-heading">{{ advanceTotal() | phpCurrency }}</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Deposit</span>
+      <span class="font-heading text-[15px] font-semibold text-heading">{{ depositTotal() | phpCurrency }}</span>
+    </div>
+    <div class="flex flex-col sm:items-end">
+      <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Due at move-in</span>
+      <span class="font-heading text-[15px] font-semibold text-primary">{{ moveInTotal() | phpCurrency }}</span>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between border-t border-border pt-4">
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="back.emit()"
+    >
+      <svg pIcon="arrow-left" [size]="12" aria-hidden="true"></svg>
+      <span>Back</span>
+    </button>
+    <button
+      type="submit"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="busy()"
+    >
+      <span>{{ busy() ? 'Saving…' : 'Next: Contract' }}</span>
+      @if (!busy()) {
+        <svg pIcon="arrow-right" [size]="12" aria-hidden="true"></svg>
+      }
+    </button>
+  </div>
+</form>

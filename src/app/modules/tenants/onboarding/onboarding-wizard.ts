@@ -17,18 +17,24 @@ import { apiErrorMessage } from '../../../core/models/api.types';
 import {
   ONBOARDING_STEP_LABELS,
   ONBOARDING_STEP_ORDER,
+  type LeaseTermsStepData,
   type OnboardingDetail,
   type OnboardingStepData,
   type OnboardingStepKey,
+  type OverviewStepData,
   type TurnoverStepData,
 } from '../../../core/models/onboarding.types';
+import { PhpCurrencyPipe } from '../../../shared/pipes/php-currency-pipe';
 import { ErrorBanner } from '../../../shared/ui/error-banner/error-banner';
 import { Skeleton } from '../../../shared/ui/skeleton/skeleton';
 import { Stepper, type StepperStep } from '../../../shared/ui/stepper/stepper';
+import { leaseTermLabel } from '../../../shared/utils/date.util';
 import { OnboardingsService } from '../services/onboardings.service';
 import { StepContract } from './steps/step-contract';
+import { StepDeposit } from './steps/step-deposit';
 import { StepLeaseTerms } from './steps/step-lease-terms';
 import { StepMoveInPayment } from './steps/step-move-in-payment';
+import { StepOverview } from './steps/step-overview';
 import { StepRequirements } from './steps/step-requirements';
 import { StepTenant } from './steps/step-tenant';
 import { StepTurnover } from './steps/step-turnover';
@@ -44,12 +50,15 @@ import { StepTurnover } from './steps/step-turnover';
   imports: [
     RouterLink,
     PIcon,
+    PhpCurrencyPipe,
     ErrorBanner,
     Skeleton,
     Stepper,
+    StepOverview,
     StepTenant,
     StepRequirements,
     StepLeaseTerms,
+    StepDeposit,
     StepContract,
     StepMoveInPayment,
     StepTurnover,
@@ -69,7 +78,7 @@ export class OnboardingWizard {
   readonly id = computed(() => this.params().get('id') ?? '');
 
   readonly detail = signal<OnboardingDetail | null>(null);
-  readonly activeStep = signal<OnboardingStepKey>('tenant');
+  readonly activeStep = signal<OnboardingStepKey>('overview');
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
   readonly saving = signal(false);
@@ -94,6 +103,25 @@ export class OnboardingWizard {
   readonly tenantName = computed(() => {
     const tenant = this.detail()?.tenant;
     return tenant ? `${tenant.firstName} ${tenant.lastName}` : null;
+  });
+
+  /** Context rail: the term agreed in the Overview step, once it exists. */
+  readonly leaseTerm = computed(() => {
+    const saved = this.detail()?.stepsState.overview?.data as OverviewStepData | undefined;
+    if (!saved?.startDate || !saved.endDate) return null;
+    const format = (iso: string) =>
+      new Date(iso).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+    return {
+      range: `${format(saved.startDate)} – ${format(saved.endDate)}`,
+      length: leaseTermLabel(saved.startDate, saved.endDate),
+    };
+  });
+
+  /** Context rail: the sum of the rent charges, once the terms step is saved. */
+  readonly monthlyRent = computed(() => {
+    const saved = this.detail()?.stepsState['lease-terms']?.data as LeaseTermsStepData | undefined;
+    if (!saved?.charges?.length) return null;
+    return saved.charges.reduce((total, charge) => total + charge.amount, 0);
   });
 
   constructor() {

@@ -1,11 +1,22 @@
 <div class="flex flex-col gap-4">
   <p class="text-[13px] text-muted">
-    Collect the move-in requirements. Attached files are labelled and filed on the tenant's profile automatically.
+    Collect the move-in requirements. Attached files are labelled and filed on the tenant's profile
+    automatically.
   </p>
 
   @if (errorMessage(); as message) {
     <p class="rounded-base border border-destructive/30 bg-muted-destructive px-3 py-2 text-[13px] text-destructive">
       {{ message }}
+    </p>
+  }
+
+  @if (carriedOverCount() > 0) {
+    <p class="flex items-start gap-2 rounded-base border border-[color-mix(in_oklab,var(--success)_28%,transparent)] bg-muted-success px-3 py-2.5 text-[12.5px] text-body">
+      <svg pIcon="history" class="mt-px shrink-0 text-success" [size]="13" aria-hidden="true"></svg>
+      <span>
+        {{ carriedOverCount() === 1 ? '1 requirement is' : carriedOverCount() + ' requirements are' }}
+        already on file from a previous onboarding — ticked below. Untick anything that needs a fresh copy.
+      </span>
     </p>
   }
 
@@ -28,6 +39,9 @@
                 @if (item.required) {
                   <span class="ml-1 rounded-full bg-muted-destructive px-1.5 py-px text-[10.5px] font-semibold text-destructive">Required</span>
                 }
+                @if (filedFor(item.key).length > 0) {
+                  <span class="ml-1 rounded-full bg-muted-success px-1.5 py-px text-[10.5px] font-semibold text-success">On file</span>
+                }
               </span>
               <span class="text-[12px] text-muted">{{ item.hint }}</span>
             </span>
@@ -43,12 +57,20 @@
               <span>Uploading…</span>
             } @else {
               <svg pIcon="paperclip" [size]="11" aria-hidden="true"></svg>
-              <span>Attach file</span>
+              <span>{{ filedFor(item.key).length > 0 ? 'Attach newer' : 'Attach file' }}</span>
             }
           </button>
         </div>
-        @if (uploadsFor(item.key).length > 0) {
+
+        @if (filedFor(item.key).length > 0 || uploadsFor(item.key).length > 0) {
           <ul class="mt-2 flex flex-col gap-1 pl-6">
+            @for (doc of filedFor(item.key); track doc.id) {
+              <li class="flex flex-wrap items-center gap-1.5 text-[12.5px] text-body">
+                <svg pIcon="file" class="text-muted" [size]="11" aria-hidden="true"></svg>
+                <a [href]="doc.url" target="_blank" rel="noopener" class="text-primary hover:underline">{{ doc.fileName }}</a>
+                <span class="text-[11.5px] text-muted">— already on file</span>
+              </li>
+            }
             @for (doc of uploadsFor(item.key); track doc.id) {
               <li class="flex items-center gap-1.5 text-[12.5px] text-body">
                 <svg pIcon="file" class="text-muted" [size]="11" aria-hidden="true"></svg>

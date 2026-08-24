@@ -2,7 +2,21 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { API_BASE_URL } from '../config/api';
-import type { KitEvent, KitMood } from './kit.model';
+import type { KitEvent, KitMood, KitSeverity } from './kit.model';
+
+/**
+ * Ordering for a restored item.
+ *
+ * The server ranks by severity band plus an urgency the client never sees, so
+ * this can only put a restored row back in the right *band* — close enough to
+ * read correctly until the next load, and honest about being an approximation
+ * rather than pretending to reproduce the server's order.
+ */
+const SEVERITY_RANK: Record<KitSeverity, number> = { URGENT: 3, WARNING: 2, INFO: 1 };
+
+function severityRank(event: KitEvent): number {
+  return SEVERITY_RANK[event.severity];
+}
 
 /**
  * Celebration is capped, deliberately. A mascot that keeps moving in the
@@ -27,6 +41,7 @@ export class KitService {
   private readonly base = `${API_BASE_URL}/kit`;
 
   private readonly _events = signal<KitEvent[]>([]);
+  private readonly _setAside = signal<KitEvent[]>([]);
   private readonly _loading = signal(true);
   private readonly _celebrating = signal(false);
   private readonly _loadedAt = signal(new Date());
@@ -51,6 +66,21 @@ export class KitService {
 
   /** The rest, as their own entries — the dashboard shows them as chips. */
   readonly restEvents = computed(() => this._events().slice(1));
+
+  /**
+   * Findings the user closed that are still true.
+   *
+   * Loaded alongside the active ones because they change what Kit is allowed
+   * to say: "all caught up" over seven items somebody clicked away without
+   * acting on is a lie, and the only way to know is to have counted them.
+   */
+  readonly setAside = this._setAside.asReadonly();
+  readonly setAsideCount = computed(() => this._setAside().length);
+
+  /** True only when there is genuinely nothing left — active or set aside. */
+  readonly allClear = computed(
+    () => this._events().length === 0 && this._setAside().length === 0,
+  );
 
   readonly mood = computed<KitMood>(() => {
     // Celebrating outranks loading: recording a payment reloads the dashboard,
@@ -82,15 +112,53 @@ export class KitService {
         this._loading.set(false);
       },
     });
+
+    // Separate request, and deliberately not awaited alongside the first: the
+    // card renders on the active list, and this only decides whether its quiet
+    // state is allowed to claim everything is done.
+    this.http.get<KitEvent[]>(`${this.base}/events/set-aside`).subscribe({
+      next: (events) => this._setAside.set(events),
+      error: () => this._setAside.set([]),
+    });
   }
 
-  /** Optimistic: the card leaves immediately, and comes back if the call fails. */
+  /**
+   * Optimistic: the card leaves immediately, and comes back if the call fails.
+   * It moves to the set-aside list rather than vanishing — dismissing is now
+   * "not now", and Kit has to keep being able to say so.
+   */
   dismiss(event: KitEvent): void {
-    const previous = this._events();
-    this._events.set(previous.filter((candidate) => candidate.id !== event.id));
+    const active = this._events();
+    const aside = this._setAside();
+    this._events.set(active.filter((candidate) => candidate.id !== event.id));
+    this._setAside.set([event, ...aside]);
 
     this.http.patch<KitEvent>(`${this.base}/events/${event.id}/dismiss`, {}).subscribe({
-      error: () => this._events.set(previous),
+      error: () => {
+        this._events.set(active);
+        this._setAside.set(aside);
+      },
+    });
+  }
+
+  /**
+   * Brings a set-aside finding back.
+   *
+   * Re-sorted by rank on the way in rather than pushed to the front: the list
+   * is a priority order, and a restored urgent item belongs at the top of it,
+   * not wherever the user happened to click.
+   */
+  restore(event: KitEvent): void {
+    const active = this._events();
+    const aside = this._setAside();
+    this._events.set([...active, event].sort((a, b) => severityRank(b) - severityRank(a)));
+    this._setAside.set(aside.filter((candidate) => candidate.id !== event.id));
+
+    this.http.patch<KitEvent>(`${this.base}/events/${event.id}/restore`, {}).subscribe({
+      error: () => {
+        this._events.set(active);
+        this._setAside.set(aside);
+      },
     });
   }
 

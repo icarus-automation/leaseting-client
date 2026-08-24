@@ -1,33 +1,47 @@
+import type { ChargeLine } from './charge-item.types';
 import type { PaymentMethod } from './enums';
 
 export type OnboardingStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export type OnboardingStepKey =
+  | 'overview'
   | 'tenant'
   | 'requirements'
   | 'lease-terms'
+  | 'deposit'
   | 'contract'
   | 'move-in-payment'
   | 'turnover';
 
 /** Walk order — mirrors the backend's ONBOARDING_STEP_KEYS. */
 export const ONBOARDING_STEP_ORDER: OnboardingStepKey[] = [
+  'overview',
   'tenant',
   'requirements',
   'lease-terms',
+  'deposit',
   'contract',
   'move-in-payment',
   'turnover',
 ];
 
 export const ONBOARDING_STEP_LABELS: Record<OnboardingStepKey, string> = {
+  overview: 'Overview',
   tenant: 'Tenant',
   requirements: 'Requirements',
   'lease-terms': 'Lease terms',
+  deposit: 'Deposit',
   contract: 'Contract',
   'move-in-payment': 'Move-in payment',
   turnover: 'Turnover',
 };
+
+/** Which unit, and for how long. The property is implied by the unit. */
+export interface OverviewStepData {
+  unitId: string;
+  startDate: string;
+  endDate: string;
+}
 
 export interface TenantStepData {
   tenantId: string;
@@ -39,13 +53,21 @@ export interface RequirementsStepData {
   priorAddress?: boolean;
 }
 
+/** Recurring rent charges; their sum becomes the lease's monthly rent. */
 export interface LeaseTermsStepData {
-  unitId: string;
-  startDate: string;
-  endDate: string;
-  monthlyRent: number;
   dueDay: number;
+  charges: ChargeLine[];
+}
+
+/**
+ * Money collected up front. Both are multiples of the monthly rent the lease
+ * terms step settled, so neither repeats the charge lines behind it. A "no"
+ * answer carries zero months.
+ */
+export interface DepositStepData {
+  collectsAdvance: boolean;
   advanceMonths: number;
+  holdsDeposit: boolean;
   depositMonths: number;
 }
 
@@ -56,6 +78,7 @@ export interface ContractStepData {
 
 export interface MoveInPaymentStepData {
   advanceAmount: number;
+  /** Total received against the deposit bills; allocated line by line. */
   depositAmount: number;
   paidOn: string;
   method: PaymentMethod;
@@ -70,9 +93,11 @@ export interface TurnoverStepData {
 }
 
 export type OnboardingStepData =
+  | OverviewStepData
   | TenantStepData
   | RequirementsStepData
   | LeaseTermsStepData
+  | DepositStepData
   | ContractStepData
   | MoveInPaymentStepData
   | TurnoverStepData;

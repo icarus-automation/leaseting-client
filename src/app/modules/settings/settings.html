@@ -1,8 +1,53 @@
-<div class="mx-auto flex w-full max-w-3xl flex-col gap-7">
+<div class="mx-auto flex w-full max-w-4xl flex-col gap-8">
   <header>
     <h1 class="font-heading text-2xl font-semibold text-heading">Settings</h1>
-    <p class="mt-1 text-[13px] text-muted">Workspace preferences for your organization.</p>
+    <p class="mt-1 text-[13px] text-muted">Configure your workspace.</p>
   </header>
 
-  <app-property-type-settings />
+  @for (group of groups; track group.label) {
+    <section class="flex flex-col gap-3" [attr.aria-label]="group.label">
+      <h2 class="font-heading text-[15px] font-semibold text-heading">{{ group.label }}</h2>
+      <ul class="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        @for (card of group.cards; track card.route) {
+          <li>
+            @if (card.comingSoon) {
+              <!-- Listed so the shape of Settings is honest about what is coming. -->
+              <div
+                class="flex h-full cursor-default flex-col gap-2.5 rounded-base border border-dashed border-border bg-background p-4"
+                aria-disabled="true"
+              >
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-muted">
+                  <svg [pIcon]="card.icon" [size]="16" aria-hidden="true"></svg>
+                </span>
+                <span class="flex flex-col gap-0.5">
+                  <span class="flex items-center gap-1.5">
+                    <span class="font-heading text-[14px] font-semibold text-muted">{{ card.label }}</span>
+                    <span class="rounded-full bg-surface px-1.5 py-px text-[10.5px] font-semibold uppercase tracking-wide text-muted">
+                      Soon
+                    </span>
+                  </span>
+                  <span class="text-[12.5px] leading-relaxed text-muted">{{ card.description }}</span>
+                </span>
+              </div>
+            } @else {
+              <a
+                [routerLink]="[card.route]"
+                class="group flex h-full flex-col gap-2.5 rounded-base border border-border bg-background p-4 no-underline transition-[border-color,box-shadow] duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_45%,var(--border))] hover:shadow-lifted focus-visible:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring motion-reduce:transition-none"
+              >
+                <span
+                  class="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-muted transition-colors duration-150 ease-out group-hover:bg-primary/10 group-hover:text-primary motion-reduce:transition-none"
+                >
+                  <svg [pIcon]="card.icon" [size]="16" aria-hidden="true"></svg>
+                </span>
+                <span class="flex flex-col gap-0.5">
+                  <span class="font-heading text-[14px] font-semibold text-heading">{{ card.label }}</span>
+                  <span class="text-[12.5px] leading-relaxed text-muted">{{ card.description }}</span>
+                </span>
+              </a>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
 </div>

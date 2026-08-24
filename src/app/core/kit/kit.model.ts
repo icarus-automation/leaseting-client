@@ -53,6 +53,19 @@ export const KIT_SEVERITY_ICONS: Record<KitSeverity, string> = {
   INFO: 'info-circle',
 };
 
+/**
+ * Colour for a severity icon, using the status tokens the rest of the app
+ * already reads: red is late money, amber is a date approaching, blue is
+ * context. Never the only signal — the label beside it says the same thing in
+ * words, and the shape differs too, so this survives both a screen reader and
+ * a colour-blind reader.
+ */
+export const KIT_SEVERITY_TONES: Record<KitSeverity, string> = {
+  URGENT: 'text-destructive',
+  WARNING: 'text-warning',
+  INFO: 'text-primary',
+};
+
 export interface KitEventLink {
   commands: string[];
 }

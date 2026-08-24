@@ -119,6 +119,16 @@ export interface BillListFilters {
   overdue?: boolean;
   /** Only bills carrying a meter-reading breakdown. */
   hasReading?: boolean;
+  /** Every bill raised against a unit in this property. */
+  propertyId?: string;
+  /** Part of the billed tenant's name. */
+  q?: string;
+  /** Inclusive due-date window (yyyy-MM-dd). */
+  dueFrom?: string;
+  dueTo?: string;
+  /** Bounds on the bill's face amount, not its open balance. */
+  amountMin?: number;
+  amountMax?: number;
 }
 
 interface BillsSummaryBucket {

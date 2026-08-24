@@ -80,18 +80,31 @@
         <aside class="flex flex-col gap-4 md:sticky md:top-20">
           <app-stepper [steps]="stepperSteps()" (stepClick)="jumpTo($event)" />
           @if (onboarding.tenant || onboarding.unit) {
-            <div class="hidden flex-col gap-2 rounded-base border border-border bg-surface px-3.5 py-3 md:flex">
+            <div class="hidden flex-col gap-2.5 rounded-base border border-border bg-surface px-3.5 py-3 md:flex">
+              @if (onboarding.unit; as unit) {
+                <div class="flex flex-col">
+                  <span class="text-[11px] font-medium uppercase tracking-wide text-muted">Property</span>
+                  <span class="text-[13px] font-medium text-heading">{{ unit.property.name }}</span>
+                  <span class="text-[12px] text-muted">Unit {{ unit.unitNo }}</span>
+                </div>
+              }
               @if (onboarding.tenant; as tenant) {
                 <div class="flex flex-col">
                   <span class="text-[11px] font-medium uppercase tracking-wide text-muted">Tenant</span>
                   <span class="text-[13px] font-medium text-heading">{{ tenant.firstName }} {{ tenant.lastName }}</span>
                 </div>
               }
-              @if (onboarding.unit; as unit) {
+              @if (leaseTerm(); as term) {
                 <div class="flex flex-col">
-                  <span class="text-[11px] font-medium uppercase tracking-wide text-muted">Unit</span>
-                  <span class="text-[13px] font-medium text-heading">{{ unit.unitNo }}</span>
-                  <span class="text-[12px] text-muted">{{ unit.property.name }}</span>
+                  <span class="text-[11px] font-medium uppercase tracking-wide text-muted">Term</span>
+                  <span class="text-[13px] font-medium text-heading">{{ term.range }}</span>
+                  <span class="text-[12px] text-muted">{{ term.length }}</span>
+                </div>
+              }
+              @if (monthlyRent() !== null) {
+                <div class="flex flex-col">
+                  <span class="text-[11px] font-medium uppercase tracking-wide text-muted">Monthly rent</span>
+                  <span class="text-[13px] font-medium text-heading">{{ monthlyRent() | phpCurrency }}</span>
                 </div>
               }
             </div>
@@ -112,8 +125,16 @@
           }
 
           @switch (activeStep()) {
+            @case ('overview') {
+              <app-step-overview [detail]="onboarding" [busy]="saving()" (next)="saveStep('overview', $event)" />
+            }
             @case ('tenant') {
-              <app-step-tenant [detail]="onboarding" [busy]="saving()" (next)="saveStep('tenant', $event)" />
+              <app-step-tenant
+                [detail]="onboarding"
+                [busy]="saving()"
+                (next)="saveStep('tenant', $event)"
+                (back)="goBack()"
+              />
             }
             @case ('requirements') {
               <app-step-requirements
@@ -128,6 +149,14 @@
                 [detail]="onboarding"
                 [busy]="saving()"
                 (next)="saveStep('lease-terms', $event)"
+                (back)="goBack()"
+              />
+            }
+            @case ('deposit') {
+              <app-step-deposit
+                [detail]="onboarding"
+                [busy]="saving()"
+                (next)="saveStep('deposit', $event)"
                 (back)="goBack()"
               />
             }

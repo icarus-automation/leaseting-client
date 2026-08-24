@@ -104,8 +104,8 @@
           </p>
           <p class="mt-2 text-[12.5px] leading-relaxed text-muted">
             Start with <code class="rounded-[3px] bg-[color-mix(in_oklab,var(--primary)_12%,transparent)] px-1 font-semibold text-primary">/document</code>
-            and Kit builds a PDF or a spreadsheet from those same records — say which one if you
-            have a preference.
+            and Kit builds a file from those same records — a spreadsheet for a list, a PDF for a
+            notice or letter. Add “as a PDF” or “as a spreadsheet” to override.
           </p>
           <ul class="mt-4 flex w-full flex-col gap-1.5" role="list">
             @for (suggestion of suggestions; track suggestion.text) {
@@ -166,16 +166,18 @@
               <div class="flex max-w-[85%] min-w-0 flex-col gap-2 sm:max-w-[70%]">
                 <!-- A document turn carries no text until the file lands; the
                      card below is the whole message until then. -->
-                @if (message.content) {
-                  <!-- One line on purpose, like the user bubble above:
-                       whitespace-pre-wrap renders the template's own newline
-                       and indentation as a leading blank line and space. -->
-                  <p
-                    class="whitespace-pre-wrap rounded-base border border-border bg-surface px-3 py-2 text-[13.5px] leading-relaxed text-body"
-                  >{{ message.content }}</p>
+                @if (message.blocks.length > 0) {
+                  <!-- Kit writes Markdown, so the bubble reads it. Drawn from a
+                       parsed token tree, never innerHTML: nothing a model
+                       returns can become an element on this page. -->
+                  <div
+                    class="flex flex-col gap-2 rounded-base border border-border bg-surface px-3 py-2 text-[13.5px] leading-relaxed text-body"
+                  >
+                    <app-kit-markdown [blocks]="message.blocks" />
+                  </div>
                 }
                 @if (message.document; as document) {
-                  <app-kit-document-card [document]="document" />
+                  <app-kit-document-card [document]="document" (refined)="onRefined($event)" />
                 }
               </div>
             </div>
@@ -194,9 +196,15 @@
          native submit and reloads the app if this ever throws. -->
     <form class="flex flex-col border-t border-border px-3 py-2.5" (submit)="$event.preventDefault(); send()">
       @if (isDocumentDraft()) {
-        <p class="mb-1.5 flex items-center gap-1.5 text-[12px] text-primary" aria-live="polite">
-          <svg pIcon="file-export" [size]="11" aria-hidden="true"></svg>
-          Kit will build a file. Say “as a PDF” or “as a spreadsheet” to pick the format.
+        <!-- States the rule rather than offering a choice: the format is
+             decided by what the file is, and the only thing the user needs to
+             know is how to override it. -->
+        <p class="mb-1.5 flex items-start gap-1.5 text-[12px] text-primary" aria-live="polite">
+          <svg pIcon="file-export" [size]="11" class="mt-[3px] shrink-0" aria-hidden="true"></svg>
+          <span>
+            Lists come back as a spreadsheet, letters and notices as a PDF. Add “as a PDF” or
+            “as a spreadsheet” to override.
+          </span>
         </p>
       }
       <div class="flex items-end gap-2">

@@ -15,6 +15,7 @@ import { Pagination } from '../../../../shared/ui/pagination/pagination';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../../../shared/ui/status-badge/status-badge';
 import { GenerateSoaDialog } from '../../components/generate-soa-dialog/generate-soa-dialog';
+import { SoaLines } from '../../components/soa-lines/soa-lines';
 import { SoaService } from '../../services/soa.service';
 
 @Component({
@@ -29,6 +30,7 @@ import { SoaService } from '../../services/soa.service';
     Skeleton,
     StatusBadge,
     GenerateSoaDialog,
+    SoaLines,
   ],
   templateUrl: './soa-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,6 +46,7 @@ export class SoaList {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly resendingId = signal<string | null>(null);
+  readonly expandedId = signal<string | null>(null);
   readonly dialogVisible = signal(false);
   readonly skeletons = Array.from({ length: 6 });
 
@@ -74,6 +77,10 @@ export class SoaList {
 
   downloadUrl(statement: SoaResponse): string {
     return this.soa.downloadUrl(statement.id);
+  }
+
+  toggleDetails(statementId: string): void {
+    this.expandedId.update((current) => (current === statementId ? null : statementId));
   }
 
   smsBadge(statement: SoaResponse): { label: string; tone: BadgeTone } {

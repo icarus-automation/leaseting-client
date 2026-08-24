@@ -29,6 +29,7 @@ import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { LeasesService } from '../../../leases/services/leases.service';
 import { BillsService } from '../../services/bills.service';
 import { SoaService } from '../../services/soa.service';
+import { SoaLines } from '../soa-lines/soa-lines';
 
 interface LeaseOption {
   id: string;
@@ -42,7 +43,7 @@ interface LeaseOption {
  */
 @Component({
   selector: 'app-generate-soa-dialog',
-  imports: [DatePipe, FormsModule, PIcon, Select, PhpCurrencyPipe, ErrorBanner, FormDialog],
+  imports: [DatePipe, FormsModule, PIcon, Select, PhpCurrencyPipe, ErrorBanner, FormDialog, SoaLines],
   templateUrl: './generate-soa-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

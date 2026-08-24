@@ -9,13 +9,13 @@
     <div class="grid gap-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-2">
       <div class="flex flex-col">
         <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">
-          Advance billed ({{ billed.advanceMonths }} mo)
+          Advance billed{{ billed.advanceMonths > 0 ? ' (' + billed.advanceMonths + ' mo)' : '' }}
         </span>
         <span class="font-heading text-[15px] font-semibold text-heading">{{ billed.advanceDue | phpCurrency }}</span>
       </div>
       <div class="flex flex-col">
         <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">
-          Deposit billed ({{ billed.depositMonths }} mo)
+          Deposit billed{{ billed.depositMonths > 0 ? ' (' + billed.depositMonths + ' mo)' : '' }}
         </span>
         <span class="font-heading text-[15px] font-semibold text-heading">{{ billed.depositDue | phpCurrency }}</span>
       </div>

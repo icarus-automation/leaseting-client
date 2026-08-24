@@ -98,6 +98,12 @@
     </div>
   }
 
+  <app-nl-filter-bar
+    grid="bills"
+    placeholder="Try: overdue water bills over ₱1,000 in Mabini"
+    (filtersChange)="onFiltersChange($event)"
+  />
+
   <div class="flex flex-wrap items-center gap-2">
     <div class="flex items-center gap-1 rounded-base border border-border bg-surface p-1" role="group" aria-label="Filter bills">
       @for (chip of quickFilters; track chip.value) {

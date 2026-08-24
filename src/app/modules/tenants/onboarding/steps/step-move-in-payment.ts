@@ -23,6 +23,7 @@ import { Select } from 'primeng/select';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { PAYMENT_METHOD_OPTIONS, type PaymentMethod } from '../../../../core/models/enums';
 import type {
+  DepositStepData,
   LeaseTermsStepData,
   MoveInPaymentStepData,
   OnboardingDetail,
@@ -35,9 +36,9 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const RECEIPT_LABEL = 'Onboarding — Payment receipt';
 
 /**
- * Step 5 — money received at move-in. The amounts here become payments against
- * the opening bills (rent advance + security deposit) at completion; partial
- * amounts leave the corresponding bill open.
+ * Step 7 — money received at move-in. The amounts here become payments against
+ * the opening bills (rent advance + security deposit) at completion; a partial
+ * amount leaves its bill open.
  */
 @Component({
   selector: 'app-step-move-in-payment',
@@ -62,15 +63,25 @@ export class StepMoveInPayment {
   readonly receiptName = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
 
-  /** Billed amounts from the saved lease terms — the ceilings for both inputs. */
+  /**
+   * The opening bills this step collects against — the ceilings for both
+   * inputs. Rent charges set the monthly figure; the deposit step decides how
+   * many months of it are advanced and what deposits are held alongside.
+   */
   readonly terms = computed(() => {
-    const saved = this.detail().stepsState['lease-terms']?.data as LeaseTermsStepData | undefined;
-    if (!saved) return null;
+    const stepsState = this.detail().stepsState;
+    const terms = stepsState['lease-terms']?.data as LeaseTermsStepData | undefined;
+    const deposit = stepsState.deposit?.data as DepositStepData | undefined;
+    if (!terms || !deposit) return null;
+
+    const monthlyRent = (terms.charges ?? []).reduce((total, charge) => total + charge.amount, 0);
+    const advanceMonths = deposit.collectsAdvance ? deposit.advanceMonths : 0;
+    const depositMonths = deposit.holdsDeposit ? deposit.depositMonths : 0;
     return {
-      advanceDue: saved.monthlyRent * saved.advanceMonths,
-      depositDue: saved.monthlyRent * saved.depositMonths,
-      advanceMonths: saved.advanceMonths,
-      depositMonths: saved.depositMonths,
+      advanceMonths,
+      depositMonths,
+      advanceDue: monthlyRent * advanceMonths,
+      depositDue: monthlyRent * depositMonths,
     };
   });
 

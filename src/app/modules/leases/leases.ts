@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -7,9 +7,11 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
-import type { LeaseListItem } from '../../core/models/lease.types';
+import type { GridFilters } from '../../core/models/grid-query.types';
+import type { LeaseListFilters, LeaseListItem } from '../../core/models/lease.types';
 import { PhpCurrencyPipe } from '../../shared/pipes/php-currency-pipe';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+import { NlFilterBar } from '../../shared/ui/nl-filter-bar/nl-filter-bar';
 import { Pagination } from '../../shared/ui/pagination/pagination';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../shared/ui/status-badge/status-badge';
@@ -19,7 +21,17 @@ import { LeasesService } from './services/leases.service';
 
 @Component({
   selector: 'app-leases',
-  imports: [DatePipe, RouterLink, PIcon, PhpCurrencyPipe, EmptyState, Pagination, Skeleton, StatusBadge],
+  imports: [
+    DatePipe,
+    RouterLink,
+    PIcon,
+    PhpCurrencyPipe,
+    EmptyState,
+    NlFilterBar,
+    Pagination,
+    Skeleton,
+    StatusBadge,
+  ],
   templateUrl: './leases.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -35,6 +47,16 @@ export class Leases {
   readonly error = signal<string | null>(null);
   readonly activeOnly = signal(true);
 
+  /**
+   * Filters produced by the natural-language bar.
+   *
+   * These and the Active/All toggle are one setting: a parse that says
+   * anything about which leases to show takes the toggle with it, so the two
+   * controls can never contradict each other on screen.
+   */
+  readonly nlFilters = signal<GridFilters>({});
+  readonly isFiltered = computed(() => Object.keys(this.nlFilters()).length > 0);
+
   readonly skeletons = Array.from({ length: 6 });
 
   constructor() {
@@ -45,7 +67,12 @@ export class Leases {
     this.loading.set(true);
     this.error.set(null);
     this.leases
-      .list({ page, limit: 10, active: this.activeOnly() ? true : undefined })
+      .list({
+        page,
+        limit: 10,
+        active: this.activeOnly() ? true : undefined,
+        ...(this.nlFilters() as LeaseListFilters),
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -63,6 +90,14 @@ export class Leases {
   setActiveOnly(active: boolean): void {
     if (this.activeOnly() === active) return;
     this.activeOnly.set(active);
+    this.nlFilters.set({});
+    this.load(1);
+  }
+
+  /** A new parse from the filter bar — it owns the view from here. */
+  onFiltersChange(filters: GridFilters): void {
+    this.nlFilters.set(filters);
+    if (Object.keys(filters).length > 0) this.activeOnly.set(false);
     this.load(1);
   }
 

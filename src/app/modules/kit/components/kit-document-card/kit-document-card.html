@@ -41,9 +41,53 @@
           Download
         </a>
       </div>
-      <p class="border-t border-border px-3 py-1.5 text-[11.5px] text-muted">
-        Kept until {{ document().expiresAt | date: 'h:mm a' }} — Kit does not store it after that.
-      </p>
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-border px-3 py-1.5">
+        <p class="text-[11.5px] text-muted">
+          Kept until {{ document().expiresAt | date: 'h:mm a' }} — Kit does not store it after that.
+        </p>
+        <!-- Refining is the cheap path to a second draft: the server keeps the
+             original request, so this asks only for what should change. -->
+        <button
+          type="button"
+          class="ml-auto shrink-0 rounded-base px-1.5 py-px text-[11.5px] font-medium text-primary transition-colors duration-150 ease-out hover:bg-[color-mix(in_oklab,var(--primary)_12%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+          [attr.aria-expanded]="refining()"
+          (click)="toggleRefine()"
+        >
+          {{ refining() ? 'Cancel' : 'Refine' }}
+        </button>
+      </div>
+
+      @if (refining()) {
+        <form
+          class="flex items-center gap-2 border-t border-border px-3 py-2"
+          (submit)="$event.preventDefault(); submitRefine()"
+        >
+          <label class="sr-only" [attr.for]="'refine-' + document().id">
+            What should change about {{ document().title }}?
+          </label>
+          <!-- Ref name deliberately unlike the signal: a template reference
+               shadows the component's own members, so #refinement would make
+               refinement() resolve to the input element. -->
+          <input
+            #refineField
+            [id]="'refine-' + document().id"
+            type="text"
+            maxlength="500"
+            placeholder="What should change? e.g. add the property column"
+            class="min-w-0 flex-1 rounded-base border border-border bg-background px-2.5 py-1.5 text-[12.5px] text-body placeholder:text-muted focus-visible:border-primary focus-visible:outline-none"
+            [value]="refinement()"
+            [disabled]="sending()"
+            (input)="refinement.set($any($event.target).value)"
+          />
+          <button
+            type="submit"
+            class="shrink-0 rounded-base bg-primary px-2.5 py-1.5 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+            [disabled]="!canRefine()"
+          >
+            {{ sending() ? 'Sending…' : 'Rebuild' }}
+          </button>
+        </form>
+      }
     </div>
   }
 

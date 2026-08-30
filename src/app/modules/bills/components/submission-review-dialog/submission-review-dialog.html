@@ -1,0 +1,114 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="Review payment submission"
+  [subheading]="submission() ? submission()!.destinationName : null"
+  width="36rem"
+>
+  @if (error(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  @if (loading()) {
+    <p class="text-[13px] text-muted">Loading submission…</p>
+  } @else if (submission(); as current) {
+    <div class="mb-4 flex items-start justify-between gap-2">
+      @if (badge(); as status) {
+        <app-status-badge [tone]="status.tone" [label]="status.label" />
+      }
+    </div>
+    <dl class="mb-4 grid grid-cols-2 gap-2 text-[13px]">
+      <div>
+        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Tenant</dt>
+        <dd class="m-0 text-heading">{{ current.tenant?.firstName }} {{ current.tenant?.lastName }}</dd>
+      </div>
+      <div>
+        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Unit</dt>
+        <dd class="m-0 text-heading">
+          {{ current.bill?.lease?.unit?.unitNo }} · {{ current.bill?.lease?.unit?.property?.name }}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Bill</dt>
+        <dd class="m-0 text-heading">{{ current.bill ? billTypeLabels[current.bill.type] : 'Bill' }}</dd>
+      </div>
+      <div>
+        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Amount</dt>
+        <dd class="m-0 font-semibold tabular-nums text-heading">{{ current.amount | phpCurrency }}</dd>
+      </div>
+      <div>
+        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Paid on</dt>
+        <dd class="m-0 text-heading">{{ current.paidOn | date: 'MMM d, y' }}</dd>
+      </div>
+      <div>
+        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Account</dt>
+        <dd class="m-0 text-heading">{{ current.accountName }} · {{ current.accountNumber }}</dd>
+      </div>
+      @if (current.referenceNo) {
+        <div>
+          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Reference</dt>
+          <dd class="m-0 text-heading">{{ current.referenceNo }}</dd>
+        </div>
+      }
+      @if (current.tenantNote) {
+        <div class="col-span-2">
+          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Tenant note</dt>
+          <dd class="m-0 text-heading">{{ current.tenantNote }}</dd>
+        </div>
+      }
+      @if (current.rejectionReason) {
+        <div class="col-span-2">
+          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Rejection reason</dt>
+          <dd class="m-0 text-destructive">{{ current.rejectionReason }}</dd>
+        </div>
+      }
+    </dl>
+    @if (proofUrl(); as url) {
+      <div class="max-h-80 overflow-hidden rounded-base border border-border bg-surface p-2">
+        <app-private-image [url]="url" alt="Payment proof" />
+      </div>
+    }
+    @if (isPending() && !canMutate()) {
+      <p class="mt-3 text-[12.5px] text-muted">Only an owner or admin can approve or reject this submission.</p>
+    }
+  }
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Close
+    </button>
+    @if (isPending() && canMutate()) {
+      <button
+        type="button"
+        class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-destructive transition-colors duration-150 ease-out hover:bg-muted-destructive disabled:opacity-45 motion-reduce:transition-none"
+        [disabled]="busy()"
+        (click)="rejectVisible.set(true)"
+      >
+        Reject
+      </button>
+      <button
+        type="button"
+        class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover disabled:opacity-[0.65] motion-reduce:transition-none"
+        [disabled]="busy()"
+        (click)="approve()"
+      >
+        Approve exact amount
+      </button>
+    }
+  </ng-container>
+</app-form-dialog>
+
+<app-reason-dialog
+  [visible]="rejectVisible()"
+  (visibleChange)="rejectVisible.set($event)"
+  heading="Reject submission"
+  subheading="The tenant will see this reason and can submit again."
+  label="Reason"
+  confirmLabel="Reject"
+  (confirmed)="onRejected($event)"
+/>

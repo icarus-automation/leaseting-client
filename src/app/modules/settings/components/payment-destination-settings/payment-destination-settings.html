@@ -1,0 +1,117 @@
+<section class="flex flex-col gap-4" aria-label="Payment destinations">
+  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
+    Tenants see property destinations when that property has any enabled. Otherwise they see these
+    organization fallback destinations. Disabled destinations stay in history but are not offered for
+    new payments.
+  </p>
+
+  @if (loading()) {
+    <app-skeleton variant="panel" />
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center justify-between gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <span>{{ message }}</span>
+      <button type="button" class="font-medium text-primary hover:underline" (click)="load()">Retry</button>
+    </div>
+  } @else {
+    @for (group of groups(); track group.propertyId ?? 'org') {
+      <div class="overflow-hidden rounded-base border border-border">
+        <h3 class="border-b border-border bg-surface px-4 py-2 text-[13px] font-semibold text-heading">
+          {{ propertyName(group.propertyId) }}
+        </h3>
+        <ul class="m-0 list-none p-0">
+          @for (destination of group.destinations; track destination.id) {
+            <li class="border-b border-border px-4 py-3 last:border-b-0">
+              @if (editingId() === destination.id) {
+                <form class="flex flex-col gap-2" [formGroup]="editForm" (ngSubmit)="submitEdit()">
+                  <div class="grid gap-2 sm:grid-cols-2">
+                    <input type="text" formControlName="displayName" aria-label="Display name" class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring" />
+                    <p-select formControlName="method" [options]="methodOptions" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" />
+                    <input type="text" formControlName="accountName" aria-label="Account name" class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring" />
+                    <input type="text" formControlName="accountNumber" aria-label="Account number" class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring" />
+                  </div>
+                  <textarea rows="2" formControlName="instructions" aria-label="Instructions" class="rounded-base border border-border bg-background px-2.5 py-2 text-[13px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring"></textarea>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" class="text-[12.5px] font-medium text-primary hover:underline" (click)="editQrInput.click()">
+                      {{ editQr() ? editQr()!.name : 'Replace QR' }}
+                    </button>
+                    <input #editQrInput type="file" class="hidden" [accept]="acceptedQrTypes" (change)="onQrPicked($event, 'edit')" />
+                    <span class="flex-1"></span>
+                    <button type="button" class="h-8 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium" (click)="editingId.set(null)">Cancel</button>
+                    <button type="submit" class="h-8 rounded-base border-none bg-primary px-2.5 text-[12.5px] font-semibold text-primary-foreground disabled:opacity-[0.65]" [disabled]="saving()">Save</button>
+                  </div>
+                </form>
+              } @else {
+                <div class="flex flex-wrap items-start gap-3">
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[13px] font-medium text-heading">{{ destination.displayName }}</p>
+                    <p class="text-[12.5px] text-muted">
+                      {{ destination.accountName }} · {{ destination.accountNumber }}
+                    </p>
+                    @if (destination.instructions) {
+                      <p class="mt-1 text-[12.5px] text-body">{{ destination.instructions }}</p>
+                    }
+                  </div>
+                  <app-status-badge [tone]="destination.isEnabled ? 'success' : 'neutral'" [label]="destination.isEnabled ? 'Enabled' : 'Disabled'" />
+                  <button type="button" class="text-[12.5px] font-medium text-primary hover:underline" (click)="togglePreview(destination.id)">
+                    {{ previewId() === destination.id ? 'Hide QR' : 'View QR' }}
+                  </button>
+                  @if (canMutate()) {
+                    <button type="button" class="text-[12.5px] font-medium text-body hover:underline" (click)="startEdit(destination)">Edit</button>
+                    <button type="button" class="text-[12.5px] font-medium text-body hover:underline" [disabled]="busyId() === destination.id" (click)="toggleEnabled(destination)">
+                      {{ destination.isEnabled ? 'Disable' : 'Enable' }}
+                    </button>
+                    <button type="button" class="text-muted" aria-label="Move up" (click)="move(destination, -1)">
+                      <svg pIcon="chevron-up" [size]="12" aria-hidden="true"></svg>
+                    </button>
+                    <button type="button" class="text-muted" aria-label="Move down" (click)="move(destination, 1)">
+                      <svg pIcon="chevron-down" [size]="12" aria-hidden="true"></svg>
+                    </button>
+                  }
+                </div>
+                @if (previewId() === destination.id) {
+                  <div class="mt-3 max-h-56 overflow-hidden rounded-base border border-border bg-surface p-2">
+                    <app-private-image [url]="qrUrl(destination.id)" [alt]="destination.displayName + ' QR'" />
+                  </div>
+                }
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    } @empty {
+      <p class="rounded-base border border-dashed border-border px-4 py-8 text-center text-[13px] text-muted">
+        No destinations yet. Add an organization fallback so tenants always have a place to pay.
+      </p>
+    }
+
+    @if (canMutate()) {
+      <form class="flex flex-col gap-3 rounded-base border border-border bg-background p-4" [formGroup]="createForm" (ngSubmit)="submitCreate()">
+        <h3 class="text-[13px] font-semibold text-heading">Add destination</h3>
+        <div class="grid gap-2 sm:grid-cols-2">
+          <input type="text" formControlName="displayName" placeholder="GCash, MariBank…" class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring" />
+          <p-select formControlName="method" [options]="methodOptions" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" />
+          <input type="text" formControlName="accountName" placeholder="Account name" class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring" />
+          <input type="text" formControlName="accountNumber" placeholder="Account number" class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring" />
+          <p-select formControlName="propertyId" [options]="propertyOptions()" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" />
+        </div>
+        <textarea rows="2" formControlName="instructions" placeholder="Optional tenant instructions" class="rounded-base border border-border bg-background px-2.5 py-2 text-[13px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring"></textarea>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body hover:bg-surface" (click)="createQrInput.click()">
+            <svg pIcon="upload" [size]="13" aria-hidden="true"></svg>
+            {{ qrFile() ? qrFile()!.name : 'Upload QR' }}
+          </button>
+          <input #createQrInput type="file" class="hidden" [accept]="acceptedQrTypes" (change)="onQrPicked($event, 'create')" />
+          <button type="submit" class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground disabled:opacity-[0.65]" [disabled]="creating()">Add destination</button>
+        </div>
+        @if (createError(); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+      </form>
+    } @else {
+      <p class="text-[12.5px] text-muted">Only an owner or admin can add or change destinations.</p>
+    }
+  }
+</section>

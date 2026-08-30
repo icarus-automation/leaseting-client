@@ -40,6 +40,11 @@
   --ring:             oklch(0.50 0.16 262 / 0.35);
   --ring-destructive: oklch(0.54 0.22 15 / 0.25);
 
+  /* Scrollbars — thin, primary-tinted. Overlay menus use the same tokens. */
+  --scrollbar-size: 6px;
+  --scrollbar-thumb: color-mix(in oklab, var(--primary) 50%, var(--border));
+  --scrollbar-thumb-hover: var(--primary);
+
   /* Radius — 4px everywhere, pills use full */
   --radius: 4px;
 
@@ -219,6 +224,36 @@
   min-height: 2.5rem;
 }
 
+/* Overlay lists: same thin primary bar as the rest of the app, but drop the
+   OS arrow buttons that make a five-option menu look like a native <select>. */
+.p-select-overlay .p-select-list-container,
+.p-multiselect-overlay .p-multiselect-list-container,
+.p-datepicker-panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+.p-select-overlay .p-select-list-container::-webkit-scrollbar,
+.p-multiselect-overlay .p-multiselect-list-container::-webkit-scrollbar,
+.p-datepicker-panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.p-select-overlay .p-select-list-container::-webkit-scrollbar-thumb,
+.p-multiselect-overlay .p-multiselect-list-container::-webkit-scrollbar-thumb,
+.p-datepicker-panel::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+
+.p-select-overlay .p-select-list-container::-webkit-scrollbar-button,
+.p-multiselect-overlay .p-multiselect-list-container::-webkit-scrollbar-button,
+.p-datepicker-panel::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* Toasts must clear pinned masks even without PrimeNG's inline z-index. */
 .p-toast {
   z-index: var(--z-toast);
@@ -244,6 +279,35 @@
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   html, body {

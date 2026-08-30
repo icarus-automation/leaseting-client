@@ -6,6 +6,13 @@
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <a
+        routerLink="/bills/submissions"
+        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      >
+        <svg pIcon="inbox" [size]="14" aria-hidden="true"></svg>
+        <span>Submissions</span>
+      </a>
+      <a
         routerLink="/bills/soa"
         class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
       >
@@ -223,18 +230,26 @@
                       class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--success)_45%,transparent)] hover:bg-muted-success motion-reduce:transition-none"
                       (click)="openPaymentDialog(bill)"
                     >
-                      Record payment
+                      {{ canMutateFinance() ? 'Record payment' : 'Payments' }}
                     </button>
+                    @if (canMutateFinance()) {
+                      <button
+                        type="button"
+                        class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+                        aria-label="Delete bill"
+                        (click)="confirmDelete(bill)"
+                      >
+                        <svg pIcon="trash" [size]="12" aria-hidden="true"></svg>
+                      </button>
+                    }
+                  } @else {
                     <button
                       type="button"
-                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
-                      aria-label="Delete bill"
-                      (click)="confirmDelete(bill)"
+                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                      (click)="openPaymentDialog(bill)"
                     >
-                      <svg pIcon="trash" [size]="12" aria-hidden="true"></svg>
+                      Payments
                     </button>
-                  } @else if (bill.paidAt) {
-                    <span class="text-[12px] text-muted">Paid {{ bill.paidAt | date: 'MMM d' }}</span>
                   }
                 </div>
               </td>

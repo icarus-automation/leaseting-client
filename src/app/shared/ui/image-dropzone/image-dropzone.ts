@@ -57,6 +57,7 @@ export class ImageDropzone {
         credits: false,
         storeAsFile: true,
       });
+      if (!this.pond) return;
 
       this.pond.on('addfile', (error, item) => {
         if (this.syncing || error) return;

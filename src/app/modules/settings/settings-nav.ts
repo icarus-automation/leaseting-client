@@ -45,6 +45,12 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
         icon: 'money-bill',
         route: 'charge-items',
       },
+      {
+        label: 'Payment destinations',
+        description: 'QR and account details tenants use to pay. Property-specific first, then organization fallback.',
+        icon: 'qrcode',
+        route: 'payment-destinations',
+      },
     ],
   },
 ];

@@ -12,5 +12,12 @@ export const SETTINGS_ROUTES: Routes = [
     loadComponent: () =>
       import('./pages/charge-items-settings/charge-items-settings').then(m => m.ChargeItemsSettingsPage),
   },
+  {
+    path: 'payment-destinations',
+    loadComponent: () =>
+      import('./pages/payment-destinations-settings/payment-destinations-settings').then(
+        m => m.PaymentDestinationsSettingsPage,
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];

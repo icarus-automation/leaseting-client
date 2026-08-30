@@ -1,4 +1,4 @@
-import type { BillStatus, BillType, PaymentMethod } from './enums';
+import type { BillStatus, BillType, PaymentMethod, PaymentSource } from './enums';
 
 /**
  * Meter-reading breakdown for ELECTRICITY/WATER bills. Numeric values travel
@@ -67,9 +67,14 @@ export interface PaymentResponse {
   method: PaymentMethod;
   referenceNo: string | null;
   notes: string | null;
-  /** Proof of payment served through the media proxy; null when none uploaded. */
-  receiptUrl: string | null;
+  hasReceipt: boolean;
+  source: PaymentSource;
+  isVoided: boolean;
+  voidedAt: string | null;
+  voidReason: string | null;
+  createdByUserId: string | null;
   billId: string;
+  submissionId: string | null;
   createdAt: string;
 }
 
@@ -80,7 +85,8 @@ export interface RecordPaymentPayload {
   paidOn: string;
   method: PaymentMethod;
   referenceNo?: string;
-  notes?: string;
+  /** Collection memo — required for staff-recorded payments. */
+  notes: string;
 }
 
 export interface CreateBillPayload {

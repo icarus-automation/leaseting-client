@@ -1,0 +1,105 @@
+<div class="flex flex-col gap-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <nav class="mb-1 flex items-center gap-1.5 text-[13px]" aria-label="Breadcrumb">
+        <a routerLink="/bills" class="rounded-[2px] font-medium text-muted transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none">Bills</a>
+        <svg pIcon="chevron-right" class="text-muted" [size]="11" aria-hidden="true"></svg>
+        <span class="font-medium text-heading">Payment submissions</span>
+      </nav>
+      <h1 class="font-heading text-2xl font-semibold text-heading">Payment submissions</h1>
+      <p class="mt-0.5 text-sm text-muted">
+        Residence Care claims awaiting review. Approval records the exact submitted amount as confirmed payment.
+      </p>
+    </div>
+    @if (pendingCount() > 0) {
+      <app-status-badge tone="warning" label="Pending" [count]="pendingCount()" />
+    }
+  </header>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <p-select
+      [ngModel]="filter()"
+      (ngModelChange)="onFilterChange($event)"
+      [options]="filterOptions"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="w-52"
+    />
+  </div>
+
+  @if (loading()) {
+    <app-skeleton variant="panel" />
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center justify-between gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <span>{{ message }}</span>
+      <button type="button" class="font-medium text-primary hover:underline" (click)="load(1)">Retry</button>
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      icon="inbox"
+      heading="No submissions here"
+      description="When a tenant submits proof from Residence Care, it will wait in Pending review until an owner or admin approves or rejects it."
+    />
+  } @else {
+    <div class="overflow-hidden rounded-base border border-border">
+      <table class="w-full border-collapse text-left">
+        <thead class="border-b border-border bg-surface text-[12px] font-medium uppercase tracking-wide text-muted">
+          <tr>
+            <th class="px-4 py-2.5">Tenant</th>
+            <th class="px-4 py-2.5">Bill</th>
+            <th class="px-4 py-2.5">Amount</th>
+            <th class="px-4 py-2.5">Destination</th>
+            <th class="px-4 py-2.5">Submitted</th>
+            <th class="px-4 py-2.5">Status</th>
+            <th class="px-4 py-2.5"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (submission of items(); track submission.id) {
+            <tr class="border-b border-border last:border-b-0">
+              <td class="px-4 py-3">
+                <p class="text-[13px] font-medium text-heading">
+                  {{ submission.tenant?.firstName }} {{ submission.tenant?.lastName }}
+                </p>
+                <p class="text-[12px] text-muted">
+                  Unit {{ submission.bill?.lease?.unit?.unitNo }} · {{ submission.bill?.lease?.unit?.property?.name }}
+                </p>
+              </td>
+              <td class="px-4 py-3 text-[13px] text-body">
+                {{ submission.bill ? billTypeLabels[submission.bill.type] : 'Bill' }}
+              </td>
+              <td class="px-4 py-3 text-[13px] font-medium tabular-nums text-heading">
+                {{ submission.amount | phpCurrency }}
+              </td>
+              <td class="px-4 py-3 text-[13px] text-body">{{ submission.destinationName }}</td>
+              <td class="px-4 py-3 text-[13px] text-body">{{ submission.createdAt | date: 'MMM d, y' }}</td>
+              <td class="px-4 py-3">
+                <app-status-badge [tone]="statusBadge(submission.status).tone" [label]="statusBadge(submission.status).label" />
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  type="button"
+                  class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                  (click)="openReview(submission)"
+                >
+                  {{ submission.status === 'PENDING_REVIEW' && canMutate() ? 'Review' : 'View' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination [meta]="meta()" (pageChange)="load($event)" />
+  }
+</div>
+
+<app-submission-review-dialog
+  [visible]="reviewVisible()"
+  (visibleChange)="reviewVisible.set($event)"
+  [submissionId]="reviewId()"
+  (reviewed)="onReviewed()"
+/>

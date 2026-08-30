@@ -15,36 +15,39 @@ import { Router } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { KitService } from '../../../../core/kit/kit.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
+import type { BillListItem } from '../../../../core/models/bill.types';
 import type { UnitDetail, UnitOutstandingBill } from '../../../../core/models/property.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { isPastDue, leaseTermLabel, ordinal } from '../../../../shared/utils/date.util';
 import { unitTone, unitToneLabel } from '../../../../shared/utils/unit-tone.util';
-import { BillsService } from '../../../bills/services/bills.service';
+import { RecordPaymentDialog } from '../../../bills/components/record-payment-dialog/record-payment-dialog';
 import { LeasesService } from '../../../leases/services/leases.service';
 import { OnboardingsService } from '../../../tenants/services/onboardings.service';
 import { UnitsService } from '../../services/units.service';
+import { billFromUnit } from '../../utils/bill-from-unit.util';
 
 @Component({
   selector: 'app-unit-panel',
-  imports: [DatePipe, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge],
+  imports: [DatePipe, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge, RecordPaymentDialog],
   templateUrl: './unit-panel.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UnitPanel {
   private readonly units = inject(UnitsService);
   private readonly leasesService = inject(LeasesService);
-  private readonly bills = inject(BillsService);
   private readonly kit = inject(KitService);
   private readonly onboardings = inject(OnboardingsService);
   private readonly router = inject(Router);
   private readonly confirmation = inject(ConfirmationService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
 
   readonly unitId = input.required<string | null>();
   /** Any mutation that changes floor colors / summaries happened. */
@@ -57,6 +60,9 @@ export class UnitPanel {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly startingOnboarding = signal(false);
+  readonly paymentDialogVisible = signal(false);
+  readonly paymentTarget = signal<BillListItem | null>(null);
+  readonly canMutateFinance = this.auth.isFinancialAdmin;
 
   readonly billTypeLabels = BILL_TYPE_LABELS;
 
@@ -99,36 +105,20 @@ export class UnitPanel {
     return isPastDue(bill.dueDate);
   }
 
-  markPaid(bill: UnitOutstandingBill): void {
-    this.confirmation.confirm({
-      header: 'Mark bill paid',
-      message: `Mark this ${BILL_TYPE_LABELS[bill.type]} bill as paid?`,
-      acceptButtonProps: { label: 'Mark paid' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
-        this.bills
-          .pay(bill.id)
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: () => {
-              this.toast.add({ severity: 'success', summary: 'Bill marked paid' });
-              // Kit reacts to the action, then re-reads what's left to worry
-              // about — the celebration is transient and never persisted.
-              this.kit.celebrate();
-              this.kit.load();
-              this.refetch();
-              this.changed.emit();
-            },
-            error: (error: unknown) => {
-              this.toast.add({
-                severity: 'error',
-                summary: 'Could not mark as paid',
-                detail: apiErrorMessage(error),
-              });
-            },
-          });
-      },
-    });
+  openPaymentDialog(bill: UnitOutstandingBill): void {
+    const unit = this.unit();
+    if (!unit) return;
+    const target = billFromUnit(unit, bill);
+    if (!target) return;
+    this.paymentTarget.set(target);
+    this.paymentDialogVisible.set(true);
+  }
+
+  onPaymentsChanged(): void {
+    this.kit.celebrate();
+    this.kit.load();
+    this.refetch();
+    this.changed.emit();
   }
 
   confirmEndLease(): void {

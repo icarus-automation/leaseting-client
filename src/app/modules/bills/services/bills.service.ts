@@ -69,9 +69,8 @@ export class BillsService {
     return this.http.post<BillListItem>(`${API_BASE_URL}/leases/${leaseId}/bills`, payload);
   }
 
-  /** One-click settle — records a cash payment for the open balance. */
-  pay(id: string): Observable<PaymentResponse> {
-    return this.http.post<PaymentResponse>(`${this.base}/${id}/pay`, {});
+  getPaymentProof(paymentId: string): Observable<Blob> {
+    return this.http.get(`${API_BASE_URL}/payments/${paymentId}/proof`, { responseType: 'blob' });
   }
 
   /**
@@ -92,7 +91,7 @@ export class BillsService {
     form.append('paidOn', payload.paidOn);
     form.append('method', payload.method);
     if (payload.referenceNo) form.append('referenceNo', payload.referenceNo);
-    if (payload.notes) form.append('notes', payload.notes);
+    form.append('notes', payload.notes);
     if (receipt) form.append('receipt', receipt, receipt.name);
     return this.http.post<PaymentResponse>(`${this.base}/${billId}/payments`, form);
   }
@@ -101,9 +100,9 @@ export class BillsService {
     return this.http.get<PaymentResponse[]>(`${this.base}/${billId}/payments`);
   }
 
-  /** Removing a payment reopens the bill when the rest no longer covers it. */
-  deletePayment(paymentId: string): Observable<PaymentResponse> {
-    return this.http.delete<PaymentResponse>(`${API_BASE_URL}/payments/${paymentId}`);
+  /** Voids a confirmed payment. History stays; the bill reopens if needed. */
+  voidPayment(paymentId: string, reason: string): Observable<PaymentResponse> {
+    return this.http.post<PaymentResponse>(`${API_BASE_URL}/payments/${paymentId}/void`, { reason });
   }
 
   /** Only UNPAID bills without recorded payments can be deleted — 409 otherwise. */

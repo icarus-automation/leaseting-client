@@ -7,6 +7,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Select } from 'primeng/select';
 
+import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
 import type { BillListFilters, BillListItem, BillsSummary } from '../../core/models/bill.types';
@@ -72,11 +73,14 @@ const TYPE_OPTIONS: { label: string; value: BillType | null }[] = [
 })
 export class Bills {
   private readonly bills = inject(BillsService);
+  private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly confirmation = inject(ConfirmationService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canMutateFinance = this.auth.isFinancialAdmin;
 
   readonly quickFilters = QUICK_FILTERS;
   readonly typeOptions = TYPE_OPTIONS;

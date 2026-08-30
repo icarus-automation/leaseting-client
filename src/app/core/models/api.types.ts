@@ -35,8 +35,13 @@ export interface ApiErrorBody {
 
 /** First human-readable message out of an HTTP error body, with a fallback. */
 export function apiErrorMessage(error: unknown, fallback = 'Something went wrong.'): string {
-  const body = (error as { error?: Partial<ApiErrorBody> } | null)?.error;
-  const message = body?.message;
+  const response = error as { status?: number; error?: Partial<ApiErrorBody> | string | null };
+  if (response?.status === 0) {
+    return "Can't reach the server. Check that the API is running.";
+  }
+  const body = response?.error;
+  if (!body || typeof body !== 'object') return fallback;
+  const message = body.message;
   if (Array.isArray(message) && message.length > 0) return message[0];
   if (typeof message === 'string' && message.length > 0) return message;
   return fallback;

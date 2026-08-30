@@ -24,11 +24,9 @@
               } @else {
                 <a
                   class="nav-item"
+                  [class.nav-item--active]="isActive(item.route)"
                   [routerLink]="item.route"
-                  routerLinkActive="nav-item--active"
-                  [routerLinkActiveOptions]="{ exact: false }"
-                  #rla="routerLinkActive"
-                  [attr.aria-current]="rla.isActive ? 'page' : null"
+                  [attr.aria-current]="isActive(item.route) ? 'page' : null"
                 >
                   <svg [pIcon]="item.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
                   <span class="nav-label">{{ item.label }}</span>
@@ -44,11 +42,9 @@
   <div class="sidebar-bottom">
     <a
       class="nav-item"
+      [class.nav-item--active]="isActive(settingsNav.route)"
       [routerLink]="settingsNav.route"
-      routerLinkActive="nav-item--active"
-      [routerLinkActiveOptions]="{ exact: false }"
-      #rlaSettings="routerLinkActive"
-      [attr.aria-current]="rlaSettings.isActive ? 'page' : null"
+      [attr.aria-current]="isActive(settingsNav.route) ? 'page' : null"
     >
       <svg [pIcon]="settingsNav.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
       <span class="nav-label">{{ settingsNav.label }}</span>

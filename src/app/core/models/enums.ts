@@ -38,5 +38,14 @@ export const PAYMENT_METHOD_OPTIONS = (
   Object.entries(PAYMENT_METHOD_LABELS) as [PaymentMethod, string][]
 ).map(([value, label]) => ({ value, label }));
 
+export type PaymentSource = 'STAFF' | 'SUBMISSION' | 'ONBOARDING' | 'LEGACY';
+
+export const PAYMENT_SOURCE_LABELS: Record<PaymentSource, string> = {
+  STAFF: 'Staff collection',
+  SUBMISSION: 'Residence Care',
+  ONBOARDING: 'Onboarding',
+  LEGACY: 'Legacy',
+};
+
 /** Derived occupancy — computed by the backend from active leases. */
 export type UnitStatus = 'OCCUPIED' | 'VACANT';

@@ -17,8 +17,12 @@ export interface SessionUser {
   email: string;
   image?: string | null;
   role?: string | null;
+  organizationRole?: string | null;
+  audience?: 'staff' | 'tenant';
   features?: FeatureFlags;
 }
+
+export const TENANT_USE_MOBILE = 'TENANT_USE_MOBILE';
 
 /** Organization from the Better Auth organization plugin. */
 export interface Organization {

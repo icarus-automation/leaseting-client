@@ -20,6 +20,7 @@ import { isPastDue, ordinal } from '../../../../shared/utils/date.util';
 import { isLeaseActive, leaseStatus } from '../../../../shared/utils/lease-status.util';
 import { TenantFormDialog } from '../../components/tenant-form-dialog/tenant-form-dialog';
 import { TenantRiskPanel } from '../../components/tenant-risk-panel/tenant-risk-panel';
+import { ResidenceCareAccess } from '../../components/residence-care-access/residence-care-access';
 import { TenantsService } from '../../services/tenants.service';
 
 /** A bill row flattened with its lease context for the billing-history table. */
@@ -42,6 +43,7 @@ const ACCEPTED_DOCUMENT_TYPES = 'application/pdf,image/png,image/jpeg,image/webp
     StatusBadge,
     TenantFormDialog,
     TenantRiskPanel,
+    ResidenceCareAccess,
   ],
   templateUrl: './tenant-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

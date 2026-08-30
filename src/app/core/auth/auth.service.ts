@@ -5,6 +5,8 @@ import { Observable, catchError, map, of, shareReplay, switchMap, tap, throwErro
 import { API_BASE_URL, AUTH_ENDPOINTS, ME_ENDPOINT } from '../config/api';
 import { clearHttpCache } from '../http/cache.interceptor';
 import type { FeatureFlags, Organization, SessionUser, SignInCredentials, SignInResponse } from './auth.types';
+import { TENANT_USE_MOBILE } from './auth.types';
+import { isTenantAudience } from './tenant-audience.util';
 
 /**
  * Cookie-session auth (Better Auth). The browser holds an HTTP-only session
@@ -28,6 +30,10 @@ export class AuthService {
   readonly features = computed<FeatureFlags>(
     () => this.user()?.features ?? { sms: false },
   );
+  readonly isFinancialAdmin = computed(() => {
+    const role = this.user()?.organizationRole;
+    return role === 'owner' || role === 'admin';
+  });
 
   /**
    * Sign-in chain: authenticate → pick the first organization → set it active
@@ -38,8 +44,11 @@ export class AuthService {
     return this.http
       .post<SignInResponse>(`${API_BASE_URL}${AUTH_ENDPOINTS.signInEmail}`, credentials)
       .pipe(
-        switchMap(() => this.activateOrganization()),
+        // Audience first: a tenant session must be cleared before any staff
+        // organization call, so the login page can show the Residence Care message
+        // instead of "no organization".
         switchMap(() => this.loadMe()),
+        switchMap((me) => this.activateOrganization().pipe(map(() => me))),
       );
   }
 
@@ -76,9 +85,22 @@ export class AuthService {
   }
 
   private loadMe(): Observable<SessionUser> {
-    return this.http
-      .get<SessionUser>(`${API_BASE_URL}${ME_ENDPOINT}`)
-      .pipe(tap((me) => this.user.set(me)));
+    return this.http.get<SessionUser>(`${API_BASE_URL}${ME_ENDPOINT}`).pipe(
+      switchMap((me) => {
+        if (isTenantAudience(me)) {
+          return this.http.post(`${API_BASE_URL}${AUTH_ENDPOINTS.signOut}`, {}).pipe(
+            catchError(() => of(null)),
+            tap(() => {
+              clearHttpCache();
+              this.clearSession();
+            }),
+            switchMap(() => throwError(() => new Error(TENANT_USE_MOBILE))),
+          );
+        }
+        this.user.set(me);
+        return of(me);
+      }),
+    );
   }
 
   private activateOrganization(): Observable<Organization> {

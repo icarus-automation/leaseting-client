@@ -140,10 +140,10 @@
                 <button
                   type="button"
                   class="shrink-0 rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--success)_45%,transparent)] hover:bg-muted-success motion-reduce:transition-none"
-                  [attr.aria-label]="'Mark ' + billTypeLabels[bill.type] + ' bill paid'"
-                  (click)="markPaid(bill)"
+                  [attr.aria-label]="'Record payment for ' + billTypeLabels[bill.type] + ' bill'"
+                  (click)="openPaymentDialog(bill)"
                 >
-                  Mark paid
+                  {{ canMutateFinance() ? 'Record payment' : 'Payments' }}
                 </button>
               </li>
             }
@@ -191,3 +191,11 @@
     }
   }
 </aside>
+
+<app-record-payment-dialog
+  [visible]="paymentDialogVisible()"
+  (visibleChange)="paymentDialogVisible.set($event)"
+  [bill]="paymentTarget()"
+  (changed)="onPaymentsChanged()"
+/>
+

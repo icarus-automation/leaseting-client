@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-4">
   <p class="text-[13px] text-muted">
     Upload the signed lease contract (scan or photo). It files itself on the tenant's profile as
-    “Onboarding — Signed contract”.
+    “Onboarding · Signed contract”.
   </p>
 
   @if (errorMessage(); as message) {
@@ -48,7 +48,7 @@
       <input type="checkbox" class="accent-primary" [checked]="deferred()" (change)="toggleDeferred()" />
       <span class="flex flex-col">
         <span class="text-[13px] font-medium text-heading">Contract to follow</span>
-        <span class="text-[12px] text-muted">Signing happens at turnover — upload it from the tenant's profile later.</span>
+        <span class="text-[12px] text-muted">Signing happens at turnover. You can upload it from the tenant's profile later.</span>
       </span>
     </label>
   }

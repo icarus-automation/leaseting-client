@@ -44,7 +44,7 @@ export function createFormErrors(form: FormGroup): FormErrors {
         case 'required':
           return 'This field is required.';
         case 'minlength':
-          return `Too short — use at least ${(errors[key] as { requiredLength: number }).requiredLength} characters.`;
+          return `Too short. Use at least ${(errors[key] as { requiredLength: number }).requiredLength} characters.`;
         case 'maxlength':
           return 'Too long.';
         case 'email':

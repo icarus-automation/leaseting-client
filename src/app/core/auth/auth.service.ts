@@ -5,8 +5,7 @@ import { Observable, catchError, map, of, shareReplay, switchMap, tap, throwErro
 import { API_BASE_URL, AUTH_ENDPOINTS, ME_ENDPOINT } from '../config/api';
 import { clearHttpCache } from '../http/cache.interceptor';
 import type { FeatureFlags, Organization, SessionUser, SignInCredentials, SignInResponse } from './auth.types';
-import { TENANT_USE_MOBILE } from './auth.types';
-import { isTenantAudience } from './tenant-audience.util';
+import { WrongAppError, dedicatedAppRejection } from './audience.util';
 
 /**
  * Cookie-session auth (Better Auth). The browser holds an HTTP-only session
@@ -44,9 +43,9 @@ export class AuthService {
     return this.http
       .post<SignInResponse>(`${API_BASE_URL}${AUTH_ENDPOINTS.signInEmail}`, credentials)
       .pipe(
-        // Audience first: a tenant session must be cleared before any staff
-        // organization call, so the login page can show the Residence Care message
-        // instead of "no organization".
+        // Audience first: a session that belongs to another Leaseting app must
+        // be cleared before any staff organization call, so the login page can
+        // name that app instead of reporting "no organization".
         switchMap(() => this.loadMe()),
         switchMap((me) => this.activateOrganization().pipe(map(() => me))),
       );
@@ -87,14 +86,15 @@ export class AuthService {
   private loadMe(): Observable<SessionUser> {
     return this.http.get<SessionUser>(`${API_BASE_URL}${ME_ENDPOINT}`).pipe(
       switchMap((me) => {
-        if (isTenantAudience(me)) {
+        const rejection = dedicatedAppRejection(me);
+        if (rejection) {
           return this.http.post(`${API_BASE_URL}${AUTH_ENDPOINTS.signOut}`, {}).pipe(
             catchError(() => of(null)),
             tap(() => {
               clearHttpCache();
               this.clearSession();
             }),
-            switchMap(() => throwError(() => new Error(TENANT_USE_MOBILE))),
+            switchMap(() => throwError(() => new WrongAppError(rejection))),
           );
         }
         this.user.set(me);

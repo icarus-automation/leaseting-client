@@ -127,7 +127,7 @@ export class FloorPlanViewer {
   }
 
   unitTitle(unit: FloorUnitItem): string {
-    const tenant = unit.activeLease ? ` — ${unit.activeLease.tenantName}` : '';
+    const tenant = unit.activeLease ? `, ${unit.activeLease.tenantName}` : '';
     return `Unit ${unit.unitNo} · ${this.statusLabel(unit)}${tenant}`;
   }
 

@@ -10,9 +10,10 @@ import { ComingSoon } from '../../shared/ui/coming-soon/coming-soon';
 })
 export class Parking {
   readonly features = [
-    'Spot inventory: Available · Assigned · Reserved · Out of Service',
-    'Assignments tied to units and leases',
-    'Flags occupied units without an assigned spot',
-    'Utilization reporting per property',
+    'Current parking occupancy and space availability by property',
+    'Vehicles currently parked, with entry time and elapsed stay',
+    'Review guard-recorded activity and void incorrect entries',
+    'Revenue trends, peak hours, and parking reports',
   ];
 }
+

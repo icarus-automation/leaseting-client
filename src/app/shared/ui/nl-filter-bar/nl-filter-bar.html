@@ -80,7 +80,7 @@
 
     @if (foundNothing()) {
       <p class="text-[12.5px] text-muted">
-        Nothing in that narrows this table — the full list is still shown.
+        Nothing in that narrows this table, so the full list is still shown.
       </p>
     }
 
@@ -89,7 +89,7 @@
         @for (note of unresolved(); track note) {
           <li class="flex items-start gap-1.5 text-[12.5px] text-muted">
             <svg pIcon="info-circle" class="mt-[3px] shrink-0" [size]="11" aria-hidden="true"></svg>
-            <span>Not applied — {{ note }}.</span>
+            <span>Not applied. {{ note }}.</span>
           </li>
         }
       </ul>

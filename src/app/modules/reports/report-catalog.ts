@@ -1,5 +1,5 @@
 /**
- * The report catalog — the single source of truth for what reporting exists,
+ * The report catalog: the single source of truth for what reporting exists,
  * what is live, and what is still owed.
  *
  * A report ships by flipping `route` from null to its path. Entries stay
@@ -35,7 +35,7 @@ export interface ReportEntry {
   route: string | null;
   /** Feature the report waits on. Rendered on the card when unbuilt. */
   blockedBy?: string;
-  /** Extra search terms — old names, accounting jargon, synonyms. */
+  /** Extra search terms: old names, accounting jargon, synonyms. */
   keywords: string;
 }
 
@@ -73,7 +73,7 @@ export const REPORT_GROUPS: ReportGroup[] = [
   {
     key: 'parking',
     label: 'Parking',
-    description: 'Served by the connected Parking app.',
+    description: 'Parking income, customers, payments, and unpaid fees.',
   },
 ];
 
@@ -91,7 +91,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'profit-and-loss',
     title: 'Profit & Loss',
-    summary: 'Income less operating costs over a period, per property and portfolio-wide.',
+    summary: 'What is left after costs over a period, per property and across the portfolio.',
     group: 'business-overview',
     icon: 'chart-line',
     route: null,
@@ -101,7 +101,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'cash-flow',
     title: 'Cash Flow Summary',
-    summary: 'Cash in against cash out, month by month, with the closing position.',
+    summary: 'Money in against money out, month by month, with what is left at the end.',
     group: 'business-overview',
     icon: 'money-bill',
     route: null,
@@ -111,7 +111,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'owner-statement',
     title: 'Owner Statement',
-    summary: 'Per-owner income, costs, and management fee for a period.',
+    summary: 'What each owner earned, what it cost, and the management fee for a period.',
     group: 'business-overview',
     icon: 'briefcase',
     route: null,
@@ -122,17 +122,17 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   // ── Revenue ────────────────────────────────────────────
   {
     key: 'revenue-by-tenant',
-    title: 'Revenue by Tenant — Detail',
-    summary: 'Every charge or payment in a period, grouped under the tenant it came from.',
+    title: 'Money In, by Tenant',
+    summary: 'Every charge raised and every payment received in a period, grouped by tenant.',
     group: 'revenue',
     icon: 'users',
     route: 'revenue-by-tenant',
-    keywords: 'sales by customer details customer transactions billed collected ledger',
+    keywords: 'revenue by tenant sales by customer details customer transactions billed collected ledger',
   },
   {
     key: 'rent-roll',
     title: 'Rent Roll',
-    summary: 'Every active lease with its contracted rent, next due date, and open balance.',
+    summary: 'Every active lease with its agreed rent, next due date, and what is still owed.',
     group: 'revenue',
     icon: 'list',
     route: null,
@@ -141,7 +141,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'bill-register',
     title: 'Bill Register',
-    summary: 'Flat chronological list of every bill raised — the transaction-level audit view.',
+    summary: 'Every bill raised, in the order it was raised. The audit trail behind the totals.',
     group: 'revenue',
     icon: 'file-edit',
     route: null,
@@ -170,37 +170,37 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   // ── Who Owes You ───────────────────────────────────────
   {
     key: 'ar-aging-summary',
-    title: 'A/R Aging — Summary',
-    summary: 'Outstanding balance per tenant, split by how long it has been owed.',
+    title: 'Who Owes What',
+    summary: 'What each tenant still owes, split by how long it has been sitting unpaid.',
     group: 'receivables',
     icon: 'chart-pie',
     route: 'ar-aging-summary',
-    keywords: 'accounts receivable buckets summary by tenant arrears who owes 1-30 31-60 61-90 90+',
+    keywords: 'ar aging accounts receivable buckets summary by tenant arrears who owes 1-30 31-60 61-90 90+',
   },
   {
     key: 'ar-aging-detail',
-    title: 'A/R Aging — Detail',
-    summary: 'Every unpaid bill with its days overdue and remaining balance.',
+    title: 'Unpaid Bills',
+    summary: 'Every open bill, how many days it is past due, and what is left to collect.',
     group: 'receivables',
     icon: 'exclamation-circle',
     route: 'ar-aging-detail',
-    keywords: 'accounts receivable overdue arrears past due buckets worklist chase list',
+    keywords: 'ar aging detail accounts receivable overdue arrears past due buckets worklist chase list',
   },
   {
     key: 'delinquency',
-    title: 'Delinquency & Reminders',
-    summary: 'Chronically late tenants alongside the reminders already sent to them.',
+    title: 'Late Payers & Reminders',
+    summary: 'Tenants who are late again and again, next to the reminders already sent to them.',
     group: 'receivables',
     icon: 'bell',
     route: 'delinquency',
-    keywords: 'late payers sms reminder ladder escalation collections chase repeat offenders',
+    keywords: 'delinquency late payers sms reminder ladder escalation collections chase repeat offenders',
   },
 
   // ── Portfolio & Leases ─────────────────────────────────
   {
     key: 'occupancy-by-property',
     title: 'Occupancy by Property',
-    summary: 'Occupied against total units per property, with the trend over time.',
+    summary: 'How many units are filled per property, and how that has moved over time.',
     group: 'portfolio',
     icon: 'building',
     route: null,
@@ -209,7 +209,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'vacant-units',
     title: 'Vacant Units',
-    summary: 'Units with no active lease, how long they have been empty, and asking rent.',
+    summary: 'Units with nobody in them, how long they have been empty, and the asking rent.',
     group: 'portfolio',
     icon: 'home',
     route: null,
@@ -236,7 +236,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'move-in-move-out',
     title: 'Move-ins & Move-outs',
-    summary: 'Onboardings completed and leases ended in a period, with unit turnaround time.',
+    summary: 'Who moved in, who moved out, and how long each room took to fill again.',
     group: 'portfolio',
     icon: 'sign-in',
     route: null,
@@ -256,7 +256,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'utility-run-summary',
     title: 'Utility Billing Run Summary',
-    summary: 'What each billing run charged, including admin fee, VAT, and withholding.',
+    summary: 'What each billing run charged, including the handling fee, VAT, and withholding.',
     group: 'utilities',
     icon: 'calculator',
     route: null,
@@ -267,7 +267,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'soa-issued',
     title: 'Statements Issued',
-    summary: 'Every statement of account generated, its total, and whether the SMS landed.',
+    summary: 'Every statement of account generated, its total, and whether the text was delivered.',
     group: 'documents',
     icon: 'file-excel',
     route: null,
@@ -280,30 +280,40 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     title: 'Parking Revenue',
     summary: 'Income from parking assignments, per property and per period.',
     group: 'parking',
-    icon: 'car',
+    icon: 'chart-line',
     route: null,
-    blockedBy: 'Parking app integration',
+    blockedBy: 'parking management records',
     keywords: 'slot spot bay stall income',
+  },
+  {
+    key: 'monthly-parking-customers',
+    title: 'Monthly Parking Customers',
+    summary: 'Customers on a monthly plan, with their assigned space, vehicle, and current rate.',
+    group: 'parking',
+    icon: 'users',
+    route: null,
+    blockedBy: 'parking management records',
+    keywords: 'monthly parker customer recurring plan assignment vehicle rate',
   },
   {
     key: 'parking-history-by-tenant',
     title: 'Parking Payments by Tenant',
     summary: 'Parking charges and payments grouped under each tenant.',
     group: 'parking',
-    icon: 'car',
+    icon: 'wallet',
     route: null,
-    blockedBy: 'Parking app integration',
+    blockedBy: 'parking management records',
     keywords: 'parking payment history by tenant slot spot',
   },
   {
     key: 'parking-delinquency',
-    title: 'Parking Delinquency',
-    summary: 'Unpaid parking charges and how far past due they are.',
+    title: 'Unpaid Parking Fees',
+    summary: 'Customers with unpaid parking charges and how far past due they are.',
     group: 'parking',
-    icon: 'car',
+    icon: 'exclamation-circle',
     route: null,
-    blockedBy: 'Parking app integration',
-    keywords: 'parking overdue arrears unpaid slot',
+    blockedBy: 'parking management records',
+    keywords: 'parking delinquency overdue arrears unpaid late fees slot',
   },
 ];
 

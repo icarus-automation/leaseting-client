@@ -15,7 +15,7 @@
       <svg pIcon="history" class="mt-px shrink-0 text-success" [size]="13" aria-hidden="true"></svg>
       <span>
         {{ carriedOverCount() === 1 ? '1 requirement is' : carriedOverCount() + ' requirements are' }}
-        already on file from a previous onboarding — ticked below. Untick anything that needs a fresh copy.
+        already on file from an earlier onboarding, ticked below. Untick anything that needs a fresh copy.
       </span>
     </p>
   }
@@ -68,7 +68,7 @@
               <li class="flex flex-wrap items-center gap-1.5 text-[12.5px] text-body">
                 <svg pIcon="file" class="text-muted" [size]="11" aria-hidden="true"></svg>
                 <a [href]="doc.url" target="_blank" rel="noopener" class="text-primary hover:underline">{{ doc.fileName }}</a>
-                <span class="text-[11.5px] text-muted">— already on file</span>
+                <span class="text-[11.5px] text-muted">already on file</span>
               </li>
             }
             @for (doc of uploadsFor(item.key); track doc.id) {

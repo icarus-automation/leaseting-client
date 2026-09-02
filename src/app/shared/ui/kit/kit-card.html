@@ -97,7 +97,7 @@
       } @else if (allClear()) {
         <p class="mt-1.5 flex items-center gap-2 text-[13.5px] text-body">
           <svg pIcon="check-circle" class="shrink-0 text-success" [size]="15" aria-hidden="true"></svg>
-          All caught up — nothing needs you right now.
+          All caught up. Nothing needs you right now.
         </p>
         @if (summary()) {
           <p class="mt-1 text-[12.5px] leading-relaxed text-muted">{{ summary() }}</p>
@@ -110,7 +110,7 @@
         -->
         <p class="mt-1.5 flex items-center gap-2 text-[13.5px] text-body">
           <svg pIcon="inbox" class="shrink-0 text-muted" [size]="15" aria-hidden="true"></svg>
-          Nothing new — but you have set some things aside.
+          Nothing new, but you have set some things aside.
         </p>
         @if (summary()) {
           <p class="mt-1 text-[12.5px] leading-relaxed text-muted">{{ summary() }}</p>

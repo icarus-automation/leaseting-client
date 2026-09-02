@@ -155,7 +155,7 @@ export class ChargeItemSettings {
   confirmArchive(item: ChargeItemResponse): void {
     this.confirmation.confirm({
       header: 'Archive charge item',
-      message: `Archive “${item.name}”? Leases already charging it are untouched — it just leaves the picker for new ones.`,
+      message: `Archive “${item.name}”? Leases already charging it are untouched. It just leaves the picker for new ones.`,
       icon: 'pi pi-exclamation-triangle',
       acceptButtonProps: { label: 'Archive', severity: 'danger' },
       rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },

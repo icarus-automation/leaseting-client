@@ -332,7 +332,7 @@ The primary display surface of the product, and the one place density is allowed
 
 ### Navigation
 
-- **Sidebar:** 240px, Panel Surface ground, right hairline, `100dvh` sticky. Its header-height brand row directly renders the full transparent Leaseting lockup, centered and without a generated backing. Sections carry Eyebrow labels; "Connected Apps" is separated by a top hairline. External items append a 11px `external-link` glyph at 45% opacity and name their destination in the `aria-label`.
+- **Sidebar:** 240px, Panel Surface ground, right hairline, `100dvh` sticky. Its header-height brand row directly renders the full transparent Leaseting lockup, centered and without a generated backing. Sections carry Eyebrow labels. Planned internal routes append a compact "Soon" status and open an honest placeholder page. Connected Apps is separated by a top hairline. External items open in a new tab and append an `external-link` glyph.
 - **Nav item:** 7px / 10px padding, 4px radius, 13.5px medium, muted ink, 16px icon at 80% opacity. Hover tints the ground with ink at 5%. **Active** takes primary at 8% with a Ledger Indigo label and a full-opacity icon, plus `aria-current="page"` — a tint and a color change, never a left stripe.
 - **Header:** 56px, white, bottom hairline, sticky at z-1100. Holds the skip link (offscreen until focused), the drawer toggle and compact Leaseting identity below 1024px, the search trigger, and the user cluster. The sign-out button is the one control whose hover goes red.
 - **Search trigger:** Panel Surface, hairline, 4px, 220px minimum, muted placeholder plus a `Ctrl` / `K` keycap pair. Hover raises the border to Border Strong. It carries `aria-keyshortcuts="Control+K"` and collapses to an icon-only button on phones.

@@ -73,9 +73,9 @@
     <div class="flex items-center gap-2 text-[12.5px] text-muted">
       <svg pIcon="paperclip" [size]="12" aria-hidden="true"></svg>
       @if (receiptName(); as name) {
-        <span class="text-body">{{ name }} — filed on the tenant's documents</span>
+        <span class="text-body">{{ name }}, filed on the tenant's documents</span>
       } @else {
-        <span>Receipt / deposit slip (optional) — files on the tenant's profile</span>
+        <span>Receipt or deposit slip (optional), filed on the tenant's profile</span>
       }
     </div>
     <button

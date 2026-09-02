@@ -189,7 +189,7 @@ function clamp01(value: number): number {
 export const TRACE_FAILURE_MESSAGE: Record<TraceFailure, string> = {
   'on-a-line': 'That landed on a wall or a label. Tap in the open part of the room.',
   'too-small': 'That area is too small to be part of a unit.',
-  'too-large': "That covers too much of the plan to be one unit — it's probably a hallway.",
+  'too-large': "That covers too much of the plan to be one unit. It looks like a hallway.",
   'no-outline': "Couldn't work out a clean outline there. Trace this one by hand.",
 };
 

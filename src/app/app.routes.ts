@@ -52,6 +52,11 @@ export const routes: Routes = [
       },
       { path: 'maintenance', redirectTo: 'work-orders' },
       {
+        path: 'parking',
+        loadChildren: () =>
+          import('./modules/parking/parking.routes').then(m => m.PARKING_ROUTES),
+      },
+      {
         path: 'knowledge-base',
         loadChildren: () =>
           import('./modules/knowledge-base/knowledge-base.routes').then(m => m.KB_ROUTES),

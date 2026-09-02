@@ -49,6 +49,6 @@ export class Pagination {
     if (!m) return '';
     const from = (m.page - 1) * m.limit + 1;
     const to = Math.min(m.page * m.limit, m.total);
-    return `${from}–${to} of ${m.total}`;
+    return `${from}-${to} of ${m.total}`;
   });
 }

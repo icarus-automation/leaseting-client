@@ -25,6 +25,7 @@ import type { BillType } from '../../../../core/models/enums';
 import type { PropertyListItem } from '../../../../core/models/property.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
+import { SegmentedControl } from '../../../../shared/ui/segmented-control/segmented-control';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { PropertiesService } from '../../../properties/services/properties.service';
@@ -70,6 +71,7 @@ function addMonths(date: Date, months: number): Date {
     DatePipe,
     PhpCurrencyPipe,
     EmptyState,
+    SegmentedControl,
     Skeleton,
   ],
   templateUrl: './utility-run.html',
@@ -164,6 +166,12 @@ export class UtilityRun {
   );
 
   readonly unitLabel = computed(() => (this.setupValues().type === 'WATER' ? 'cu.m' : 'kWh'));
+
+  /** Named after the unit in force, so the choice reads the same as the fields. */
+  readonly rateModes = computed(() => [
+    { value: 'derived' as RateMode, label: 'From total bill' },
+    { value: 'direct' as RateMode, label: `Rate per ${this.unitLabel()}` },
+  ]);
 
   /** No carried readings at all — this property has never been billed for this
    *  utility, so staff seed each meter's current figure as the baseline. */
@@ -308,7 +316,7 @@ export class UtilityRun {
       this.toast.add({
         severity: 'warn',
         summary: 'No readings entered',
-        detail: 'Type at least one present reading — blank rows are skipped.',
+        detail: 'Type at least one present reading. Blank rows are skipped.',
       });
       return;
     }

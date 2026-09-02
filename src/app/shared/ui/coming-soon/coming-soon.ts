@@ -37,7 +37,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
               }
             </ul>
             <p class="text-[12.5px] text-muted">
-              Until then, everything under <span class="font-medium text-body">Management</span> — properties, tenants, leases, and bills — is live.
+              Until then, everything under <span class="font-medium text-body">Management</span> is live: properties, tenants, leases, and bills.
             </p>
           </div>
         </div>

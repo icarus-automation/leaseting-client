@@ -49,3 +49,16 @@ export const PAYMENT_SOURCE_LABELS: Record<PaymentSource, string> = {
 
 /** Derived occupancy — computed by the backend from active leases. */
 export type UnitStatus = 'OCCUPIED' | 'VACANT';
+
+export type ParkingBillingPeriod = 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+
+export const PARKING_BILLING_PERIOD_LABELS: Record<ParkingBillingPeriod, string> = {
+  HOURLY: 'Hourly',
+  DAILY: 'Daily',
+  WEEKLY: 'Weekly',
+  MONTHLY: 'Monthly',
+};
+
+export const PARKING_BILLING_PERIOD_OPTIONS = (
+  Object.entries(PARKING_BILLING_PERIOD_LABELS) as [ParkingBillingPeriod, string][]
+).map(([value, label]) => ({ value, label }));

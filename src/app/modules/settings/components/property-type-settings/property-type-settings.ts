@@ -145,7 +145,7 @@ export class PropertyTypeSettings {
     }
     this.confirmation.confirm({
       header: 'Archive property type',
-      message: `Archive “${item.name}”? The ${this.usageLabel(item)} using it keep the label — it just leaves the picker for new properties.`,
+      message: `Archive “${item.name}”? The ${this.usageLabel(item)} using it keep the label. It just leaves the picker for new properties.`,
       icon: 'pi pi-exclamation-triangle',
       acceptButtonProps: { label: 'Archive', severity: 'danger' },
       rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },

@@ -8,6 +8,7 @@ describe('navLinkIsActive', () => {
     expect(navLinkIsActive('/bills/submissions', '/bills')).toBe(false);
   });
 
+
   it('activates Submissions only on that queue', () => {
     expect(navLinkIsActive('/bills/submissions', '/bills/submissions')).toBe(true);
     expect(navLinkIsActive('/bills', '/bills/submissions')).toBe(false);

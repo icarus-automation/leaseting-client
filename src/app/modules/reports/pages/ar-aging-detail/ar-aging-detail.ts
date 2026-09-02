@@ -14,7 +14,7 @@ import type {
 } from '../../../../core/models/report.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
-import { asOfLabel, toIsoDate } from '../../as-of.util';
+import { AsOfSelection, asOfLabel, asOfParam, todaySelection } from '../../as-of.util';
 import { AsOfFilter } from '../../components/as-of-filter/as-of-filter';
 import { ReportHeader } from '../../components/report-header/report-header';
 import { downloadCsv, toCsv } from '../../csv-export.util';
@@ -52,7 +52,7 @@ export class ArAgingDetailPage {
     ...AGING_BUCKETS.map((bucket) => ({ value: bucket.key as string, label: bucket.label })),
   ];
 
-  readonly asOf = signal<Date>(new Date());
+  readonly asOf = signal<AsOfSelection>(todaySelection());
   readonly propertyId = signal<string>(ALL_PROPERTIES);
   readonly bucket = signal<string>(ALL_BUCKETS);
 
@@ -94,7 +94,8 @@ export class ArAgingDetailPage {
   private readQueryParams(): void {
     const params = this.route.snapshot.queryParamMap;
     const asOf = params.get('asOf');
-    if (asOf) this.asOf.set(new Date(`${asOf}T00:00:00`));
+    // A pinned date arrived in the link; without one the report stays live.
+    if (asOf) this.asOf.set({ preset: 'custom', date: new Date(`${asOf}T00:00:00`) });
     this.propertyId.set(params.get('propertyId') ?? ALL_PROPERTIES);
     this.bucket.set(params.get('bucket') ?? ALL_BUCKETS);
   }
@@ -107,7 +108,7 @@ export class ArAgingDetailPage {
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        asOf: toIsoDate(this.asOf()),
+        asOf: asOfParam(this.asOf()) ?? null,
         propertyId: this.propertyId() || null,
         bucket: this.bucket() || null,
       },
@@ -120,7 +121,7 @@ export class ArAgingDetailPage {
     this.error.set(null);
     this.reports
       .arAgingDetail({
-        asOf: toIsoDate(this.asOf()),
+        asOf: asOfParam(this.asOf()),
         propertyId: this.propertyId() || undefined,
         bucket: (this.bucket() || undefined) as AgingBucketKey | undefined,
       })
@@ -143,8 +144,8 @@ export class ArAgingDetailPage {
     this.load();
   }
 
-  onAsOfChange(date: Date): void {
-    this.asOf.set(date);
+  onAsOfChange(selection: AsOfSelection): void {
+    this.asOf.set(selection);
     this.reload();
   }
 

@@ -4,7 +4,7 @@
       <h1 class="font-heading text-xl font-semibold text-heading">Kit usage</h1>
       <p class="mt-0.5 text-[13px] text-muted">
         What Kit has cost and what has been failing. Costs are estimated from a local price
-        list, not billed figures — check your provider for the invoice.
+        list, not billed figures. Check your provider for the invoice.
       </p>
     </div>
     <a
@@ -56,7 +56,7 @@
             @if (totalCost(); as cost) {
               ${{ cost | number: '1.2-4' }}
             } @else {
-              <span class="text-muted">—</span>
+              <span class="text-muted">-</span>
             }
           </dd>
         </div>
@@ -142,7 +142,7 @@
                     </td>
                     <td class="px-3 py-2 text-right text-body">{{ row.calls | number }}</td>
                     <td class="px-3 py-2 text-right text-body">
-                      @if (row.costUsd; as cost) { ${{ cost | number: '1.2-4' }} } @else { — }
+                      @if (row.costUsd; as cost) { ${{ cost | number: '1.2-4' }} } @else { - }
                     </td>
                     <td class="px-3 py-2 text-right text-muted">{{ row.avgLatencyMs | number }}ms</td>
                   </tr>
@@ -170,7 +170,7 @@
                     <td class="truncate px-3 py-2 text-body">{{ row.key }}</td>
                     <td class="px-3 py-2 text-right text-body">{{ row.calls | number }}</td>
                     <td class="px-3 py-2 text-right text-body">
-                      @if (row.costUsd; as cost) { ${{ cost | number: '1.2-4' }} } @else { — }
+                      @if (row.costUsd; as cost) { ${{ cost | number: '1.2-4' }} } @else { - }
                     </td>
                     <td class="px-3 py-2 text-right text-muted">{{ row.avgLatencyMs | number }}ms</td>
                   </tr>

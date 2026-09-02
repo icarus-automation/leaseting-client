@@ -250,7 +250,7 @@ export class BillFormDialog {
         return;
       }
       if (breakdown.netDue <= 0) {
-        this.errorMessage.set('Net due must be above zero — check the readings and rate.');
+        this.errorMessage.set('The amount comes out at zero. Check the readings and the rate.');
         return;
       }
       payloadAmount = breakdown.netDue;
@@ -331,7 +331,7 @@ export class BillFormDialog {
 function toLeaseOption(lease: LeaseListItem): LeaseOption {
   return {
     id: lease.id,
-    label: `Unit ${lease.unit.unitNo} · ${lease.unit.property.name} — ${lease.tenant.firstName} ${lease.tenant.lastName}`,
+    label: `Unit ${lease.unit.unitNo} · ${lease.unit.property.name} · ${lease.tenant.firstName} ${lease.tenant.lastName}`,
     monthlyRent: lease.monthlyRent,
     dueDay: lease.dueDay,
   };

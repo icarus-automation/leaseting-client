@@ -9,7 +9,7 @@ import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { AgingBucketKey, ArAgingSummary } from '../../../../core/models/report.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
-import { asOfLabel, toIsoDate } from '../../as-of.util';
+import { AsOfSelection, asOfLabel, asOfParam, todaySelection } from '../../as-of.util';
 import { AsOfFilter } from '../../components/as-of-filter/as-of-filter';
 import { ReportHeader } from '../../components/report-header/report-header';
 import { downloadCsv, toCsv } from '../../csv-export.util';
@@ -50,7 +50,7 @@ export class ArAgingSummaryPage {
   readonly skeletons = Array.from({ length: 5 });
   readonly propertyOptions = this.filters.propertyOptions;
 
-  readonly asOf = signal<Date>(new Date());
+  readonly asOf = signal<AsOfSelection>(todaySelection());
   readonly propertyId = signal<string>(ALL_PROPERTIES);
   readonly sort = signal<SortKey>('exposure');
 
@@ -111,7 +111,7 @@ export class ArAgingSummaryPage {
     this.error.set(null);
     this.reports
       .arAgingSummary({
-        asOf: toIsoDate(this.asOf()),
+        asOf: asOfParam(this.asOf()),
         propertyId: this.propertyId() || undefined,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -127,8 +127,8 @@ export class ArAgingSummaryPage {
       });
   }
 
-  onAsOfChange(date: Date): void {
-    this.asOf.set(date);
+  onAsOfChange(selection: AsOfSelection): void {
+    this.asOf.set(selection);
     this.load();
   }
 
@@ -136,9 +136,17 @@ export class ArAgingSummaryPage {
     this.load();
   }
 
-  /** Query params that carry the current filters into the detail report. */
+  /**
+   * Query params that carry the current filters into the detail report.
+   *
+   * A live "Today" is passed on as nothing at all, so the detail report dates
+   * itself the same way this one did rather than pinning yesterday's date on a
+   * link opened tomorrow.
+   */
   detailParams(bucket?: AgingBucketKey): Record<string, string> {
-    const params: Record<string, string> = { asOf: toIsoDate(this.asOf()) };
+    const params: Record<string, string> = {};
+    const asOf = asOfParam(this.asOf());
+    if (asOf) params['asOf'] = asOf;
     if (this.propertyId()) params['propertyId'] = this.propertyId();
     if (bucket) params['bucket'] = bucket;
     return params;

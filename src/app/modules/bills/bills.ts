@@ -17,6 +17,7 @@ import { PhpCurrencyPipe } from '../../shared/pipes/php-currency-pipe';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { NlFilterBar } from '../../shared/ui/nl-filter-bar/nl-filter-bar';
 import { Pagination } from '../../shared/ui/pagination/pagination';
+import { SegmentedControl } from '../../shared/ui/segmented-control/segmented-control';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../shared/ui/status-badge/status-badge';
 import { watchCreateParam } from '../../shared/utils/create-param.util';
@@ -62,6 +63,7 @@ const TYPE_OPTIONS: { label: string; value: BillType | null }[] = [
     EmptyState,
     NlFilterBar,
     Pagination,
+    SegmentedControl,
     Skeleton,
     StatusBadge,
     BillFormDialog,

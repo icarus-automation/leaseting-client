@@ -1,0 +1,259 @@
+<section class="flex flex-col gap-3" aria-label="Rate plans">
+  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
+    Each plan is a named stay length with a price per vehicle type. Leave a type blank if that plan
+    does not apply to it. Archiving a plan hides it from the picker; stays already charged on it keep
+    the price they paid.
+  </p>
+
+  @if (loading()) {
+    <app-skeleton variant="panel" />
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center justify-between gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <span class="flex items-center gap-2">
+        <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+        {{ message }}
+      </span>
+      <button type="button" class="shrink-0 font-medium text-primary hover:underline" (click)="load()">Retry</button>
+    </div>
+  } @else if (items(); as list) {
+    @if (list.length === 0 && activeTypes().length === 0) {
+      <div class="rounded-base border border-dashed border-border bg-background px-4 py-8 text-center">
+        <p class="text-[13.5px] font-medium text-heading">Add a vehicle type first</p>
+        <p class="mx-auto mt-1 max-w-[42ch] text-[13px] leading-relaxed text-muted">
+          Rate plans set a price for each type of vehicle. Create Car, Motorcycle, Truck, or your own
+          list, then come back here.
+        </p>
+        <a
+          routerLink="/settings/vehicle-types"
+          class="mt-3 inline-flex h-8 items-center rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground no-underline transition-colors duration-150 ease-out hover:bg-primary-hover motion-reduce:transition-none"
+        >
+          Go to Vehicle types
+        </a>
+      </div>
+    } @else {
+      <div class="overflow-hidden rounded-base border border-border">
+        @if (list.length === 0) {
+          <p class="px-4 py-6 text-center text-[13px] text-muted">No rate plans yet. Add the first one below.</p>
+        } @else {
+          <ul class="m-0 list-none p-0">
+            @for (item of list; track item.id) {
+              <li
+                class="border-b border-border px-4 py-3 last:border-b-0"
+                [class.animate-row-flash]="flashId() === item.id"
+                (animationend)="flashId.set(null)"
+              >
+                @if (editingId() === item.id) {
+                  <form class="flex flex-col gap-3" [formGroup]="editForm" (ngSubmit)="submitEdit()">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <input
+                        #editInput
+                        type="text"
+                        formControlName="name"
+                        class="h-10 w-44 min-w-0 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+                        (keydown.escape)="cancelEdit()"
+                        aria-label="Rate plan name"
+                      />
+                      <app-segmented-control
+                        [options]="periodOptions"
+                        [value]="editForm.controls.billingPeriod.value"
+                        ariaLabel="Billing period"
+                        (valueChange)="setPeriod(editForm, $event)"
+                      />
+                      <span class="flex-1"></span>
+                      <button
+                        type="submit"
+                        class="flex h-7 w-7 items-center justify-center rounded-base border-none bg-primary text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                        aria-label="Save rate plan"
+                        [disabled]="saving()"
+                      >
+                        @if (saving()) {
+                          <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+                        } @else {
+                          <svg pIcon="check" [size]="13" aria-hidden="true"></svg>
+                        }
+                      </button>
+                      <button
+                        type="button"
+                        class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                        aria-label="Cancel edit"
+                        (click)="cancelEdit()"
+                      >
+                        <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+                      </button>
+                    </div>
+                    <div
+                      class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2"
+                      formGroupName="amounts"
+                    >
+                      @for (cell of priceCells(item); track cell.id) {
+                        <label class="flex min-w-0 flex-col gap-1">
+                          <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                            {{ cell.name }}
+                          </span>
+                          <p-inputnumber
+                            [formControlName]="cell.id"
+                            mode="currency"
+                            currency="PHP"
+                            locale="en-PH"
+                            [min]="0"
+                            placeholder="Not set"
+                            styleClass="w-full"
+                            inputStyleClass="w-full"
+                            [ariaLabel]="'Amount for ' + cell.name"
+                          />
+                        </label>
+                      }
+                    </div>
+                  </form>
+                  @if (editError(); as message) {
+                    <p class="mt-1 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+                  }
+                } @else {
+                  <div class="flex flex-wrap items-start gap-x-3 gap-y-2">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex min-h-8 flex-wrap items-center gap-x-2.5 gap-y-1">
+                        <span
+                          class="truncate text-[13.5px] font-medium"
+                          [class]="item.isArchived ? 'text-muted' : 'text-heading'"
+                        >
+                          {{ item.name }}
+                        </span>
+                        @if (item.isArchived) {
+                          <app-status-badge tone="neutral" label="Archived" />
+                        }
+                        <span class="rounded-full bg-surface px-2 py-px text-[11.5px] font-medium text-muted">
+                          {{ billedHint(item.billingPeriod) }}
+                        </span>
+                      </div>
+                      <div class="mt-2 grid grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] gap-x-4 gap-y-1.5">
+                        @for (cell of priceCells(item); track cell.id) {
+                          <div class="min-w-0">
+                            <p class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                              {{ cell.name }}
+                            </p>
+                            @if (cell.amount !== null) {
+                              <p
+                                class="text-[13.5px] font-medium tabular-nums"
+                                [class]="item.isArchived || cell.isArchived ? 'text-muted' : 'text-heading'"
+                              >
+                                {{ cell.amount | phpCurrency }}
+                              </p>
+                            } @else {
+                              <p class="text-[13.5px] text-muted">Not set</p>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="flex shrink-0 items-center gap-2">
+                      <button
+                        type="button"
+                        class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                        [attr.aria-label]="'Edit ' + item.name"
+                        (click)="startEdit(item)"
+                      >
+                        <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+                      </button>
+                      @if (item.isArchived) {
+                        <button
+                          type="button"
+                          class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                          [attr.aria-label]="'Restore ' + item.name"
+                          [disabled]="busyId() === item.id"
+                          (click)="restore(item)"
+                        >
+                          <svg pIcon="undo" [size]="12" aria-hidden="true"></svg>
+                          <span>Restore</span>
+                        </button>
+                      } @else {
+                        <button
+                          type="button"
+                          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                          [attr.aria-label]="'Archive ' + item.name"
+                          [disabled]="busyId() === item.id"
+                          (click)="confirmArchive(item)"
+                        >
+                          <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+
+        @if (activeTypes().length > 0) {
+          <div class="border-t border-border bg-surface px-4 py-3">
+            <form class="flex flex-col gap-3" [formGroup]="createForm" (ngSubmit)="submitCreate()">
+              <div class="flex flex-wrap items-center gap-2">
+                <svg pIcon="plus" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+                <input
+                  type="text"
+                  formControlName="name"
+                  class="h-10 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
+                  placeholder="Add a plan, e.g. Overnight"
+                  aria-label="New rate plan name"
+                  (input)="createError.set(null)"
+                />
+                <app-segmented-control
+                  [options]="periodOptions"
+                  [value]="createForm.controls.billingPeriod.value"
+                  ariaLabel="Billing period for the new rate plan"
+                  (valueChange)="setPeriod(createForm, $event)"
+                />
+                <button
+                  type="submit"
+                  class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                  [disabled]="creating() || createForm.controls.name.invalid"
+                >
+                  @if (creating()) {
+                    <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+                  }
+                  <span>Add</span>
+                </button>
+              </div>
+              <div
+                class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2 pl-6"
+                formGroupName="amounts"
+              >
+                @for (type of activeTypes(); track type.id) {
+                  <label class="flex min-w-0 flex-col gap-1">
+                    <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                      {{ type.name }}
+                    </span>
+                    <p-inputnumber
+                      [formControlName]="type.id"
+                      mode="currency"
+                      currency="PHP"
+                      locale="en-PH"
+                      [min]="0"
+                      placeholder="Not set"
+                      styleClass="w-full"
+                      inputStyleClass="w-full"
+                      [ariaLabel]="'Amount for ' + type.name"
+                    />
+                  </label>
+                }
+              </div>
+            </form>
+            @if (createError(); as message) {
+              <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+            }
+          </div>
+        } @else {
+          <div class="border-t border-border bg-surface px-4 py-3 text-[13px] text-muted">
+            Restore or
+            <a routerLink="/settings/vehicle-types" class="font-medium text-primary hover:underline">add a vehicle type</a>
+            to create another plan.
+          </div>
+        }
+      </div>
+    }
+  }
+</section>

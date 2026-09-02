@@ -3,7 +3,7 @@
   [visible]="visible()"
   (visibleChange)="visible.set($event)"
   [heading]="heading()"
-  [subheading]="isEdit() ? 'Update the property details and photo.' : 'Register a property you own or manage.'"
+  [subheading]="isEdit() ? 'Update the property details and photo.' : 'Add a property you own or manage.'"
   [dirty]="errors.dirty() || imageTouched()"
   width="32rem"
 >
@@ -77,7 +77,7 @@
           </div>
         } @else if (pickerOptions().length === 0) {
           <p class="rounded-base border border-dashed border-border px-3 py-2.5 text-[12.5px] text-muted">
-            No property types yet — add the first one with “+ New type”.
+            No property types yet. Add the first one with “+ New type”.
           </p>
         } @else if (useSelect()) {
           <p-select
@@ -197,7 +197,7 @@
 
       <app-image-dropzone
         [currentImageUrl]="property()?.imageUrl ?? null"
-        idleHint="PNG, JPG, or WebP — up to 5 MB"
+        idleHint="PNG, JPG, or WebP, up to 5 MB"
         [imagePreviewHeight]="170"
         (fileChange)="onImageChange($event)"
       />

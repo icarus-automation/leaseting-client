@@ -1,7 +1,7 @@
 <section class="flex flex-col gap-3" aria-label="Charge items">
   <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
     Each item can carry a default amount, which pre-fills the line when it is picked. Archiving one
-    hides it from the picker — leases already charging it keep the line.
+    hides it from the picker. Leases already charging it keep the line.
   </p>
 
   @if (loading()) {
@@ -20,7 +20,7 @@
   } @else if (items(); as list) {
     <div class="overflow-hidden rounded-base border border-border">
       @if (list.length === 0) {
-        <p class="px-4 py-6 text-center text-[13px] text-muted">No charge items yet — add the first one below.</p>
+        <p class="px-4 py-6 text-center text-[13px] text-muted">No charge items yet. Add the first one below.</p>
       } @else {
         <ul class="m-0 list-none p-0">
           @for (item of list; track item.id) {
@@ -150,7 +150,7 @@
             type="text"
             formControlName="name"
             class="h-10 w-44 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
-            placeholder="Add a charge — e.g. Laundry"
+            placeholder="Add a charge, e.g. Laundry"
             aria-label="New charge item name"
             (input)="createError.set(null)"
           />

@@ -118,7 +118,7 @@
           @if (mapTarget(); as target) {
             <span>
               Outlining <strong class="font-semibold">Unit {{ target.unitNo }}</strong>
-              — {{ mapEditor()?.points()?.length ?? 0 }} corner{{ (mapEditor()?.points()?.length ?? 0) === 1 ? '' : 's' }}{{ mapDrawHint() }}
+              &middot; {{ mapEditor()?.points()?.length ?? 0 }} corner{{ (mapEditor()?.points()?.length ?? 0) === 1 ? '' : 's' }}{{ mapDrawHint() }}
             </span>
             <div class="ml-auto flex items-center gap-1.5">
               <button
@@ -180,7 +180,7 @@
               </button>
             </div>
           } @else {
-            <span>Pick a unit from the “Units to map” list — or click an existing shape on the plan to adjust it.</span>
+            <span>Pick a unit from the “Units to map” list, or click a shape already on the plan to adjust it.</span>
           }
         </div>
       }

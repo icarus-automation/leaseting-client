@@ -120,7 +120,7 @@ export class RecordPaymentDialog {
   readonly heading = computed(() => {
     const bill = this.bill();
     if (!bill) return 'Record payment';
-    return `Record payment — ${BILL_TYPE_LABELS[bill.type]}`;
+    return `Record payment · ${BILL_TYPE_LABELS[bill.type]}`;
   });
   readonly subheading = computed(() => {
     const bill = this.bill();

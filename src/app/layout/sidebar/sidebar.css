@@ -81,12 +81,12 @@
   padding-top: 2px;
 }
 
-/* "Connected Apps" gets a divider before it */
 .nav-section--apps {
   padding-top: 10px;
   margin-top: 8px;
   border-top: 1px solid var(--border);
 }
+
 
 .nav-section-label {
   display: block;
@@ -148,13 +148,8 @@
   color: var(--primary);
 }
 
-/* External app item */
 .nav-item--external {
   position: relative;
-}
-
-.nav-item--external:hover {
-  color: var(--text-heading);
 }
 
 .nav-external-icon {
@@ -169,6 +164,7 @@
 .nav-item--external:hover .nav-external-icon {
   opacity: 0.7;
 }
+
 
 /* Icons */
 .nav-icon {
@@ -187,6 +183,25 @@
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
+}
+
+.nav-soon {
+  flex-shrink: 0;
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--background);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.nav-item--active .nav-soon {
+  border-color: color-mix(in oklab, var(--primary) 25%, var(--border));
+  color: var(--primary);
 }
 
 /* Bottom pinned */

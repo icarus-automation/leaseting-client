@@ -123,10 +123,10 @@ export class PropertyDetailPage {
       // Says the quiet part out loud: a unit is usually more than one room, and
       // the second tap is the whole trick on a plan where the ensuite door is
       // drawn shut.
-      if (rooms === 0) return ' · tap inside a room — its ensuite comes with it';
-      return ` · ${rooms} room${rooms === 1 ? '' : 's'} — tap another to add it, tap one again to drop it`;
+      if (rooms === 0) return ' · tap inside a room, and its ensuite comes with it';
+      return ` · ${rooms} room${rooms === 1 ? '' : 's'} · tap another to add it, tap one again to drop it`;
     }
-    if (editor.closed()) return ' · drag corners to fine-tune — press Enter to save';
+    if (editor.closed()) return ' · drag corners to fine-tune, then press Enter to save';
     return editor.points().length >= 3
       ? ' · click the first corner or press Enter to close & save'
       : ' · click the first corner to close';

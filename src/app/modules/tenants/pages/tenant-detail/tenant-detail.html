@@ -137,7 +137,7 @@
           <div class="rounded-base border border-border bg-background p-3.5">
             <p class="text-[12px] font-medium text-muted">Next due</p>
             <p class="mt-1 font-heading text-xl font-semibold" [class]="hasOverdue() ? 'text-destructive' : 'text-heading'">
-              {{ t.nextDueDate ? (t.nextDueDate | date: 'MMM d, y') : '—' }}
+              {{ t.nextDueDate ? (t.nextDueDate | date: 'MMM d, y') : '-' }}
             </p>
           </div>
         </div>
@@ -154,7 +154,7 @@
           </div>
           @if (billingHistory().length === 0) {
             <p class="rounded-base border border-dashed border-border px-4 py-6 text-center text-[13px] text-muted">
-              No bills yet — charges appear here once this tenant's lease is billed.
+              No bills yet. Charges appear here once this tenant's lease has been billed.
             </p>
           } @else {
             <div class="overflow-x-auto rounded-base border border-border">
@@ -180,7 +180,7 @@
                         <app-status-badge [tone]="billStatus(bill).tone" [label]="billStatus(bill).label" />
                       </td>
                       <td class="hidden px-4 py-2.5 text-[13px] text-muted md:table-cell">
-                        {{ bill.paidAt ? (bill.paidAt | date: 'MMM d, y') : '—' }}
+                        {{ bill.paidAt ? (bill.paidAt | date: 'MMM d, y') : '-' }}
                       </td>
                     </tr>
                   }
@@ -195,7 +195,7 @@
           <h2 class="font-heading text-base font-semibold text-heading">Lease history</h2>
           @if (t.leases.length === 0) {
             <p class="rounded-base border border-dashed border-border px-4 py-6 text-center text-[13px] text-muted">
-              No leases yet — assign this tenant to a vacant unit from a property's floor plan.
+              No leases yet. Put this tenant into a vacant unit from a property's floor plan.
             </p>
           } @else {
             <div class="overflow-x-auto rounded-base border border-border">
@@ -221,7 +221,7 @@
                         </a>
                       </td>
                       <td class="px-4 py-3 text-[13px] text-body">
-                        {{ lease.startDate | date: 'MMM d, y' }} – {{ lease.endDate | date: 'MMM d, y' }}
+                        {{ lease.startDate | date: 'MMM d, y' }} to {{ lease.endDate | date: 'MMM d, y' }}
                       </td>
                       <td class="px-4 py-3 text-[13px] text-body tabular-nums">{{ lease.monthlyRent | phpCurrency }}</td>
                       <td class="px-4 py-3">
@@ -260,7 +260,7 @@
               (change)="onDocumentPicked($event)"
             />
           </div>
-          <p class="text-[12px] text-muted">Contracts, IDs, receipts — PDF or image, up to 10 MB.</p>
+          <p class="text-[12px] text-muted">Contracts, IDs, and receipts. PDF or image, up to 10 MB.</p>
 
           @if (t.documents.length === 0) {
             <p class="rounded-base border border-dashed border-border px-4 py-6 text-center text-[13px] text-muted">

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { asOfLabel, resolveAsOf, toIsoDate } from './as-of.util';
+import { asOfLabel, asOfParam, resolveAsOf, toIsoDate, todaySelection } from './as-of.util';
 
 /** Mid-month, mid-quarter — so every period-end lands somewhere different. */
 const TODAY = new Date(2026, 7, 5); // 5 Aug 2026, local time
@@ -41,6 +41,23 @@ describe('as-of.util', () => {
 
     it('keeps an early-morning date on its own day', () => {
       expect(toIsoDate(new Date(2026, 10, 1, 0, 15))).toBe('2026-11-01');
+    });
+  });
+
+  describe('asOfParam', () => {
+    it('sends nothing for Today, so the server dates the report', () => {
+      expect(asOfParam(todaySelection(TODAY))).toBeUndefined();
+    });
+
+    it('sends the picked date for every other option', () => {
+      expect(asOfParam({ preset: 'last-month-end', date: new Date(2026, 6, 31) })).toBe('2026-07-31');
+      expect(asOfParam({ preset: 'custom', date: new Date(2026, 6, 4) })).toBe('2026-07-04');
+    });
+  });
+
+  describe('todaySelection', () => {
+    it('opens on Today, carrying the date for labels and links', () => {
+      expect(todaySelection(TODAY)).toEqual({ preset: 'today', date: TODAY });
     });
   });
 

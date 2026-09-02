@@ -11,7 +11,7 @@ const FORMATTER = new Intl.NumberFormat('en-PH', {
  */
 @Pipe({ name: 'phpCurrency' })
 export class PhpCurrencyPipe implements PipeTransform {
-  transform(value: string | number | null | undefined, fallback = '—'): string {
+  transform(value: string | number | null | undefined, fallback = '-'): string {
     if (value === null || value === undefined || value === '') return fallback;
     const amount = typeof value === 'number' ? value : Number(value);
     if (Number.isNaN(amount)) return fallback;

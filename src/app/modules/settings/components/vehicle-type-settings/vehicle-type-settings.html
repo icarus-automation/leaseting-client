@@ -1,0 +1,149 @@
+<section class="flex flex-col gap-3" aria-label="Vehicle types">
+  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
+    These are the categories a vehicle is filed under when it parks. Rate plans set a price for each
+    type. Archiving a type hides it from the picker. Plans that already price it keep the amount.
+  </p>
+
+  @if (loading()) {
+    <app-skeleton variant="panel" />
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center justify-between gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <span class="flex items-center gap-2">
+        <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+        {{ message }}
+      </span>
+      <button type="button" class="shrink-0 font-medium text-primary hover:underline" (click)="load()">Retry</button>
+    </div>
+  } @else if (items(); as list) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @if (list.length === 0) {
+        <p class="px-4 py-6 text-center text-[13px] text-muted">No vehicle types yet. Add the first one below.</p>
+      } @else {
+        <ul class="m-0 list-none p-0">
+          @for (item of list; track item.id) {
+            <li
+              class="flex min-h-11 items-center gap-3 border-b border-border px-4 py-2 last:border-b-0"
+              [class.animate-row-flash]="flashId() === item.id"
+              (animationend)="flashId.set(null)"
+            >
+              @if (editingId() === item.id) {
+                <input
+                  #renameInput
+                  type="text"
+                  class="h-8 w-56 max-w-full rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+                  [value]="editName()"
+                  (input)="onEditNameInput($event)"
+                  (keydown.enter)="submitRename()"
+                  (keydown.escape)="cancelRename()"
+                  aria-label="Rename vehicle type"
+                />
+                <button
+                  type="button"
+                  class="flex h-7 w-7 items-center justify-center rounded-base border-none bg-primary text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                  aria-label="Save name"
+                  [disabled]="renaming()"
+                  (click)="submitRename()"
+                >
+                  @if (renaming()) {
+                    <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+                  } @else {
+                    <svg pIcon="check" [size]="13" aria-hidden="true"></svg>
+                  }
+                </button>
+                <button
+                  type="button"
+                  class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                  aria-label="Cancel rename"
+                  (click)="cancelRename()"
+                >
+                  <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+                </button>
+                @if (renameError(); as message) {
+                  <p class="text-[12.5px] text-destructive">{{ message }}</p>
+                }
+              } @else {
+                <span
+                  class="truncate text-[13.5px] font-medium"
+                  [class]="item.isArchived ? 'text-muted' : 'text-heading'"
+                >
+                  {{ item.name }}
+                </span>
+                @if (item.isArchived) {
+                  <app-status-badge tone="neutral" label="Archived" />
+                }
+                <span class="text-[12.5px] text-muted">{{ usageLabel(item) }}</span>
+              }
+
+              <span class="flex-1"></span>
+
+              @if (editingId() !== item.id) {
+                <button
+                  type="button"
+                  class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                  [attr.aria-label]="'Rename ' + item.name"
+                  (click)="startRename(item)"
+                >
+                  <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+                </button>
+                @if (item.isArchived) {
+                  <button
+                    type="button"
+                    class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                    [attr.aria-label]="'Restore ' + item.name"
+                    [disabled]="busyId() === item.id"
+                    (click)="restore(item)"
+                  >
+                    <svg pIcon="undo" [size]="12" aria-hidden="true"></svg>
+                    <span>Restore</span>
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                    [attr.aria-label]="'Archive ' + item.name"
+                    [disabled]="busyId() === item.id"
+                    (click)="confirmArchive(item)"
+                  >
+                    <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+                  </button>
+                }
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="border-t border-border bg-surface px-4 py-2.5">
+        <div class="flex items-center gap-2">
+          <svg pIcon="plus" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+          <input
+            type="text"
+            class="h-8 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
+            placeholder="Add a type, e.g. Van"
+            aria-label="New vehicle type name"
+            [value]="newName()"
+            (input)="onNewNameInput($event)"
+            (keydown.enter)="submitCreate()"
+          />
+          <button
+            type="button"
+            class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+            [disabled]="creating() || newName().trim().length === 0"
+            (click)="submitCreate()"
+          >
+            @if (creating()) {
+              <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+            }
+            <span>Add</span>
+          </button>
+        </div>
+        @if (createError(); as message) {
+          <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+        }
+      </div>
+    </div>
+  }
+</section>

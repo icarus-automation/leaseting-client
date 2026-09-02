@@ -48,11 +48,13 @@ Two things a neighboring property SaaS could not truthfully copy:
 
 **Stack.** Angular 21 (standalone, signals, zoneless-era idioms), PrimeNG 21 + `@primeuix/themes`, Tailwind v4, Konva (floor-plan editor), FilePond (uploads), Fuse.js (fuzzy search), hotkeys-js (shortcuts), date-fns. Vitest for tests. Separate backend service on `:8000`, `/api/v1`, responses wrapped in a `{ statusCode, message, data }` envelope except Better Auth routes, which are raw.
 
-**Built and live:** dashboard, properties (incl. floor-plan editor and viewer), tenants, leases, bills + SOA, tenant onboarding walk, knowledge base, reports, settings (org-curated property types and charge items), Kit event feed, auth.
+**Built and live:** dashboard, properties (incl. floor-plan editor and viewer), tenants, leases, bills + SOA, tenant onboarding walk, knowledge base, reports, settings (org-curated property types, charge items, vehicle types, and rate plans), Kit event feed, auth.
 
 **Stubbed with a published feature list (`ComingSoon`):** work orders / maintenance — committed scope, status vocabulary defined (Open → In Progress → Waiting on Vendor → Resolved → Closed).
 
-**Separate deployed app:** parking lives at `parking.leaseting.com` and is reached from a "Connected Apps" section in the sidebar, not from an in-app route. The in-app `/parking` route is a `ComingSoon` placeholder describing the spot inventory (Available / Assigned / Reserved / Out of Service), assignments tied to units and leases, and utilization reporting. Treat Leaseting as one product with at least one satellite app, not a single monolith.
+**Planned in-app module:** Parking Overview appears in the Operations sidebar section with a "Soon" marker. The `/parking` route remains a `ComingSoon` placeholder. Its future admin surface monitors occupancy, parked vehicles, entry times, elapsed stays, and guard-recorded activity. Guards alone perform parking in and parking out on handheld devices. An admin may correct a wrong guard entry only by voiding that transaction. A void must preserve the original record and capture the reason, actor, and time. The admin web must not call parking-in or parking-out endpoints. Settings already manage vehicle types and rate plans; parking rules remain later. Dashboard and Reports remain monitoring, read, and export surfaces without fake data.
+
+**Connected client app:** Website CMS appears under Connected Apps and links to `https://admin.aleeviacarterresidences.com/`. It is a separate repository and deployment for editing the client's public website. This application provides only a clearly marked external link and does not imply shared routing, data, or authentication.
 
 **Not built:** the tenant/owner portal. Committed scope, no routes yet.
 

@@ -2,7 +2,7 @@
   <header class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="font-heading text-2xl font-semibold text-heading">Bills</h1>
-      <p class="mt-0.5 text-sm text-muted">Rent and utility charges across all leases — unpaid, overdue, and settled.</p>
+      <p class="mt-0.5 text-sm text-muted">Every rent and utility charge across your leases: unpaid, overdue, and settled.</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <a
@@ -112,21 +112,12 @@
   />
 
   <div class="flex flex-wrap items-center gap-2">
-    <div class="flex items-center gap-1 rounded-base border border-border bg-surface p-1" role="group" aria-label="Filter bills">
-      @for (chip of quickFilters; track chip.value) {
-        <button
-          type="button"
-          class="rounded-[3px] px-2.5 py-1 text-[12.5px] font-medium transition-colors duration-150 ease-out motion-reduce:transition-none"
-          [class]="quickFilter() === chip.value
-            ? 'bg-primary text-primary-foreground'
-            : 'text-body hover:bg-background'"
-          [attr.aria-pressed]="quickFilter() === chip.value"
-          (click)="setQuickFilter(chip.value)"
-        >
-          {{ chip.label }}
-        </button>
-      }
-    </div>
+    <app-segmented-control
+      ariaLabel="Filter bills"
+      [options]="quickFilters"
+      [value]="quickFilter()"
+      (valueChange)="setQuickFilter($event)"
+    />
     <p-select
       [options]="typeOptions"
       optionLabel="label"
@@ -176,7 +167,7 @@
     <app-empty-state
       icon="wallet"
       heading="No bills found"
-      description="Create rent or utility bills against an active lease — overdue ones turn the unit red on the floor plan."
+      description="Raise a rent or utility bill on an active lease. Once a bill goes overdue, its unit turns red on the floor plan."
       ctaLabel="New bill"
       (cta)="drawerVisible.set(true)"
     />

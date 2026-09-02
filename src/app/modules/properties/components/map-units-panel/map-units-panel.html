@@ -20,7 +20,7 @@
 
   @if (totalCount() === 0) {
     <p class="rounded-base border border-dashed border-border px-3 py-4 text-center text-[12.5px] text-muted">
-      No units on this floor yet — add one first, then outline it here.
+      No units on this floor yet. Add one first, then outline it here.
     </p>
   } @else {
     <ul class="m-0 flex list-none flex-col gap-1 p-0">
@@ -43,7 +43,7 @@
             <span class="min-w-0 flex-1">
               <span class="block truncate text-[13.5px] font-medium text-heading">Unit {{ unit.unitNo }}</span>
               <span class="block text-[12px] text-muted">
-                {{ unit.id === targetId() ? 'Outlining now — click the plan to drop corners' : isMapped(unit) ? 'Mapped — click to re-edit' : 'Not mapped' }}
+                {{ unit.id === targetId() ? 'Outlining now. Click the plan to drop corners.' : isMapped(unit) ? 'Mapped. Click to re-edit.' : 'Not mapped' }}
               </span>
             </span>
           </button>
@@ -66,9 +66,9 @@
       <ol class="mt-2 flex list-decimal flex-col gap-1.5 pl-4 text-[12.5px] leading-relaxed text-body">
         <li>Pick a unit above, or click an existing shape to re-do it.</li>
         <li>Click the plan to drop a corner at each corner of the room.</li>
-        <li>Click the <strong class="font-semibold">first corner</strong> — or double-click — to close the shape.</li>
+        <li>Click the <strong class="font-semibold">first corner</strong> again, or double-click, to close the shape.</li>
         <li>Drag corners to fine-tune, or drag the whole shape to move it.</li>
-        <li>Hit <strong class="font-semibold">Save shape</strong> — the next unmapped unit is picked for you.</li>
+        <li>Hit <strong class="font-semibold">Save shape</strong>, and the next unmapped unit is picked for you.</li>
       </ol>
       <p class="mt-2 text-[12px] leading-relaxed text-muted">
         Shortcuts: <kbd class="rounded-[2px] border border-border bg-background px-1">Ctrl+Z</kbd> undo ·

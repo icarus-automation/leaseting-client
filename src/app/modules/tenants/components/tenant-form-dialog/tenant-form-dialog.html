@@ -88,7 +88,7 @@
       <span class="text-[13px] font-medium text-heading">Photo <span class="font-normal text-muted">(optional)</span></span>
       <app-image-dropzone
         [currentImageUrl]="tenant()?.photoUrl ?? null"
-        idleHint="PNG, JPG, or WebP — up to 5 MB"
+        idleHint="PNG, JPG, or WebP, up to 5 MB"
         [imagePreviewHeight]="140"
         (fileChange)="onPhotoChange($event)"
       />

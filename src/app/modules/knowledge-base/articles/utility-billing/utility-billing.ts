@@ -37,25 +37,25 @@ export class UtilityBillingGuide {
   /** Numbered walkthrough of the billing-run page (light markup allowed). */
   readonly runSteps: string[] = [
     'Pick the <strong class="font-medium text-heading">property</strong> and the <strong class="font-medium text-heading">utility</strong> (Electricity or Water). The units and their carried-over previous readings load on their own.',
-    'Set the <strong class="font-medium text-heading">rate</strong> — the provider\'s total bill for the building, or a fixed price per unit if you know it. The app shows the working rate as you type.',
+    'Set the <strong class="font-medium text-heading">rate</strong>: the provider\'s total bill for the building, or a fixed price per unit if you know it. The app shows the working rate as you type.',
     'Type each unit\'s <strong class="font-medium text-heading">present reading</strong>. Consumed and amount update live beside every row.',
-    'Leave the <strong class="font-medium text-heading">dates</strong> alone — they\'re filled in for you — unless you need to adjust the period.',
+    'Leave the <strong class="font-medium text-heading">dates</strong> alone. They are filled in for you, unless you need to adjust the period.',
     'Check the <strong class="font-medium text-heading">total</strong> and how many units will be billed at the bottom.',
     'Hit <strong class="font-medium text-heading">Create bills</strong>. Every bill is made at once, each due on its tenant\'s own due day.',
   ];
 
   readonly faqs: Faq[] = [
     {
-      q: 'A row says "skipped" — why?',
-      a: 'Its present reading is blank, or that unit was already billed for this month. Skipped rows are never charged — type a present reading to include it.',
+      q: 'A row says "skipped". Why?',
+      a: 'Its present reading is blank, or that unit was already billed for this month. Skipped rows are never charged, so type a present reading to include it.',
     },
     {
       q: 'It warns "below previous".',
-      a: 'The present reading is smaller than the previous one, and a meter can\'t count down. Re-check the figure — it\'s almost always a typo.',
+      a: 'The present reading is smaller than the previous one, and a meter can\'t count down. Re-check the figure. It is almost always a typo.',
     },
     {
       q: 'The previous reading shows 0.',
-      a: 'There\'s no earlier bill to carry from, so this is the first time the unit is billed for this utility. Enter the real previous reading once; next month it carries over on its own.',
+      a: 'There\'s no earlier bill to carry from, so this is the first time the unit is billed for this utility. Enter the real previous reading once, and next month it carries over on its own.',
     },
     {
       q: 'I ran the same month twice by accident.',
@@ -63,15 +63,15 @@ export class UtilityBillingGuide {
     },
     {
       q: 'I deleted an auto-generated bill and it came back.',
-      a: 'The system re-creates missing bills. To cancel a charge, don\'t delete it — set its amount to zero (or record a waiver) instead.',
+      a: 'The system re-creates missing bills. To cancel a charge, don\'t delete it. Set its amount to zero, or record a waiver, instead.',
     },
     {
       q: 'Do tenants get reminded to pay?',
-      a: 'Yes. When SMS is set up, tenants are texted before the due date and again if it lapses — automatically, with no action from you.',
+      a: 'Yes. When SMS is set up, tenants are texted before the due date and again if it lapses, automatically, with no action from you.',
     },
     {
       q: 'How accurate is the photo scan?',
-      a: 'It\'s a helper, not the source of truth. It fills fields from the receipt to save typing; always verify the numbers before you save.',
+      a: 'It\'s a helper, not the source of truth. It fills fields from the receipt to save typing, so always check the numbers before you save.',
     },
   ];
 

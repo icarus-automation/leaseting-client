@@ -112,7 +112,7 @@ export class OnboardingWizard {
     const format = (iso: string) =>
       new Date(iso).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
     return {
-      range: `${format(saved.startDate)} – ${format(saved.endDate)}`,
+      range: `${format(saved.startDate)} to ${format(saved.endDate)}`,
       length: leaseTermLabel(saved.startDate, saved.endDate),
     };
   });
@@ -166,7 +166,7 @@ export class OnboardingWizard {
             this.toast.add({
               severity: 'success',
               summary: 'Onboarding complete',
-              detail: 'Lease created — opening bills and payments are posted.',
+              detail: 'Lease created. The opening bills and payments are posted.',
             });
           },
           error: (error: unknown) => {

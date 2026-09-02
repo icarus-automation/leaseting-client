@@ -1,0 +1,191 @@
+<section class="flex flex-col gap-3" aria-label="Parking attendants">
+  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
+    These logins work only in the Leaseting Parking Terminal on the handheld. They are refused by
+    this web client and by Residence Care. You set the password, because the terminal has no
+    change-password screen. Disabling a login signs its terminal out immediately and keeps the
+    transactions it recorded.
+  </p>
+
+  @if (loading()) {
+    <app-skeleton variant="panel" />
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center justify-between gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <span class="flex items-center gap-2">
+        <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+        {{ message }}
+      </span>
+      <button type="button" class="shrink-0 font-medium text-primary hover:underline" (click)="load()">Retry</button>
+    </div>
+  } @else if (items(); as list) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @if (list.length === 0) {
+        <p class="px-4 py-6 text-center text-[13px] text-muted">
+          No terminal logins yet. Add the first one below.
+        </p>
+      } @else {
+        <ul class="m-0 list-none p-0">
+          @for (item of list; track item.id) {
+            <li
+              class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-border px-4 py-2 last:border-b-0"
+              [class.animate-row-flash]="flashId() === item.id"
+              (animationend)="flashId.set(null)"
+            >
+              @if (resettingId() === item.id) {
+                <span class="text-[13px] text-body">New password for {{ item.name }}</span>
+                <input
+                  #passwordInput
+                  type="text"
+                  class="h-8 w-56 max-w-full rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+                  [value]="newPassword()"
+                  [attr.aria-label]="'New password for ' + item.name"
+                  (input)="onNewPasswordInput($event)"
+                  (keydown.enter)="submitResetPassword(item)"
+                  (keydown.escape)="cancelResetPassword()"
+                />
+                <button
+                  type="button"
+                  class="flex h-7 w-7 items-center justify-center rounded-base border-none bg-primary text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                  aria-label="Save password"
+                  [disabled]="busyId() === item.id"
+                  (click)="submitResetPassword(item)"
+                >
+                  <svg pIcon="check" [size]="13" aria-hidden="true"></svg>
+                </button>
+                <button
+                  type="button"
+                  class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                  aria-label="Cancel password reset"
+                  (click)="cancelResetPassword()"
+                >
+                  <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+                </button>
+                @if (resetError(); as message) {
+                  <p class="text-[12.5px] text-destructive">{{ message }}</p>
+                }
+              } @else {
+                <span
+                  class="truncate text-[13.5px] font-medium"
+                  [class]="item.status === 'DISABLED' ? 'text-muted' : 'text-heading'"
+                >
+                  {{ item.name }}
+                </span>
+                <app-status-badge [tone]="badge(item).tone" [label]="badge(item).label" />
+                <span class="truncate text-[12.5px] text-muted">{{ item.email }}</span>
+
+                <span class="flex-1"></span>
+
+                @if (canMutate()) {
+                  <button
+                    type="button"
+                    class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                    [attr.aria-label]="'Reset the password for ' + item.name"
+                    [disabled]="busyId() === item.id"
+                    (click)="startResetPassword(item)"
+                  >
+                    <svg pIcon="key" [size]="12" aria-hidden="true"></svg>
+                    <span>Reset password</span>
+                  </button>
+                  @if (item.status === 'DISABLED') {
+                    <button
+                      type="button"
+                      class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                      [attr.aria-label]="'Enable ' + item.name"
+                      [disabled]="busyId() === item.id"
+                      (click)="enable(item)"
+                    >
+                      <svg pIcon="undo" [size]="12" aria-hidden="true"></svg>
+                      <span>Enable</span>
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                      [attr.aria-label]="'Disable ' + item.name"
+                      [disabled]="busyId() === item.id"
+                      (click)="confirmDisable(item)"
+                    >
+                      <svg pIcon="ban" [size]="13" aria-hidden="true"></svg>
+                    </button>
+                  }
+                }
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      @if (canMutate()) {
+        <form
+          class="flex flex-col gap-2 border-t border-border bg-surface px-4 py-3"
+          [formGroup]="form"
+          (ngSubmit)="submitCreate()"
+          novalidate
+        >
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="sr-only" for="attendant-name">Attendant name</label>
+            <input
+              id="attendant-name"
+              type="text"
+              formControlName="name"
+              class="h-8 min-w-0 flex-1 basis-40 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+              placeholder="Name, e.g. Gate 1 Attendant"
+            />
+            <label class="sr-only" for="attendant-email">Login email</label>
+            <input
+              id="attendant-email"
+              type="email"
+              formControlName="email"
+              autocomplete="off"
+              class="h-8 min-w-0 flex-1 basis-48 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+              placeholder="Login email"
+            />
+            <label class="sr-only" for="attendant-password">Password</label>
+            <input
+              id="attendant-password"
+              type="text"
+              formControlName="password"
+              autocomplete="off"
+              class="h-8 min-w-0 flex-1 basis-40 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+              [placeholder]="'Password, ' + minPasswordLength + '+ characters'"
+            />
+            <button
+              type="submit"
+              class="inline-flex h-8 shrink-0 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+              [disabled]="creating()"
+            >
+              @if (creating()) {
+                <span
+                  class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner"
+                  aria-hidden="true"
+                ></span>
+              }
+              <span>Add attendant</span>
+            </button>
+          </div>
+
+          <!-- Held back until submit: tabbing across three inputs should not
+               light up three identical errors before anything was sent. -->
+          @if (errors.submitted()) {
+            @if (errors.fieldError('name', fieldMessages.name); as message) {
+              <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+            }
+            @if (errors.fieldError('email', fieldMessages.email); as message) {
+              <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+            }
+            @if (errors.fieldError('password', fieldMessages.password); as message) {
+              <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+            }
+          }
+          @if (createError(); as message) {
+            <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none" role="alert">
+              {{ message }}
+            </p>
+          }
+        </form>
+      }
+    </div>
+  }
+</section>

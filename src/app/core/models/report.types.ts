@@ -141,7 +141,8 @@ export interface ArAgingDetail extends ArAgingBase {
 }
 
 export interface ArAgingQuery {
-  asOf: string;
+  /** Left out to let the server date the report on its own clock. */
+  asOf?: string;
   propertyId?: string;
   bucket?: AgingBucketKey;
 }
@@ -222,7 +223,8 @@ export interface DelinquencyReport {
 }
 
 export interface DelinquencyQuery {
-  asOf: string;
+  /** Left out to let the server date the report on its own clock. */
+  asOf?: string;
   months: number;
   propertyId?: string;
 }

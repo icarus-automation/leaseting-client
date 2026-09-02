@@ -18,7 +18,7 @@ const ARTICLES: KbArticle[] = [
   {
     slug: 'utility-billing',
     title: 'Utility billing, explained simply',
-    summary: 'Bill electricity and water to tenants — meter readings, rates, fees, and the monthly run.',
+    summary: 'Bill electricity and water to tenants: meter readings, rates, fees, and the monthly run.',
     category: 'Billing',
     icon: 'bolt',
     readMinutes: 5,
@@ -26,7 +26,7 @@ const ARTICLES: KbArticle[] = [
   {
     slug: null,
     title: 'House rules & move-in guide',
-    summary: 'What to hand every new tenant on day one. Sample entry — content coming soon.',
+    summary: 'What to hand every new tenant on day one. Sample entry, content coming soon.',
     category: 'Tenants',
     icon: 'home',
     readMinutes: null,

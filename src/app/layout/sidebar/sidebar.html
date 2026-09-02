@@ -14,8 +14,9 @@
                 <a
                   class="nav-item nav-item--external"
                   [href]="item.href"
-                  rel="noreferrer"
-                  [attr.aria-label]="item.label + ' — opens Parking app'"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="item.label + ', opens in a new tab'"
                 >
                   <svg [pIcon]="item.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
                   <span class="nav-label">{{ item.label }}</span>
@@ -30,6 +31,9 @@
                 >
                   <svg [pIcon]="item.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
                   <span class="nav-label">{{ item.label }}</span>
+                  @if (item.comingSoon) {
+                    <span class="nav-soon">Soon</span>
+                  }
                 </a>
               }
             </li>

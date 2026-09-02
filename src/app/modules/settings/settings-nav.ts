@@ -31,7 +31,7 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
     ],
   },
   {
-    label: 'Configuration',
+    label: 'Property Management',
     cards: [
       {
         label: 'Property types',
@@ -50,6 +50,36 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
         description: 'QR and account details tenants use to pay. Property-specific first, then organization fallback.',
         icon: 'qrcode',
         route: 'payment-destinations',
+      },
+    ],
+  },
+  {
+    label: 'Parking Management',
+    cards: [
+      {
+        label: 'Vehicle types',
+        description: 'The categories a vehicle is filed under when it parks.',
+        icon: 'car',
+        route: 'vehicle-types',
+      },
+      {
+        label: 'Rate plans',
+        description: 'Hourly, daily, weekly, and monthly charges, priced per vehicle type.',
+        icon: 'calendar-clock',
+        route: 'rate-plans',
+      },
+      {
+        label: 'Parking attendants',
+        description: 'Terminal logins for the guards on the handheld. Nothing else in Leaseting accepts them.',
+        icon: 'users',
+        route: 'parking-attendants',
+      },
+      {
+        label: 'Parking rules',
+        description: 'Set grace periods, lost ticket fees, and access rules.',
+        icon: 'sliders-h',
+        route: 'parking-rules',
+        comingSoon: true,
       },
     ],
   },

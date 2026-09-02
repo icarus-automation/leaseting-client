@@ -16,7 +16,7 @@ import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { BadgeTone, StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { BillsService } from '../../../bills/services/bills.service';
-import { asOfLabel, toIsoDate } from '../../as-of.util';
+import { AsOfSelection, asOfLabel, asOfParam, todaySelection } from '../../as-of.util';
 import { AsOfFilter } from '../../components/as-of-filter/as-of-filter';
 import { ReportHeader } from '../../components/report-header/report-header';
 import { downloadCsv, toCsv } from '../../csv-export.util';
@@ -68,7 +68,7 @@ export class Delinquency {
   readonly propertyOptions = this.filters.propertyOptions;
   readonly tiers = TIER_META;
 
-  readonly asOf = signal<Date>(new Date());
+  readonly asOf = signal<AsOfSelection>(todaySelection());
   readonly propertyId = signal<string>(ALL_PROPERTIES);
   readonly months = signal(12);
 
@@ -109,7 +109,7 @@ export class Delinquency {
     this.error.set(null);
     this.reports
       .delinquency({
-        asOf: toIsoDate(this.asOf()),
+        asOf: asOfParam(this.asOf()),
         months: this.months(),
         propertyId: this.propertyId() || undefined,
       })
@@ -127,8 +127,8 @@ export class Delinquency {
       });
   }
 
-  onAsOfChange(date: Date): void {
-    this.asOf.set(date);
+  onAsOfChange(selection: AsOfSelection): void {
+    this.asOf.set(selection);
     this.load();
   }
 

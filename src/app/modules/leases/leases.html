@@ -3,7 +3,7 @@
     <div>
       <h1 class="font-heading text-2xl font-semibold text-heading">Leases</h1>
       <p class="mt-0.5 text-sm text-muted">
-        Every rental agreement. New leases are created from a vacant unit on the floor plan.
+        Every rental agreement. You start a new one from a vacant unit on the floor plan.
       </p>
     </div>
     <div class="inline-flex rounded-base border border-border bg-background p-0.5" role="group" aria-label="Filter leases">
@@ -55,7 +55,7 @@
     <app-empty-state
       icon="file-edit"
       heading="No leases here"
-      description="Open a property's floor plan, click a vacant unit, and add a tenant — the lease shows up here."
+      description="Open a property's floor plan, click a vacant unit, and add a tenant. The lease shows up here."
     />
   } @else {
     <div class="overflow-x-auto rounded-base border border-border">
@@ -92,7 +92,7 @@
                 </a>
               </td>
               <td class="px-4 py-3 text-[13px] text-body">
-                {{ lease.startDate | date: 'MMM d, y' }} – {{ lease.endDate | date: 'MMM d, y' }}
+                {{ lease.startDate | date: 'MMM d, y' }} to {{ lease.endDate | date: 'MMM d, y' }}
                 @if (daysLeft(lease); as days) {
                   <span class="ml-1.5 inline-flex items-center rounded-full border border-[color-mix(in_oklab,var(--warning)_35%,transparent)] bg-muted-warning px-1.5 py-px text-[11px] font-medium text-body">
                     {{ days === 0 ? 'ends today' : days + 'd left' }}

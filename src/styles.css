@@ -224,6 +224,19 @@
   min-height: 2.5rem;
 }
 
+/* A datepicker with [showIcon] renders its trigger as a sibling button that
+   sizes itself from its own padding, so it lands a few pixels short of the
+   input it is welded to and the field reads as two stacked controls. Pin the
+   whole group to the same height as everything else on a filter row. */
+.p-datepicker {
+  min-height: 2.5rem;
+}
+
+.p-datepicker .p-datepicker-dropdown {
+  align-self: stretch;
+  height: auto;
+}
+
 /* Overlay lists: same thin primary bar as the rest of the app, but drop the
    OS arrow buttons that make a five-option menu look like a native <select>. */
 .p-select-overlay .p-select-list-container,

@@ -53,12 +53,12 @@ export function toIsoDate(date: Date): string {
   return format(date, 'yyyy-MM-dd');
 }
 
-/** "1 Nov – 30 Nov 2026", collapsing the year when both ends share it. */
+/** "1 Nov to 30 Nov 2026", collapsing the year when both ends share it. */
 export function rangeLabel(fromIso: string, toIso: string): string {
   const from = new Date(`${fromIso}T00:00:00`);
   const to = new Date(`${toIso}T00:00:00`);
   const sameYear = from.getFullYear() === to.getFullYear();
-  return `${format(from, sameYear ? 'd MMM' : 'd MMM yyyy')} – ${format(to, 'd MMM yyyy')}`;
+  return `${format(from, sameYear ? 'd MMM' : 'd MMM yyyy')} to ${format(to, 'd MMM yyyy')}`;
 }
 
 function earlierOf(a: Date, b: Date): Date {

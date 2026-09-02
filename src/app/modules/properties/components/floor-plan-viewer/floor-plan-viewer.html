@@ -8,8 +8,8 @@
       <div>
         <h3 class="font-heading text-[15px] font-semibold text-heading">Set up this floor</h3>
         <p class="mx-auto mt-1 max-w-[46ch] text-[13px] leading-relaxed text-muted">
-          Add the rooms or units on this floor, and upload a plan image to lay them out visually —
-          in either order.
+          Add the rooms or units on this floor, and upload a plan image to lay them out
+          visually. Either order works.
         </p>
       </div>
       <div class="flex flex-wrap items-center justify-center gap-2">
@@ -88,7 +88,7 @@
     <app-empty-state
       icon="table"
       heading="No units on this floor"
-      description="Add the rooms or units on this floor — you can map them onto the plan afterwards."
+      description="Add the rooms or units on this floor. You can map them onto the plan afterwards."
       ctaLabel="Add unit"
       (cta)="addUnitRequested.emit()"
     />
@@ -107,7 +107,7 @@
           >
             <span class="h-1.5 w-1.5 rounded-full" [class]="dotClass(unit)" aria-hidden="true"></span>
             <span>{{ unit.unitNo }}</span>
-            <span class="sr-only">— {{ statusLabel(unit) }}</span>
+            <span class="sr-only">, {{ statusLabel(unit) }}</span>
           </button>
         }
       </div>

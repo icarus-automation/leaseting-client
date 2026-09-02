@@ -33,7 +33,7 @@ import { TenantsService } from '../../services/tenants.service';
 
 const ACCEPTED_TYPES = 'application/pdf,image/png,image/jpeg,image/webp';
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
-const RECEIPT_LABEL = 'Onboarding — Payment receipt';
+const RECEIPT_LABEL = 'Onboarding · Payment receipt';
 
 /**
  * Step 7 — money received at move-in. The amounts here become payments against
@@ -115,7 +115,7 @@ export class StepMoveInPayment {
     if (!file) return;
 
     if (file.size > MAX_FILE_BYTES) {
-      this.errorMessage.set('File is over 10 MB — upload a smaller scan.');
+      this.errorMessage.set('That file is over 10 MB. Upload a smaller scan.');
       return;
     }
     const tenant = this.detail().tenant;
@@ -136,7 +136,7 @@ export class StepMoveInPayment {
         },
         error: (error: unknown) => {
           this.uploading.set(false);
-          this.errorMessage.set(apiErrorMessage(error, 'Upload failed — try again.'));
+          this.errorMessage.set(apiErrorMessage(error, 'The upload did not go through. Try again.'));
         },
       });
   }
@@ -151,7 +151,7 @@ export class StepMoveInPayment {
 
     const terms = this.terms();
     if (terms && (advanceAmount > terms.advanceDue || depositAmount > terms.depositDue)) {
-      this.errorMessage.set('Amounts cannot exceed what is billed — lower the payment or adjust the lease terms.');
+      this.errorMessage.set('That is more than what has been billed. Lower the payment, or adjust the lease terms.');
       return;
     }
 

@@ -28,7 +28,7 @@
                   {{ item.tenant ? item.tenant.firstName + ' ' + item.tenant.lastName : 'New tenant' }}
                 </span>
                 <span class="truncate text-[12px] text-muted">
-                  {{ item.unit ? item.unit.property.name + ' — Unit ' + item.unit.unitNo : 'Unit not picked yet' }}
+                  {{ item.unit ? item.unit.property.name + ' · Unit ' + item.unit.unitNo : 'Unit not picked yet' }}
                 </span>
               </div>
               <span class="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
@@ -93,7 +93,7 @@
       <app-empty-state
         icon="users"
         heading="No tenants yet"
-        description="Every tenant starts with onboarding — pick or create the person, collect requirements, and move them into a unit."
+        description="Every tenant starts with onboarding. Pick or add the person, collect their requirements, and move them into a unit."
         ctaLabel="Start onboarding"
         (cta)="startOnboarding()"
       />
@@ -129,7 +129,7 @@
                 </a>
               </td>
               <td class="px-4 py-3 text-[13px] text-body">{{ tenant.contactNo }}</td>
-              <td class="hidden px-4 py-3 text-[13px] text-body md:table-cell">{{ tenant.email ?? '—' }}</td>
+              <td class="hidden px-4 py-3 text-[13px] text-body md:table-cell">{{ tenant.email ?? '-' }}</td>
               <td class="px-4 py-3">
                 @if (tenant.unpaidBillCount > 0) {
                   <app-status-badge
@@ -140,7 +140,7 @@
                     <span class="ml-1.5 text-[11.5px] text-muted">{{ tenant.maxDaysOverdue }}d late</span>
                   }
                 } @else {
-                  <span class="text-[13px] text-muted">—</span>
+                  <span class="text-[13px] text-muted">-</span>
                 }
               </td>
               <td class="hidden px-4 py-3 text-[13px] text-muted lg:table-cell">{{ tenant.createdAt | date: 'MMM d, y' }}</td>

@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePicker } from 'primeng/datepicker';
 import { Select } from 'primeng/select';
 
-import { AS_OF_PRESETS, AsOfPreset, resolveAsOf } from '../../as-of.util';
+import { AS_OF_PRESETS, AsOfPreset, AsOfSelection, resolveAsOf } from '../../as-of.util';
 
 /**
  * The "as of" control shared by the point-in-time reports: a preset list and
@@ -25,7 +25,7 @@ import { AS_OF_PRESETS, AsOfPreset, resolveAsOf } from '../../as-of.util';
         [options]="presets"
         optionLabel="label"
         optionValue="value"
-        [ngModel]="preset()"
+        [ngModel]="value().preset"
         (ngModelChange)="onPresetChange($event)"
         styleClass="w-full"
         appendTo="body"
@@ -36,7 +36,7 @@ import { AS_OF_PRESETS, AsOfPreset, resolveAsOf } from '../../as-of.util';
       <label class="text-[13px] font-medium text-heading" [attr.for]="dateId()">As of</label>
       <p-datepicker
         [inputId]="dateId()"
-        [ngModel]="value()"
+        [ngModel]="value().date"
         (ngModelChange)="onDateChange($event)"
         dateFormat="d M yy"
         [maxDate]="today"
@@ -49,13 +49,12 @@ import { AS_OF_PRESETS, AsOfPreset, resolveAsOf } from '../../as-of.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AsOfFilter {
-  readonly value = input.required<Date>();
+  readonly value = input.required<AsOfSelection>();
   /** Prefix for the two field ids, so one page can host more than one. */
   readonly idPrefix = input('report');
-  readonly valueChange = output<Date>();
+  readonly valueChange = output<AsOfSelection>();
 
   readonly presets = AS_OF_PRESETS;
-  readonly preset = signal<AsOfPreset>('today');
   /** A report cannot be run as of a date that has not happened. */
   readonly today = new Date();
 
@@ -63,14 +62,14 @@ export class AsOfFilter {
   readonly dateId = computed(() => `${this.idPrefix()}-as-of-date`);
 
   onPresetChange(preset: AsOfPreset): void {
-    this.preset.set(preset);
     const resolved = resolveAsOf(preset, this.today);
-    if (resolved) this.valueChange.emit(resolved);
+    // "Pick a date" only arms the date field, so the report stays on the date
+    // already showing until the reader chooses a different one.
+    this.valueChange.emit({ preset, date: resolved ?? this.value().date });
   }
 
-  /** Picking a date by hand is what "custom" means — no second click needed. */
+  /** Picking a date by hand is what "custom" means, so no second click. */
   onDateChange(date: Date): void {
-    this.preset.set('custom');
-    this.valueChange.emit(date);
+    this.valueChange.emit({ preset: 'custom', date });
   }
 }

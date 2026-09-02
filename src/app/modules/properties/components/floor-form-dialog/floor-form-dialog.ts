@@ -123,7 +123,7 @@ export class FloorFormDialog {
 
   onCropped(file: File): void {
     if (file.size > MAX_PLAN_BYTES) {
-      this.errorMessage.set('The cropped plan is over 5 MB — crop tighter or use a smaller image.');
+      this.errorMessage.set('The cropped plan is over 5 MB. Crop it tighter, or use a smaller image.');
       return;
     }
     this.revokePreview();

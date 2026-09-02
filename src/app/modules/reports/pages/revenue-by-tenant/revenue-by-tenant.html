@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5">
   <app-report-header
-    title="Revenue by Tenant — Detail"
-    description="Every charge or payment in a period, grouped under the tenant it came from."
+    title="Money In, by Tenant"
+    description="Every charge raised and every payment received in a period, grouped by tenant."
     [caption]="caption()"
   >
     <button
@@ -108,7 +108,7 @@
 
       <p class="max-w-[52ch] text-[12.5px] leading-relaxed text-muted">
         @if (accrual()) {
-          <strong class="font-medium text-body">Billed</strong> lists the charges raised in this period —
+          <strong class="font-medium text-body">Billed</strong> lists the charges raised in this period:
           what tenants owed, settled or not.
         } @else {
           <strong class="font-medium text-body">Collected</strong> lists the payments received in this period,
@@ -274,7 +274,7 @@
                     <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body">{{ row.kind }}</td>
                     <td class="px-4 py-2.5 text-[12.5px] text-muted">{{ row.unitLabel }}</td>
                     @if (!accrual()) {
-                      <td class="px-4 py-2.5 text-[12.5px] text-muted tabular-nums">{{ row.referenceNo || '—' }}</td>
+                      <td class="px-4 py-2.5 text-[12.5px] text-muted tabular-nums">{{ row.referenceNo || '-' }}</td>
                     }
                     <td class="px-4 py-2.5 text-[13px] text-body">{{ row.memo }}</td>
                     <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] font-medium text-heading tabular-nums">

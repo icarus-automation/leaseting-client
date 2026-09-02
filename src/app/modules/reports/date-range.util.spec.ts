@@ -48,11 +48,11 @@ describe('date-range.util', () => {
 
   describe('rangeLabel', () => {
     it('states the year once when both ends share it', () => {
-      expect(rangeLabel('2026-11-01', '2026-11-30')).toBe('1 Nov – 30 Nov 2026');
+      expect(rangeLabel('2026-11-01', '2026-11-30')).toBe('1 Nov to 30 Nov 2026');
     });
 
     it('spells out both years when the range crosses one', () => {
-      expect(rangeLabel('2025-12-01', '2026-01-31')).toBe('1 Dec 2025 – 31 Jan 2026');
+      expect(rangeLabel('2025-12-01', '2026-01-31')).toBe('1 Dec 2025 to 31 Jan 2026');
     });
   });
 });

@@ -16,8 +16,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { PIcon } from '@primeicons/angular/p-icon';
 
 import { AuthService } from '../../../core/auth/auth.service';
-import { TENANT_USE_MOBILE } from '../../../core/auth/auth.types';
-import { TENANT_WEB_LOGIN_MESSAGE } from '../../../core/auth/tenant-audience.util';
+import { WrongAppError } from '../../../core/auth/audience.util';
 import { AuthShell } from '../auth-shell/auth-shell';
 
 @Component({
@@ -113,9 +112,8 @@ export class Login {
   }
 
   private resolveError(error: unknown): string {
-    if (error instanceof Error && error.message === TENANT_USE_MOBILE) {
-      return TENANT_WEB_LOGIN_MESSAGE;
-    }
+    // Already user-facing: it names the app this account belongs to.
+    if (error instanceof WrongAppError) return error.message;
     if (error instanceof Error && error.message === 'NO_ORGANIZATION') {
       return 'Your account has no organization yet. Ask your administrator for an invite.';
     }

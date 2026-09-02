@@ -43,7 +43,7 @@
     @if (form.controls.unitId.invalid && form.controls.unitId.touched) {
       <p class="text-[12px] text-destructive">Pick the unit this tenant is moving into.</p>
     } @else if (askingRent(); as rent) {
-      <p class="text-[12px] text-muted">Asking rent {{ rent | phpCurrency }}/mo — you set the actual charges next.</p>
+      <p class="text-[12px] text-muted">Asking rent {{ rent | phpCurrency }}/mo. You set the actual charges next.</p>
     }
   </div>
 

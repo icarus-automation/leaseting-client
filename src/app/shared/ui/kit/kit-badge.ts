@@ -94,8 +94,8 @@ export class KitBadge {
 
   readonly label = computed(() => {
     const count = this.count();
-    if (count === 0) return 'Kit — nothing needs your attention';
-    return `Kit — ${count} item${count === 1 ? '' : 's'} needing attention`;
+    if (count === 0) return 'Kit: nothing needs your attention';
+    return `Kit: ${count} item${count === 1 ? '' : 's'} needing attention`;
   });
 
   constructor() {

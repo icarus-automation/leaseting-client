@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5">
   <app-report-header
-    title="A/R Aging — Summary"
-    description="Outstanding balance per tenant, split by how long it has been owed."
+    title="Who Owes What"
+    description="What each tenant still owes, split by how long it has been sitting unpaid."
     [caption]="caption()"
   >
     <button
@@ -185,7 +185,7 @@
                 </th>
                 @for (bucket of buckets; track bucket.key) {
                   <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums" [class]="cellClass(bucket.key, group.buckets[bucket.key])">
-                    {{ +group.buckets[bucket.key] > 0 ? (group.buckets[bucket.key] | phpCurrency) : '—' }}
+                    {{ +group.buckets[bucket.key] > 0 ? (group.buckets[bucket.key] | phpCurrency) : '-' }}
                   </td>
                 }
                 <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums text-heading">

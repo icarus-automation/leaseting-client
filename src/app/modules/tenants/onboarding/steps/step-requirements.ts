@@ -37,21 +37,21 @@ const REQUIREMENTS: RequirementItem[] = [
     label: 'Valid government ID',
     hint: 'Any PhilSys, passport, driver’s license, UMID, or similar.',
     required: true,
-    docLabel: 'Onboarding — Valid ID',
+    docLabel: 'Onboarding · Valid ID',
   },
   {
     key: 'proofOfIncome',
     label: 'Proof of income',
     hint: 'Payslip, COE, or bank statement.',
     required: false,
-    docLabel: 'Onboarding — Proof of income',
+    docLabel: 'Onboarding · Proof of income',
   },
   {
     key: 'priorAddress',
     label: 'Prior address / references',
     hint: 'Previous landlord reference or billing statement.',
     required: false,
-    docLabel: 'Onboarding — Prior address',
+    docLabel: 'Onboarding · Prior address',
   },
 ];
 
@@ -145,7 +145,7 @@ export class StepRequirements {
     if (!file || !key) return;
 
     if (file.size > MAX_FILE_BYTES) {
-      this.errorMessage.set('File is over 10 MB — upload a smaller scan.');
+      this.errorMessage.set('That file is over 10 MB. Upload a smaller scan.');
       return;
     }
     const tenant = this.detail().tenant;
@@ -169,7 +169,7 @@ export class StepRequirements {
         },
         error: (error: unknown) => {
           this.uploadingKey.set(null);
-          this.errorMessage.set(apiErrorMessage(error, 'Upload failed — try again.'));
+          this.errorMessage.set(apiErrorMessage(error, 'The upload did not go through. Try again.'));
         },
       });
   }

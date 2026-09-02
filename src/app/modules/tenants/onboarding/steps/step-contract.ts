@@ -20,7 +20,7 @@ import { TenantsService } from '../../services/tenants.service';
 
 const ACCEPTED_TYPES = 'application/pdf,image/png,image/jpeg,image/webp';
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
-const DOC_LABEL = 'Onboarding — Signed contract';
+const DOC_LABEL = 'Onboarding · Signed contract';
 
 /**
  * Step 4 — the signed lease contract, as a scan or photo. Signing sometimes
@@ -76,7 +76,7 @@ export class StepContract {
     if (!file) return;
 
     if (file.size > MAX_FILE_BYTES) {
-      this.errorMessage.set('File is over 10 MB — upload a smaller scan.');
+      this.errorMessage.set('That file is over 10 MB. Upload a smaller scan.');
       return;
     }
     const tenant = this.detail().tenant;
@@ -99,7 +99,7 @@ export class StepContract {
         },
         error: (error: unknown) => {
           this.uploading.set(false);
-          this.errorMessage.set(apiErrorMessage(error, 'Upload failed — try again.'));
+          this.errorMessage.set(apiErrorMessage(error, 'The upload did not go through. Try again.'));
         },
       });
   }

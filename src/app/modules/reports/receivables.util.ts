@@ -21,9 +21,9 @@ export interface BucketMeta {
 
 export const AGING_BUCKETS: readonly BucketMeta[] = [
   { key: 'current', label: 'Not yet due', short: 'Not yet due', tone: 'neutral' },
-  { key: '1-30', label: '1–30 days late', short: '1–30', tone: 'warning' },
-  { key: '31-60', label: '31–60 days late', short: '31–60', tone: 'warning' },
-  { key: '61-90', label: '61–90 days late', short: '61–90', tone: 'destructive' },
+  { key: '1-30', label: '1-30 days late', short: '1-30', tone: 'warning' },
+  { key: '31-60', label: '31-60 days late', short: '31-60', tone: 'warning' },
+  { key: '61-90', label: '61-90 days late', short: '61-90', tone: 'destructive' },
   { key: '90+', label: '90+ days late', short: '90+', tone: 'destructive' },
 ] as const;
 
@@ -101,7 +101,7 @@ export const TIER_META: Record<DelinquencyTier, TierMeta> = {
     tone: 'destructive',
   },
   chronic: {
-    label: 'Chronic',
+    label: 'Often late',
     hint: 'Late three or more times in the period',
     tone: 'warning',
   },

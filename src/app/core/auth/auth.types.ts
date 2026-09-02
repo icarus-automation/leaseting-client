@@ -10,6 +10,12 @@ export interface FeatureFlags {
   sms: boolean;
 }
 
+/**
+ * Which Leaseting app a session belongs to: `staff` is this web client,
+ * `tenant` is Residence Care, `parking` is the H10S parking terminal.
+ */
+export type Audience = 'staff' | 'tenant' | 'parking';
+
 /** Session user as returned by `GET /users/me` (Better Auth user row). */
 export interface SessionUser {
   id: string;
@@ -18,11 +24,9 @@ export interface SessionUser {
   image?: string | null;
   role?: string | null;
   organizationRole?: string | null;
-  audience?: 'staff' | 'tenant';
+  audience?: Audience;
   features?: FeatureFlags;
 }
-
-export const TENANT_USE_MOBILE = 'TENANT_USE_MOBILE';
 
 /** Organization from the Better Auth organization plugin. */
 export interface Organization {

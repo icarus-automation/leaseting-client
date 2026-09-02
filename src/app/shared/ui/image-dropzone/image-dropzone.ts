@@ -30,7 +30,7 @@ export class ImageDropzone {
   /** Existing stored image (edit mode) — shown as a removable preview. */
   readonly currentImageUrl = input<string | null>(null);
   /** Short helper under the drop label, e.g. "A top-down floor plan works best." */
-  readonly idleHint = input<string>('PNG, JPG, or WebP — up to 5 MB');
+  readonly idleHint = input<string>('PNG, JPG, or WebP, up to 5 MB');
   readonly imagePreviewHeight = input(160);
 
   /** New file picked (File) or selection cleared (null). */

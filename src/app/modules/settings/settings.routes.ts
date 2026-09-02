@@ -19,5 +19,22 @@ export const SETTINGS_ROUTES: Routes = [
         m => m.PaymentDestinationsSettingsPage,
       ),
   },
+  {
+    path: 'vehicle-types',
+    loadComponent: () =>
+      import('./pages/vehicle-types-settings/vehicle-types-settings').then(m => m.VehicleTypesSettingsPage),
+  },
+  {
+    path: 'rate-plans',
+    loadComponent: () =>
+      import('./pages/rate-plans-settings/rate-plans-settings').then(m => m.RatePlansSettingsPage),
+  },
+  {
+    path: 'parking-attendants',
+    loadComponent: () =>
+      import('./pages/parking-attendants-settings/parking-attendants-settings').then(
+        m => m.ParkingAttendantsSettingsPage,
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];

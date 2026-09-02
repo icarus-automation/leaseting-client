@@ -5,7 +5,7 @@
     <a
       [routerLink]="['/properties', p.id]"
       class="flex min-w-0 flex-col outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary"
-      [attr.aria-label]="p.name + ' — open floor plans'"
+      [attr.aria-label]="p.name + ', open floor plans'"
     >
       <div class="flex h-36 items-center justify-center overflow-hidden bg-surface">
         @if (p.imageUrl && !imageFailed()) {

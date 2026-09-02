@@ -136,7 +136,7 @@
       </div>
       @if (lease.bills.length === 0) {
         <p class="rounded-base border border-dashed border-border px-4 py-6 text-center text-[13px] text-muted">
-          No bills yet — charges appear here once this lease is billed.
+          No bills yet. Charges appear here once this lease has been billed.
         </p>
       } @else {
         <div class="overflow-x-auto rounded-base border border-border">
@@ -160,7 +160,7 @@
                     <app-status-badge [tone]="billStatus(bill).tone" [label]="billStatus(bill).label" />
                   </td>
                   <td class="hidden px-4 py-2.5 text-[13px] text-muted sm:table-cell">
-                    {{ bill.paidAt ? (bill.paidAt | date: 'MMM d, y') : '—' }}
+                    {{ bill.paidAt ? (bill.paidAt | date: 'MMM d, y') : '-' }}
                   </td>
                 </tr>
               }

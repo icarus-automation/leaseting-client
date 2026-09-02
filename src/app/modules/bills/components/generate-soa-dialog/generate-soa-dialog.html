@@ -19,13 +19,13 @@
         <p class="text-[15px] font-semibold text-heading">{{ statement.soaNo }}</p>
         <p class="text-[13px] text-muted">
           {{ statement.lease.tenant.firstName }} {{ statement.lease.tenant.lastName }} · Unit
-          {{ statement.lease.unit.unitNo }} — total due {{ statement.totalDue | phpCurrency }}
+          {{ statement.lease.unit.unitNo }} · total due {{ statement.totalDue | phpCurrency }}
         </p>
         @if (statement.smsStatus === 'SENT') {
           <p class="mt-1 text-[12.5px] text-success">SMS summary sent to the tenant.</p>
         } @else if (statement.smsStatus === 'FAILED') {
           <p class="mt-1 text-[12.5px] text-destructive">
-            SMS failed — you can resend it from the SOA history.
+            The text did not go through. You can send it again from the statement history.
           </p>
         }
       </div>
@@ -64,7 +64,7 @@
         <p class="py-4 text-center text-[13px] text-muted">Loading unpaid bills…</p>
       } @else if (selectedLeaseId() && unpaidBills().length === 0) {
         <p class="rounded-base border border-border bg-surface px-3 py-4 text-center text-[13px] text-muted">
-          No unpaid bills on this lease — nothing to put on a statement.
+          Nothing unpaid on this lease, so there is nothing to put on a statement.
         </p>
       } @else if (unpaidBills().length > 0) {
         <fieldset class="flex flex-col gap-1.5">
@@ -98,7 +98,7 @@
         <label
           class="flex w-fit items-center gap-2 text-[13px] font-medium"
           [class]="smsAvailable() ? 'cursor-pointer text-heading' : 'cursor-not-allowed text-muted'"
-          [title]="smsAvailable() ? '' : 'SMS gateway not configured — add the Semaphore keys to enable'"
+          [title]="smsAvailable() ? '' : 'Texting is not set up yet. Add your Semaphore keys in Settings to turn it on.'"
         >
           <input
             type="checkbox"

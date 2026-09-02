@@ -115,7 +115,7 @@ export class FormDialog {
     }
     this.confirmation.confirm({
       header: 'Discard changes?',
-      message: 'You have unsaved edits — closing will throw them away.',
+      message: 'You have unsaved edits. Closing will throw them away.',
       icon: 'pi pi-exclamation-triangle',
       acceptButtonProps: { label: 'Discard', severity: 'danger' },
       rejectButtonProps: { label: 'Keep editing', severity: 'secondary', outlined: true },

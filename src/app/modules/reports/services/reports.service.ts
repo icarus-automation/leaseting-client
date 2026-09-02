@@ -56,14 +56,21 @@ export class ReportsService {
   }
 
   delinquency(query: DelinquencyQuery): Observable<DelinquencyReport> {
-    let params = new HttpParams().set('asOf', query.asOf).set('months', query.months);
+    let params = new HttpParams().set('months', query.months);
+    if (query.asOf) params = params.set('asOf', query.asOf);
     if (query.propertyId) params = params.set('propertyId', query.propertyId);
     return this.http.get<DelinquencyReport>(`${this.base}/delinquency`, { params });
   }
 }
 
+/**
+ * An absent `asOf` is sent as an absent parameter, never as an empty string:
+ * the server reads "no date given" as "date it as of now", and an empty value
+ * would fail its date validation instead.
+ */
 function agingParams(query: ArAgingQuery): HttpParams {
-  let params = new HttpParams().set('asOf', query.asOf);
+  let params = new HttpParams();
+  if (query.asOf) params = params.set('asOf', query.asOf);
   if (query.propertyId) params = params.set('propertyId', query.propertyId);
   if (query.bucket) params = params.set('bucket', query.bucket);
   return params;

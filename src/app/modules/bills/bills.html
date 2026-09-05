@@ -128,6 +128,14 @@
       appendTo="body"
       aria-label="Filter by type"
     />
+    @if (billIdFilter()) {
+      <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[12.5px] font-medium text-body">
+        Filtered to one bill
+        <button type="button" class="text-muted hover:text-body" aria-label="Clear bill filter" (click)="clearBillFilter()">
+          <svg pIcon="times" [size]="11" aria-hidden="true"></svg>
+        </button>
+      </span>
+    }
     @if (leaseIdFilter()) {
       <span class="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] bg-surface px-2.5 py-1 text-[12.5px] font-medium text-body">
         Filtered to one lease

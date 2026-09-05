@@ -112,6 +112,7 @@ export interface CreateBillPayload {
 }
 
 export interface BillListFilters {
+  billId?: string;
   page?: number;
   limit?: number;
   leaseId?: string;

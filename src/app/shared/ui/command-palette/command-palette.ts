@@ -42,6 +42,7 @@ interface PaletteItem {
 
 const COMMANDS: Command[] = [
   { id: 'nav-dashboard', label: 'Dashboard', icon: 'home', group: 'Go to', keywords: 'home overview start', route: '/dashboard' },
+  { id: 'nav-calendar', label: 'Calendar', icon: 'calendar', group: 'Go to', keywords: 'schedule agenda dates lease expiry bills due onboarding move in', route: '/calendar' },
   { id: 'nav-properties', label: 'Properties', icon: 'building', group: 'Go to', keywords: 'buildings portfolio floors units', route: '/properties' },
   { id: 'nav-tenants', label: 'Tenants', icon: 'users', group: 'Go to', keywords: 'people renters residents', route: '/tenants' },
   { id: 'nav-leases', label: 'Leases', icon: 'file-edit', group: 'Go to', keywords: 'contracts agreements rent', route: '/leases' },

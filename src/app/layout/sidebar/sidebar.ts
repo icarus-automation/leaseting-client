@@ -33,22 +33,29 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    label: 'Overview',
+    label: 'Today',
     type: 'core',
     items: [
       { label: 'Dashboard', route: '/dashboard', icon: 'home' },
+      { label: 'Calendar', route: '/calendar', icon: 'calendar' },
       { label: 'Ask Kit', route: '/kit', icon: 'comments' },
     ],
   },
   {
-    label: 'Management',
+    label: 'Portfolio',
     type: 'core',
     items: [
       { label: 'Properties', route: '/properties', icon: 'building' },
       { label: 'Tenants', route: '/tenants', icon: 'users' },
       { label: 'Leases', route: '/leases', icon: 'file-edit' },
+    ],
+  },
+  {
+    label: 'Money',
+    type: 'core',
+    items: [
       { label: 'Bills', route: '/bills', icon: 'wallet' },
-      { label: 'Submissions', route: '/bills/submissions', icon: 'inbox' },
+      { label: 'Payment reviews', route: '/bills/submissions', icon: 'inbox' },
     ],
   },
   {

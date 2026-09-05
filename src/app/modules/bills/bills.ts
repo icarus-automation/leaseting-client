@@ -95,6 +95,7 @@ export class Bills {
   readonly summary = signal<BillsSummary | null>(null);
 
   readonly quickFilter = signal<QuickFilter>('all');
+  readonly billIdFilter = signal<string | null>(this.route.snapshot.queryParamMap.get('billId'));
   typeFilter: BillType | null = null;
   readonly leaseIdFilter = signal<string | null>(
     this.route.snapshot.queryParamMap.get('leaseId'),
@@ -137,6 +138,11 @@ export class Bills {
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
+        const billId = params.get('billId');
+        if (billId !== this.billIdFilter()) {
+          this.billIdFilter.set(billId);
+          this.load(1);
+        }
         const status = params.get('status');
         const wanted: QuickFilter | null =
           status === 'UNPAID' ? 'unpaid' : status === 'PAID' ? 'paid' : null;
@@ -164,6 +170,7 @@ export class Bills {
       .list({
         page,
         limit: 10,
+        billId: this.billIdFilter() ?? undefined,
         ...QUICK_FILTER_PARAMS[this.quickFilter()],
         type: this.typeFilter ?? undefined,
         ...(this.nlFilters() as BillListFilters),
@@ -220,6 +227,17 @@ export class Bills {
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { leaseId: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+    this.load(1);
+  }
+
+  clearBillFilter(): void {
+    this.billIdFilter.set(null);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { billId: null },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });

@@ -22,6 +22,10 @@ export const routes: Routes = [
           import('./modules/home/home.routes').then(m => m.HOME_ROUTES),
       },
       {
+        path: 'calendar',
+        loadComponent: () => import('./modules/calendar/calendar').then(m => m.OpsCalendar),
+      },
+      {
         path: 'kit',
         loadChildren: () => import('./modules/kit/kit.routes').then(m => m.KIT_ROUTES),
       },

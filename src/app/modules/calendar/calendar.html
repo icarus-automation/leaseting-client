@@ -1,0 +1,190 @@
+<!--
+THESIS: Dates already tracked by property operations, collected into a readable calendar.
+OWN-WORLD: Leaseting's white surfaces, Ledger Indigo controls, Poppins headings and Work Sans data.
+STORY: Scan a month, narrow by property or source, inspect a milestone, open its record.
+FIRST VIEWPORT: Compact heading; visible filters; period navigation and views; calendar.
+FORM: Calendar extension of the established app, with an agenda for compact screens and a contextual preview.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->
+<div class="ops-calendar">
+  <header class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="font-heading text-2xl font-semibold text-heading">Calendar</h1>
+      <p class="mt-1 text-sm text-muted">Lease milestones, bills and move-ins, in one place.</p>
+    </div>
+  </header>
+
+  <section class="ops-filters" aria-label="Calendar filters">
+    <div class="ops-filter-fields">
+      <div class="ops-search-field">
+        <label for="calendar-search">Search</label>
+        <div class="ops-search">
+          <svg pIcon="search" [size]="15" aria-hidden="true"></svg>
+          <input id="calendar-search" type="search" placeholder="Tenant, unit or property" maxlength="120"
+            [ngModel]="searchText()" (ngModelChange)="searchText.set($event)" />
+        </div>
+      </div>
+      <div class="ops-filter-field">
+        <label for="calendar-property">Property</label>
+        <p-select inputId="calendar-property" [options]="propertyOptions()" optionLabel="label" optionValue="value"
+          [ngModel]="state().propertyId" (ngModelChange)="setState({ propertyId: $event })"
+          [filter]="properties().length > 8" filterBy="label" styleClass="w-full" appendTo="body" />
+      </div>
+      <div class="ops-filter-field">
+        <label for="calendar-scope">Show</label>
+        <p-select inputId="calendar-scope" [options]="scopeOptions" optionLabel="label" optionValue="value"
+          [ngModel]="state().scope" (ngModelChange)="setState({ scope: $event })" styleClass="w-full" appendTo="body" />
+      </div>
+    </div>
+    @if (propertiesError()) {
+      <p class="text-[13px] text-destructive" role="alert">
+        Property choices could not load.
+        <button type="button" class="font-medium underline underline-offset-2" (click)="loadProperties()">Retry properties</button>
+      </p>
+    }
+    <div class="ops-type-row">
+      <div class="ops-types" role="group" aria-label="Entry types">
+        @for (type of eventTypes; track type.value) {
+          <button type="button" class="ops-type" [attr.aria-pressed]="state().types.includes(type.value)"
+            (click)="toggleType(type.value)">
+            <svg [pIcon]="type.icon" [size]="14" aria-hidden="true"></svg>
+            {{ type.label }}
+            <span class="ops-count">{{ loading() || error() ? '—' : typeCounts()[type.value] }}</span>
+          </button>
+        }
+      </div>
+      @if (hasFilters()) {
+        <button type="button" class="ops-reset" (click)="resetFilters()">Reset filters</button>
+      }
+    </div>
+  </section>
+
+  @if (selected(); as entry) {
+    <aside #details tabindex="-1" class="ops-details" aria-label="Calendar entry details" (keydown.escape)="closeEntry()">
+      <div class="ops-detail-heading">
+        <div>
+          <h2 class="font-heading text-base font-semibold">{{ entry.title }}</h2>
+          <!-- Anchor the literal day before formatting; Angular parses a bare date as local midnight. -->
+          <p class="mt-1 text-sm text-muted"><time [attr.datetime]="entry.date">{{ entry.date + 'T00:00:00Z' | date: 'EEEE, MMMM d, y' : 'UTC' }}</time></p>
+        </div>
+        <button type="button" class="ops-icon-button" aria-label="Close calendar entry details" (click)="closeEntry()">
+          <svg pIcon="times" [size]="15" aria-hidden="true"></svg>
+        </button>
+      </div>
+      <div class="ops-detail-body">
+        <dl class="ops-detail-facts">
+          <div><dt>Tenant</dt><dd>{{ entry.tenant?.name ?? 'Not selected yet' }}</dd></div>
+          <div><dt>Location</dt><dd>Unit {{ entry.unit.unitNo }} · {{ entry.property.name }}</dd></div>
+          <div><dt>{{ entry.type === 'BILL_DUE' ? 'Payment status' : 'Status' }}</dt><dd><app-status-badge [tone]="tone(entry)" [label]="entry.statusLabel" /></dd></div>
+          @if (entry.amount !== null) {
+            <div><dt>Bill amount</dt><dd class="tabular-nums">{{ entry.amount | phpCurrency }}</dd></div>
+            <div><dt>Outstanding</dt><dd class="tabular-nums">{{ entry.balance | phpCurrency }}</dd></div>
+          }
+        </dl>
+        <a class="ops-button ops-button-primary ops-detail-action" [routerLink]="source(entry).route" [queryParams]="source(entry).queryParams">
+          {{ source(entry).label }} <svg pIcon="arrow-up-right" [size]="14" aria-hidden="true"></svg>
+        </a>
+      </div>
+      @if (entry.type === 'MOVE_IN') {
+        <p class="mt-3 text-[13px] text-muted">
+          Planned from the onboarding start date. Complete the walk to confirm the lease.
+        </p>
+      }
+    </aside>
+  }
+
+  <section class="ops-calendar-panel" aria-label="Operations calendar" [attr.aria-busy]="loading()">
+    <div class="ops-toolbar">
+      <div class="ops-period">
+        <div class="ops-navigation" role="group" aria-label="Navigate calendar">
+          <button type="button" class="ops-icon-button" aria-label="Previous period" (click)="navigate('prev')">
+            <svg pIcon="chevron-left" [size]="14" aria-hidden="true"></svg>
+          </button>
+          <button type="button" class="ops-icon-button" aria-label="Next period" (click)="navigate('next')">
+            <svg pIcon="chevron-right" [size]="14" aria-hidden="true"></svg>
+          </button>
+        </div>
+        <h2 class="font-heading text-lg font-semibold" aria-live="polite">{{ title() }}</h2>
+        <button type="button" class="ops-button ops-today" (click)="navigate('today')">Today</button>
+      </div>
+      <div class="ops-views" role="group" aria-label="Calendar view">
+        @for (view of viewOptions; track view.value) {
+          <button type="button" [attr.aria-pressed]="state().view === view.value" (click)="changeView(view.value)">
+            <svg [pIcon]="view.icon" [size]="13" aria-hidden="true"></svg>{{ view.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="ops-result-line" role="status" aria-live="polite">
+      @if (loading()) {
+        <span>Loading calendar…</span>
+      } @else if (error()) {
+        <span>Calendar unavailable</span>
+      } @else {
+        <span>{{ filtered().length }} {{ filtered().length === 1 ? 'entry' : 'entries' }} in this {{ state().view === 'week' ? 'week' : 'month' }}</span>
+        @if (overdueCount()) {
+          <span class="ops-overdue-count">{{ overdueCount() }} past due or planned date</span>
+        }
+      }
+      <span class="ops-timezone">Manila time</span>
+    </div>
+
+    <div class="ops-legend" aria-label="Bill status legend">
+      <span>Bill status</span>
+      <app-status-badge tone="warning" label="Due / Due today" />
+      <app-status-badge tone="destructive" label="Overdue" />
+      <app-status-badge tone="success" label="Paid" />
+      <span>Lease and move-in dates stay neutral.</span>
+    </div>
+
+    @if (error(); as message) {
+      <div class="ops-message ops-error" role="alert">
+        <svg pIcon="exclamation-circle" [size]="18" aria-hidden="true"></svg>
+        <div><p class="font-medium">Could not load calendar entries</p><p class="mt-1 text-sm">{{ message }}</p></div>
+        <button type="button" class="ops-button" (click)="retryEntries()">Retry</button>
+      </div>
+    } @else if (!loading() && filtered().length === 0) {
+      <div class="ops-message ops-empty">
+        <svg pIcon="calendar" [size]="22" aria-hidden="true"></svg>
+        <div>
+          <p class="font-medium">{{ hasFilters() ? 'No entries match these filters' : 'No scheduled dates in this period' }}</p>
+          <p class="mt-1 text-sm text-muted">
+            {{ hasFilters() ? 'Reset the filters or choose another period.' : 'Lease dates, issued bills and planned move-ins appear here automatically.' }}
+          </p>
+        </div>
+        @if (hasFilters()) { <button type="button" class="ops-button" (click)="resetFilters()">Reset filters</button> }
+      </div>
+    }
+
+    <div class="ops-calendar-viewport" [class.ops-calendar-loading]="loading()" [class.ops-calendar-failed]="!!error()">
+      <!-- Keyed on calendarKey so an overnight Manila-day rollover remounts full-calendar; see calendar.ts. -->
+      @for (key of [calendarKey()]; track key) {
+        <full-calendar [options]="options" [events]="calendarEvents()">
+          <ng-template #eventContent let-info>
+            @let entry = eventEntry(info.event);
+            <div class="ops-event-content">
+              <div class="ops-event-title">
+                <svg class="shrink-0" [pIcon]="entryIcon(entry.type)" [size]="12" aria-hidden="true"></svg>
+                <span>{{ entry.title }} · {{ entry.unit.unitNo }}</span>
+              </div>
+              <div class="ops-event-meta">{{ entry.tenant?.name ?? entry.property.name }}</div>
+              <app-status-badge class="ops-event-status" [tone]="tone(entry)" [label]="entry.statusLabel" />
+              <div class="ops-event-extra">
+                <div class="mt-1 text-[12.5px] text-muted">{{ entry.property.name }}</div>
+                @if (entry.balance !== null) {
+                  <span class="mt-1 block text-[13px] tabular-nums">{{ entry.balance | phpCurrency }} outstanding</span>
+                }
+              </div>
+            </div>
+          </ng-template>
+        </full-calendar>
+      }
+    </div>
+  </section>
+
+  <p class="flex items-baseline gap-2 text-[12.5px] text-muted">
+    <svg class="shrink-0" pIcon="link" [size]="13" aria-hidden="true"></svg>
+    Dates come from your records. Only issued bills appear; future rent is added when billed.
+  </p>
+</div>

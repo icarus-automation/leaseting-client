@@ -1,9 +1,10 @@
-import type { ParkingBillingPeriod } from './enums';
+import { ParkingBillingBasis } from './enums';
 
 /**
- * Org-curated parking rate board. Each plan has a billing period and one
- * amount per vehicle type. A missing amount means that type is not offered
- * on the plan. Archived plans leave the picker; history is untouched.
+ * Org-curated parking rate board. Each plan has a billing basis, an increment
+ * of that basis, and one amount per vehicle type. A missing amount means that
+ * type is not offered on the plan. Archived plans leave the picker; history
+ * is untouched.
  */
 export interface RatePlanAmountResponse {
   vehicleTypeId: string;
@@ -16,7 +17,10 @@ export interface RatePlanAmountResponse {
 export interface RatePlanResponse {
   id: string;
   name: string;
-  billingPeriod: ParkingBillingPeriod;
+  billingBasis: ParkingBillingBasis;
+  increment: number;
+  /** Derived: basis unit minutes × increment. Terminal fee math uses this. */
+  incrementMinutes: number;
   isArchived: boolean;
   amounts: RatePlanAmountResponse[];
   createdAt: string;
@@ -30,7 +34,8 @@ export interface RatePlanAmountPayload {
 
 export interface CreateRatePlanPayload {
   name: string;
-  billingPeriod: ParkingBillingPeriod;
+  billingBasis: ParkingBillingBasis;
+  increment: number;
   amounts: RatePlanAmountPayload[];
 }
 

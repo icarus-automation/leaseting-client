@@ -30,6 +30,18 @@ export const SETTINGS_ROUTES: Routes = [
       import('./pages/rate-plans-settings/rate-plans-settings').then(m => m.RatePlansSettingsPage),
   },
   {
+    path: 'parking-rules',
+    loadComponent: () =>
+      import('./pages/parking-rules-settings/parking-rules-settings').then(m => m.ParkingRulesSettingsPage),
+  },
+  {
+    path: 'parking-terminals',
+    loadComponent: () =>
+      import('./pages/parking-terminals-settings/parking-terminals-settings').then(
+        m => m.ParkingTerminalsSettingsPage,
+      ),
+  },
+  {
     path: 'parking-attendants',
     loadComponent: () =>
       import('./pages/parking-attendants-settings/parking-attendants-settings').then(

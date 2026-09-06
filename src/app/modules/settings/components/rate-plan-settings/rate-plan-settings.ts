@@ -18,9 +18,9 @@ import { forkJoin } from 'rxjs';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import {
-  PARKING_BILLING_PERIOD_LABELS,
-  PARKING_BILLING_PERIOD_OPTIONS,
-  type ParkingBillingPeriod,
+  PARKING_BILLING_BASIS_OPTIONS,
+  PARKING_BILLING_BASIS_UNIT,
+  type ParkingBillingBasis,
 } from '../../../../core/models/enums';
 import type { RatePlanResponse } from '../../../../core/models/rate-plan.types';
 import type { VehicleTypeResponse } from '../../../../core/models/vehicle-type.types';
@@ -31,7 +31,7 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { sortLookupRows } from '../../../../shared/utils/lookup-order.util';
 import { RatePlansService } from '../../services/rate-plans.service';
 import { VehicleTypesService } from '../../services/vehicle-types.service';
-import { sortRatePlans } from '../../utils/rate-plan-order.util';
+import { billedHint, sortRatePlans } from '../../utils/rate-plan-order.util';
 
 interface PriceCell {
   id: string;
@@ -42,7 +42,9 @@ interface PriceCell {
 
 /**
  * Settings → Rate plans. One row per named plan; prices sit in a grid keyed
- * by vehicle type so "Hourly" is one thing, not three duplicate rows.
+ * by vehicle type so a plan is one thing, not three duplicate rows. Billing
+ * is a unit (minute / hour / day) times an increment, not a fixed Hourly /
+ * Daily / Weekly / Monthly label.
  */
 @Component({
   selector: 'app-rate-plan-settings',
@@ -72,8 +74,9 @@ export class RatePlanSettings {
   readonly error = signal<string | null>(null);
   readonly loading = computed(() => this.items() === null && this.error() === null);
 
-  readonly periodOptions = PARKING_BILLING_PERIOD_OPTIONS;
-  readonly periodLabels = PARKING_BILLING_PERIOD_LABELS;
+  readonly basisOptions = PARKING_BILLING_BASIS_OPTIONS;
+  readonly billedHint = billedHint;
+  readonly basisUnit = PARKING_BILLING_BASIS_UNIT;
 
   readonly activeTypes = computed(() =>
     sortLookupRows((this.vehicleTypes() ?? []).filter((type) => !type.isArchived)),
@@ -117,9 +120,9 @@ export class RatePlanSettings {
       });
   }
 
-  setPeriod(form: ReturnType<RatePlanSettings['buildForm']>, period: ParkingBillingPeriod): void {
-    form.controls.billingPeriod.setValue(period);
-    form.controls.billingPeriod.markAsDirty();
+  setBasis(form: ReturnType<RatePlanSettings['buildForm']>, basis: ParkingBillingBasis): void {
+    form.controls.billingBasis.setValue(basis);
+    form.controls.billingBasis.markAsDirty();
   }
 
   priceCells(plan: RatePlanResponse): PriceCell[] {
@@ -130,10 +133,6 @@ export class RatePlanSettings {
       amount: byId.get(type.id)?.amount ?? null,
       isArchived: type.isArchived,
     }));
-  }
-
-  billedHint(period: ParkingBillingPeriod): string {
-    return `Billed ${this.periodLabels[period].toLowerCase()}`;
   }
 
   submitCreate(): void {
@@ -155,7 +154,7 @@ export class RatePlanSettings {
       .subscribe({
         next: (created) => {
           this.creating.set(false);
-          this.createForm.reset({ name: '', billingPeriod: 'HOURLY' });
+          this.createForm.reset({ name: '', billingBasis: 'PER_HOUR', increment: 1 });
           this.setAmountControls(this.createForm, this.activeTypes());
           this.replaceItem(created);
           this.flashId.set(created.id);
@@ -171,7 +170,11 @@ export class RatePlanSettings {
     const existing = new Map(
       item.amounts.map((amount) => [amount.vehicleTypeId, Number(amount.amount)]),
     );
-    this.editForm.reset({ name: item.name, billingPeriod: item.billingPeriod });
+    this.editForm.reset({
+      name: item.name,
+      billingBasis: item.billingBasis,
+      increment: item.increment,
+    });
     this.setAmountControls(this.editForm, this.columnTypes(item), existing);
     this.editingId.set(item.id);
     this.editError.set(null);
@@ -288,7 +291,8 @@ export class RatePlanSettings {
   private buildForm() {
     return this.fb.nonNullable.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
-      billingPeriod: ['HOURLY' as ParkingBillingPeriod, [Validators.required]],
+      billingBasis: ['PER_HOUR' as ParkingBillingBasis, [Validators.required]],
+      increment: [1, [Validators.required, Validators.min(1), Validators.max(365)]],
       amounts: this.fb.group({}),
     });
   }
@@ -312,11 +316,11 @@ export class RatePlanSettings {
   }
 
   private payloadOf(form: ReturnType<RatePlanSettings['buildForm']>) {
-    const { name, billingPeriod, amounts } = form.getRawValue();
+    const { name, billingBasis, increment, amounts } = form.getRawValue();
     const priced = Object.entries(amounts).flatMap(([vehicleTypeId, amount]) =>
       typeof amount === 'number' ? [{ vehicleTypeId, amount }] : [],
     );
-    return { name: name.trim(), billingPeriod, amounts: priced };
+    return { name: name.trim(), billingBasis, increment, amounts: priced };
   }
 
   private replaceItem(item: RatePlanResponse): void {

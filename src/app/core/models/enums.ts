@@ -50,15 +50,31 @@ export const PAYMENT_SOURCE_LABELS: Record<PaymentSource, string> = {
 /** Derived occupancy — computed by the backend from active leases. */
 export type UnitStatus = 'OCCUPIED' | 'VACANT';
 
-export type ParkingBillingPeriod = 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+export type ParkingBillingBasis = 'PER_MINUTE' | 'PER_HOUR' | 'PER_DAY';
 
-export const PARKING_BILLING_PERIOD_LABELS: Record<ParkingBillingPeriod, string> = {
-  HOURLY: 'Hourly',
-  DAILY: 'Daily',
-  WEEKLY: 'Weekly',
-  MONTHLY: 'Monthly',
+export const PARKING_BILLING_BASIS_LABELS: Record<ParkingBillingBasis, string> = {
+  PER_MINUTE: 'Minute',
+  PER_HOUR: 'Hour',
+  PER_DAY: 'Day',
 };
 
-export const PARKING_BILLING_PERIOD_OPTIONS = (
-  Object.entries(PARKING_BILLING_PERIOD_LABELS) as [ParkingBillingPeriod, string][]
+export const PARKING_BILLING_BASIS_OPTIONS = (
+  Object.entries(PARKING_BILLING_BASIS_LABELS) as [ParkingBillingBasis, string][]
+).map(([value, label]) => ({ value, label }));
+
+export const PARKING_BILLING_BASIS_UNIT: Record<ParkingBillingBasis, string> = {
+  PER_MINUTE: 'minute',
+  PER_HOUR: 'hour',
+  PER_DAY: 'day',
+};
+
+export type ParkingRoundingMode = 'CEIL' | 'NEAREST';
+
+export const PARKING_ROUNDING_MODE_LABELS: Record<ParkingRoundingMode, string> = {
+  CEIL: 'Ceil',
+  NEAREST: 'Nearest',
+};
+
+export const PARKING_ROUNDING_MODE_OPTIONS = (
+  Object.entries(PARKING_ROUNDING_MODE_LABELS) as [ParkingRoundingMode, string][]
 ).map(([value, label]) => ({ value, label }));

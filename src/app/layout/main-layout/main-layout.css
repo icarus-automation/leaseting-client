@@ -27,6 +27,17 @@
   scroll-padding-bottom: 5rem;
 }
 
+.content-width {
+  width: 100%;
+}
+
+/* Standard: same left gutter as Wide (the padding above). No auto margins —
+   centering in the leftover column fights the sidebar. */
+.content-area[data-content-width='standard'] .content-width {
+  max-width: var(--content-width-standard);
+  container-type: inline-size;
+}
+
 /*
  * Below this width the sidebar stops being a column and becomes a drawer that
  * floats over the content — 240px of permanent navigation is most of a phone.

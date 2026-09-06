@@ -5,6 +5,7 @@ export const TENANTS_ROUTES: Routes = [
   // Before ':id' so "onboarding" is never swallowed as a tenant id.
   {
     path: 'onboarding/:id',
+    data: { contentWidth: 'standard' },
     loadComponent: () => import('./onboarding/onboarding-wizard').then(m => m.OnboardingWizard),
   },
   { path: ':id', loadComponent: () => import('./pages/tenant-detail/tenant-detail').then(m => m.TenantDetailPage) },

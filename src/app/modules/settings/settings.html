@@ -1,4 +1,4 @@
-<div class="mx-auto flex w-full max-w-4xl flex-col gap-8">
+<div class="flex w-full flex-col gap-8">
   <header>
     <h1 class="font-heading text-2xl font-semibold text-heading">Settings</h1>
     <p class="mt-1 text-[13px] text-muted">Configure your workspace.</p>
@@ -7,7 +7,7 @@
   @for (group of groups; track group.label) {
     <section class="flex flex-col gap-3" [attr.aria-label]="group.label">
       <h2 class="font-heading text-[15px] font-semibold text-heading">{{ group.label }}</h2>
-      <ul class="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      <ul class="m-0 grid list-none gap-3 p-0 @[36rem]:grid-cols-2 @[48rem]:grid-cols-3">
         @for (card of group.cards; track card.route) {
           <li>
             @if (card.comingSoon) {

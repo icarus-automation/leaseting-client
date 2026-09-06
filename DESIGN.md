@@ -244,6 +244,13 @@ There is no third ground. The sign-in sheet — historically the one place tempt
 
 **The shell.** A fixed `100dvh` CSS grid: a 240px sidebar column and a `1fr` main column, with the page itself never scrolling. The main column holds a 56px sticky header and a single scroll container (`.content-area`) at 32px padding. This is what makes the sidebar and header permanent without any sticky-positioning fragility — and it is why the print rules exist (see below).
 
+**Content widths.** Two, and only two, chosen by route `data.contentWidth`:
+
+- **Wide** (default): the page fills the main column inside that 32px gutter. Dashboard, Calendar, Properties, Tenants, Leases, Bills, lists and tables.
+- **Standard**: `max-width: var(--content-width-standard)` (56rem — a three-card settings row), left-aligned on the same gutter. Settings, forms, knowledge articles. Never `mx-auto`: centering in the leftover column fights the sidebar.
+
+Do not invent a third page width. A form that feels wide still uses Standard; a table that feels dense still uses Wide.
+
 **Density.** Comfortable, not compressed. Page sections stack at 20px. Table cells run 16px horizontal / 12px vertical, header cells 10px vertical. Form fields group at 6px between label and control, 12px between fields. The rule of thumb: rows can be tight, but the gutters around a data region are never negotiable.
 
 **Responsive.** One structural breakpoint at **1024px**: below it the sidebar stops being a grid column and becomes a fixed drawer that slides in over the content at 200ms, behind a 40% ink scrim, with `visibility` animated alongside the transform so offscreen links are not tab stops. Content padding drops to 16px. A second breakpoint at **640px** handles phone chrome: the header loses its search placeholder and keyboard hint (there is no physical keyboard to press `Ctrl+K` on), the user's name gives way to the avatar that already carries their initials, and the stepper collapses from a vertical rail to a row of progress bars.
@@ -255,6 +262,8 @@ There is no third ground. The sign-in sheet — historically the one place tempt
 **Print.** Reports are printed and saved-to-PDF straight from the page — there is no separate export renderer to drift out of sync. That only works because the print stylesheet unwinds the shell: the fixed grid becomes block flow, every scroll container goes visible, sidebar / header / Kit badge / scrim / toasts are hidden outright, `thead` repeats per sheet, rows avoid breaking, and borders drop to a hairline gray that survives printer color management. Individual toolbars and filter bars opt out with Tailwind's `print:hidden` — a control that cannot be clicked on paper is noise.
 
 ### Named Rules
+
+**The Two Content Widths Rule.** Every shell page is Wide or Standard. Wide fills the main column; Standard caps at `--content-width-standard` and stays left-aligned on the same gutter. A new `max-w-*` on a page root is a defect — opt in with route data instead.
 
 **The Print Is The Export Rule.** What a manager sees on screen is what comes out of the printer. Any new report surface must survive `@media print` — if a region needs its own scroll container, it must release it in print, and any control that cannot be operated on paper must carry `print:hidden`.
 

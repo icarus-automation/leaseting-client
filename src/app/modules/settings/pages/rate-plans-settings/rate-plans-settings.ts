@@ -7,7 +7,7 @@ import { SettingsPageShell } from '../../components/settings-page-shell/settings
   selector: 'app-rate-plans-settings-page',
   imports: [SettingsPageShell, RatePlanSettings],
   template: `
-    <app-settings-page-shell section="rate-plans" [wide]="true">
+    <app-settings-page-shell section="rate-plans">
       <app-rate-plan-settings />
     </app-settings-page-shell>
   `,

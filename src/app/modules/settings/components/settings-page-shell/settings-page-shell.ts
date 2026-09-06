@@ -13,11 +13,7 @@ import { findSettingsCard } from '../../settings-nav';
   selector: 'app-settings-page-shell',
   imports: [RouterLink, PIcon],
   template: `
-    <div
-      class="mx-auto flex w-full flex-col gap-6"
-      [class.max-w-3xl]="!wide()"
-      [class.max-w-4xl]="wide()"
-    >
+    <div class="flex w-full flex-col gap-6">
       <div class="flex flex-col gap-1">
         <nav class="flex items-center gap-1.5 text-[12.5px]" aria-label="Breadcrumb">
           <a
@@ -43,8 +39,6 @@ import { findSettingsCard } from '../../settings-nav';
 export class SettingsPageShell {
   /** Child path under /settings — the key into SETTINGS_GROUPS. */
   readonly section = input.required<string>();
-  /** Rate plans need a bit more width for the per-type price grid. */
-  readonly wide = input(false);
 
   readonly card = computed(() => findSettingsCard(this.section()));
 }

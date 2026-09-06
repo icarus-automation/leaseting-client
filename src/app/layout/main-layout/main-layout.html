@@ -15,8 +15,14 @@
 
   <div class="main-area">
     <app-header />
-    <main class="content-area" id="main-content">
-      <router-outlet />
+    <main
+      class="content-area"
+      id="main-content"
+      [attr.data-content-width]="contentWidth()"
+    >
+      <div class="content-width">
+        <router-outlet />
+      </div>
     </main>
   </div>
 </div>

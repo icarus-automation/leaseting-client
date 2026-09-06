@@ -62,6 +62,7 @@ export const routes: Routes = [
       },
       {
         path: 'knowledge-base',
+        data: { contentWidth: 'standard' },
         loadChildren: () =>
           import('./modules/knowledge-base/knowledge-base.routes').then(m => m.KB_ROUTES),
       },
@@ -72,6 +73,7 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
+        data: { contentWidth: 'standard' },
         loadChildren: () =>
           import('./modules/settings/settings.routes').then(m => m.SETTINGS_ROUTES),
       },

@@ -30,6 +30,7 @@ src/app/
 ## Layout
 
 - New pages default to being rendered inside `MainLayout` (header + sidebar). Do NOT strip app chrome for "premium feel" pages unless the user explicitly asks.
+- Pick a content width with route `data.contentWidth`: `'wide'` (default — fluid, for dashboards, calendar, lists, and tables) or `'standard'` (shared max `--content-width-standard`, left-aligned with the same gutter — settings, forms, knowledge). Do not add per-page `mx-auto max-w-*` wrappers.
 
 ## Routing
 

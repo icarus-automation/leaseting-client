@@ -65,6 +65,11 @@
   --sidebar-width: 240px;
   --header-height: 56px;
 
+  /* Page content. Wide pages fill the main column. Standard pages cap here —
+     wide enough for a 3-card settings row — and stay left-aligned with the
+     same content-area gutter, never mx-auto centered in the shell. */
+  --content-width-standard: 56rem;
+
 }
 
 /* ─── Tailwind @theme mapping ───────────────────────────── */
@@ -97,6 +102,7 @@
   --font-body:    'Work Sans', sans-serif;
 
   --radius-base: var(--radius);
+  --max-width-content-standard: var(--content-width-standard);
 
   --shadow-lifted: var(--shadow-lifted);
   --shadow-modal:  var(--shadow-modal);
@@ -491,6 +497,10 @@
 
   .content-area {
     padding: 0;
+  }
+
+  .content-width {
+    max-width: none;
   }
 
   /* Repeat column headers on every sheet and keep a row whole. */

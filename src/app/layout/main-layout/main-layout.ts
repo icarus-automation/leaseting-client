@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 
+import { contentWidthFromSnapshot } from '../content-width';
 import { Sidebar } from '../sidebar/sidebar';
 import { Header } from '../header/header';
 import { NavDrawerService } from '../nav-drawer.service';
@@ -41,5 +42,11 @@ export class MainLayout {
   readonly showKitBadge = computed(() => {
     const url = this.url();
     return !url.startsWith('/dashboard') && !url.startsWith('/kit');
+  });
+
+  /** Wide unless a route sets `data.contentWidth` to `standard`. */
+  readonly contentWidth = computed(() => {
+    void this.url();
+    return contentWidthFromSnapshot(this.router.routerState.snapshot.root);
   });
 }

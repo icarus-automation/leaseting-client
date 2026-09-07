@@ -2,12 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
 
-import { findSettingsCard } from '../../settings-nav';
+import { findSettingsCard, settingsSetupSteps } from '../../settings-nav';
 
 /**
  * Chrome shared by every Settings detail page: breadcrumb back to the index
  * plus the title and blurb the hub card already promised, read from the same
- * SETTINGS_GROUPS entry so the two can never drift apart.
+ * SETTINGS_GROUPS entry so the two can never drift apart. Title, blurb, setup
+ * chain, and the page card share the standard Settings column — no narrower
+ * copy column inside it.
  */
 @Component({
   selector: 'app-settings-page-shell',
@@ -27,7 +29,26 @@ import { findSettingsCard } from '../../settings-nav';
         </nav>
         <h1 class="font-heading text-2xl font-semibold text-heading">{{ card()?.label ?? section() }}</h1>
         @if (card(); as details) {
-          <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">{{ details.description }}</p>
+          <p class="text-[13px] leading-relaxed text-muted">{{ details.description }}</p>
+        }
+        @if (setupSteps(); as steps) {
+          <nav class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[12.5px]" aria-label="Setup order">
+            @for (step of steps; track step.route; let last = $last) {
+              @if (step.route === section()) {
+                <span class="font-medium text-heading">{{ step.label }}</span>
+              } @else {
+                <a
+                  [routerLink]="['/settings', step.route]"
+                  class="font-medium text-primary transition-colors duration-150 ease-out hover:underline motion-reduce:transition-none"
+                >
+                  {{ step.label }}
+                </a>
+              }
+              @if (!last) {
+                <svg pIcon="chevron-right" class="text-muted" [size]="10" aria-hidden="true"></svg>
+              }
+            }
+          </nav>
         }
       </div>
 
@@ -41,4 +62,5 @@ export class SettingsPageShell {
   readonly section = input.required<string>();
 
   readonly card = computed(() => findSettingsCard(this.section()));
+  readonly setupSteps = computed(() => settingsSetupSteps(this.section()));
 }

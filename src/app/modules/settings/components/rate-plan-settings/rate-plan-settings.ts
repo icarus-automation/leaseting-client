@@ -22,7 +22,7 @@ import {
   PARKING_BILLING_BASIS_UNIT,
   type ParkingBillingBasis,
 } from '../../../../core/models/enums';
-import type { RatePlanResponse } from '../../../../core/models/rate-plan.types';
+import type { RatePlanAmountResponse, RatePlanResponse } from '../../../../core/models/rate-plan.types';
 import type { VehicleTypeResponse } from '../../../../core/models/vehicle-type.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { SegmentedControl } from '../../../../shared/ui/segmented-control/segmented-control';
@@ -31,6 +31,13 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { sortLookupRows } from '../../../../shared/utils/lookup-order.util';
 import { RatePlansService } from '../../services/rate-plans.service';
 import { VehicleTypesService } from '../../services/vehicle-types.service';
+import {
+  compactAmountLine,
+  formatParkingWindow,
+  minutesToClock,
+  openingBandHint,
+  toRatePlanPayload,
+} from '../../utils/parking-clock.util';
 import { billedHint, sortRatePlans } from '../../utils/rate-plan-order.util';
 
 interface PriceCell {
@@ -41,10 +48,9 @@ interface PriceCell {
 }
 
 /**
- * Settings → Rate plans. One row per named plan; prices sit in a grid keyed
- * by vehicle type so a plan is one thing, not three duplicate rows. Billing
- * is a unit (minute / hour / day) times an increment, not a fixed Hourly /
- * Daily / Weekly / Monthly label.
+ * Settings → Rate plans. One row per named plan; succeeding prices sit in a
+ * grid keyed by vehicle type. Optional opening bands (flat) and an optional
+ * overnight window (overtime ₱/hour) live on the plan, not on Parking rules.
  */
 @Component({
   selector: 'app-rate-plan-settings',
@@ -77,6 +83,9 @@ export class RatePlanSettings {
   readonly basisOptions = PARKING_BILLING_BASIS_OPTIONS;
   readonly billedHint = billedHint;
   readonly basisUnit = PARKING_BILLING_BASIS_UNIT;
+  readonly openingBandHint = openingBandHint;
+  readonly formatParkingWindow = formatParkingWindow;
+  readonly compactAmountLine = compactAmountLine;
 
   readonly activeTypes = computed(() =>
     sortLookupRows((this.vehicleTypes() ?? []).filter((type) => !type.isArchived)),
@@ -113,7 +122,7 @@ export class RatePlanSettings {
         next: ({ types, plans }) => {
           this.vehicleTypes.set(types);
           this.items.set(plans);
-          this.setAmountControls(this.createForm, this.activeTypes());
+          this.syncPriceGrids(this.createForm, this.activeTypes());
         },
         error: (error: unknown) =>
           this.error.set(apiErrorMessage(error, 'Could not load rate plans.')),
@@ -125,8 +134,20 @@ export class RatePlanSettings {
     form.controls.billingBasis.markAsDirty();
   }
 
-  priceCells(plan: RatePlanResponse): PriceCell[] {
-    const byId = new Map(plan.amounts.map((amount) => [amount.vehicleTypeId, amount]));
+  durationTiersOf(form: ReturnType<RatePlanSettings['buildForm']>) {
+    return form.controls.durationTiers;
+  }
+
+  addOpeningBand(form: ReturnType<RatePlanSettings['buildForm']>, types: VehicleTypeResponse[]): void {
+    form.controls.durationTiers.push(this.buildTierGroup(types));
+  }
+
+  removeOpeningBand(form: ReturnType<RatePlanSettings['buildForm']>, index: number): void {
+    form.controls.durationTiers.removeAt(index);
+  }
+
+  priceCells(plan: RatePlanResponse, amounts: RatePlanAmountResponse[] = plan.amounts): PriceCell[] {
+    const byId = new Map(amounts.map((amount) => [amount.vehicleTypeId, amount]));
     return this.columnTypes(plan).map((type) => ({
       id: type.id,
       name: type.name,
@@ -140,22 +161,21 @@ export class RatePlanSettings {
       this.createError.set('Use at least 2 characters.');
       return;
     }
-    const payload = this.payloadOf(this.createForm);
-    if (payload.amounts.length === 0) {
-      this.createError.set('Set a price for at least one vehicle type.');
+    const built = this.payloadOf(this.createForm);
+    if (!built.ok) {
+      this.createError.set(built.error);
       return;
     }
 
     this.creating.set(true);
     this.createError.set(null);
     this.ratePlans
-      .create(payload)
+      .create(built.payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (created) => {
           this.creating.set(false);
-          this.createForm.reset({ name: '', billingBasis: 'PER_HOUR', increment: 1 });
-          this.setAmountControls(this.createForm, this.activeTypes());
+          this.resetCreateForm();
           this.replaceItem(created);
           this.flashId.set(created.id);
         },
@@ -167,15 +187,23 @@ export class RatePlanSettings {
   }
 
   startEdit(item: RatePlanResponse): void {
-    const existing = new Map(
-      item.amounts.map((amount) => [amount.vehicleTypeId, Number(amount.amount)]),
-    );
+    const types = this.columnTypes(item);
     this.editForm.reset({
       name: item.name,
       billingBasis: item.billingBasis,
       increment: item.increment,
+      windowEnabled: item.windowStartMinute !== null && item.windowEndMinute !== null,
+      windowStart: minutesToClock(item.windowStartMinute ?? 18 * 60),
+      windowEnd: minutesToClock(item.windowEndMinute ?? 6 * 60),
     });
-    this.setAmountControls(this.editForm, this.columnTypes(item), existing);
+    this.syncPriceGrids(this.editForm, types, {
+      amounts: this.amountMap(item.amounts),
+      overtime: this.amountMap(item.overtimeAmounts),
+      tiers: item.durationTiers.map((tier) => ({
+        incrementCount: tier.incrementCount,
+        amounts: this.amountMap(tier.amounts),
+      })),
+    });
     this.editingId.set(item.id);
     this.editError.set(null);
     queueMicrotask(() => this.editInput()?.nativeElement.focus());
@@ -193,16 +221,16 @@ export class RatePlanSettings {
       this.editError.set('Use at least 2 characters.');
       return;
     }
-    const payload = this.payloadOf(this.editForm);
-    if (payload.amounts.length === 0) {
-      this.editError.set('Set a price for at least one vehicle type.');
+    const built = this.payloadOf(this.editForm);
+    if (!built.ok) {
+      this.editError.set(built.error);
       return;
     }
 
     this.saving.set(true);
     this.editError.set(null);
     this.ratePlans
-      .update(id, payload)
+      .update(id, built.payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
@@ -251,6 +279,23 @@ export class RatePlanSettings {
       });
   }
 
+  columnTypes(plan: RatePlanResponse): VehicleTypeResponse[] {
+    const extra = plan.amounts
+      .concat(plan.overtimeAmounts, ...plan.durationTiers.map((tier) => tier.amounts))
+      .filter((amount) => amount.vehicleTypeIsArchived)
+      .map((amount) => ({
+        id: amount.vehicleTypeId,
+        name: amount.vehicleTypeName,
+        isArchived: true,
+        ratePlanCount: 0,
+        createdAt: '',
+        updatedAt: '',
+      }));
+    const seen = new Set<string>();
+    const uniqueExtra = extra.filter((type) => (seen.has(type.id) ? false : (seen.add(type.id), true)));
+    return sortLookupRows([...this.activeTypes(), ...uniqueExtra]);
+  }
+
   private archive(item: RatePlanResponse): void {
     this.busyId.set(item.id);
     this.ratePlans
@@ -273,54 +318,93 @@ export class RatePlanSettings {
       });
   }
 
-  private columnTypes(plan: RatePlanResponse): VehicleTypeResponse[] {
-    const active = this.activeTypes();
-    const extra = plan.amounts
-      .filter((amount) => amount.vehicleTypeIsArchived)
-      .map((amount) => ({
-        id: amount.vehicleTypeId,
-        name: amount.vehicleTypeName,
-        isArchived: true,
-        ratePlanCount: 0,
-        createdAt: '',
-        updatedAt: '',
-      }));
-    return sortLookupRows([...active, ...extra]);
-  }
-
   private buildForm() {
     return this.fb.nonNullable.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
       billingBasis: ['PER_HOUR' as ParkingBillingBasis, [Validators.required]],
       increment: [1, [Validators.required, Validators.min(1), Validators.max(365)]],
       amounts: this.fb.group({}),
+      durationTiers: this.fb.array<ReturnType<RatePlanSettings['buildTierGroup']>>([]),
+      windowEnabled: [false],
+      windowStart: ['18:00'],
+      windowEnd: ['06:00'],
+      overtimeAmounts: this.fb.group({}),
     });
   }
 
-  private setAmountControls(
-    form: ReturnType<RatePlanSettings['buildForm']>,
+  private buildTierGroup(
     types: VehicleTypeResponse[],
+    incrementCount = 3,
     existing?: Map<string, number>,
-  ): void {
-    form.setControl(
-      'amounts',
-      this.fb.group(
-        Object.fromEntries(
-          types.map((type) => [
-            type.id,
-            this.fb.control<number | null>(existing?.get(type.id) ?? null, [Validators.min(0)]),
-          ]),
-        ),
+  ) {
+    return this.fb.nonNullable.group({
+      incrementCount: [
+        incrementCount,
+        [Validators.required, Validators.min(1), Validators.max(10080)],
+      ],
+      amounts: this.amountGroup(types, existing),
+    });
+  }
+
+  private amountGroup(types: VehicleTypeResponse[], existing?: Map<string, number>) {
+    return this.fb.group(
+      Object.fromEntries(
+        types.map((type) => [
+          type.id,
+          this.fb.control<number | null>(existing?.get(type.id) ?? null, [Validators.min(0)]),
+        ]),
       ),
     );
   }
 
-  private payloadOf(form: ReturnType<RatePlanSettings['buildForm']>) {
-    const { name, billingBasis, increment, amounts } = form.getRawValue();
-    const priced = Object.entries(amounts).flatMap(([vehicleTypeId, amount]) =>
-      typeof amount === 'number' ? [{ vehicleTypeId, amount }] : [],
+  private syncPriceGrids(
+    form: ReturnType<RatePlanSettings['buildForm']>,
+    types: VehicleTypeResponse[],
+    existing?: {
+      amounts?: Map<string, number>;
+      overtime?: Map<string, number>;
+      tiers?: { incrementCount: number; amounts: Map<string, number> }[];
+    },
+  ): void {
+    form.setControl('amounts', this.amountGroup(types, existing?.amounts));
+    form.setControl('overtimeAmounts', this.amountGroup(types, existing?.overtime));
+    form.setControl(
+      'durationTiers',
+      this.fb.array((existing?.tiers ?? []).map((tier) =>
+        this.buildTierGroup(types, tier.incrementCount, tier.amounts),
+      )),
     );
-    return { name: name.trim(), billingBasis, increment, amounts: priced };
+  }
+
+  private resetCreateForm(): void {
+    this.createForm.reset({
+      name: '',
+      billingBasis: 'PER_HOUR',
+      increment: 1,
+      windowEnabled: false,
+      windowStart: '18:00',
+      windowEnd: '06:00',
+    });
+    this.syncPriceGrids(this.createForm, this.activeTypes());
+  }
+
+  private payloadOf(form: ReturnType<RatePlanSettings['buildForm']>) {
+    const value = form.getRawValue();
+    return toRatePlanPayload({
+      name: value.name,
+      billingBasis: value.billingBasis,
+      increment: value.increment,
+      amounts: value.amounts,
+      durationTiers: value.durationTiers,
+      windowEnabled: value.windowEnabled,
+      windowStart: value.windowStart,
+      windowEnd: value.windowEnd,
+      overtimeAmounts: value.overtimeAmounts,
+    });
+  }
+
+  private amountMap(amounts: RatePlanAmountResponse[]): Map<string, number> {
+    return new Map(amounts.map((amount) => [amount.vehicleTypeId, Number(amount.amount)]));
   }
 
   private replaceItem(item: RatePlanResponse): void {

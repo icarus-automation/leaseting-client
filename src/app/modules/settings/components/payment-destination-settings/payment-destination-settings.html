@@ -1,10 +1,4 @@
 <section class="flex flex-col gap-4" aria-label="Payment destinations">
-  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
-    Tenants see property destinations when that property has any enabled. Otherwise they see these
-    organization fallback destinations. Disabled destinations stay in history but are not offered for
-    new payments.
-  </p>
-
   @if (loading()) {
     <app-skeleton variant="panel" />
   } @else if (error(); as message) {

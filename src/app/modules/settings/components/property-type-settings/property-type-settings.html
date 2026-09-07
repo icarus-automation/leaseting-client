@@ -1,8 +1,4 @@
 <section class="flex flex-col gap-3" aria-label="Property types">
-  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
-    Archiving a type hides it from the picker. Properties already using it keep their label.
-  </p>
-
   @if (loading()) {
     <app-skeleton variant="panel" />
   } @else if (error(); as message) {
@@ -41,24 +37,21 @@
                 />
                 <button
                   type="button"
-                  class="flex h-7 w-7 items-center justify-center rounded-base border-none bg-primary text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                  aria-label="Save name"
+                  class="inline-flex h-7 items-center gap-1.5 rounded-base border-none bg-primary px-2.5 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
                   [disabled]="renaming()"
                   (click)="submitRename()"
                 >
                   @if (renaming()) {
                     <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
-                  } @else {
-                    <svg pIcon="check" [size]="13" aria-hidden="true"></svg>
                   }
+                  <span>Save</span>
                 </button>
                 <button
                   type="button"
-                  class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                  aria-label="Cancel rename"
+                  class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
                   (click)="cancelRename()"
                 >
-                  <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+                  Cancel
                 </button>
                 @if (renameError(); as message) {
                   <p class="text-[12.5px] text-destructive">{{ message }}</p>
@@ -83,6 +76,7 @@
                   type="button"
                   class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
                   [attr.aria-label]="'Rename ' + item.name"
+                  [attr.title]="'Rename ' + item.name"
                   (click)="startRename(item)"
                 >
                   <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
@@ -101,12 +95,12 @@
                 } @else {
                   <button
                     type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                    class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
                     [attr.aria-label]="'Archive ' + item.name"
                     [disabled]="busyId() === item.id"
                     (click)="confirmArchive(item)"
                   >
-                    <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+                    Archive
                   </button>
                 }
               }

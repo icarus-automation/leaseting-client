@@ -1,10 +1,4 @@
 <section class="flex flex-col gap-3" aria-label="Parking rules">
-  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
-    These numbers are what the attendant terminal will use later: time within grace is free, then
-    stay is snapped onto the default plan’s increment, then priced by vehicle type. Weekly and
-    monthly-style plans can live on the rate board — they should not be the gate default.
-  </p>
-
   @if (loading()) {
     <app-skeleton variant="panel" />
   } @else if (error(); as message) {
@@ -22,9 +16,8 @@
     @if (livePlans().length === 0) {
       <div class="rounded-base border border-dashed border-border bg-background px-4 py-8 text-center">
         <p class="text-[13.5px] font-medium text-heading">Add a rate plan first</p>
-        <p class="mx-auto mt-1 max-w-[42ch] text-[13px] leading-relaxed text-muted">
-          The gate needs a default transient plan (typically billed per hour or per increment) before
-          these rules can be saved.
+        <p class="mt-1 text-[13px] leading-relaxed text-muted">
+          The gate needs a default transient plan before these rules can be saved.
         </p>
         <a
           routerLink="/settings/rate-plans"
@@ -39,7 +32,7 @@
         [formGroup]="form"
         (ngSubmit)="submit()"
       >
-        <label class="flex max-w-sm flex-col gap-1.5">
+        <label class="flex w-full flex-col gap-1.5">
           <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Grace minutes</span>
           <p-inputnumber
             formControlName="graceMinutes"
@@ -55,7 +48,7 @@
           </span>
         </label>
 
-        <label class="flex max-w-lg flex-col gap-1.5">
+        <label class="flex w-full flex-col gap-1.5">
           <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
             Default transient plan
           </span>
@@ -87,24 +80,6 @@
             Ceil charges any time into the next slice. Nearest snaps to the closest increment.
           </span>
         </fieldset>
-
-        <div class="flex max-w-sm flex-col gap-1.5">
-          <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
-            Lost-ticket surcharge
-          </span>
-          <input
-            type="text"
-            value=""
-            placeholder="Not used in v1"
-            disabled
-            class="h-10 w-full cursor-not-allowed rounded-base border border-border bg-surface px-2.5 text-[13px] text-muted"
-            aria-label="Lost-ticket surcharge"
-          />
-          <span class="text-[12.5px] leading-relaxed text-muted">
-            Out of v1. A lost ticket later uses the normal duration fee from the default plan, not a
-            flat surcharge.
-          </span>
-        </div>
 
         <div class="flex flex-wrap items-center gap-3">
           <button

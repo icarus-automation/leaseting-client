@@ -23,8 +23,8 @@ import { billedHint } from '../../utils/rate-plan-order.util';
 
 /**
  * Settings → Parking rules. Org-scoped gate math: grace, default transient
- * plan, rounding. Lost-ticket surcharge is stored on the API but unused in
- * v1 — the field stays visible and disabled.
+ * plan, rounding. Lost-ticket surcharge stays on the API unused in v1 and
+ * is not shown here.
  */
 @Component({
   selector: 'app-parking-rules-settings',

@@ -1,11 +1,4 @@
 <section class="flex flex-col gap-3" aria-label="Parking attendants">
-  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
-    These logins work only in the Leaseting Parking Terminal on the handheld. They are refused by
-    this web client and by Residence Care. You set the password, because the terminal has no
-    change-password screen. Disabling a login signs its terminal out immediately and keeps the
-    transactions it recorded.
-  </p>
-
   @if (loading()) {
     <app-skeleton variant="panel" />
   } @else if (error(); as message) {
@@ -47,20 +40,18 @@
                 />
                 <button
                   type="button"
-                  class="flex h-7 w-7 items-center justify-center rounded-base border-none bg-primary text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                  aria-label="Save password"
+                  class="inline-flex h-7 items-center gap-1.5 rounded-base border-none bg-primary px-2.5 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
                   [disabled]="busyId() === item.id"
                   (click)="submitResetPassword(item)"
                 >
-                  <svg pIcon="check" [size]="13" aria-hidden="true"></svg>
+                  Save
                 </button>
                 <button
                   type="button"
-                  class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                  aria-label="Cancel password reset"
+                  class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
                   (click)="cancelResetPassword()"
                 >
-                  <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+                  Cancel
                 </button>
                 @if (resetError(); as message) {
                   <p class="text-[12.5px] text-destructive">{{ message }}</p>
@@ -102,12 +93,12 @@
                   } @else {
                     <button
                       type="button"
-                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                      class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
                       [attr.aria-label]="'Disable ' + item.name"
                       [disabled]="busyId() === item.id"
                       (click)="confirmDisable(item)"
                     >
-                      <svg pIcon="ban" [size]="13" aria-hidden="true"></svg>
+                      Disable
                     </button>
                   }
                 }
@@ -165,6 +156,10 @@
               <span>Add attendant</span>
             </button>
           </div>
+
+          <p class="text-[12.5px] leading-relaxed text-muted">
+            These logins work only on the handheld. This web app will refuse them.
+          </p>
 
           <!-- Held back until submit: tabbing across three inputs should not
                light up three identical errors before anything was sent. -->

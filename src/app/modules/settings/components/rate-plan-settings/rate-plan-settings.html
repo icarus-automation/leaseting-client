@@ -1,11 +1,4 @@
 <section class="flex flex-col gap-3" aria-label="Rate plans">
-  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
-    Each plan is a named product with a billing increment and a price per vehicle type. Leave a type
-    blank if that plan does not apply to it. Archiving a plan hides it from the picker; stays already
-    charged on it keep the price they paid. The gate uses the default plan from Parking rules, not
-    every plan on this board.
-  </p>
-
   @if (loading()) {
     <app-skeleton variant="panel" />
   } @else if (error(); as message) {
@@ -23,7 +16,7 @@
     @if (list.length === 0 && activeTypes().length === 0) {
       <div class="rounded-base border border-dashed border-border bg-background px-4 py-8 text-center">
         <p class="text-[13.5px] font-medium text-heading">Add a vehicle type first</p>
-        <p class="mx-auto mt-1 max-w-[42ch] text-[13px] leading-relaxed text-muted">
+        <p class="mt-1 text-[13px] leading-relaxed text-muted">
           Rate plans set a price for each type of vehicle. Create Car, Motorcycle, Truck, or your own
           list, then come back here.
         </p>
@@ -78,48 +71,212 @@
                       <span class="flex-1"></span>
                       <button
                         type="submit"
-                        class="flex h-7 w-7 items-center justify-center rounded-base border-none bg-primary text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                        aria-label="Save rate plan"
+                        class="inline-flex h-7 items-center gap-1.5 rounded-base border-none bg-primary px-2.5 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
                         [disabled]="saving()"
                       >
                         @if (saving()) {
                           <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
-                        } @else {
-                          <svg pIcon="check" [size]="13" aria-hidden="true"></svg>
                         }
+                        <span>Save</span>
                       </button>
                       <button
                         type="button"
-                        class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                        aria-label="Cancel edit"
+                        class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
                         (click)="cancelEdit()"
                       >
-                        <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+                        Cancel
                       </button>
                     </div>
-                    <div
-                      class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2"
-                      formGroupName="amounts"
-                    >
-                      @for (cell of priceCells(item); track cell.id) {
-                        <label class="flex min-w-0 flex-col gap-1">
-                          <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
-                            {{ cell.name }}
-                          </span>
-                          <p-inputnumber
-                            [formControlName]="cell.id"
-                            mode="currency"
-                            currency="PHP"
-                            locale="en-PH"
-                            [min]="0"
-                            placeholder="Not set"
-                            styleClass="w-full"
-                            inputStyleClass="w-full"
-                            [ariaLabel]="'Amount for ' + cell.name"
-                          />
-                        </label>
-                      }
+                    <div>
+                      <p class="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                        Per increment
+                      </p>
+                      <div
+                        class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2"
+                        formGroupName="amounts"
+                      >
+                        @for (cell of priceCells(item); track cell.id) {
+                          <label class="flex min-w-0 flex-col gap-1">
+                            <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                              {{ cell.name }}
+                            </span>
+                            <p-inputnumber
+                              [formControlName]="cell.id"
+                              mode="currency"
+                              currency="PHP"
+                              locale="en-PH"
+                              [min]="0"
+                              placeholder="Not set"
+                              styleClass="w-full"
+                              inputStyleClass="w-full"
+                              [ariaLabel]="'Succeeding amount for ' + cell.name"
+                            />
+                          </label>
+                        }
+                      </div>
+                      <p class="mt-1.5 text-[12.5px] leading-relaxed text-muted">
+                        Leave a type blank if this plan does not sell it. Each opening band needs a
+                        price for at least one type. With a clock window on, set overtime for at least
+                        one type.
+                      </p>
                     </div>
+                    @if (durationTiersOf(editForm).length === 0) {
+                      <button
+                        type="button"
+                        class="inline-flex h-8 w-fit items-center rounded-base border border-dashed border-border bg-background px-3 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                        (click)="addOpeningBand(editForm, columnTypes(item))"
+                      >
+                        Add opening band
+                      </button>
+                    } @else {
+                      <div class="flex flex-col gap-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                          <p class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                            Opening bands
+                          </p>
+                          <button
+                            type="button"
+                            class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                            (click)="addOpeningBand(editForm, columnTypes(item))"
+                          >
+                            Add band
+                          </button>
+                        </div>
+                        <p class="text-[12.5px] leading-relaxed text-muted">
+                          Example: first 3 hours ₱50 flat, then the succeeding price above. Blank band
+                          prices for a type are omitted.
+                        </p>
+                        <div class="flex flex-col gap-2" formArrayName="durationTiers">
+                          @for (tier of durationTiersOf(editForm).controls; track $index; let i = $index) {
+                            <div class="rounded-base border border-border bg-surface p-3" [formGroupName]="i">
+                              <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <span class="text-[12.5px] text-muted">{{ i === 0 ? 'First' : 'Next' }}</span>
+                                <p-inputnumber
+                                  formControlName="incrementCount"
+                                  [min]="1"
+                                  [max]="10080"
+                                  [showButtons]="false"
+                                  inputStyleClass="w-14 text-center"
+                                  [ariaLabel]="'Opening band ' + (i + 1) + ' increment count'"
+                                />
+                                <span class="text-[12.5px] text-muted">
+                                  {{ basisUnit[editForm.controls.billingBasis.value] }}{{ editForm.controls.durationTiers.at(i).controls.incrementCount.value === 1 ? '' : 's' }}
+                                  @if (editForm.controls.increment.value !== 1) {
+                                    of {{ billedHint(editForm.controls.billingBasis.value, editForm.controls.increment.value) }}
+                                  }
+                                  , flat
+                                </span>
+                                <span class="flex-1"></span>
+                                <button
+                                  type="button"
+                                  class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+                                  [attr.aria-label]="'Remove opening band ' + (i + 1)"
+                                  (click)="removeOpeningBand(editForm, i)"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                              <div
+                                class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2"
+                                formGroupName="amounts"
+                              >
+                                @for (cell of priceCells(item); track cell.id) {
+                                  <label class="flex min-w-0 flex-col gap-1">
+                                    <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                                      {{ cell.name }}
+                                    </span>
+                                    <p-inputnumber
+                                      [formControlName]="cell.id"
+                                      mode="currency"
+                                      currency="PHP"
+                                      locale="en-PH"
+                                      [min]="0"
+                                      placeholder="Not set"
+                                      styleClass="w-full"
+                                      inputStyleClass="w-full"
+                                      [ariaLabel]="'Opening band ' + (i + 1) + ' amount for ' + cell.name"
+                                    />
+                                  </label>
+                                }
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @if (!editForm.controls.windowEnabled.value) {
+                      <button
+                        type="button"
+                        class="inline-flex h-8 w-fit items-center rounded-base border border-dashed border-border bg-background px-3 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                        (click)="editForm.controls.windowEnabled.setValue(true)"
+                      >
+                        Limit to a clock window
+                      </button>
+                    } @else {
+                      <div class="flex flex-col gap-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                          <p class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                            Clock window
+                          </p>
+                          <button
+                            type="button"
+                            class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                            (click)="editForm.controls.windowEnabled.setValue(false)"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div class="flex flex-wrap items-end gap-3">
+                          <label class="flex flex-col gap-1">
+                            <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">From</span>
+                            <input
+                              type="time"
+                              formControlName="windowStart"
+                              class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+                              aria-label="Window starts"
+                            />
+                          </label>
+                          <label class="flex flex-col gap-1">
+                            <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">To</span>
+                            <input
+                              type="time"
+                              formControlName="windowEnd"
+                              class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+                              aria-label="Window ends"
+                            />
+                          </label>
+                          <p class="text-[12.5px] text-muted">Start after end spans midnight (18:00–06:00).</p>
+                        </div>
+                        <div>
+                          <p class="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                            Overtime outside window, ₱ per hour
+                          </p>
+                          <div
+                            class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2"
+                            formGroupName="overtimeAmounts"
+                          >
+                            @for (cell of priceCells(item); track cell.id) {
+                              <label class="flex min-w-0 flex-col gap-1">
+                                <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                                  {{ cell.name }}
+                                </span>
+                                <p-inputnumber
+                                  [formControlName]="cell.id"
+                                  mode="currency"
+                                  currency="PHP"
+                                  locale="en-PH"
+                                  [min]="0"
+                                  placeholder="Not set"
+                                  styleClass="w-full"
+                                  inputStyleClass="w-full"
+                                  [ariaLabel]="'Overtime amount for ' + cell.name"
+                                />
+                              </label>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    }
                   </form>
                   @if (editError(); as message) {
                     <p class="mt-1 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
@@ -140,24 +297,45 @@
                         <span class="rounded-full bg-surface px-2 py-px text-[11.5px] font-medium text-muted">
                           {{ billedHint(item.billingBasis, item.increment) }}
                         </span>
+                        @if (item.windowStartMinute !== null && item.windowEndMinute !== null) {
+                          <span class="rounded-full bg-surface px-2 py-px text-[11.5px] font-medium text-muted">
+                            {{ formatParkingWindow(item.windowStartMinute, item.windowEndMinute) }}
+                          </span>
+                        }
                       </div>
-                      <div class="mt-2 grid grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] gap-x-4 gap-y-1.5">
-                        @for (cell of priceCells(item); track cell.id) {
-                          <div class="min-w-0">
-                            <p class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
-                              {{ cell.name }}
-                            </p>
-                            @if (cell.amount !== null) {
-                              <p
-                                class="text-[13.5px] font-medium tabular-nums"
-                                [class]="item.isArchived || cell.isArchived ? 'text-muted' : 'text-heading'"
-                              >
-                                {{ cell.amount | phpCurrency }}
+                      <div class="mt-2 flex flex-col gap-1.5">
+                        @for (tier of item.durationTiers; track $index; let i = $index) {
+                          <p class="text-[13px] text-body">
+                            <span class="text-muted">{{ openingBandHint(i, item.billingBasis, item.increment, tier.incrementCount) }} · </span>
+                            <span [class]="item.isArchived ? 'text-muted' : 'text-heading'">{{ compactAmountLine(tier.amounts) }}</span>
+                            <span class="text-muted"> flat</span>
+                          </p>
+                        }
+                        <div class="grid grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] gap-x-4 gap-y-1.5">
+                          @for (cell of priceCells(item); track cell.id) {
+                            <div class="min-w-0">
+                              <p class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                                {{ item.durationTiers.length > 0 ? 'Then · ' + cell.name : cell.name }}
                               </p>
-                            } @else {
-                              <p class="text-[13.5px] text-muted">Not set</p>
-                            }
-                          </div>
+                              @if (cell.amount !== null) {
+                                <p
+                                  class="text-[13.5px] font-medium tabular-nums"
+                                  [class]="item.isArchived || cell.isArchived ? 'text-muted' : 'text-heading'"
+                                >
+                                  {{ cell.amount | phpCurrency }}
+                                </p>
+                              } @else {
+                                <p class="text-[13.5px] text-muted">Not set</p>
+                              }
+                            </div>
+                          }
+                        </div>
+                        @if (item.windowStartMinute !== null && item.overtimeAmounts.length > 0) {
+                          <p class="text-[13px] text-body">
+                            <span class="text-muted">Overtime · </span>
+                            <span [class]="item.isArchived ? 'text-muted' : 'text-heading'">{{ compactAmountLine(item.overtimeAmounts) }}</span>
+                            <span class="text-muted"> / hour</span>
+                          </p>
                         }
                       </div>
                     </div>
@@ -167,6 +345,7 @@
                         type="button"
                         class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
                         [attr.aria-label]="'Edit ' + item.name"
+                        [attr.title]="'Edit ' + item.name"
                         (click)="startEdit(item)"
                       >
                         <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
@@ -185,12 +364,12 @@
                       } @else {
                         <button
                           type="button"
-                          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                          class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
                           [attr.aria-label]="'Archive ' + item.name"
                           [disabled]="busyId() === item.id"
                           (click)="confirmArchive(item)"
                         >
-                          <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+                          Archive
                         </button>
                       }
                     </div>
@@ -243,32 +422,186 @@
                   <span>Add</span>
                 </button>
               </div>
-              <div
-                class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2 pl-6"
-                formGroupName="amounts"
-              >
-                @for (type of activeTypes(); track type.id) {
-                  <label class="flex min-w-0 flex-col gap-1">
-                    <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
-                      {{ type.name }}
-                    </span>
-                    <p-inputnumber
-                      [formControlName]="type.id"
-                      mode="currency"
-                      currency="PHP"
-                      locale="en-PH"
-                      [min]="0"
-                      placeholder="Not set"
-                      styleClass="w-full"
-                      inputStyleClass="w-full"
-                      [ariaLabel]="'Amount for ' + type.name"
-                    />
-                  </label>
-                }
+              <div>
+                <div
+                  class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2"
+                  formGroupName="amounts"
+                >
+                  @for (type of activeTypes(); track type.id) {
+                    <label class="flex min-w-0 flex-col gap-1">
+                      <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                        {{ type.name }}
+                      </span>
+                      <p-inputnumber
+                        [formControlName]="type.id"
+                        mode="currency"
+                        currency="PHP"
+                        locale="en-PH"
+                        [min]="0"
+                        placeholder="Not set"
+                        styleClass="w-full"
+                        inputStyleClass="w-full"
+                        [ariaLabel]="'Succeeding amount for ' + type.name"
+                      />
+                    </label>
+                  }
+                </div>
+                <p class="mt-1.5 text-[12.5px] leading-relaxed text-muted">
+                  Leave a type blank if this plan does not sell it.
+                </p>
               </div>
+              @if (durationTiersOf(createForm).length === 0) {
+                <button
+                  type="button"
+                  class="inline-flex h-8 w-fit items-center rounded-base border border-dashed border-border bg-background px-3 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                  (click)="addOpeningBand(createForm, activeTypes())"
+                >
+                  Add opening band
+                </button>
+              } @else {
+                <div class="flex flex-col gap-2">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                      Opening bands
+                    </p>
+                    <button
+                      type="button"
+                      class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                      (click)="addOpeningBand(createForm, activeTypes())"
+                    >
+                      Add band
+                    </button>
+                  </div>
+                  <div class="flex flex-col gap-2" formArrayName="durationTiers">
+                    @for (tier of durationTiersOf(createForm).controls; track $index; let i = $index) {
+                      <div class="rounded-base border border-border bg-background p-3" [formGroupName]="i">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                          <span class="text-[12.5px] text-muted">{{ i === 0 ? 'First' : 'Next' }}</span>
+                          <p-inputnumber
+                            formControlName="incrementCount"
+                            [min]="1"
+                            [max]="10080"
+                            [showButtons]="false"
+                            inputStyleClass="w-14 text-center"
+                            [ariaLabel]="'Opening band ' + (i + 1) + ' increment count'"
+                          />
+                          <span class="text-[12.5px] text-muted">
+                            {{ basisUnit[createForm.controls.billingBasis.value] }}{{ createForm.controls.durationTiers.at(i).controls.incrementCount.value === 1 ? '' : 's' }}, flat
+                          </span>
+                          <span class="flex-1"></span>
+                          <button
+                            type="button"
+                            class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+                            [attr.aria-label]="'Remove opening band ' + (i + 1)"
+                            (click)="removeOpeningBand(createForm, i)"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div
+                          class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2"
+                          formGroupName="amounts"
+                        >
+                          @for (type of activeTypes(); track type.id) {
+                            <label class="flex min-w-0 flex-col gap-1">
+                              <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                                {{ type.name }}
+                              </span>
+                              <p-inputnumber
+                                [formControlName]="type.id"
+                                mode="currency"
+                                currency="PHP"
+                                locale="en-PH"
+                                [min]="0"
+                                placeholder="Not set"
+                                styleClass="w-full"
+                                inputStyleClass="w-full"
+                                [ariaLabel]="'Opening band ' + (i + 1) + ' amount for ' + type.name"
+                              />
+                            </label>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+              @if (!createForm.controls.windowEnabled.value) {
+                <button
+                  type="button"
+                  class="inline-flex h-8 w-fit items-center rounded-base border border-dashed border-border bg-background px-3 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                  (click)="createForm.controls.windowEnabled.setValue(true)"
+                >
+                  Limit to a clock window
+                </button>
+              } @else {
+                <div class="flex flex-col gap-2">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                      Clock window
+                    </p>
+                    <button
+                      type="button"
+                      class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                      (click)="createForm.controls.windowEnabled.setValue(false)"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div class="flex flex-wrap items-end gap-3">
+                    <label class="flex flex-col gap-1">
+                      <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">From</span>
+                      <input
+                        type="time"
+                        formControlName="windowStart"
+                        class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+                        aria-label="Window starts"
+                      />
+                    </label>
+                    <label class="flex flex-col gap-1">
+                      <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">To</span>
+                      <input
+                        type="time"
+                        formControlName="windowEnd"
+                        class="h-10 rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+                        aria-label="Window ends"
+                      />
+                    </label>
+                    <p class="text-[12.5px] text-muted">Start after end spans midnight (18:00–06:00).</p>
+                  </div>
+                  <div>
+                    <p class="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                      Overtime outside window, ₱ per hour
+                    </p>
+                    <div
+                      class="grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-2"
+                      formGroupName="overtimeAmounts"
+                    >
+                      @for (type of activeTypes(); track type.id) {
+                        <label class="flex min-w-0 flex-col gap-1">
+                          <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                            {{ type.name }}
+                          </span>
+                          <p-inputnumber
+                            [formControlName]="type.id"
+                            mode="currency"
+                            currency="PHP"
+                            locale="en-PH"
+                            [min]="0"
+                            placeholder="Not set"
+                            styleClass="w-full"
+                            inputStyleClass="w-full"
+                            [ariaLabel]="'Overtime amount for ' + type.name"
+                          />
+                        </label>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
             </form>
             @if (createError(); as message) {
-              <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+              <p class="mt-1 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
             }
           </div>
         } @else {

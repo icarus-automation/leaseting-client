@@ -35,19 +35,19 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
     cards: [
       {
         label: 'Property types',
-        description: 'The categories offered when registering a property.',
+        description: 'Categories offered when registering a property.',
         icon: 'home',
         route: 'property-types',
       },
       {
         label: 'Charge items',
-        description: 'The rent and deposit lines you can put on a lease.',
+        description: 'Rent and deposit lines you can put on a lease.',
         icon: 'money-bill',
         route: 'charge-items',
       },
       {
         label: 'Payment destinations',
-        description: 'QR and account details tenants use to pay. Property-specific first, then organization fallback.',
+        description: 'QR and account details tenants use to pay.',
         icon: 'qrcode',
         route: 'payment-destinations',
       },
@@ -58,31 +58,31 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
     cards: [
       {
         label: 'Vehicle types',
-        description: 'The categories a vehicle is filed under when it parks.',
+        description: 'What can park — Car, Motorcycle, or your own list.',
         icon: 'car',
         route: 'vehicle-types',
       },
       {
         label: 'Rate plans',
-        description: 'Named parking products with a billing increment and a price per vehicle type.',
+        description: 'How each vehicle type is charged, including opening bands and overnight.',
         icon: 'calendar-clock',
         route: 'rate-plans',
       },
       {
         label: 'Parking rules',
-        description: 'Grace minutes, the default gate plan, and how stay is rounded onto that plan.',
+        description: 'Grace, the default gate plan, and rounding.',
         icon: 'sliders-h',
         route: 'parking-rules',
       },
       {
         label: 'Terminals',
-        description: 'Handheld gates bound to a property. Disable one to take it off the floor.',
+        description: 'Named handheld gates bound to a property.',
         icon: 'tablet',
         route: 'parking-terminals',
       },
       {
         label: 'Parking attendants',
-        description: 'Terminal logins for the guards on the handheld. Nothing else in Leaseting accepts them.',
+        description: 'Handheld logins for guards. Nothing else in Leaseting accepts them.',
         icon: 'users',
         route: 'parking-attendants',
       },
@@ -96,4 +96,25 @@ export function findSettingsCard(route: string): SettingsCard | null {
     if (card) return card;
   }
   return null;
+}
+
+export interface SettingsSetupStep {
+  label: string;
+  route: string;
+}
+
+/** Pages that belong to a setup sequence shown under the Settings title. */
+const SETTINGS_SETUP_CHAPTERS: { routes: string[]; steps: SettingsSetupStep[] }[] = [
+  {
+    routes: ['vehicle-types', 'rate-plans', 'parking-rules'],
+    steps: [
+      { label: 'Vehicle types', route: 'vehicle-types' },
+      { label: 'Rate plans', route: 'rate-plans' },
+      { label: 'Parking rules', route: 'parking-rules' },
+    ],
+  },
+];
+
+export function settingsSetupSteps(route: string): SettingsSetupStep[] | null {
+  return SETTINGS_SETUP_CHAPTERS.find((chapter) => chapter.routes.includes(route))?.steps ?? null;
 }

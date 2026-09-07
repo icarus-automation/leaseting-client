@@ -1,9 +1,4 @@
 <section class="flex flex-col gap-3" aria-label="Charge items">
-  <p class="max-w-[62ch] text-[13px] leading-relaxed text-muted">
-    Each item can carry a default amount, which pre-fills the line when it is picked. Archiving one
-    hides it from the picker. Leases already charging it keep the line.
-  </p>
-
   @if (loading()) {
     <app-skeleton variant="panel" />
   } @else if (error(); as message) {
@@ -64,23 +59,20 @@
 
                   <button
                     type="submit"
-                    class="flex h-7 w-7 items-center justify-center rounded-base border-none bg-primary text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                    aria-label="Save charge item"
+                    class="inline-flex h-7 items-center gap-1.5 rounded-base border-none bg-primary px-2.5 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
                     [disabled]="saving()"
                   >
                     @if (saving()) {
                       <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
-                    } @else {
-                      <svg pIcon="check" [size]="13" aria-hidden="true"></svg>
                     }
+                    <span>Save</span>
                   </button>
                   <button
                     type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                    aria-label="Cancel edit"
+                    class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
                     (click)="cancelEdit()"
                   >
-                    <svg pIcon="times" [size]="13" aria-hidden="true"></svg>
+                    Cancel
                   </button>
                 </form>
                 @if (editError(); as message) {
@@ -110,6 +102,7 @@
                     type="button"
                     class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
                     [attr.aria-label]="'Edit ' + item.name"
+                    [attr.title]="'Edit ' + item.name"
                     (click)="startEdit(item)"
                   >
                     <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
@@ -128,12 +121,12 @@
                   } @else {
                     <button
                       type="button"
-                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                      class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
                       [attr.aria-label]="'Archive ' + item.name"
                       [disabled]="busyId() === item.id"
                       (click)="confirmArchive(item)"
                     >
-                      <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+                      Archive
                     </button>
                   }
                 </div>

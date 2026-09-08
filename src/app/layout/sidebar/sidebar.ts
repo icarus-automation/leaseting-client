@@ -63,7 +63,7 @@ const NAV_SECTIONS: NavSection[] = [
     type: 'core',
     items: [
       { label: 'Work Orders', route: '/work-orders', icon: 'wrench' },
-      { label: 'Parking Overview', route: '/parking', icon: 'car', comingSoon: true },
+      { label: 'Parking Overview', route: '/parking', icon: 'car' },
     ],
   },
   {

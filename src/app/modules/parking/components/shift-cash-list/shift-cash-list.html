@@ -1,0 +1,68 @@
+@if (shifts().length === 0) {
+  <app-empty-state
+    icon="check-circle"
+    heading="No tills waiting"
+    description="A shift appears here once the attendant counts the cash and ends their turn on the terminal. Nothing is pending right now."
+  />
+} @else {
+  <ul class="flex flex-col gap-3">
+    @for (shift of shifts(); track shift.id) {
+      <li class="rounded-base border border-border bg-background p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p class="text-[13px] font-semibold text-heading">{{ shift.attendantName }}</p>
+            <p class="text-[12.5px] text-muted">
+              {{ shift.terminalName }}@if (showProperty()) { · {{ shift.propertyName }} }
+            </p>
+            <p class="mt-1 text-[12px] tabular-nums text-muted">
+              Opened {{ shift.openedAt | date: 'MMM d, h:mm a' }} · declared
+              {{ shift.declaredAt | date: 'MMM d, h:mm a' }}
+            </p>
+          </div>
+          @if (canConfirm()) {
+            <button
+              type="button"
+              class="inline-flex h-9 shrink-0 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+              [disabled]="busyId() === shift.id"
+              [attr.aria-label]="'Confirm the cash ' + shift.attendantName + ' declared at ' + shift.terminalName"
+              (click)="confirmRequested.emit(shift)"
+            >
+              <svg pIcon="check" [size]="14" aria-hidden="true"></svg>
+              <span>{{ busyId() === shift.id ? 'Confirming...' : 'Confirm' }}</span>
+            </button>
+          }
+        </div>
+
+        <dl class="mt-3 grid gap-3 border-t border-border pt-3 sm:grid-cols-3">
+          <div>
+            <dt class="text-[12px] font-medium text-muted">Expected</dt>
+            <dd class="font-heading text-[15px] font-semibold tabular-nums text-heading">
+              {{ shift.expectedCash | phpCurrency }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[12px] font-medium text-muted">Declared by attendant</dt>
+            <dd class="font-heading text-[15px] font-semibold tabular-nums text-heading">
+              {{ shift.declaredCash | phpCurrency }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[12px] font-medium text-muted">Variance</dt>
+            <dd
+              class="font-heading text-[15px] font-semibold tabular-nums"
+              [class]="varianceClass(shift.variance)"
+            >
+              {{ varianceLabel(shift.variance) }}
+            </dd>
+          </div>
+        </dl>
+
+        @if (shift.note) {
+          <p class="mt-3 rounded-base bg-surface px-3 py-2 text-[12.5px] leading-relaxed text-body">
+            <span class="font-medium text-heading">Attendant note:</span> {{ shift.note }}
+          </p>
+        }
+      </li>
+    }
+  </ul>
+}

@@ -1,6 +1,163 @@
-<app-coming-soon
-  icon="car"
-  title="Parking Overview"
-  description="Monitor parking occupancy and guard-recorded activity. Admins may later void an incorrect guard entry."
-  [features]="features"
+<div class="flex flex-col gap-5">
+  <header class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="font-heading text-2xl font-semibold text-heading">Parking Overview</h1>
+      <p class="mt-0.5 max-w-[68ch] text-sm text-muted">
+        The floor as the gates recorded it. Guards handle entry and exit on their handhelds. From
+        here you can void a wrong entry and sign off the cash a guard declared.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex h-9 shrink-0 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+      [disabled]="loading()"
+      (click)="load()"
+    >
+      <svg pIcon="refresh" [size]="14" aria-hidden="true"></svg>
+      <span>Refresh</span>
+    </button>
+  </header>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <label class="sr-only" for="parking-property">Property</label>
+    <p-select
+      inputId="parking-property"
+      [ngModel]="propertyId()"
+      (ngModelChange)="onPropertyChange($event)"
+      [options]="propertyOptions()"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="w-56"
+    />
+    <label class="sr-only" for="parking-terminal">Terminal</label>
+    <p-select
+      inputId="parking-terminal"
+      [ngModel]="terminalId()"
+      (ngModelChange)="onTerminalChange($event)"
+      [options]="terminalOptions()"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="w-56"
+    />
+  </div>
+
+  @if (error(); as message) {
+    <app-error-banner [message]="message" [retryable]="true" (retry)="load()" />
+  } @else if (loading()) {
+    <app-skeleton variant="panel" />
+  } @else {
+    @if (summary(); as stats) {
+      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="flex flex-col gap-1 rounded-base border border-border bg-background p-4">
+          <span class="text-[12.5px] font-medium text-muted">In park now</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ stats.inParkCount }}</span>
+          <span class="text-[12px] text-muted">{{ stats.openShiftCount }} shift(s) still trading</span>
+        </div>
+        <div class="flex flex-col gap-1 rounded-base border border-border bg-background p-4">
+          <span class="text-[12.5px] font-medium text-muted">Collected today</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ stats.collectedToday | phpCurrency }}
+          </span>
+          <span class="text-[12px] text-muted">{{ stats.paidExitsToday }} paid exit(s), cash at the gate</span>
+        </div>
+        <div class="flex flex-col gap-1 rounded-base border border-border bg-background p-4">
+          <span class="text-[12.5px] font-medium text-muted">Voided today</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ stats.voidsToday }}</span>
+          <span class="text-[12px] text-muted">Each one keeps its reason and actor</span>
+        </div>
+        <div
+          class="flex flex-col gap-1 rounded-base p-4"
+          [class]="
+            stats.shiftsPendingConfirm > 0
+              ? 'border border-[color-mix(in_oklab,var(--warning)_40%,transparent)] bg-muted-warning'
+              : 'border border-border bg-background'
+          "
+        >
+          <span class="text-[12.5px] font-medium text-muted">Cash awaiting confirm</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ stats.shiftsPendingConfirm }}
+          </span>
+          <span class="text-[12px] text-muted">
+            {{ stats.shiftsPendingConfirm > 0 ? 'Shifts declared and not signed off' : 'Every till is signed off' }}
+          </span>
+        </div>
+      </div>
+    }
+
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <app-segmented-control
+        [options]="tabs()"
+        [value]="tab()"
+        ariaLabel="Parking Overview section"
+        (valueChange)="onTabChange($event)"
+      />
+      @if (tab() === 'in-park') {
+        <div class="relative">
+          <label class="sr-only" for="parking-plate">Search plate</label>
+          <svg
+            pIcon="search"
+            class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"
+            [size]="14"
+            aria-hidden="true"
+          ></svg>
+          <input
+            id="parking-plate"
+            type="search"
+            placeholder="Search plate"
+            class="h-10 w-56 rounded-base border border-border bg-background pl-8 pr-3 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+            [ngModel]="plateQuery()"
+            (ngModelChange)="plateQuery.set($event)"
+          />
+        </div>
+      }
+    </div>
+
+    @switch (tab()) {
+      @case ('in-park') {
+        <app-parked-table
+          [sessions]="visibleInPark()"
+          [now]="now()"
+          [showProperty]="propertyId() === 'all'"
+          [canVoid]="canCorrect()"
+          [busyId]="busyId()"
+          [filtered]="plateQuery().trim().length > 0"
+          [capped]="inParkCapped()"
+          (voidRequested)="openVoidDialog($event)"
+        />
+      }
+      @case ('activity') {
+        <app-parking-activity-table
+          [sessions]="activity()"
+          [showProperty]="propertyId() === 'all'"
+          [limit]="activityLimit"
+        />
+      }
+      @case ('cash') {
+        <app-shift-cash-list
+          [shifts]="shifts()"
+          [showProperty]="propertyId() === 'all'"
+          [canConfirm]="canCorrect()"
+          [busyId]="busyId()"
+          (confirmRequested)="askConfirmShift($event)"
+        />
+      }
+    }
+
+    @if (!canCorrect()) {
+      <p class="text-[12.5px] text-muted">
+        Voiding a stay and confirming a shift's cash are owner and admin actions. You have read
+        access to everything on this page.
+      </p>
+    }
+  }
+</div>
+
+<app-reason-dialog
+  [visible]="voidDialogVisible()"
+  (visibleChange)="voidDialogVisible.set($event)"
+  [heading]="voidHeading()"
+  subheading="The stay comes off the floor and the original record is kept, with your name and the time against this reason. Only open stays can be voided; a collected exit cannot be reversed here."
+  label="Why is this being voided?"
+  confirmLabel="Void stay"
+  (confirmed)="confirmVoid($event)"
 />

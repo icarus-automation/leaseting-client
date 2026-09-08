@@ -1,0 +1,83 @@
+@if (rows().length === 0) {
+  <app-empty-state
+    icon="car"
+    heading="Nothing is parked here"
+    [description]="
+      filtered()
+        ? 'No plate on the floor matches that search. Clear it to see every vehicle in park.'
+        : 'Vehicles appear the moment a guard prints a stub at the gate. Entry is recorded on the handheld, never here.'
+    "
+  />
+} @else {
+  <div class="overflow-x-auto rounded-base border border-border">
+    <table class="w-full min-w-[46rem] border-collapse text-left">
+      <caption class="sr-only">Vehicles currently in park, longest stay first</caption>
+      <thead class="border-b border-border bg-surface text-[12px] font-medium uppercase tracking-wide text-muted">
+        <tr>
+          <th scope="col" class="px-4 py-2.5">Plate</th>
+          <th scope="col" class="px-4 py-2.5">Vehicle</th>
+          <th scope="col" class="px-4 py-2.5">Entry</th>
+          <th scope="col" class="px-4 py-2.5">Elapsed</th>
+          <th scope="col" class="px-4 py-2.5">{{ showProperty() ? 'Terminal · Property' : 'Terminal' }}</th>
+          <th scope="col" class="px-4 py-2.5">Attendant</th>
+          @if (canVoid()) {
+            <th scope="col" class="px-4 py-2.5 text-right"><span class="sr-only">Actions</span></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.session.id) {
+          <tr class="border-b border-border last:border-b-0">
+            <td class="px-4 py-3">
+              <p class="text-[13px] font-semibold tabular-nums text-heading">{{ row.session.plateNumber }}</p>
+              <p class="text-[12px] tabular-nums text-muted">Stub {{ row.session.ticketCode }}</p>
+            </td>
+            <td class="px-4 py-3 text-[13px] text-body">{{ row.session.vehicleTypeName }}</td>
+            <td class="px-4 py-3 text-[13px] tabular-nums text-body">
+              {{ row.session.entryAt | date: 'MMM d, h:mm a' }}
+            </td>
+            <td class="px-4 py-3">
+              <span
+                class="inline-flex items-center gap-1.5 text-[13px] font-medium tabular-nums"
+                [class]="row.longStay ? 'text-destructive' : 'text-heading'"
+              >
+                @if (row.longStay) {
+                  <svg pIcon="clock" [size]="13" aria-hidden="true"></svg>
+                }
+                {{ row.elapsed }}
+              </span>
+              @if (row.longStay) {
+                <p class="text-[12px] text-muted">Over 12 hours</p>
+              }
+            </td>
+            <td class="px-4 py-3 text-[13px] text-body">
+              {{ row.session.terminalName }}
+              @if (showProperty()) {
+                <span class="block text-[12px] text-muted">{{ row.session.propertyName }}</span>
+              }
+            </td>
+            <td class="px-4 py-3 text-[13px] text-body">{{ row.session.entryAttendantName }}</td>
+            @if (canVoid()) {
+              <td class="px-4 py-3 text-right">
+                <button
+                  type="button"
+                  class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:border-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+                  [disabled]="busyId() === row.session.id"
+                  [attr.aria-label]="'Void the stay for ' + row.session.plateNumber"
+                  (click)="voidRequested.emit(row.session)"
+                >
+                  {{ busyId() === row.session.id ? 'Voiding...' : 'Void' }}
+                </button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (capped()) {
+    <p class="text-[12.5px] text-muted">
+      This is one page of a fuller floor. Narrow by property or terminal to see the rest.
+    </p>
+  }
+}

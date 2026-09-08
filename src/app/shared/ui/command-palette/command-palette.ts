@@ -48,7 +48,7 @@ const COMMANDS: Command[] = [
   { id: 'nav-leases', label: 'Leases', icon: 'file-edit', group: 'Go to', keywords: 'contracts agreements rent', route: '/leases' },
   { id: 'nav-bills', label: 'Bills', icon: 'wallet', group: 'Go to', keywords: 'payments charges rent utilities invoices', route: '/bills' },
   { id: 'nav-work-orders', label: 'Work Orders', icon: 'wrench', group: 'Go to', keywords: 'maintenance repairs tickets', route: '/work-orders' },
-  { id: 'nav-parking', label: 'Parking Overview', hint: 'Soon', icon: 'car', group: 'Go to', keywords: 'parking monitoring occupancy spaces vehicles guards activity', route: '/parking' },
+  { id: 'nav-parking', label: 'Parking Overview', icon: 'car', group: 'Go to', keywords: 'parking monitoring occupancy spaces vehicles guards activity void shift cash', route: '/parking' },
   { id: 'nav-reports', label: 'Reports', icon: 'chart-bar', group: 'Go to', keywords: 'analytics occupancy export catalog', route: '/reports' },
   { id: 'nav-revenue-by-tenant', label: 'Money In, by Tenant', hint: 'Report', icon: 'users', group: 'Go to', keywords: 'revenue by tenant sales by customer details billed collected ledger', route: '/reports/revenue-by-tenant' },
   { id: 'nav-portfolio-overview', label: 'Portfolio Overview', hint: 'Report', icon: 'chart-bar', group: 'Go to', keywords: 'collections aging occupancy dashboard', route: '/reports/portfolio-overview' },

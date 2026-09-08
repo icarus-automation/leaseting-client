@@ -1,0 +1,73 @@
+@if (sessions().length === 0) {
+  <app-empty-state
+    icon="history"
+    heading="No activity yet"
+    description="Collected exits and voided stays land here as they happen. Nothing on this list can be edited."
+  />
+} @else {
+  <div class="overflow-x-auto rounded-base border border-border">
+    <table class="w-full min-w-[52rem] border-collapse text-left">
+      <caption class="sr-only">Collected exits and voided stays, most recent first</caption>
+      <thead class="border-b border-border bg-surface text-[12px] font-medium uppercase tracking-wide text-muted">
+        <tr>
+          <th scope="col" class="px-4 py-2.5">Plate</th>
+          <th scope="col" class="px-4 py-2.5">Outcome</th>
+          <th scope="col" class="px-4 py-2.5">Entry</th>
+          <th scope="col" class="px-4 py-2.5">Ended</th>
+          <th scope="col" class="px-4 py-2.5">{{ showProperty() ? 'Terminal · Property' : 'Terminal' }}</th>
+          <th scope="col" class="px-4 py-2.5 text-right">Collected</th>
+          <th scope="col" class="px-4 py-2.5">Recorded by</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (session of sessions(); track session.id) {
+          <tr class="border-b border-border align-top last:border-b-0">
+            <td class="px-4 py-3">
+              <p class="text-[13px] font-semibold tabular-nums text-heading">{{ session.plateNumber }}</p>
+              <p class="text-[12px] text-muted">{{ session.vehicleTypeName }} · {{ session.ticketCode }}</p>
+            </td>
+            <td class="px-4 py-3">
+              <app-status-badge [tone]="badge(session.status).tone" [label]="badge(session.status).label" />
+              @if (session.voidedReason) {
+                <p class="mt-1.5 max-w-[32ch] text-[12px] leading-relaxed text-muted">
+                  {{ session.voidedReason }}
+                </p>
+              }
+            </td>
+            <td class="px-4 py-3 text-[13px] tabular-nums text-body">
+              {{ session.entryAt | date: 'MMM d, h:mm a' }}
+            </td>
+            <td class="px-4 py-3 text-[13px] tabular-nums text-body">
+              {{ (session.exitAt ?? session.voidedAt) | date: 'MMM d, h:mm a' }}
+            </td>
+            <td class="px-4 py-3 text-[13px] text-body">
+              {{ session.terminalName }}
+              @if (showProperty()) {
+                <span class="block text-[12px] text-muted">{{ session.propertyName }}</span>
+              }
+            </td>
+            <td class="px-4 py-3 text-right">
+              @if (session.status === 'PAID') {
+                <p class="text-[13px] font-medium tabular-nums text-heading">{{ session.feeAmount | phpCurrency }}</p>
+                <p class="text-[12px] text-muted">{{ session.ratePlanName }}</p>
+              } @else {
+                <span class="text-[13px] text-muted">Nothing collected</span>
+              }
+            </td>
+            <td class="px-4 py-3 text-[13px] text-body">
+              {{ session.voidedByName ?? session.exitAttendantName ?? session.entryAttendantName }}
+              <span class="block text-[12px] text-muted">
+                {{ session.status === 'VOID' ? 'Voided in the web client' : 'Collected at the gate' }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (limit(); as window) {
+    @if (sessions().length >= window) {
+      <p class="text-[12.5px] text-muted">The {{ window }} most recent. Older activity is not listed here.</p>
+    }
+  }
+}

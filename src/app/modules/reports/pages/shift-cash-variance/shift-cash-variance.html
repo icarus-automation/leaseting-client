@@ -1,0 +1,224 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="Shift Cash Variance"
+    description="What each till was expected to hold against what the attendant declared."
+    [caption]="caption()"
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="exportCsv()"
+    >
+      <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+      <span>Export CSV</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  <!-- ── Controls ──────────────────────────────────────────── -->
+  <section
+    class="grid gap-4 rounded-base border border-border bg-background p-4 print:hidden min-[1100px]:grid-cols-5"
+    aria-label="Report filters"
+  >
+    <app-parking-scope-filter
+      idPrefix="shift-cash"
+      [value]="scope()"
+      (valueChange)="onScopeChange($event)"
+    />
+  </section>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (row of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else if (report(); as data) {
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-muted">
+          <svg pIcon="wallet" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-[15px] font-semibold text-heading">No tills declared</h2>
+          <p class="max-w-[52ch] text-[13px] leading-relaxed text-muted">
+            No attendant handed in a shift between {{ rangeText() }}. A shift appears here once it is
+            declared on the terminal; one that is still open has no figure to hold anyone to yet.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <!-- ── Totals ──────────────────────────────────────────── -->
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Expected</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ data.totals.expected | phpCurrency }}
+          </span>
+          <span class="text-[12px] tabular-nums text-muted">
+            across {{ data.totals.shifts }} till{{ data.totals.shifts === 1 ? '' : 's' }}
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Declared</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ data.totals.declared | phpCurrency }}
+          </span>
+          <span class="text-[12px] text-muted">Handed over by attendants</span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Net variance</span>
+          <span
+            class="font-heading text-xl font-semibold tabular-nums"
+            [class]="+data.totals.variance === 0 ? 'text-heading' : 'text-destructive'"
+          >
+            {{ data.totals.variance | phpCurrency }}
+          </span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.totals.shortAmount | phpCurrency }} short, {{ data.totals.overAmount | phpCurrency }} over
+          </span>
+        </div>
+        <div class="flex flex-col gap-1.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">How the tills landed</span>
+          <div class="flex flex-wrap gap-1.5">
+            <app-status-badge tone="success" label="Balanced" [count]="data.totals.balancedCount" />
+            <app-status-badge tone="destructive" label="Short" [count]="data.totals.shortCount" />
+            <app-status-badge tone="warning" label="Over" [count]="data.totals.overCount" />
+          </div>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.totals.awaitingConfirm }} still awaiting confirm
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 print:hidden">
+        <app-segmented-control
+          [options]="views"
+          [value]="view()"
+          ariaLabel="Which tills to list"
+          (valueChange)="onViewChange($event)"
+        />
+        <span class="text-[12.5px] tabular-nums text-muted">
+          {{ rows().length }} of {{ data.totals.shifts }} till{{ data.totals.shifts === 1 ? '' : 's' }}
+        </span>
+      </div>
+
+      <!-- ── Per-till detail ─────────────────────────────────── -->
+      <div class="overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">
+            Expected against declared cash for every till handed in between {{ data.from }} and {{ data.to }}.
+          </caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Till</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Declared</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Exits</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Expected</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Declared cash</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Variance</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Sign-off</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (row of rows(); track row.shiftId) {
+              <tr class="border-b border-border align-top transition-colors duration-150 ease-out last:border-b-0 hover:bg-surface motion-reduce:transition-none">
+                <th scope="row" class="px-4 py-2.5 text-left font-normal">
+                  <span class="block text-[13.5px] font-medium text-body">{{ row.terminalName }}</span>
+                  <span class="block text-[12px] text-muted">{{ row.attendantName }} · {{ row.propertyName }}</span>
+                  @if (row.note; as note) {
+                    <span class="mt-0.5 block max-w-[38ch] text-[12px] italic text-muted">"{{ note }}"</span>
+                  }
+                </th>
+                <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body">
+                  <span class="block tabular-nums">{{ stamp(row.declaredAt) }}</span>
+                  <span class="block text-[12px] tabular-nums text-muted">opened {{ stamp(row.openedAt) }}</span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-muted">
+                  {{ row.paidExits }}
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-body">
+                  {{ row.expectedCash | phpCurrency }}
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-body">
+                  {{ row.declaredCash | phpCurrency }}
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right">
+                  <span
+                    class="block text-[13px] font-semibold tabular-nums"
+                    [class]="row.state === 'balanced' ? 'text-heading' : row.state === 'short' ? 'text-destructive' : 'text-warning'"
+                  >
+                    {{ row.variance | phpCurrency }}
+                  </span>
+                  <span class="mt-0.5 inline-flex justify-end">
+                    <app-status-badge [tone]="stateTone(row)" [label]="stateLabel(row)" />
+                  </span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-[12.5px] text-muted">
+                  <span class="block">{{ confirmText(row) }}</span>
+                  @if (row.confirmedAt; as confirmedAt) {
+                    <span class="block tabular-nums">{{ stamp(confirmedAt) }}</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="px-4 py-8 text-center text-[13px] text-muted">
+                  Every till in this period balanced and has been signed off.
+                </td>
+              </tr>
+            }
+          </tbody>
+
+          <tfoot>
+            <tr class="border-t-2 border-border-strong bg-surface">
+              <th scope="row" colspan="3" class="px-4 py-3 text-left text-[13.5px] font-semibold text-heading">
+                All {{ data.totals.shifts }} till{{ data.totals.shifts === 1 ? '' : 's' }} declared
+              </th>
+              <td class="whitespace-nowrap px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ data.totals.expected | phpCurrency }}
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ data.totals.declared | phpCurrency }}
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ data.totals.variance | phpCurrency }}
+              </td>
+              <td class="px-4 py-3"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <p class="text-[12.5px] leading-relaxed text-muted print:hidden">
+        Expected cash is the figure snapshotted when the attendant declared, so a rate plan repriced
+        since then cannot move the number anyone is being held to. Shortfalls and overages are listed
+        apart because they cancel in the net, and two counting errors are not a clean month.
+        @if (filtered()) {
+          The totals above cover every declared till, not only the ones listed.
+        }
+      </p>
+    }
+  }
+</div>

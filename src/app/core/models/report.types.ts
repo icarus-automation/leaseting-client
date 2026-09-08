@@ -257,13 +257,14 @@ export interface ParkingReportQuery {
   terminalId?: string;
 }
 
-/** How the revenue table is sliced. All six arrive in one response. */
+/** How the revenue table is sliced. All seven arrive in one response. */
 export type ParkingRevenueGrouping =
   | 'day'
   | 'property'
   | 'terminal'
   | 'attendant'
   | 'vehicle-type'
+  | 'rate-plan'
   | 'shift';
 
 export interface ParkingRevenueGroupRow {

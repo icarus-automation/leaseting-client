@@ -37,6 +37,7 @@ const GROUPINGS: (SegmentedOption<ParkingRevenueGrouping> & { column: string })[
   { value: 'terminal', label: 'By gate', column: 'Gate' },
   { value: 'attendant', label: 'By attendant', column: 'Attendant' },
   { value: 'vehicle-type', label: 'By vehicle', column: 'Vehicle type' },
+  { value: 'rate-plan', label: 'By rate', column: 'Rate plan' },
   { value: 'shift', label: 'By shift', column: 'Shift' },
 ];
 
@@ -47,7 +48,7 @@ const GROUPINGS: (SegmentedOption<ParkingRevenueGrouping> & { column: string })[
  * one never was, so neither is money and neither is counted here. What the
  * page reports is cash that ended up in a till.
  *
- * The six breakdowns arrive together and are switched between without another
+ * The seven breakdowns arrive together and are switched between without another
  * request, because they are built from the same set of exits server-side: the
  * total never moves as the reader changes the question, which is what makes it
  * safe to cross-check a gate's take against an attendant's.

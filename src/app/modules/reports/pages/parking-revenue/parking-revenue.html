@@ -1,0 +1,188 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="Parking Revenue"
+    description="Cash collected at the barrier on paid exits, over a period."
+    [caption]="caption()"
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="exportCsv()"
+    >
+      <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+      <span>Export CSV</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  <!-- ── Controls ──────────────────────────────────────────── -->
+  <section
+    class="grid gap-4 rounded-base border border-border bg-background p-4 print:hidden min-[1100px]:grid-cols-5"
+    aria-label="Report filters"
+  >
+    <app-parking-scope-filter
+      idPrefix="parking-revenue"
+      [value]="scope()"
+      (valueChange)="onScopeChange($event)"
+    />
+  </section>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (row of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else if (report(); as data) {
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-muted">
+          <svg pIcon="car" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-[15px] font-semibold text-heading">No exits collected</h2>
+          <p class="max-w-[52ch] text-[13px] leading-relaxed text-muted">
+            No vehicle paid its way out of the gate between {{ rangeText() }}. Stays still on the floor
+            and voided ones never carry a fee, so neither appears here.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <!-- ── Totals ──────────────────────────────────────────── -->
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Collected</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ data.totals.collected | phpCurrency }}
+          </span>
+          <span class="text-[12px] text-muted">Cash, taken on exit</span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Paid exits</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ data.totals.exits }}
+          </span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.totals.averageFee | phpCurrency }} average
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Average stay</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ stayLabel(data.totals.averageStayMinutes) }}
+          </span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ stayLabel(data.totals.billedMinutes) }} billed in total
+          </span>
+        </div>
+      </div>
+
+      <!-- ── The one table, sliced six ways ──────────────────── -->
+      <div class="flex flex-wrap items-center justify-between gap-3 print:hidden">
+        <app-segmented-control
+          [options]="groupings"
+          [value]="grouping()"
+          ariaLabel="Break the period down by"
+          (valueChange)="onGroupingChange($event)"
+        />
+        <span class="text-[12.5px] text-muted">
+          {{ rows().length }} row{{ rows().length === 1 ? '' : 's' }}
+        </span>
+      </div>
+
+      <div class="overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">
+            Cash collected on paid exits between {{ data.from }} and {{ data.to }}, {{ columnHeader() }}.
+          </caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">{{ columnHeader() }}</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Exits</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Billed time</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Average fee</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Collected</th>
+              <th scope="col" class="w-[120px] px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Share</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (row of rows(); track row.key) {
+              <tr class="border-b border-border transition-colors duration-150 ease-out last:border-b-0 hover:bg-surface motion-reduce:transition-none">
+                <th scope="row" class="px-4 py-2.5 text-left font-normal">
+                  <span class="block text-[13.5px] font-medium text-body">{{ rowLabel(row) }}</span>
+                  @if (row.sublabel; as context) {
+                    <span class="block text-[12px] text-muted">{{ context }}</span>
+                  }
+                </th>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-body">{{ row.exits }}</td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-muted">
+                  {{ stayLabel(row.billedMinutes) }}
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-muted">
+                  {{ row.averageFee | phpCurrency }}
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums text-heading">
+                  {{ row.collected | phpCurrency }}
+                </td>
+                <td class="px-4 py-2.5">
+                  <span class="flex items-center justify-end gap-2">
+                    <span class="h-1.5 w-14 overflow-hidden rounded-full bg-surface print:hidden" aria-hidden="true">
+                      <span class="block h-full rounded-full bg-primary" [style.width.%]="row.share"></span>
+                    </span>
+                    <span class="w-11 text-right text-[12.5px] tabular-nums text-muted">{{ row.share }}%</span>
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+
+          <tfoot>
+            <tr class="border-t-2 border-border-strong bg-surface">
+              <th scope="row" class="px-4 py-3 text-left text-[13.5px] font-semibold text-heading">Total</th>
+              <td class="whitespace-nowrap px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ data.totals.exits }}
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ stayLabel(data.totals.billedMinutes) }}
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ data.totals.averageFee | phpCurrency }}
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ data.totals.collected | phpCurrency }}
+              </td>
+              <td class="px-4 py-3 text-right text-[12.5px] tabular-nums text-muted">100%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <p class="text-[12.5px] leading-relaxed text-muted print:hidden">
+        Every slice is built from the same collected exits, so each one totals to
+        {{ data.totals.collected | phpCurrency }}. Fees are the amount snapshotted at exit, not a
+        re-pricing against today's rate plans.
+      </p>
+    }
+  }
+</div>

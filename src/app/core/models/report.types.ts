@@ -237,3 +237,148 @@ export interface ManualReminderResult {
   body: string;
   error: string | null;
 }
+
+// ── Parking, gate cash ───────────────────────────────────────────────────────
+
+/**
+ * The historical read of a parking gate worked entirely from handhelds.
+ *
+ * Separate from `parking-overview.types.ts`, which is the live floor and the
+ * two corrections an admin can make on it. These three are read-only, cover a
+ * period rather than a moment, and export.
+ *
+ * Every window is stated in whole Manila days and echoed back by the server,
+ * so a printout says exactly what it covers.
+ */
+export interface ParkingReportQuery {
+  from: string;
+  to: string;
+  propertyId?: string;
+  terminalId?: string;
+}
+
+/** How the revenue table is sliced. All seven arrive in one response. */
+export type ParkingRevenueGrouping =
+  | 'day'
+  | 'property'
+  | 'terminal'
+  | 'attendant'
+  | 'vehicle-type'
+  | 'rate-plan'
+  | 'shift';
+
+export interface ParkingRevenueGroupRow {
+  /** Stable within its breakdown: an id, or the ISO date for `day`. */
+  key: string;
+  label: string;
+  /** The context that disambiguates the label, e.g. a terminal's property. */
+  sublabel: string | null;
+  exits: number;
+  collected: string;
+  billedMinutes: number;
+  averageFee: string;
+  /** Percent of the period's cash, one decimal. */
+  share: number;
+}
+
+export interface ParkingRevenueReport {
+  from: string;
+  to: string;
+  totals: {
+    exits: number;
+    collected: string;
+    billedMinutes: number;
+    averageFee: string;
+    averageStayMinutes: number;
+  };
+  breakdowns: Record<ParkingRevenueGrouping, ParkingRevenueGroupRow[]>;
+}
+
+/** Anything other than an exact match is called out, in either direction. */
+export type ShiftVarianceState = 'balanced' | 'short' | 'over';
+
+export interface ShiftCashRow {
+  shiftId: string;
+  /** DECLARED is a till still waiting on an admin; CONFIRMED is signed off. */
+  status: 'DECLARED' | 'CONFIRMED';
+  propertyId: string;
+  propertyName: string;
+  terminalId: string;
+  terminalName: string;
+  attendantId: string;
+  attendantName: string;
+  openedAt: string;
+  declaredAt: string;
+  confirmedAt: string | null;
+  confirmedByName: string | null;
+  /** Snapshotted when the guard declared, never re-derived. */
+  expectedCash: string;
+  declaredCash: string;
+  /** Declared minus expected. Negative is short, positive is over. */
+  variance: string;
+  state: ShiftVarianceState;
+  /** Collected exits that landed on this till: what expected was built from. */
+  paidExits: number;
+  note: string | null;
+}
+
+export interface ShiftCashVarianceReport {
+  from: string;
+  to: string;
+  totals: {
+    shifts: number;
+    expected: string;
+    declared: string;
+    /** Declared less expected: the net the books are out by. */
+    variance: string;
+    /** Kept apart from the net, where a shortfall and an overage cancel. */
+    shortAmount: string;
+    overAmount: string;
+    shortCount: number;
+    overCount: number;
+    balancedCount: number;
+    awaitingConfirm: number;
+    confirmed: number;
+  };
+  rows: ShiftCashRow[];
+}
+
+export interface ParkingVoidRow {
+  sessionId: string;
+  ticketCode: string;
+  plateNumber: string;
+  entryAt: string;
+  voidedAt: string;
+  /** How long the stub had been open when it was struck. */
+  minutesInPark: number;
+  propertyId: string;
+  propertyName: string;
+  terminalId: string;
+  terminalName: string;
+  vehicleTypeName: string;
+  entryAttendantName: string;
+  voidedById: string | null;
+  voidedByName: string;
+  reason: string;
+}
+
+export interface ParkingVoidActorRow {
+  actorId: string;
+  actorName: string;
+  voids: number;
+  /** Percent of the period's voids, one decimal. */
+  share: number;
+}
+
+export interface ParkingVoidReport {
+  from: string;
+  to: string;
+  totals: {
+    voids: number;
+    actors: number;
+    terminals: number;
+    averageMinutesInPark: number;
+  };
+  byActor: ParkingVoidActorRow[];
+  rows: ParkingVoidRow[];
+}

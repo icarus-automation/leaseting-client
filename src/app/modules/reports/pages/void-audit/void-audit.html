@@ -1,0 +1,169 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="Parking Void Audit"
+    description="Stays struck off the floor, with the reason given and the person who decided it."
+    [caption]="caption()"
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="exportCsv()"
+    >
+      <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+      <span>Export CSV</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  <!-- ── Controls ──────────────────────────────────────────── -->
+  <section
+    class="grid gap-4 rounded-base border border-border bg-background p-4 print:hidden min-[1100px]:grid-cols-5"
+    aria-label="Report filters"
+  >
+    <app-parking-scope-filter
+      idPrefix="void-audit"
+      [value]="scope()"
+      (valueChange)="onScopeChange($event)"
+    />
+  </section>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (row of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else if (report(); as data) {
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted-success text-success">
+          <svg pIcon="check-circle" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-[15px] font-semibold text-heading">No stays were voided</h2>
+          <p class="max-w-[52ch] text-[13px] leading-relaxed text-muted">
+            Nothing was struck off the floor between {{ rangeText() }}. A void is an admin correction to
+            an open stay, so an empty period means every stub either paid its way out or is parked still.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <!-- ── Totals ──────────────────────────────────────────── -->
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Stays voided</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.voids }}</span>
+          <span class="text-[12px] tabular-nums text-muted">
+            across {{ data.totals.terminals }} gate{{ data.totals.terminals === 1 ? '' : 's' }}
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">People voiding</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.actors }}</span>
+          <span class="text-[12px] text-muted">Owners and admins only</span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Average time in park</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">
+            {{ stayLabel(data.totals.averageMinutesInPark) }}
+          </span>
+          <span class="text-[12px] text-muted">Stub open before it was struck</span>
+        </div>
+      </div>
+
+      <!-- ── Who is voiding ──────────────────────────────────── -->
+      <section class="flex flex-col gap-3 rounded-base border border-border bg-background p-4">
+        <h2 class="font-heading text-[15px] font-semibold text-heading">Who voided them</h2>
+        <ul class="flex flex-col gap-2">
+          @for (actor of data.byActor; track actor.actorId) {
+            <li class="flex items-center gap-3">
+              <span class="min-w-[14ch] shrink-0 text-[13px] font-medium text-body">{{ actor.actorName }}</span>
+              <span class="h-1.5 min-w-[3rem] flex-1 overflow-hidden rounded-full bg-surface print:hidden" aria-hidden="true">
+                <span class="block h-full rounded-full bg-primary" [style.width.%]="actor.share"></span>
+              </span>
+              <span class="w-24 shrink-0 text-right text-[12.5px] tabular-nums text-muted">
+                {{ actor.voids }} void{{ actor.voids === 1 ? '' : 's' }} · {{ actor.share }}%
+              </span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <!-- ── The audit trail ─────────────────────────────────── -->
+      <div class="overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">
+            Every parking stay voided between {{ data.from }} and {{ data.to }}, with its reason and actor.
+          </caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Vehicle</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Gate</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Entered</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">In park</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Voided</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Reason</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (row of data.rows; track row.sessionId) {
+              <tr class="border-b border-border align-top transition-colors duration-150 ease-out last:border-b-0 hover:bg-surface motion-reduce:transition-none">
+                <th scope="row" class="px-4 py-2.5 text-left font-normal">
+                  <span class="block text-[13.5px] font-medium tracking-wide text-body">{{ row.plateNumber }}</span>
+                  <span class="block text-[12px] tabular-nums text-muted">
+                    {{ row.ticketCode }} · {{ row.vehicleTypeName }}
+                  </span>
+                </th>
+                <td class="px-4 py-2.5 text-[13px] text-body">
+                  <span class="block">{{ row.terminalName }}</span>
+                  <span class="block text-[12px] text-muted">{{ row.propertyName }}</span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body">
+                  <span class="block tabular-nums">{{ stamp(row.entryAt) }}</span>
+                  <span class="block text-[12px] text-muted">by {{ row.entryAttendantName }}</span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-muted">
+                  {{ inParkLabel(row) }}
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body">
+                  <span class="block tabular-nums">{{ stamp(row.voidedAt) }}</span>
+                  <span class="block text-[12px] text-muted">by {{ row.voidedByName }}</span>
+                </td>
+                <td class="px-4 py-2.5 text-[13px] text-body">
+                  <span class="block max-w-[42ch]">{{ row.reason }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-[12.5px] leading-relaxed text-muted print:hidden">
+        Voids carry no amount because a stay is only priced when it pays its way out, and only an open
+        stay can be voided. A collected exit is corrected on the shift's cash instead, which is what
+        Shift Cash Variance reports.
+      </p>
+    }
+  }
+</div>

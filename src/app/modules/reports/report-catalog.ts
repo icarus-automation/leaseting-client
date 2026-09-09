@@ -73,7 +73,7 @@ export const REPORT_GROUPS: ReportGroup[] = [
   {
     key: 'parking',
     label: 'Parking',
-    description: 'Parking income, customers, payments, and unpaid fees.',
+    description: 'Cash taken at the gate, the tills behind it, and what was struck off.',
   },
 ];
 
@@ -275,15 +275,38 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   },
 
   // ── Parking ────────────────────────────────────────────
+  // The gate is transient parking: pay on exit, cash only, worked from a
+  // handheld. The three live reports read exactly that. The three below them
+  // describe a monthly-contract product that does not exist yet, and say so
+  // rather than rendering an empty page under a live-looking title.
   {
     key: 'parking-revenue',
     title: 'Parking Revenue',
-    summary: 'Income from parking assignments, per property and per period.',
+    summary: 'Cash collected at the barrier on paid exits, by day, gate, attendant, or vehicle.',
     group: 'parking',
     icon: 'chart-line',
-    route: null,
-    blockedBy: 'parking management records',
-    keywords: 'slot spot bay stall income',
+    route: 'parking-revenue',
+    keywords:
+      'gate cash takings collected exits transient hourly terminal attendant shift slot spot bay stall income',
+  },
+  {
+    key: 'parking-shift-cash-variance',
+    title: 'Shift Cash Variance',
+    summary: 'What each till was expected to hold against what the attendant declared, and who signed it off.',
+    group: 'parking',
+    icon: 'wallet',
+    route: 'shift-cash-variance',
+    keywords:
+      'parking gate till shift cash declared expected variance short over reconciliation handover guard attendant confirm sign off',
+  },
+  {
+    key: 'parking-void-audit',
+    title: 'Parking Void Audit',
+    summary: 'Stays struck off the floor, with the reason given and the person who decided it.',
+    group: 'parking',
+    icon: 'ban',
+    route: 'void-audit',
+    keywords: 'void voided cancelled struck off correction audit reason actor open stay session trail',
   },
   {
     key: 'monthly-parking-customers',
@@ -292,28 +315,28 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     group: 'parking',
     icon: 'users',
     route: null,
-    blockedBy: 'parking management records',
-    keywords: 'monthly parker customer recurring plan assignment vehicle rate',
+    blockedBy: 'Monthly parking plans',
+    keywords: 'monthly parker customer recurring plan assignment vehicle rate contract reserved',
   },
   {
     key: 'parking-history-by-tenant',
     title: 'Parking Payments by Tenant',
-    summary: 'Parking charges and payments grouped under each tenant.',
+    summary: 'Parking charged to a tenant on their lease. The gate takes cash from whoever is driving, under no name.',
     group: 'parking',
-    icon: 'wallet',
+    icon: 'receipt',
     route: null,
-    blockedBy: 'parking management records',
-    keywords: 'parking payment history by tenant slot spot',
+    blockedBy: 'Monthly parking plans',
+    keywords: 'parking payment history by tenant lease billed charge slot spot',
   },
   {
     key: 'parking-delinquency',
     title: 'Unpaid Parking Fees',
-    summary: 'Customers with unpaid parking charges and how far past due they are.',
+    summary: 'Parking charges past their due date. Nothing can fall behind at the gate, where the barrier lifts only once the cash is in.',
     group: 'parking',
     icon: 'exclamation-circle',
     route: null,
-    blockedBy: 'parking management records',
-    keywords: 'parking delinquency overdue arrears unpaid late fees slot',
+    blockedBy: 'Monthly parking plans',
+    keywords: 'parking delinquency overdue arrears unpaid late fees slot monthly',
   },
 ];
 

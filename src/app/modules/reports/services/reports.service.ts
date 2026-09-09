@@ -11,10 +11,15 @@ import type {
   CollectionsMonth,
   DelinquencyQuery,
   DelinquencyReport,
+  ParkingReportQuery,
+  ParkingRevenueReport,
+  ParkingVoidReport,
   PropertyOccupancy,
   RevenueByTenantQuery,
   RevenueByTenantReport,
+  ShiftCashVarianceReport,
 } from '../../../core/models/report.types';
+import { toHttpParams } from '../../../shared/utils/http-params.util';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
@@ -60,6 +65,24 @@ export class ReportsService {
     if (query.asOf) params = params.set('asOf', query.asOf);
     if (query.propertyId) params = params.set('propertyId', query.propertyId);
     return this.http.get<DelinquencyReport>(`${this.base}/delinquency`, { params });
+  }
+
+  parkingRevenue(query: ParkingReportQuery): Observable<ParkingRevenueReport> {
+    return this.http.get<ParkingRevenueReport>(`${this.base}/parking/revenue`, {
+      params: toHttpParams({ ...query }),
+    });
+  }
+
+  parkingShiftCash(query: ParkingReportQuery): Observable<ShiftCashVarianceReport> {
+    return this.http.get<ShiftCashVarianceReport>(`${this.base}/parking/shift-cash`, {
+      params: toHttpParams({ ...query }),
+    });
+  }
+
+  parkingVoids(query: ParkingReportQuery): Observable<ParkingVoidReport> {
+    return this.http.get<ParkingVoidReport>(`${this.base}/parking/voids`, {
+      params: toHttpParams({ ...query }),
+    });
   }
 }
 

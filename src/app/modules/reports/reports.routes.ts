@@ -25,4 +25,17 @@ export const REPORTS_ROUTES: Routes = [
     path: 'delinquency',
     loadComponent: () => import('./pages/delinquency/delinquency').then(m => m.Delinquency),
   },
+  {
+    path: 'parking-revenue',
+    loadComponent: () => import('./pages/parking-revenue/parking-revenue').then(m => m.ParkingRevenue),
+  },
+  {
+    path: 'shift-cash-variance',
+    loadComponent: () =>
+      import('./pages/shift-cash-variance/shift-cash-variance').then(m => m.ShiftCashVariance),
+  },
+  {
+    path: 'void-audit',
+    loadComponent: () => import('./pages/void-audit/void-audit').then(m => m.VoidAudit),
+  },
 ];

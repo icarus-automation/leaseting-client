@@ -23,7 +23,7 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
     cards: [
       {
         label: 'Organization',
-        description: 'Company details, address, and branding.',
+        description: 'Company name, address, and branding.',
         icon: 'building',
         route: 'organization',
         comingSoon: true,
@@ -35,13 +35,13 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
     cards: [
       {
         label: 'Property types',
-        description: 'Categories offered when registering a property.',
+        description: 'Categories used when you add a property.',
         icon: 'home',
         route: 'property-types',
       },
       {
         label: 'Charge items',
-        description: 'Rent and deposit lines you can put on a lease.',
+        description: 'Rent and deposit lines you can add to a lease.',
         icon: 'money-bill',
         route: 'charge-items',
       },
@@ -58,31 +58,31 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
     cards: [
       {
         label: 'Vehicle types',
-        description: 'What can park — Car, Motorcycle, or your own list.',
+        description: 'Car, motorcycle, or your own list.',
         icon: 'car',
         route: 'vehicle-types',
       },
       {
         label: 'Rate plans',
-        description: 'How each vehicle type is charged, including opening bands and overnight.',
+        description: 'Charges by vehicle type, including opening bands and overnight.',
         icon: 'calendar-clock',
         route: 'rate-plans',
       },
       {
         label: 'Parking rules',
-        description: 'Grace, the default gate plan, and rounding.',
+        description: 'Grace minutes, default rate plan, and rounding.',
         icon: 'sliders-h',
         route: 'parking-rules',
       },
       {
         label: 'Terminals',
-        description: 'Named handheld gates bound to a property.',
+        description: 'Named handhelds, each bound to a property.',
         icon: 'tablet',
         route: 'parking-terminals',
       },
       {
         label: 'Parking attendants',
-        description: 'Handheld logins for guards. Nothing else in Leaseting accepts them.',
+        description: 'Handheld logins for parking attendants. They cannot sign in to Leaseting.',
         icon: 'users',
         route: 'parking-attendants',
       },

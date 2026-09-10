@@ -17,16 +17,16 @@ interface KbArticle {
 const ARTICLES: KbArticle[] = [
   {
     slug: 'utility-billing',
-    title: 'Utility billing, explained simply',
-    summary: 'Bill electricity and water to tenants: meter readings, rates, fees, and the monthly run.',
+    title: 'Utility billing',
+    summary: 'Bill electricity and water: meter readings, rates, fees, and the monthly run.',
     category: 'Billing',
     icon: 'bolt',
     readMinutes: 5,
   },
   {
     slug: null,
-    title: 'House rules & move-in guide',
-    summary: 'What to hand every new tenant on day one. Sample entry, content coming soon.',
+    title: 'House rules and move-in',
+    summary: 'What to hand a new tenant on day one. Article not written yet.',
     category: 'Tenants',
     icon: 'home',
     readMinutes: null,

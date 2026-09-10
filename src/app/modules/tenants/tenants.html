@@ -2,7 +2,7 @@
   <header class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="font-heading text-2xl font-semibold text-heading">Tenants</h1>
-      <p class="mt-0.5 text-sm text-muted">Everyone renting from you, with their contact details and lease history.</p>
+      <p class="mt-0.5 text-sm text-muted">Contact details, balances, and lease history.</p>
     </div>
     <button
       type="button"
@@ -85,7 +85,7 @@
       <app-empty-state
         icon="search"
         heading="No tenants match"
-        description="Nothing matches those filters. Remove one of the chips above, or clear them to see everyone."
+        description="Clear a filter chip, or clear all, to see every tenant."
         ctaLabel="Start onboarding"
         (cta)="startOnboarding()"
       />
@@ -93,7 +93,7 @@
       <app-empty-state
         icon="users"
         heading="No tenants yet"
-        description="Every tenant starts with onboarding. Pick or add the person, collect their requirements, and move them into a unit."
+        description="Start onboarding to add a tenant and move them into a vacant unit."
         ctaLabel="Start onboarding"
         (cta)="startOnboarding()"
       />

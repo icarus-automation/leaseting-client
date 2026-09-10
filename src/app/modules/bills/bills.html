@@ -2,7 +2,7 @@
   <header class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="font-heading text-2xl font-semibold text-heading">Bills</h1>
-      <p class="mt-0.5 text-sm text-muted">Every rent and utility charge across your leases: unpaid, overdue, and settled.</p>
+      <p class="mt-0.5 text-sm text-muted">Rent and utility charges: unpaid, overdue, and settled.</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <a
@@ -175,7 +175,7 @@
     <app-empty-state
       icon="wallet"
       heading="No bills found"
-      description="Raise a rent or utility bill on an active lease. Once a bill goes overdue, its unit turns red on the floor plan."
+      description="Add a rent or utility bill on an active lease. Overdue units turn red on the floor plan."
       ctaLabel="New bill"
       (cta)="drawerVisible.set(true)"
     />

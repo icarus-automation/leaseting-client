@@ -9,14 +9,14 @@
     <div>
       <h1 class="font-heading text-2xl font-semibold text-heading">Utility billing run</h1>
       <p class="mt-0.5 text-sm text-muted">
-        One pass a month, one property at a time. Last month's readings carry over, so you type this month's and every bill is worked out for you.
+        One property per run. Last month's readings carry over. Enter this month's present reading to create the bills.
       </p>
       <a
         routerLink="/knowledge-base/utility-billing"
         class="mt-1.5 inline-flex items-center gap-1.5 rounded-[2px] text-[13px] font-medium text-primary transition-colors duration-150 ease-out hover:underline motion-reduce:transition-none"
       >
         <svg pIcon="book" [size]="13" aria-hidden="true"></svg>
-        New to utility billing? Read the guide
+        Utility billing
       </a>
     </div>
     <div class="flex flex-col items-end gap-1">
@@ -239,8 +239,8 @@
     } @else if (!setupForm.controls.propertyId.value) {
       <app-empty-state
         icon="building"
-        heading="Pick a property to start"
-        description="The run lists every active lease of the property with its last meter reading carried over."
+        heading="Pick a property"
+        description="The run lists each active lease and carries over the last meter reading."
       />
     } @else if (rows().length === 0) {
       <app-empty-state

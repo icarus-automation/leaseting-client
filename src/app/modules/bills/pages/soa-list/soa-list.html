@@ -11,7 +11,9 @@
         </a>
         <h1 class="font-heading text-2xl font-semibold text-heading">Statements of account</h1>
       </div>
-      <p class="mt-0.5 text-sm text-muted">Every statement you have generated. Download the file again, or send the text summary once more.</p>
+      <p class="mt-0.5 text-sm text-muted">
+        Generated SOAs. Download the file again, or resend the SMS summary.
+      </p>
     </div>
     <button
       type="button"
@@ -43,8 +45,8 @@
   } @else if (items().length === 0) {
     <app-empty-state
       icon="file-excel"
-      heading="No statements yet"
-      description="Build a statement of account from a lease's unpaid bills. Every one you make lands here, ready to download again."
+      heading="No SOA yet"
+      description="Generate a statement of account from a lease's unpaid bills."
       ctaLabel="Generate SOA"
       (cta)="dialogVisible.set(true)"
     />

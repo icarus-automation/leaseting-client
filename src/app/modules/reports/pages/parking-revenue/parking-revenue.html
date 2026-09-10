@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5">
   <app-report-header
     title="Parking Revenue"
-    description="Cash collected at the barrier on paid exits, over a period."
+    description="Cash collected on paid exits, for the selected period."
     [caption]="caption()"
   >
     <button
@@ -62,8 +62,7 @@
         <div class="flex flex-col gap-1">
           <h2 class="font-heading text-[15px] font-semibold text-heading">No exits collected</h2>
           <p class="max-w-[52ch] text-[13px] leading-relaxed text-muted">
-            No vehicle paid its way out of the gate between {{ rangeText() }}. Stays still on the floor
-            and voided ones never carry a fee, so neither appears here.
+            No paid exits between {{ rangeText() }}. Vehicles still in park and voided stays have no fee, so they are not listed.
           </p>
         </div>
       </div>

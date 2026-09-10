@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5">
   <app-report-header
-    title="Late Payers &amp; Reminders"
-    description="Tenants who are late again and again, next to the reminders already sent to them."
+    title="Delinquency"
+    description="Tenants with repeat overdue bills, and reminders already sent."
     [caption]="caption()"
   >
     <button
@@ -84,11 +84,10 @@
           <svg pIcon="check-circle" [size]="18" aria-hidden="true"></svg>
         </div>
         <div class="flex flex-col gap-1">
-          <h2 class="font-heading text-[15px] font-semibold text-heading">Nobody needs chasing</h2>
+          <h2 class="font-heading text-[15px] font-semibold text-heading">No delinquency in this window</h2>
           <p class="max-w-[48ch] text-[13px] leading-relaxed text-muted">
-            Over the last {{ data.months }} months nobody has been late more than once, and nothing is
-            overdue as of {{ asOfText() }}. Tenants appear here once they owe something past its due date,
-            or slip twice.
+            Over the last {{ data.months }} months, no tenant was overdue more than once, and nothing is
+            overdue as of {{ asOfText() }}. Tenants appear here when a bill is past due, or when they are overdue twice.
           </p>
         </div>
       </div>

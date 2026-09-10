@@ -54,7 +54,7 @@ export class AuthShell {
       severity: 'URGENT',
       headline: 'Rent overdue',
       amount: '₱18,500',
-      detail: 'Unit 4B · Sunrise Residences · 6 days late',
+      detail: 'Unit 4B · Sunrise Residences · 6 days overdue',
     },
     {
       severity: 'WARNING',
@@ -66,7 +66,7 @@ export class AuthShell {
       severity: 'INFO',
       headline: 'Unit vacant',
       amount: null,
-      detail: 'Unit 2C · Sunrise Residences · 31 days empty',
+      detail: 'Unit 2C · Sunrise Residences · 31 days vacant',
     },
   ];
 

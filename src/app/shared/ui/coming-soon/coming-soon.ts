@@ -27,7 +27,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
             <svg [pIcon]="icon()" [size]="18" aria-hidden="true"></svg>
           </div>
           <div class="flex flex-col gap-3">
-            <p class="text-[13.5px] font-medium text-heading">This module ships in a later milestone. It will cover:</p>
+            <p class="text-[13.5px] font-medium text-heading">Not available yet. When it ships:</p>
             <ul class="grid gap-x-8 gap-y-1.5 sm:grid-cols-2">
               @for (feature of features(); track feature) {
                 <li class="flex items-start gap-2 text-[13px] leading-relaxed text-body">
@@ -37,7 +37,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
               }
             </ul>
             <p class="text-[12.5px] text-muted">
-              Until then, everything under <span class="font-medium text-body">Management</span> is live: properties, tenants, leases, and bills.
+              Until then, use Properties, Tenants, Leases, and Bills.
             </p>
           </div>
         </div>

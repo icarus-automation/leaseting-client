@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PIcon } from '@primeicons/angular/p-icon';
@@ -23,17 +23,16 @@ import { SegmentedControl } from '../../shared/ui/segmented-control/segmented-co
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../shared/ui/status-badge/status-badge';
 import { watchCreateParam } from '../../shared/utils/create-param.util';
-import { isPastDue } from '../../shared/utils/date.util';
 import { showPopupMenu } from '../../shared/utils/popup-menu.util';
 import { BillFormDialog } from './components/bill-form-dialog/bill-form-dialog';
+import { BillsToolsMenu } from './components/bills-tools-menu/bills-tools-menu';
 import { GenerateSoaDialog } from './components/generate-soa-dialog/generate-soa-dialog';
 import { RecordPaymentDialog } from './components/record-payment-dialog/record-payment-dialog';
 import { BillsService } from './services/bills.service';
-import { billingToolsMenuItems } from './utils/billing-tools.util';
+import { billIsOverdue, billStatusBadge } from './utils/bill-status.util';
 import { deleteBillConfirmMessage } from './utils/delete-bill-confirm.util';
 import { queriedBillToOpen } from './utils/queried-bill.util';
 
-/** One-click views over the list; dueToday/overdue are server-derived. */
 type QuickFilter = 'all' | 'dueToday' | 'overdue' | 'unpaid' | 'paid';
 
 const QUICK_FILTERS: { label: string; value: QuickFilter }[] = [
@@ -62,6 +61,7 @@ const TYPE_OPTIONS: { label: string; value: BillType | null }[] = [
   imports: [
     DatePipe,
     FormsModule,
+    RouterLink,
     PIcon,
     Menu,
     Select,
@@ -73,6 +73,7 @@ const TYPE_OPTIONS: { label: string; value: BillType | null }[] = [
     Skeleton,
     StatusBadge,
     BillFormDialog,
+    BillsToolsMenu,
     GenerateSoaDialog,
     RecordPaymentDialog,
   ],
@@ -106,19 +107,10 @@ export class Bills {
   readonly leaseIdFilter = signal<string | null>(
     this.route.snapshot.queryParamMap.get('leaseId'),
   );
-  /** Deep link from the tenant profile — all bills across the tenant's leases. */
   readonly tenantIdFilter = signal<string | null>(
     this.route.snapshot.queryParamMap.get('tenantId'),
   );
 
-  /**
-   * Filters produced by the natural-language bar.
-   *
-   * These and the quick filters are one setting, not two: whichever was used
-   * last wins and the other is cleared. Two visible controls that silently
-   * intersect is how a manager ends up staring at an empty table with both of
-   * them looking switched on.
-   */
   readonly nlFilters = signal<GridFilters>({});
 
   readonly drawerVisible = signal(false);
@@ -129,20 +121,11 @@ export class Bills {
   readonly skeletons = Array.from({ length: 6 });
   readonly overflowItems = signal<MenuItem[]>([]);
   readonly overflowForId = signal<string | null>(null);
-  readonly billingToolsItems = computed(() =>
-    billingToolsMenuItems(this.generatingRent(), {
-      openSoaList: () => void this.router.navigate(['/bills/soa']),
-      openGenerateSoa: () => this.soaDialogVisible.set(true),
-      openUtilityRun: () => void this.router.navigate(['/bills/utility-run']),
-      generateRentBills: () => this.generateRentBills(),
-    }),
-  );
   private readonly overflowMenu = viewChild.required<Menu>('overflowMenu');
   /** Deep-link `?billId=` opens the bill once; reloads after pay must not reopen it. */
   private openedQueryBillId: string | null = null;
 
   constructor() {
-    // Deep link support: ?status=UNPAID preselects the filter (dashboard links).
     const status = this.route.snapshot.queryParamMap.get('status');
     if (status === 'UNPAID') this.quickFilter.set('unpaid');
     if (status === 'PAID') this.quickFilter.set('paid');
@@ -152,8 +135,6 @@ export class Bills {
 
     watchCreateParam(() => this.drawerVisible.set(true));
 
-    // Deep links from the palette/dashboard — subscribed (not snapshot) so
-    // they also fire when already on this page.
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
@@ -193,9 +174,6 @@ export class Bills {
         ...QUICK_FILTER_PARAMS[this.quickFilter()],
         type: this.typeFilter ?? undefined,
         ...(this.nlFilters() as BillListFilters),
-        // Deep links from a tenant profile or a lease outrank both: the user
-        // arrived here asking about one record, and widening that silently
-        // would answer a question they did not ask.
         leaseId: this.leaseIdFilter() ?? undefined,
         tenantId: this.tenantIdFilter() ?? undefined,
       })
@@ -221,7 +199,6 @@ export class Bills {
     this.load(1);
   }
 
-  /** A new parse from the filter bar — it owns the view from here. */
   onFiltersChange(filters: GridFilters): void {
     this.nlFilters.set(filters);
     if (Object.keys(filters).length > 0) {
@@ -231,7 +208,6 @@ export class Bills {
     this.load(1);
   }
 
-  /** Best-effort — the cards simply stay hidden if the call fails. */
   private loadSummary(): void {
     this.bills
       .summary()
@@ -271,7 +247,7 @@ export class Bills {
     const match = queriedBillToOpen(bills, billId, this.openedQueryBillId);
     if (!match || !billId) return;
     this.openedQueryBillId = billId;
-    this.openPaymentDialog(match);
+    this.openBill(match.id);
   }
 
   clearTenantFilter(): void {
@@ -286,7 +262,7 @@ export class Bills {
   }
 
   isOverdue(bill: BillListItem): boolean {
-    return bill.status !== 'PAID' && isPastDue(bill.dueDate);
+    return billIsOverdue(bill);
   }
 
   isPartiallyPaid(bill: BillListItem): boolean {
@@ -294,17 +270,17 @@ export class Bills {
   }
 
   statusBadge(bill: BillListItem): { label: string; tone: BadgeTone } {
-    if (bill.status === 'PAID') return { label: 'Paid', tone: 'success' };
-    if (this.isOverdue(bill)) return { label: 'Overdue', tone: 'destructive' };
-    return this.isPartiallyPaid(bill)
-      ? { label: 'Partial', tone: 'vacant' }
-      : { label: 'Unpaid', tone: 'warning' };
+    return billStatusBadge(bill);
   }
 
   onSaved(): void {
     this.toast.add({ severity: 'success', summary: 'Bill created' });
     this.load(this.meta()?.page ?? 1);
     this.loadSummary();
+  }
+
+  openBill(id: string): void {
+    void this.router.navigate(['/bills', id]);
   }
 
   openPaymentDialog(bill: BillListItem): void {
@@ -317,7 +293,6 @@ export class Bills {
     this.loadSummary();
   }
 
-  /** Manual trigger for the automated rent billing — same idempotent run. */
   generateRentBills(): void {
     if (this.generatingRent()) return;
     this.generatingRent.set(true);

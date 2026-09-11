@@ -9,4 +9,5 @@ export const BILLS_ROUTES: Routes = [
     loadComponent: () =>
       import('./pages/payment-submissions/payment-submissions').then(m => m.PaymentSubmissions),
   },
+  { path: ':id', loadComponent: () => import('./pages/bill-detail/bill-detail').then(m => m.BillDetailPage) },
 ];

@@ -5,16 +5,11 @@
       <p class="mt-0.5 text-sm text-muted">Rent and utility charges: unpaid, overdue, and settled.</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-        aria-haspopup="menu"
-        aria-label="Billing tools"
-        (click)="billingToolsMenu.toggle($event)"
-      >
-        <span>Billing tools</span>
-        <svg pIcon="chevron-down" [size]="12" aria-hidden="true"></svg>
-      </button>
+      <app-bills-tools-menu
+        [generatingRent]="generatingRent()"
+        (generateSoa)="soaDialogVisible.set(true)"
+        (rentRun)="generateRentBills()"
+      />
       <button
         type="button"
         class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
@@ -164,21 +159,24 @@
         </thead>
         <tbody>
           @for (bill of items(); track bill.id) {
-            <tr
-              class="cursor-pointer border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-              (click)="openPaymentDialog(bill)"
-            >
+            <tr class="cursor-pointer border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none" (click)="openBill(bill.id)">
               <td class="px-4 py-3">
-                <button
-                  type="button"
-                  class="rounded-[2px] text-left text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                <a
+                  [routerLink]="['/bills', bill.id]"
+                  class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
                   [attr.aria-label]="'Open bill for ' + bill.lease.tenant.firstName + ' ' + bill.lease.tenant.lastName"
-                  (click)="openPaymentDialog(bill); $event.stopPropagation()"
+                  (click)="$event.stopPropagation()"
                 >
                   {{ bill.lease.tenant.firstName }} {{ bill.lease.tenant.lastName }}
-                </button>
+                </a>
                 <p class="text-[12px] text-muted">
                   Unit {{ bill.lease.unit.unitNo }} · {{ bill.lease.unit.property.name }}
+                  ·
+                  <a
+                    [routerLink]="['/tenants', bill.lease.tenant.id]"
+                    class="hover:text-primary hover:underline"
+                    (click)="$event.stopPropagation()"
+                  >Tenant</a>
                 </p>
               </td>
               <td class="px-4 py-3 text-[13px] text-body">{{ billTypeLabels[bill.type] }}</td>
@@ -236,14 +234,6 @@
     <app-pagination [meta]="meta()" (pageChange)="load($event)" />
   }
 </div>
-
-<p-menu
-  #billingToolsMenu
-  [model]="billingToolsItems()"
-  [popup]="true"
-  appendTo="body"
-  ariaLabel="Billing tools"
-/>
 
 <p-menu
   #overflowMenu

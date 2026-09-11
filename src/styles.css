@@ -205,8 +205,14 @@
 .p-cascadeselect-overlay,
 .p-autocomplete-overlay,
 .p-datepicker-panel,
-.p-popover {
+.p-popover,
+.p-menu-overlay {
   z-index: var(--z-overlay);
+}
+
+/* Destructive items in row overflow menus (End lease, Delete bill, Void stay). */
+.p-menu .p-menu-item.row-overflow-danger .p-menu-item-label {
+  color: var(--destructive);
 }
 
 /* PrimeNG form fields ship at 1rem text with 0.5rem vertical padding, which

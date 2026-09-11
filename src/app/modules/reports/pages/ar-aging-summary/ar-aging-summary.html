@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5">
   <app-report-header
-    title="Who Owes What"
-    description="What each tenant still owes, split by how long it has been sitting unpaid."
+    title="AR Aging"
+    description="Outstanding balances by tenant, split by days overdue."
     [caption]="caption()"
   >
     <button
@@ -86,8 +86,7 @@
         <div class="flex flex-col gap-1">
           <h2 class="font-heading text-[15px] font-semibold text-heading">Nothing outstanding</h2>
           <p class="max-w-[46ch] text-[13px] leading-relaxed text-muted">
-            Every bill raised on or before {{ asOfText() }} was settled by that date. Balances appear here as
-            soon as a bill goes unpaid.
+            Every bill due on or before {{ asOfText() }} was settled. Unpaid bills appear here.
           </p>
         </div>
       </div>

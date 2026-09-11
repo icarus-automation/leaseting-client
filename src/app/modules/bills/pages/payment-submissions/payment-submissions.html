@@ -8,7 +8,7 @@
       </nav>
       <h1 class="font-heading text-2xl font-semibold text-heading">Payment submissions</h1>
       <p class="mt-0.5 text-sm text-muted">
-        Residence Care claims awaiting review. Approval records the exact submitted amount as confirmed payment.
+        Residence Care payment proof waiting for review. Approval records the submitted amount.
       </p>
     </div>
     @if (pendingCount() > 0) {
@@ -40,8 +40,8 @@
   } @else if (items().length === 0) {
     <app-empty-state
       icon="inbox"
-      heading="No submissions here"
-      description="When a tenant submits proof from Residence Care, it will wait in Pending review until an owner or admin approves or rejects it."
+      heading="No submissions"
+      description="When a tenant submits proof from Residence Care, it waits in Pending review."
     />
   } @else {
     <div class="overflow-hidden rounded-base border border-border">

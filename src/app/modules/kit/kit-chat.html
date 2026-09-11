@@ -79,7 +79,7 @@
       </button>
       <h1 class="font-heading text-[15px] font-semibold text-heading">Ask Kit</h1>
       <p class="ml-auto hidden text-[12px] text-muted lg:block">
-        Kit answers from your own records. Check the figures before you act on them.
+        Kit answers from your records. Check the figures before you act.
       </p>
       <a
         routerLink="/kit/usage"
@@ -97,15 +97,14 @@
              start using, so show what Kit is actually for. -->
         <div class="m-auto flex max-w-[46ch] flex-col items-center text-center">
           <app-kit-head variant="hero" [mood]="kitAvatarMood" />
-          <p class="mt-3 font-heading text-[15px] font-semibold text-heading">Ask Kit anything</p>
+          <p class="mt-3 font-heading text-[15px] font-semibold text-heading">Ask about tenants, leases, and bills</p>
           <p class="mt-1 text-[13px] leading-relaxed text-muted">
-            Your tenants, units, leases and balances, or how the app works, and drafting a
-            message to a tenant.
+            Balances, units, how a screen works, or a draft message to a tenant.
           </p>
           <p class="mt-2 text-[12.5px] leading-relaxed text-muted">
             Start with <code class="rounded-[3px] bg-[color-mix(in_oklab,var(--primary)_12%,transparent)] px-1 font-semibold text-primary">/document</code>
-            and Kit builds a file from those same records: a spreadsheet for a list, a PDF for a
-            notice or letter. Add “as a PDF” or “as a spreadsheet” to override.
+            to build a file from those records: a spreadsheet for a list, a PDF for a notice.
+            Add “as a PDF” or “as a spreadsheet” to override.
           </p>
           <ul class="mt-4 flex w-full flex-col gap-1.5" role="list">
             @for (suggestion of suggestions; track suggestion.text) {
@@ -202,8 +201,7 @@
         <p class="mb-1.5 flex items-start gap-1.5 text-[12px] text-primary" aria-live="polite">
           <svg pIcon="file-export" [size]="11" class="mt-[3px] shrink-0" aria-hidden="true"></svg>
           <span>
-            Lists come back as a spreadsheet, letters and notices as a PDF. Add “as a PDF” or
-            “as a spreadsheet” to override.
+            Lists come back as a spreadsheet, letters and notices as a PDF. Add “as a PDF” or “as a spreadsheet” to override.
           </span>
         </p>
       }

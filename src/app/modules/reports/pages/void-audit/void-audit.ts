@@ -112,7 +112,7 @@ export class VoidAudit {
         'Voided at',
         'Ticket',
         'Plate',
-        'Gate',
+        'Terminal',
         'Property',
         'Vehicle type',
         'Entered at',

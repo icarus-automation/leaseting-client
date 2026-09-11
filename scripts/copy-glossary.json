@@ -1,0 +1,54 @@
+{
+  "voice": "Competent teammate. Short, specific product English. Concrete nouns. No marketing filler, no cute synonyms.",
+  "canonical": {
+    "property": "property",
+    "unit": "unit",
+    "tenant": "tenant",
+    "lease": "lease",
+    "bill": "bill",
+    "soa": ["SOA", "Statement of Account", "statement of account"],
+    "kit": ["Kit", "Ask Kit"],
+    "parkingAttendant": ["parking attendant", "attendant"],
+    "terminal": "terminal",
+    "shift": "shift",
+    "void": "void",
+    "occupied": "Occupied",
+    "vacant": "Vacant",
+    "overdue": "overdue"
+  },
+  "reports": {
+    "receivablesGroup": "Receivables",
+    "revenue-by-tenant": "Revenue by Tenant",
+    "ar-aging-summary": "AR Aging",
+    "ar-aging-detail": "Unpaid Bills",
+    "delinquency": "Delinquency",
+    "soa-issued": "Statements of Account"
+  },
+  "doNotUseUserFacing": {
+    "guard": "parking attendant",
+    "till": "shift",
+    "gate": "terminal",
+    "renter": "tenant",
+    "invoice": "bill",
+    "room": "unit",
+    "Who Owes What": "AR Aging",
+    "Who Owes You": "Receivables",
+    "Money In, by Tenant": "Revenue by Tenant",
+    "Late Payers & Reminders": "Delinquency"
+  },
+  "bannedPhrases": [
+    "streamline",
+    "empower",
+    "seamless",
+    "comprehensive",
+    "journey",
+    "at a glance",
+    "in one place",
+    "ships in a later"
+  ],
+  "retiredTitles": [
+    "Who Owes",
+    "Money In",
+    "Late Payers"
+  ]
+}

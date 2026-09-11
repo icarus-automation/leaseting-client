@@ -107,7 +107,7 @@ export class ParkingRulesSettings {
       return;
     }
     if (this.form.invalid) {
-      this.saveError.set('Pick a default gate plan and a grace of 0 minutes or more.');
+      this.saveError.set('Pick a default rate plan and a grace of 0 minutes or more.');
       this.form.markAllAsTouched();
       return;
     }

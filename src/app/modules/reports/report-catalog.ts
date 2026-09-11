@@ -43,22 +43,22 @@ export const REPORT_GROUPS: ReportGroup[] = [
   {
     key: 'business-overview',
     label: 'Business Overview',
-    description: 'How the portfolio is doing overall.',
+    description: 'Collections, occupancy, and overdue totals.',
   },
   {
     key: 'revenue',
     label: 'Revenue',
-    description: 'What was charged and what came in.',
+    description: 'Charges raised and payments received.',
   },
   {
     key: 'receivables',
-    label: 'Who Owes You',
-    description: 'Outstanding balances and how late they are.',
+    label: 'Receivables',
+    description: 'Unpaid bills and overdue aging.',
   },
   {
     key: 'portfolio',
     label: 'Portfolio & Leases',
-    description: 'Units, occupancy, and lease timelines.',
+    description: 'Units, occupancy, and lease dates.',
   },
   {
     key: 'utilities',
@@ -68,12 +68,12 @@ export const REPORT_GROUPS: ReportGroup[] = [
   {
     key: 'documents',
     label: 'Documents & Audit',
-    description: 'What was issued, sent, and by whom.',
+    description: 'SOAs issued and who generated them.',
   },
   {
     key: 'parking',
     label: 'Parking',
-    description: 'Cash taken at the gate, the tills behind it, and what was struck off.',
+    description: 'Paid exits, shift cash, and voids.',
   },
 ];
 
@@ -82,7 +82,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'portfolio-overview',
     title: 'Portfolio Overview',
-    summary: 'Collections trend, overdue aging, and occupancy across every property.',
+    summary: 'Collections, overdue aging, and occupancy across properties.',
     group: 'business-overview',
     icon: 'chart-bar',
     route: 'portfolio-overview',
@@ -91,7 +91,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'profit-and-loss',
     title: 'Profit & Loss',
-    summary: 'What is left after costs over a period, per property and across the portfolio.',
+    summary: 'Income minus costs for a period, by property and for the portfolio.',
     group: 'business-overview',
     icon: 'chart-line',
     route: null,
@@ -101,7 +101,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'cash-flow',
     title: 'Cash Flow Summary',
-    summary: 'Money in against money out, month by month, with what is left at the end.',
+    summary: 'Cash in and cash out by month, with the closing balance.',
     group: 'business-overview',
     icon: 'money-bill',
     route: null,
@@ -111,7 +111,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'owner-statement',
     title: 'Owner Statement',
-    summary: 'What each owner earned, what it cost, and the management fee for a period.',
+    summary: 'Owner income, costs, and management fee for a period.',
     group: 'business-overview',
     icon: 'briefcase',
     route: null,
@@ -122,8 +122,8 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   // ── Revenue ────────────────────────────────────────────
   {
     key: 'revenue-by-tenant',
-    title: 'Money In, by Tenant',
-    summary: 'Every charge raised and every payment received in a period, grouped by tenant.',
+    title: 'Revenue by Tenant',
+    summary: 'Charges and payments in a period, grouped by tenant.',
     group: 'revenue',
     icon: 'users',
     route: 'revenue-by-tenant',
@@ -132,7 +132,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'rent-roll',
     title: 'Rent Roll',
-    summary: 'Every active lease with its agreed rent, next due date, and what is still owed.',
+    summary: 'Active leases with contracted rent, next due date, and outstanding balance.',
     group: 'revenue',
     icon: 'list',
     route: null,
@@ -141,7 +141,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'bill-register',
     title: 'Bill Register',
-    summary: 'Every bill raised, in the order it was raised. The audit trail behind the totals.',
+    summary: 'Every bill raised, in order, for audit.',
     group: 'revenue',
     icon: 'file-edit',
     route: null,
@@ -150,7 +150,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'payment-register',
     title: 'Payment Register',
-    summary: 'Every payment received, with method, reference number, and receipt.',
+    summary: 'Every payment received, with method, reference, and receipt.',
     group: 'revenue',
     icon: 'wallet',
     route: null,
@@ -159,7 +159,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'deposits-held',
     title: 'Deposits Held',
-    summary: 'Security and advance deposits currently held, per tenant and lease.',
+    summary: 'Security and advance deposits held, per tenant and lease.',
     group: 'revenue',
     icon: 'lock',
     route: null,
@@ -167,11 +167,11 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'security advance bond liability refundable',
   },
 
-  // ── Who Owes You ───────────────────────────────────────
+  // ── Receivables ────────────────────────────────────────
   {
     key: 'ar-aging-summary',
-    title: 'Who Owes What',
-    summary: 'What each tenant still owes, split by how long it has been sitting unpaid.',
+    title: 'AR Aging',
+    summary: 'Outstanding balances by tenant, split by days overdue.',
     group: 'receivables',
     icon: 'chart-pie',
     route: 'ar-aging-summary',
@@ -180,7 +180,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'ar-aging-detail',
     title: 'Unpaid Bills',
-    summary: 'Every open bill, how many days it is past due, and what is left to collect.',
+    summary: 'Open bills with days overdue and amount still due.',
     group: 'receivables',
     icon: 'exclamation-circle',
     route: 'ar-aging-detail',
@@ -188,8 +188,8 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   },
   {
     key: 'delinquency',
-    title: 'Late Payers & Reminders',
-    summary: 'Tenants who are late again and again, next to the reminders already sent to them.',
+    title: 'Delinquency',
+    summary: 'Tenants with repeat overdue bills, and reminders already sent.',
     group: 'receivables',
     icon: 'bell',
     route: 'delinquency',
@@ -200,7 +200,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'occupancy-by-property',
     title: 'Occupancy by Property',
-    summary: 'How many units are filled per property, and how that has moved over time.',
+    summary: 'Occupied vs vacant units per property, over time.',
     group: 'portfolio',
     icon: 'building',
     route: null,
@@ -209,7 +209,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'vacant-units',
     title: 'Vacant Units',
-    summary: 'Units with nobody in them, how long they have been empty, and the asking rent.',
+    summary: 'Vacant units, days vacant, and asking rent.',
     group: 'portfolio',
     icon: 'home',
     route: null,
@@ -218,7 +218,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'lease-expirations',
     title: 'Lease Expirations',
-    summary: 'Leases ending in the next 30 / 60 / 90 days, so renewals start on time.',
+    summary: 'Leases ending in the next 30, 60, or 90 days.',
     group: 'portfolio',
     icon: 'calendar',
     route: null,
@@ -227,7 +227,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'tenant-directory',
     title: 'Tenant Directory',
-    summary: 'Current tenants with their unit, contact details, and lease dates.',
+    summary: 'Current tenants with unit, contact details, and lease dates.',
     group: 'portfolio',
     icon: 'id-card',
     route: null,
@@ -236,7 +236,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'move-in-move-out',
     title: 'Move-ins & Move-outs',
-    summary: 'Who moved in, who moved out, and how long each room took to fill again.',
+    summary: 'Move-ins, move-outs, and days a unit stayed vacant.',
     group: 'portfolio',
     icon: 'sign-in',
     route: null,
@@ -266,8 +266,8 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   // ── Documents & Audit ──────────────────────────────────
   {
     key: 'soa-issued',
-    title: 'Statements Issued',
-    summary: 'Every statement of account generated, its total, and whether the text was delivered.',
+    title: 'Statements of Account',
+    summary: 'Every SOA generated, its total, and whether the SMS was sent.',
     group: 'documents',
     icon: 'file-excel',
     route: null,
@@ -282,7 +282,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'parking-revenue',
     title: 'Parking Revenue',
-    summary: 'Cash collected at the barrier on paid exits, by day, gate, attendant, or vehicle.',
+    summary: 'Cash collected on paid exits, by day, terminal, attendant, or vehicle.',
     group: 'parking',
     icon: 'chart-line',
     route: 'parking-revenue',
@@ -292,7 +292,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'parking-shift-cash-variance',
     title: 'Shift Cash Variance',
-    summary: 'What each till was expected to hold against what the attendant declared, and who signed it off.',
+    summary: 'Expected cash vs what the attendant declared, and who signed it off.',
     group: 'parking',
     icon: 'wallet',
     route: 'shift-cash-variance',
@@ -302,7 +302,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'parking-void-audit',
     title: 'Parking Void Audit',
-    summary: 'Stays struck off the floor, with the reason given and the person who decided it.',
+    summary: 'Voided stays, with reason and who voided them.',
     group: 'parking',
     icon: 'ban',
     route: 'void-audit',
@@ -311,7 +311,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'monthly-parking-customers',
     title: 'Monthly Parking Customers',
-    summary: 'Customers on a monthly plan, with their assigned space, vehicle, and current rate.',
+    summary: 'Monthly parkers with assigned space, vehicle, and rate.',
     group: 'parking',
     icon: 'users',
     route: null,
@@ -321,7 +321,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'parking-history-by-tenant',
     title: 'Parking Payments by Tenant',
-    summary: 'Parking charged to a tenant on their lease. The gate takes cash from whoever is driving, under no name.',
+    summary: 'Parking billed on a lease. Transient exits are cash at the terminal, with no tenant name.',
     group: 'parking',
     icon: 'receipt',
     route: null,
@@ -331,7 +331,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'parking-delinquency',
     title: 'Unpaid Parking Fees',
-    summary: 'Parking charges past their due date. Nothing can fall behind at the gate, where the barrier lifts only once the cash is in.',
+    summary: 'Overdue parking charges on a lease. Transient exits are paid before the barrier lifts.',
     group: 'parking',
     icon: 'exclamation-circle',
     route: null,

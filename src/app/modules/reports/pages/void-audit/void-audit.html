@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5">
   <app-report-header
     title="Parking Void Audit"
-    description="Stays struck off the floor, with the reason given and the person who decided it."
+    description="Voided stays, with reason and who voided them."
     [caption]="caption()"
   >
     <button
@@ -62,8 +62,7 @@
         <div class="flex flex-col gap-1">
           <h2 class="font-heading text-[15px] font-semibold text-heading">No stays were voided</h2>
           <p class="max-w-[52ch] text-[13px] leading-relaxed text-muted">
-            Nothing was struck off the floor between {{ rangeText() }}. A void is an admin correction to
-            an open stay, so an empty period means every stub either paid its way out or is parked still.
+            Nothing was voided between {{ rangeText() }}. A void corrects an open stay. Paid exits and vehicles still in park are not listed here.
           </p>
         </div>
       </div>
@@ -74,11 +73,11 @@
           <span class="text-[12.5px] font-medium text-muted">Stays voided</span>
           <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.voids }}</span>
           <span class="text-[12px] tabular-nums text-muted">
-            across {{ data.totals.terminals }} gate{{ data.totals.terminals === 1 ? '' : 's' }}
+            across {{ data.totals.terminals }} terminal{{ data.totals.terminals === 1 ? '' : 's' }}
           </span>
         </div>
         <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
-          <span class="text-[12.5px] font-medium text-muted">People voiding</span>
+          <span class="text-[12.5px] font-medium text-muted">Who voided</span>
           <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.actors }}</span>
           <span class="text-[12px] text-muted">Owners and admins only</span>
         </div>
@@ -113,12 +112,12 @@
       <div class="overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
         <table class="w-full border-collapse text-left">
           <caption class="sr-only">
-            Every parking stay voided between {{ data.from }} and {{ data.to }}, with its reason and actor.
+            Every parking stay voided between {{ data.from }} and {{ data.to }}, with reason and who voided it.
           </caption>
           <thead>
             <tr class="border-b border-border bg-surface">
               <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Vehicle</th>
-              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Gate</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Terminal</th>
               <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Entered</th>
               <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">In park</th>
               <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Voided</th>

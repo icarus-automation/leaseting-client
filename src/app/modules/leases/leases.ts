@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import type { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
 
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
@@ -17,6 +19,7 @@ import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../shared/ui/status-badge/status-badge';
 import { daysUntil, isPastDue } from '../../shared/utils/date.util';
 import { leaseStatus } from '../../shared/utils/lease-status.util';
+import { showPopupMenu } from '../../shared/utils/popup-menu.util';
 import { LeasesService } from './services/leases.service';
 
 @Component({
@@ -25,6 +28,7 @@ import { LeasesService } from './services/leases.service';
     DatePipe,
     RouterLink,
     PIcon,
+    Menu,
     PhpCurrencyPipe,
     EmptyState,
     NlFilterBar,
@@ -58,6 +62,9 @@ export class Leases {
   readonly isFiltered = computed(() => Object.keys(this.nlFilters()).length > 0);
 
   readonly skeletons = Array.from({ length: 6 });
+  readonly overflowItems = signal<MenuItem[]>([]);
+  readonly overflowForId = signal<string | null>(null);
+  private readonly overflowMenu = viewChild.required<Menu>('overflowMenu');
 
   constructor() {
     this.load(1);
@@ -116,10 +123,23 @@ export class Leases {
     return !lease.terminatedAt && !isPastDue(lease.endDate);
   }
 
+  openOverflow(event: Event, lease: LeaseListItem): void {
+    const items: MenuItem[] = [
+      {
+        label: 'End lease',
+        styleClass: 'row-overflow-danger',
+        command: () => this.confirmTerminate(lease),
+      },
+    ];
+    this.overflowItems.set(items);
+    this.overflowForId.set(lease.id);
+    showPopupMenu(this.overflowMenu(), event, items);
+  }
+
   confirmTerminate(lease: LeaseListItem): void {
     this.confirmation.confirm({
       header: 'End lease',
-      message: `End the lease for Unit ${lease.unit.unitNo} (${lease.tenant.firstName} ${lease.tenant.lastName})? The unit becomes vacant immediately.`,
+      message: `End the lease for ${lease.tenant.firstName} ${lease.tenant.lastName} on Unit ${lease.unit.unitNo}? The unit becomes vacant immediately.`,
       icon: 'pi pi-exclamation-triangle',
       acceptButtonProps: { label: 'End lease', severity: 'danger' },
       rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },

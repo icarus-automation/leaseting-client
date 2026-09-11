@@ -3,8 +3,8 @@
     <div>
       <h1 class="font-heading text-2xl font-semibold text-heading">Parking Overview</h1>
       <p class="mt-0.5 max-w-[68ch] text-sm text-muted">
-        The floor as the gates recorded it. Guards handle entry and exit on their handhelds. From
-        here you can void a wrong entry and sign off the cash a guard declared.
+        Vehicles in park, paid exits, and voids. Attendants handle entry and exit on the terminal.
+        Void a wrong stay here, and sign off declared shift cash.
       </p>
     </div>
     <button
@@ -51,19 +51,19 @@
         <div class="flex flex-col gap-1 rounded-base border border-border bg-background p-4">
           <span class="text-[12.5px] font-medium text-muted">In park now</span>
           <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ stats.inParkCount }}</span>
-          <span class="text-[12px] text-muted">{{ stats.openShiftCount }} shift(s) still trading</span>
+          <span class="text-[12px] text-muted">{{ stats.openShiftCount }} open shift(s)</span>
         </div>
         <div class="flex flex-col gap-1 rounded-base border border-border bg-background p-4">
           <span class="text-[12.5px] font-medium text-muted">Collected today</span>
           <span class="font-heading text-xl font-semibold tabular-nums text-heading">
             {{ stats.collectedToday | phpCurrency }}
           </span>
-          <span class="text-[12px] text-muted">{{ stats.paidExitsToday }} paid exit(s), cash at the gate</span>
+          <span class="text-[12px] text-muted">{{ stats.paidExitsToday }} paid exit(s), cash on exit</span>
         </div>
         <div class="flex flex-col gap-1 rounded-base border border-border bg-background p-4">
           <span class="text-[12.5px] font-medium text-muted">Voided today</span>
           <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ stats.voidsToday }}</span>
-          <span class="text-[12px] text-muted">Each one keeps its reason and actor</span>
+          <span class="text-[12px] text-muted">Each void has a reason and who did it</span>
         </div>
         <div
           class="flex flex-col gap-1 rounded-base p-4"
@@ -78,7 +78,7 @@
             {{ stats.shiftsPendingConfirm }}
           </span>
           <span class="text-[12px] text-muted">
-            {{ stats.shiftsPendingConfirm > 0 ? 'Shifts declared and not signed off' : 'Every till is signed off' }}
+            {{ stats.shiftsPendingConfirm > 0 ? 'Shifts declared and not signed off' : 'All shifts are signed off' }}
           </span>
         </div>
       </div>
@@ -156,7 +156,7 @@
   [visible]="voidDialogVisible()"
   (visibleChange)="voidDialogVisible.set($event)"
   [heading]="voidHeading()"
-  subheading="The stay comes off the floor and the original record is kept, with your name and the time against this reason. Only open stays can be voided; a collected exit cannot be reversed here."
+  subheading="The stay is voided. The original record stays, with your name, time, and this reason. Only open stays can be voided. A collected exit cannot be reversed here."
   label="Why is this being voided?"
   confirmLabel="Void stay"
   (confirmed)="confirmVoid($event)"

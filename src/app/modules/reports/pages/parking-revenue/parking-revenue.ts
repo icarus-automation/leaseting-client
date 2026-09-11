@@ -34,7 +34,7 @@ import { ReportsService } from '../../services/reports.service';
 const GROUPINGS: (SegmentedOption<ParkingRevenueGrouping> & { column: string })[] = [
   { value: 'day', label: 'By day', column: 'Day' },
   { value: 'property', label: 'By property', column: 'Property' },
-  { value: 'terminal', label: 'By gate', column: 'Gate' },
+  { value: 'terminal', label: 'By terminal', column: 'Terminal' },
   { value: 'attendant', label: 'By attendant', column: 'Attendant' },
   { value: 'vehicle-type', label: 'By vehicle', column: 'Vehicle type' },
   { value: 'rate-plan', label: 'By rate', column: 'Rate plan' },

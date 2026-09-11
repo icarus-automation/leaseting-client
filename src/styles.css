@@ -210,6 +210,11 @@
   z-index: var(--z-overlay);
 }
 
+/* Destructive items in row overflow menus (End lease, Delete bill, Void stay). */
+.p-menu .p-menu-item.row-overflow-danger .p-menu-item-label {
+  color: var(--destructive);
+}
+
 /* PrimeNG form fields ship at 1rem text with 0.5rem vertical padding, which
    computes to ~42px. The app's own inputs are `h-10 text-sm` — 40px at 14px.
    Two pixels and two points is exactly enough to read as misaligned when a

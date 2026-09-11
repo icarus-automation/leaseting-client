@@ -8,8 +8,8 @@
       <div>
         <h3 class="font-heading text-[15px] font-semibold text-heading">Set up this floor</h3>
         <p class="mx-auto mt-1 max-w-[46ch] text-[13px] leading-relaxed text-muted">
-          Add the rooms or units on this floor, and upload a plan image to lay them out
-          visually. Either order works.
+          Add the units on this floor, and upload a plan image to lay them out.
+          Either order works.
         </p>
       </div>
       <div class="flex flex-wrap items-center justify-center gap-2">
@@ -78,7 +78,7 @@
     <app-empty-state
       icon="image"
       heading="No floor plan yet"
-      description="Upload a plan image for this floor to see units laid out visually. You can still manage units from the list below."
+      description="Upload a plan image for this floor. You can still manage units from the list below."
       ctaLabel="Upload floor plan"
       (cta)="uploadPlanRequested.emit()"
     />
@@ -88,7 +88,7 @@
     <app-empty-state
       icon="table"
       heading="No units on this floor"
-      description="Add the rooms or units on this floor. You can map them onto the plan afterwards."
+      description="Add the units on this floor. You can map them onto the plan afterwards."
       ctaLabel="Add unit"
       (cta)="addUnitRequested.emit()"
     />

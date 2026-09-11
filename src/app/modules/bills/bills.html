@@ -2,7 +2,7 @@
   <header class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="font-heading text-2xl font-semibold text-heading">Bills</h1>
-      <p class="mt-0.5 text-sm text-muted">Every rent and utility charge across your leases: unpaid, overdue, and settled.</p>
+      <p class="mt-0.5 text-sm text-muted">Rent and utility charges: unpaid, overdue, and settled.</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <app-bills-tools-menu
@@ -138,7 +138,7 @@
     <app-empty-state
       icon="wallet"
       heading="No bills found"
-      description="Raise a rent or utility bill on an active lease. Once a bill goes overdue, its unit turns red on the floor plan."
+      description="Add a rent or utility bill on an active lease. Overdue units turn red on the floor plan."
       ctaLabel="New bill"
       (cta)="drawerVisible.set(true)"
     />
@@ -164,6 +164,7 @@
                 <a
                   [routerLink]="['/bills', bill.id]"
                   class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                  [attr.aria-label]="'Open bill for ' + bill.lease.tenant.firstName + ' ' + bill.lease.tenant.lastName"
                   (click)="$event.stopPropagation()"
                 >
                   {{ bill.lease.tenant.firstName }} {{ bill.lease.tenant.lastName }}
@@ -196,28 +197,30 @@
                   @if (bill.status === 'UNPAID') {
                     <button
                       type="button"
-                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                      class="px-1.5 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:text-body hover:underline motion-reduce:transition-none"
                       (click)="openPaymentDialog(bill)"
                     >
                       {{ canMutateFinance() ? 'Record payment' : 'Payments' }}
                     </button>
-                    @if (canMutateFinance()) {
-                      <button
-                        type="button"
-                        class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
-                        aria-label="Delete bill"
-                        (click)="confirmDelete(bill)"
-                      >
-                        <svg pIcon="trash" [size]="12" aria-hidden="true"></svg>
-                      </button>
-                    }
                   } @else {
                     <button
                       type="button"
-                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                      class="px-1.5 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:text-body hover:underline motion-reduce:transition-none"
                       (click)="openPaymentDialog(bill)"
                     >
                       Payments
+                    </button>
+                  }
+                  @if (canDelete(bill)) {
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                      [attr.aria-label]="'More actions for ' + billTypeLabels[bill.type] + ' bill, ' + bill.lease.tenant.firstName + ' ' + bill.lease.tenant.lastName + ', unit ' + bill.lease.unit.unitNo"
+                      aria-haspopup="menu"
+                      [attr.aria-expanded]="overflowForId() === bill.id"
+                      (click)="openOverflow($event, bill)"
+                    >
+                      <svg pIcon="ellipsis-v" [size]="13" aria-hidden="true"></svg>
                     </button>
                   }
                 </div>
@@ -231,6 +234,15 @@
     <app-pagination [meta]="meta()" (pageChange)="load($event)" />
   }
 </div>
+
+<p-menu
+  #overflowMenu
+  [model]="overflowItems()"
+  [popup]="true"
+  appendTo="body"
+  ariaLabel="Bill actions"
+  (onHide)="overflowForId.set(null)"
+/>
 
 <app-bill-form-dialog
   [visible]="drawerVisible()"

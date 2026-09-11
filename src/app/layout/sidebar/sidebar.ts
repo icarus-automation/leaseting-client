@@ -55,7 +55,7 @@ const NAV_SECTIONS: NavSection[] = [
     type: 'core',
     items: [
       { label: 'Bills', route: '/bills', icon: 'wallet' },
-      { label: 'Payment reviews', route: '/bills/submissions', icon: 'inbox' },
+      { label: 'Payment submissions', route: '/bills/submissions', icon: 'inbox' },
     ],
   },
   {

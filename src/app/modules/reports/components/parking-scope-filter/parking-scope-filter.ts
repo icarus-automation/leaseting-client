@@ -82,7 +82,7 @@ import { ReportFiltersService } from '../../services/report-filters.service';
     </div>
 
     <div class="flex flex-col gap-1.5">
-      <label class="text-[13px] font-medium text-heading" [attr.for]="id('terminal')">Gate</label>
+      <label class="text-[13px] font-medium text-heading" [attr.for]="id('terminal')">Terminal</label>
       <p-select
         [inputId]="id('terminal')"
         [options]="terminalOptions()"

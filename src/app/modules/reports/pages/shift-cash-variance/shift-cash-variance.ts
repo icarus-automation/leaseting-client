@@ -28,7 +28,7 @@ import { ReportsService } from '../../services/reports.service';
 type ShiftView = 'all' | 'off' | 'awaiting';
 
 const VIEWS: SegmentedOption<ShiftView>[] = [
-  { value: 'all', label: 'All tills' },
+  { value: 'all', label: 'All shifts' },
   { value: 'off', label: 'Did not balance' },
   { value: 'awaiting', label: 'Awaiting confirm' },
 ];
@@ -81,7 +81,7 @@ export class ShiftCashVariance {
 
   readonly caption = computed(() => {
     if (!this.report()) return null;
-    return `${this.rangeText()} · ${this.scopeLabel()} · Declared tills`;
+    return `${this.rangeText()} · ${this.scopeLabel()} · Declared shifts`;
   });
 
   readonly isEmpty = computed(() => (this.report()?.rows.length ?? 0) === 0);
@@ -166,7 +166,7 @@ export class ShiftCashVariance {
 
     const rows: (string | number | null)[][] = [
       [
-        'Gate',
+        'Terminal',
         'Property',
         'Attendant',
         'Opened',

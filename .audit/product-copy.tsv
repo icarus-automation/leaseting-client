@@ -1,0 +1,8 @@
+ts	phase	decision	why	evidence	result
+2026-09-10T15:40:00Z	frame	Copy pass is a string rewrite against a locked glossary, not a layout or behavior change.	Cute titles and narrator blurbs were the real problem, not missing i18n.	src/app/modules/reports/report-catalog.ts, src/app/modules/parking/parking.html	open
+2026-09-10T15:41:00Z	harness	Glossary plus scripts/copy-check.mjs is the gate. Baseline is the current tree before edits.	A reviewer can rerun the scanner instead of trusting a spot-check list.	scripts/copy-check.mjs, scripts/copy-glossary.json	open
+2026-09-10T16:00:00Z	loop	Locked canonical terms and retired cute report titles.	Same concept had two names. Pick the existing product word.	src/app/modules/reports/report-catalog.ts	VERIFIED titles in catalog
+2026-09-10T16:05:00Z	verify	copy-check clean after the rewrite.	The scanner is the rerunnable proof, not a self-report.	npm run copy-check, exit 0	VERIFIED
+2026-09-10T16:06:00Z	verify	ng build succeeded.	Compile is necessary, not sufficient.	npx ng build, exit 0, dist/leaseting	VERIFIED compile
+2026-09-10T16:07:00Z	verify	Login page driven in the browser. Authenticated screens were not.	No session was available. File evidence covers those screens.	http://127.0.0.1:4200/login snapshot	INCONCLUSIVE for authed spot-check
+2026-09-10T16:10:00Z	handback	Committed on copy/product-voice against feat/parking-gate-cash-reports.	Parking report pages only exist on that parent.	commit 80c7c4e	open

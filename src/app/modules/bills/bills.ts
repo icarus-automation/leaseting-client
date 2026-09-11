@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import type { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
 import { Select } from 'primeng/select';
 
 import { AuthService } from '../../core/auth/auth.service';
@@ -21,12 +23,15 @@ import { SegmentedControl } from '../../shared/ui/segmented-control/segmented-co
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../shared/ui/status-badge/status-badge';
 import { watchCreateParam } from '../../shared/utils/create-param.util';
+import { showPopupMenu } from '../../shared/utils/popup-menu.util';
 import { BillFormDialog } from './components/bill-form-dialog/bill-form-dialog';
 import { BillsToolsMenu } from './components/bills-tools-menu/bills-tools-menu';
 import { GenerateSoaDialog } from './components/generate-soa-dialog/generate-soa-dialog';
 import { RecordPaymentDialog } from './components/record-payment-dialog/record-payment-dialog';
 import { BillsService } from './services/bills.service';
 import { billIsOverdue, billStatusBadge } from './utils/bill-status.util';
+import { deleteBillConfirmMessage } from './utils/delete-bill-confirm.util';
+import { queriedBillToOpen } from './utils/queried-bill.util';
 
 type QuickFilter = 'all' | 'dueToday' | 'overdue' | 'unpaid' | 'paid';
 
@@ -55,9 +60,10 @@ const TYPE_OPTIONS: { label: string; value: BillType | null }[] = [
   selector: 'app-bills',
   imports: [
     DatePipe,
-    RouterLink,
     FormsModule,
+    RouterLink,
     PIcon,
+    Menu,
     Select,
     PhpCurrencyPipe,
     EmptyState,
@@ -113,6 +119,11 @@ export class Bills {
   readonly soaDialogVisible = signal(false);
   readonly generatingRent = signal(false);
   readonly skeletons = Array.from({ length: 6 });
+  readonly overflowItems = signal<MenuItem[]>([]);
+  readonly overflowForId = signal<string | null>(null);
+  private readonly overflowMenu = viewChild.required<Menu>('overflowMenu');
+  /** Deep-link `?billId=` opens the bill once; reloads after pay must not reopen it. */
+  private openedQueryBillId: string | null = null;
 
   constructor() {
     const status = this.route.snapshot.queryParamMap.get('status');
@@ -172,6 +183,7 @@ export class Bills {
           this.items.set(result.data);
           this.meta.set(result.meta);
           this.loading.set(false);
+          this.maybeOpenQueriedBill(result.data);
         },
         error: (error: unknown) => {
           this.loading.set(false);
@@ -219,6 +231,7 @@ export class Bills {
 
   clearBillFilter(): void {
     this.billIdFilter.set(null);
+    this.openedQueryBillId = null;
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { billId: null },
@@ -226,6 +239,15 @@ export class Bills {
       replaceUrl: true,
     });
     this.load(1);
+  }
+
+  /** Calendar and palette land on `?billId=` — open that bill instead of leaving staff on a one-row list. */
+  private maybeOpenQueriedBill(bills: BillListItem[]): void {
+    const billId = this.billIdFilter();
+    const match = queriedBillToOpen(bills, billId, this.openedQueryBillId);
+    if (!match || !billId) return;
+    this.openedQueryBillId = billId;
+    this.openBill(match.id);
   }
 
   clearTenantFilter(): void {
@@ -304,10 +326,27 @@ export class Bills {
       });
   }
 
+  canDelete(bill: BillListItem): boolean {
+    return this.canMutateFinance() && bill.status === 'UNPAID';
+  }
+
+  openOverflow(event: Event, bill: BillListItem): void {
+    const items: MenuItem[] = [
+      {
+        label: 'Delete bill',
+        styleClass: 'row-overflow-danger',
+        command: () => this.confirmDelete(bill),
+      },
+    ];
+    this.overflowItems.set(items);
+    this.overflowForId.set(bill.id);
+    showPopupMenu(this.overflowMenu(), event, items);
+  }
+
   confirmDelete(bill: BillListItem): void {
     this.confirmation.confirm({
       header: 'Delete bill',
-      message: `Delete this unpaid ${BILL_TYPE_LABELS[bill.type]} bill? This cannot be undone.`,
+      message: deleteBillConfirmMessage(bill),
       icon: 'pi pi-exclamation-triangle',
       acceptButtonProps: { label: 'Delete', severity: 'danger' },
       rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },

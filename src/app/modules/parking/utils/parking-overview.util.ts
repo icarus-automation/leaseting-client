@@ -87,7 +87,7 @@ export function varianceLabel(variance: string | null): string {
 
 /**
  * Only an open stay can be voided, and only an owner or admin may do it. Both
- * halves are enforced by the API; this keeps the button from offering an action
+ * halves are enforced by the API; this keeps the overflow from offering an action
  * that is going to come back a 403 or a 409.
  */
 export function canVoid(session: ParkingOverviewSession, isFinancialAdmin: boolean): boolean {

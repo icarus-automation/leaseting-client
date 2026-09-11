@@ -21,11 +21,12 @@ import { SegmentedControl } from '../../shared/ui/segmented-control/segmented-co
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../shared/ui/status-badge/status-badge';
 import { watchCreateParam } from '../../shared/utils/create-param.util';
-import { isPastDue } from '../../shared/utils/date.util';
 import { BillFormDialog } from './components/bill-form-dialog/bill-form-dialog';
+import { BillsToolsMenu } from './components/bills-tools-menu/bills-tools-menu';
 import { GenerateSoaDialog } from './components/generate-soa-dialog/generate-soa-dialog';
 import { RecordPaymentDialog } from './components/record-payment-dialog/record-payment-dialog';
 import { BillsService } from './services/bills.service';
+import { billIsOverdue, billStatusBadge } from './utils/bill-status.util';
 
 /** One-click views over the list; dueToday/overdue are server-derived. */
 type QuickFilter = 'all' | 'dueToday' | 'overdue' | 'unpaid' | 'paid';
@@ -67,6 +68,7 @@ const TYPE_OPTIONS: { label: string; value: BillType | null }[] = [
     Skeleton,
     StatusBadge,
     BillFormDialog,
+    BillsToolsMenu,
     GenerateSoaDialog,
     RecordPaymentDialog,
   ],
@@ -256,7 +258,7 @@ export class Bills {
   }
 
   isOverdue(bill: BillListItem): boolean {
-    return bill.status !== 'PAID' && isPastDue(bill.dueDate);
+    return billIsOverdue(bill);
   }
 
   isPartiallyPaid(bill: BillListItem): boolean {
@@ -264,17 +266,17 @@ export class Bills {
   }
 
   statusBadge(bill: BillListItem): { label: string; tone: BadgeTone } {
-    if (bill.status === 'PAID') return { label: 'Paid', tone: 'success' };
-    if (this.isOverdue(bill)) return { label: 'Overdue', tone: 'destructive' };
-    return this.isPartiallyPaid(bill)
-      ? { label: 'Partial', tone: 'vacant' }
-      : { label: 'Unpaid', tone: 'warning' };
+    return billStatusBadge(bill);
   }
 
   onSaved(): void {
     this.toast.add({ severity: 'success', summary: 'Bill created' });
     this.load(this.meta()?.page ?? 1);
     this.loadSummary();
+  }
+
+  openBill(id: string): void {
+    void this.router.navigate(['/bills', id]);
   }
 
   openPaymentDialog(bill: BillListItem): void {

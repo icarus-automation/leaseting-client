@@ -5,48 +5,11 @@
       <p class="mt-0.5 text-sm text-muted">Every rent and utility charge across your leases: unpaid, overdue, and settled.</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
-      <a
-        routerLink="/bills/submissions"
-        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-      >
-        <svg pIcon="inbox" [size]="14" aria-hidden="true"></svg>
-        <span>Submissions</span>
-      </a>
-      <a
-        routerLink="/bills/soa"
-        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-      >
-        <svg pIcon="file-excel" [size]="14" aria-hidden="true"></svg>
-        <span>SOA</span>
-      </a>
-      <button
-        type="button"
-        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-        (click)="soaDialogVisible.set(true)"
-      >
-        <svg pIcon="file-export" [size]="14" aria-hidden="true"></svg>
-        <span>Generate SOA</span>
-      </button>
-      <a
-        routerLink="/bills/utility-run"
-        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-      >
-        <svg pIcon="bolt" [size]="14" aria-hidden="true"></svg>
-        <span>Utility run</span>
-      </a>
-      <button
-        type="button"
-        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-        [disabled]="generatingRent()"
-        (click)="generateRentBills()"
-      >
-        @if (generatingRent()) {
-          <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary)_40%,transparent)] border-t-[var(--primary)] animate-spinner" aria-hidden="true"></span>
-        } @else {
-          <svg pIcon="refresh" [size]="14" aria-hidden="true"></svg>
-        }
-        <span>Generate rent bills</span>
-      </button>
+      <app-bills-tools-menu
+        [generatingRent]="generatingRent()"
+        (generateSoa)="soaDialogVisible.set(true)"
+        (rentRun)="generateRentBills()"
+      />
       <button
         type="button"
         class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
@@ -196,16 +159,23 @@
         </thead>
         <tbody>
           @for (bill of items(); track bill.id) {
-            <tr class="border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
+            <tr class="cursor-pointer border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none" (click)="openBill(bill.id)">
               <td class="px-4 py-3">
                 <a
-                  [routerLink]="['/tenants', bill.lease.tenant.id]"
+                  [routerLink]="['/bills', bill.id]"
                   class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                  (click)="$event.stopPropagation()"
                 >
                   {{ bill.lease.tenant.firstName }} {{ bill.lease.tenant.lastName }}
                 </a>
                 <p class="text-[12px] text-muted">
                   Unit {{ bill.lease.unit.unitNo }} · {{ bill.lease.unit.property.name }}
+                  ·
+                  <a
+                    [routerLink]="['/tenants', bill.lease.tenant.id]"
+                    class="hover:text-primary hover:underline"
+                    (click)="$event.stopPropagation()"
+                  >Tenant</a>
                 </p>
               </td>
               <td class="px-4 py-3 text-[13px] text-body">{{ billTypeLabels[bill.type] }}</td>
@@ -221,12 +191,12 @@
               <td class="px-4 py-3">
                 <app-status-badge [tone]="statusBadge(bill).tone" [label]="statusBadge(bill).label" />
               </td>
-              <td class="px-4 py-3">
+              <td class="px-4 py-3" (click)="$event.stopPropagation()">
                 <div class="flex items-center justify-end gap-1">
                   @if (bill.status === 'UNPAID') {
                     <button
                       type="button"
-                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--success)_45%,transparent)] hover:bg-muted-success motion-reduce:transition-none"
+                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
                       (click)="openPaymentDialog(bill)"
                     >
                       {{ canMutateFinance() ? 'Record payment' : 'Payments' }}
@@ -244,7 +214,7 @@
                   } @else {
                     <button
                       type="button"
-                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
                       (click)="openPaymentDialog(bill)"
                     >
                       Payments

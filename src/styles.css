@@ -205,7 +205,8 @@
 .p-cascadeselect-overlay,
 .p-autocomplete-overlay,
 .p-datepicker-panel,
-.p-popover {
+.p-popover,
+.p-menu-overlay {
   z-index: var(--z-overlay);
 }
 

@@ -26,4 +26,13 @@ describe('paymentTargetFromRow', () => {
   it('keeps the seed id as the bill id', () => {
     expect(paymentTargetFromRow(bill)).toEqual({ billId: 'bill-1', seed: bill });
   });
+
+  it('copies a detail payments array onto history', () => {
+    const detail = { ...bill, payments: [] };
+    expect(paymentTargetFromRow(detail)).toEqual({
+      billId: 'bill-1',
+      seed: detail,
+      history: [],
+    });
+  });
 });

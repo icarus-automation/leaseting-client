@@ -1,18 +1,17 @@
-import type { BillDetail, BillListItem } from '../../../../core/models/bill.types';
+import type { BillDetail, BillListItem, PaymentResponse } from '../../../../core/models/bill.types';
 
-/**
- * Which bill collection is against.
- * `seed` paints billed/paid/balance immediately.
- * A seed that already has a `payments` array skips the opening GET.
- */
 export type PaymentTarget = {
   readonly billId: string;
   readonly seed?: BillListItem | BillDetail;
+  readonly history?: readonly PaymentResponse[];
 };
 
-/** Where the Record payment control lives. Not page vs dialog. */
-export type PaymentCta = 'inline' | 'host';
+export type PaymentCta = 'body' | 'footer';
 
-export function paymentTargetFromRow(bill: BillListItem): PaymentTarget {
-  return { billId: bill.id, seed: bill };
+export function paymentTargetFromRow(bill: BillListItem | BillDetail): PaymentTarget {
+  return {
+    billId: bill.id,
+    seed: bill,
+    ...('payments' in bill ? { history: bill.payments } : {}),
+  };
 }

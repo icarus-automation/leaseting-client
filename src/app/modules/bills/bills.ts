@@ -28,7 +28,6 @@ import { RecordPaymentDialog } from './components/record-payment-dialog/record-p
 import { BillsService } from './services/bills.service';
 import { billIsOverdue, billStatusBadge } from './utils/bill-status.util';
 
-/** One-click views over the list; dueToday/overdue are server-derived. */
 type QuickFilter = 'all' | 'dueToday' | 'overdue' | 'unpaid' | 'paid';
 
 const QUICK_FILTERS: { label: string; value: QuickFilter }[] = [
@@ -102,19 +101,10 @@ export class Bills {
   readonly leaseIdFilter = signal<string | null>(
     this.route.snapshot.queryParamMap.get('leaseId'),
   );
-  /** Deep link from the tenant profile — all bills across the tenant's leases. */
   readonly tenantIdFilter = signal<string | null>(
     this.route.snapshot.queryParamMap.get('tenantId'),
   );
 
-  /**
-   * Filters produced by the natural-language bar.
-   *
-   * These and the quick filters are one setting, not two: whichever was used
-   * last wins and the other is cleared. Two visible controls that silently
-   * intersect is how a manager ends up staring at an empty table with both of
-   * them looking switched on.
-   */
   readonly nlFilters = signal<GridFilters>({});
 
   readonly drawerVisible = signal(false);
@@ -125,7 +115,6 @@ export class Bills {
   readonly skeletons = Array.from({ length: 6 });
 
   constructor() {
-    // Deep link support: ?status=UNPAID preselects the filter (dashboard links).
     const status = this.route.snapshot.queryParamMap.get('status');
     if (status === 'UNPAID') this.quickFilter.set('unpaid');
     if (status === 'PAID') this.quickFilter.set('paid');
@@ -135,8 +124,6 @@ export class Bills {
 
     watchCreateParam(() => this.drawerVisible.set(true));
 
-    // Deep links from the palette/dashboard — subscribed (not snapshot) so
-    // they also fire when already on this page.
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
@@ -176,9 +163,6 @@ export class Bills {
         ...QUICK_FILTER_PARAMS[this.quickFilter()],
         type: this.typeFilter ?? undefined,
         ...(this.nlFilters() as BillListFilters),
-        // Deep links from a tenant profile or a lease outrank both: the user
-        // arrived here asking about one record, and widening that silently
-        // would answer a question they did not ask.
         leaseId: this.leaseIdFilter() ?? undefined,
         tenantId: this.tenantIdFilter() ?? undefined,
       })
@@ -203,7 +187,6 @@ export class Bills {
     this.load(1);
   }
 
-  /** A new parse from the filter bar — it owns the view from here. */
   onFiltersChange(filters: GridFilters): void {
     this.nlFilters.set(filters);
     if (Object.keys(filters).length > 0) {
@@ -213,7 +196,6 @@ export class Bills {
     this.load(1);
   }
 
-  /** Best-effort — the cards simply stay hidden if the call fails. */
   private loadSummary(): void {
     this.bills
       .summary()
@@ -289,7 +271,6 @@ export class Bills {
     this.loadSummary();
   }
 
-  /** Manual trigger for the automated rent billing — same idempotent run. */
   generateRentBills(): void {
     if (this.generatingRent()) return;
     this.generatingRent.set(true);

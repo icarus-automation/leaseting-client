@@ -10,7 +10,7 @@
   @if (visible() && target(); as paymentTarget) {
     <app-payment-workspace
       [target]="paymentTarget"
-      cta="host"
+      cta="footer"
       (changed)="changed.emit()"
       (settled)="visible.set(false)"
     />

@@ -132,7 +132,7 @@
             {{ canMutateFinance() ? 'Record payment' : 'Payments' }}
           </h2>
           <div class="mt-3">
-            <app-payment-workspace [target]="paymentTarget" cta="inline" (changed)="refresh()" />
+            <app-payment-workspace [target]="paymentTarget" cta="body" (changed)="refresh()" />
           </div>
         </section>
       }

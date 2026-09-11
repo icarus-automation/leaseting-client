@@ -6,7 +6,6 @@ export function billIsOverdue(bill: Pick<BillResponse, 'status' | 'dueDate'>): b
   return bill.status !== 'PAID' && isPastDue(bill.dueDate);
 }
 
-/** Paid → Overdue → Partial → Unpaid. Partial is unpaid with any recorded amount. */
 export function billStatusBadge(
   bill: Pick<BillResponse, 'status' | 'dueDate' | 'paidAmount'>,
 ): { label: string; tone: BadgeTone } {

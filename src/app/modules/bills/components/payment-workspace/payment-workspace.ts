@@ -44,15 +44,6 @@ import type { PaymentCta, PaymentTarget } from './payment-target';
 const ACCEPTED_RECEIPT_TYPES = 'image/png,image/jpeg,image/webp';
 const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 
-function seedPayments(seed: BillListItem | BillDetail | undefined): PaymentResponse[] | null {
-  if (!seed || !('payments' in seed) || !Array.isArray(seed.payments)) return null;
-  return seed.payments;
-}
-
-/**
- * Staff collection: amount, date, method, and a required collection memo.
- * Optional photo proof. Confirmed payments are voided, never deleted.
- */
 @Component({
   selector: 'app-payment-workspace',
   imports: [
@@ -80,9 +71,8 @@ export class PaymentWorkspace {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly target = input.required<PaymentTarget>();
-  readonly cta = input<PaymentCta>('inline');
+  readonly cta = input<PaymentCta>('body');
   readonly changed = output<void>();
-  /** Remaining balance is 0 after a record. Overlay closes; the page stays. */
   readonly settled = output<void>();
 
   readonly methodLabels = PAYMENT_METHOD_LABELS;
@@ -129,13 +119,11 @@ export class PaymentWorkspace {
   readonly methodHint = computed(() =>
     staffCollectionMethodHint(this.destinations(), this.snapshot()?.lease.unit.property.id),
   );
-  readonly showInlineCta = computed(() => this.cta() === 'inline' && this.canMutate());
+  readonly showBodyCta = computed(() => this.cta() === 'body' && this.canMutate());
 
   constructor() {
     effect(() => {
       const target = this.target();
-      // Side effects must not re-subscribe this effect — form.reset + p-inputNumber
-      // otherwise fight each other and freeze the tab.
       untracked(() => this.onTarget(target));
     });
 
@@ -156,6 +144,7 @@ export class PaymentWorkspace {
       return;
     }
     this.applySeedHint(target.seed);
+    if (target.history) this.payments.set([...target.history]);
   }
 
   private primeForm(target: PaymentTarget): void {
@@ -180,9 +169,8 @@ export class PaymentWorkspace {
       notes: '',
     });
     this.loadDestinations();
-    const history = seedPayments(target.seed);
-    if (history) {
-      this.payments.set(history);
+    if (target.history) {
+      this.payments.set([...target.history]);
       this.loading.set(false);
       return;
     }
@@ -195,8 +183,6 @@ export class PaymentWorkspace {
     this.paidAmount.set(seed.paidAmount);
     this.balance.set(seed.balance);
     this.billedAmount.set(seed.amount);
-    const history = seedPayments(seed);
-    if (history) this.payments.set(history);
     const amountControl = this.form.controls.amount;
     if (amountControl.pristine) {
       amountControl.setValue(finiteAmount(seed.balance));

@@ -1,0 +1,11 @@
+url: http://127.0.0.1:4210/login
+title: Leaseting
+observedAfterEmptySubmit:
+  - Email is required.
+  - Password is required.
+  - Email textbox states: invalid
+  - Password textbox states: invalid
+  - URL still /login
+observedAfterMalformedEmail:
+  - Enter a valid email address.
+  - Password is required.

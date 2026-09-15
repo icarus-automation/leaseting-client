@@ -1,0 +1,8 @@
+url: http://127.0.0.1:4210/login
+title: Leaseting
+note: Cursor browser_snapshot omitted role=alert. DOM read after Signing in… cleared:
+  alert: Can't reach the server. Check your connection and try again.
+  submitButton: Sign in
+  aria-busy: null
+emailValue: verify-skill@example.com
+inFlightObserved: button name Signing in…, states disabled,busy

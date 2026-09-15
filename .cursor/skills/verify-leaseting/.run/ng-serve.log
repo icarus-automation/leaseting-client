@@ -1,0 +1,35 @@
+> Building...
+√ Building...
+Initial chunk files | Names               |  Raw size
+styles.css          | styles              | 117.63 kB | 
+main.js             | main                |  10.51 kB | 
+chunk-MRDQ6YFJ.js   | -                   |   5.61 kB | 
+chunk-DFOH74JA.js   | -                   |   1.29 kB | 
+chunk-VUJOFXKG.js   | -                   | 938 bytes | 
+chunk-LVX3DW7C.js   | -                   | 881 bytes | 
+
+                    | Initial total       | 136.85 kB
+
+Lazy chunk files    | Names               |  Raw size
+chunk-E4SREZRA.js   | property-detail     | 303.69 kB | 
+chunk-A3J5N4OY.js   | onboarding-wizard   | 280.99 kB | 
+chunk-RYKW2HP4.js   | rate-plans-settings | 116.30 kB | 
+chunk-NDH5W5E6.js   | tenant-detail       | 115.41 kB | 
+chunk-RVYJB35F.js   | bills               | 108.78 kB | 
+chunk-IBG5SCPT.js   | main-layout         | 101.11 kB | 
+chunk-DIPLJTBE.js   | parking             |  89.01 kB | 
+chunk-FQL6Z4U6.js   | kit-chat            |  88.72 kB | 
+chunk-S3SEBKRH.js   | calendar            |  79.82 kB | 
+chunk-66TPYFE6.js   | utility-run         |  73.19 kB | 
+chunk-G6FPKO37.js   | home                |  69.52 kB | 
+chunk-Z6IEAMYR.js   | delinquency         |  61.28 kB | 
+chunk-HAE6XOL3.js   | revenue-by-tenant   |  58.80 kB | 
+chunk-5UIM35PJ.js   | -                   |  54.18 kB | 
+chunk-HFIUE2L4.js   | utility-billing     |  53.12 kB | 
+...and 90 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [49.398 seconds] - 2026-09-15T05:45:29.111Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://127.0.0.1:4210/

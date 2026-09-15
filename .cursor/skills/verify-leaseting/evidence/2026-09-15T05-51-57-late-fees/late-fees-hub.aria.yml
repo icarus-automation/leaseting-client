@@ -1,0 +1,13 @@
+- role: document
+  name: Leaseting
+  url: http://localhost:4210/settings
+  heading: Settings
+  propertyManagement:
+    - Property types
+    - Charge items
+    - Late fees (Charge a late fee on unpaid rent after a grace period.)
+    - Payment destinations
+  lateFeesCard:
+    name: Late fees Charge a late fee on unpaid rent after a grace period.
+    after: Charge items
+    before: Payment destinations

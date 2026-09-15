@@ -1,0 +1,16 @@
+- role: document
+  name: Leaseting
+  url: http://localhost:4210/settings/late-fees
+  heading: Late fees
+  breadcrumb: Settings
+  formLandmark: Late fees
+  fields:
+    - switch: Charge late fees (checked)
+    - spinbutton: Grace days (0 days)
+    - feeBasis: Fixed | % of balance (percent pressed)
+    - spinbutton: Late fee percent (0.00 %)
+    - combobox: Post as charge item (Late fee)
+  save:
+    name: Save
+    states: [disabled]
+  copy: Charge a late fee on unpaid rent after a grace period.

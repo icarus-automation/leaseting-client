@@ -1,0 +1,16 @@
+url: http://127.0.0.1:4210/login/forgot-password
+title: Leaseting
+- role: document
+  name: Leaseting
+  children:
+    - role: link
+      name: Back to sign in
+    - role: heading
+      name: Reset your password
+      level: 1
+    - name: Self-service reset isn't available yet.
+    - role: heading
+      name: Overdue bills, expiring leases, vacant units.
+      level: 2
+    - name: Kit flags rent, renewals, and vacant units on the dashboard.
+    - name: I check rent, renewals, and vacant units. What needs a decision is on the dashboard when you sign in.

@@ -1,0 +1,31 @@
+url: http://127.0.0.1:4210/login
+title: Leaseting
+- role: document
+  name: Leaseting
+  children:
+    - role: textbox
+      name: Email
+      placeholder: you@company.com
+    - role: link
+      name: Forgot password?
+    - role: textbox
+      name: Password
+      placeholder: Enter your password
+    - role: button
+      name: Show password
+    - role: checkbox
+      name: Keep me signed in
+    - role: button
+      name: Sign in
+    - role: heading
+      name: Sign in
+      level: 1
+    - name: Use your Leaseting workspace account.
+    - role: heading
+      name: Overdue bills, expiring leases, vacant units.
+      level: 2
+    - name: Kit flags rent, renewals, and vacant units on the dashboard.
+    - name: I check rent, renewals, and vacant units. What needs a decision is on the dashboard when you sign in.
+    - role: heading
+      name: Examples
+      level: 3

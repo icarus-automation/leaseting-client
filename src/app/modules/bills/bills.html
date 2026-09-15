@@ -179,7 +179,7 @@
                   >Tenant</a>
                 </p>
               </td>
-              <td class="px-4 py-3 text-[13px] text-body">{{ billTypeLabels[bill.type] }}</td>
+              <td class="px-4 py-3 text-[13px] text-body">{{ bill.label || billTypeLabels[bill.type] }}</td>
               <td class="px-4 py-3">
                 <p class="text-[13px] font-medium text-heading tabular-nums">{{ bill.amount | phpCurrency }}</p>
                 @if (isPartiallyPaid(bill)) {

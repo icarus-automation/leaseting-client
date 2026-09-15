@@ -28,11 +28,20 @@
                   [class.nav-item--active]="isActive(item.route)"
                   [routerLink]="item.route"
                   [attr.aria-current]="isActive(item.route) ? 'page' : null"
+                  [attr.aria-label]="countLabel(item)"
                 >
                   <svg [pIcon]="item.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
                   <span class="nav-label">{{ item.label }}</span>
                   @if (item.comingSoon) {
                     <span class="nav-soon">Soon</span>
+                  }
+                  @if (countFor(item); as count) {
+                    <span
+                      class="shrink-0 rounded-full border border-[color-mix(in_oklab,var(--warning)_35%,transparent)] bg-muted-warning px-1 py-px text-[11px] font-semibold leading-none tabular-nums text-heading"
+                      aria-hidden="true"
+                    >
+                      {{ count }}
+                    </span>
                   }
                 </a>
               }

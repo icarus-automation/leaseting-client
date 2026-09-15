@@ -1,4 +1,5 @@
 import type { BillListItem } from '../../../core/models/bill.types';
+import { BILL_TYPE_LABELS } from '../../../core/models/enums';
 import type { UnitDetail, UnitOutstandingBill } from '../../../core/models/property.types';
 
 /** Enough of a bill list row for the Record Payment dialog to open from the unit panel. */
@@ -17,6 +18,8 @@ export function billFromUnit(unit: UnitDetail, bill: UnitOutstandingBill): BillL
     createdAt: '',
     updatedAt: '',
     utilityDetail: null,
+    chargeName: null,
+    label: BILL_TYPE_LABELS[bill.type],
     paidAmount: '0',
     balance: bill.amount,
     lease: {

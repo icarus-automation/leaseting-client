@@ -46,6 +46,12 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
         route: 'charge-items',
       },
       {
+        label: 'Late fees',
+        description: 'Charge a late fee on unpaid rent after a grace period.',
+        icon: 'clock',
+        route: 'late-fees',
+      },
+      {
         label: 'Payment destinations',
         description: 'QR and account details tenants use to pay.',
         icon: 'qrcode',

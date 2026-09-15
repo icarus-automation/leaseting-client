@@ -4,7 +4,8 @@
   (visibleChange)="visible.set($event)"
   heading="Review payment submission"
   [subheading]="submission() ? submission()!.destinationName : null"
-  width="36rem"
+  [dirty]="isPending() && rejectFormErrors.dirty()"
+  width="40rem"
 >
   @if (error(); as message) {
     <app-error-banner class="mb-4" [message]="message" />
@@ -13,61 +14,109 @@
   @if (loading()) {
     <p class="text-[13px] text-muted">Loading submission…</p>
   } @else if (submission(); as current) {
-    <div class="mb-4 flex items-start justify-between gap-2">
+    <div class="mb-3 flex items-start justify-between gap-2">
       @if (badge(); as status) {
         <app-status-badge [tone]="status.tone" [label]="status.label" />
       }
     </div>
-    <dl class="mb-4 grid grid-cols-2 gap-2 text-[13px]">
+    <dl class="mb-3 grid grid-cols-1 gap-2 text-[13px] sm:grid-cols-3">
       <div>
-        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Tenant</dt>
+        <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Tenant</dt>
         <dd class="m-0 text-heading">{{ current.tenant?.firstName }} {{ current.tenant?.lastName }}</dd>
       </div>
-      <div>
-        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Unit</dt>
+      <div class="sm:col-span-2">
+        <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Unit</dt>
         <dd class="m-0 text-heading">
           {{ current.bill?.lease?.unit?.unitNo }} · {{ current.bill?.lease?.unit?.property?.name }}
         </dd>
       </div>
       <div>
-        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Bill</dt>
+        <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Bill</dt>
         <dd class="m-0 text-heading">{{ current.bill ? billTypeLabels[current.bill.type] : 'Bill' }}</dd>
       </div>
       <div>
-        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Amount</dt>
+        <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Amount</dt>
         <dd class="m-0 font-semibold tabular-nums text-heading">{{ current.amount | phpCurrency }}</dd>
       </div>
       <div>
-        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Paid on</dt>
+        <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Paid on</dt>
         <dd class="m-0 text-heading">{{ current.paidOn | date: 'MMM d, y' }}</dd>
       </div>
-      <div>
-        <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Account</dt>
+      <div class="sm:col-span-2">
+        <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Account</dt>
         <dd class="m-0 text-heading">{{ current.accountName }} · {{ current.accountNumber }}</dd>
       </div>
       @if (current.referenceNo) {
         <div>
-          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Reference</dt>
+          <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Reference</dt>
           <dd class="m-0 text-heading">{{ current.referenceNo }}</dd>
         </div>
       }
       @if (current.tenantNote) {
-        <div class="col-span-2">
-          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Tenant note</dt>
+        <div class="sm:col-span-3">
+          <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Tenant note</dt>
           <dd class="m-0 text-heading">{{ current.tenantNote }}</dd>
         </div>
       }
       @if (current.rejectionReason) {
-        <div class="col-span-2">
-          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Rejection reason</dt>
+        <div class="sm:col-span-3">
+          <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Rejection reason</dt>
           <dd class="m-0 text-destructive">{{ current.rejectionReason }}</dd>
         </div>
       }
     </dl>
     @if (proofUrl(); as url) {
-      <div class="max-h-80 overflow-hidden rounded-base border border-border bg-surface p-2">
-        <app-private-image [url]="url" alt="Payment proof" />
-      </div>
+      <section class="flex flex-col gap-2">
+        <h3 class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Payment proof</h3>
+        <div
+          id="proof-preview"
+          class="block h-72 overflow-auto rounded-base border border-border bg-surface p-2"
+        >
+          <app-private-image
+            #proofImage
+            class="block w-full"
+            [url]="url"
+            alt="Payment proof"
+            fit="width"
+          />
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="text-[12px] text-muted">Scroll to inspect the receipt at a readable size.</p>
+          @if (proofImage.src(); as fullSizeUrl) {
+            <a
+              [href]="fullSizeUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rounded-[2px] text-[12.5px] font-medium text-primary transition-colors duration-150 ease-out hover:text-primary-hover hover:underline hover:underline-offset-2 motion-reduce:transition-none"
+            >
+              Open full size
+            </a>
+          }
+        </div>
+      </section>
+    }
+    @if (isPending() && canMutate()) {
+      <form
+        id="submission-reject-form"
+        class="mt-4 flex flex-col gap-1.5"
+        [formGroup]="rejectForm"
+        (ngSubmit)="reject()"
+        novalidate
+      >
+        <label class="text-[13px] font-medium text-heading" for="rejection-reason">
+          Reason for the tenant <span class="font-normal text-muted">(optional)</span>
+        </label>
+        <textarea
+          id="rejection-reason"
+          rows="2"
+          formControlName="reason"
+          aria-describedby="rejection-reason-hint"
+          class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        ></textarea>
+        <p id="rejection-reason-hint" class="text-[12px] text-muted">
+          The tenant sees this in Residence Care and can submit again.
+        </p>
+      </form>
     }
     @if (isPending() && !canMutate()) {
       <p class="mt-3 text-[12.5px] text-muted">Only an owner or admin can approve or reject this submission.</p>
@@ -84,12 +133,12 @@
     </button>
     @if (isPending() && canMutate()) {
       <button
-        type="button"
+        type="submit"
+        form="submission-reject-form"
         class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-destructive transition-colors duration-150 ease-out hover:bg-muted-destructive disabled:opacity-45 motion-reduce:transition-none"
         [disabled]="busy()"
-        (click)="rejectVisible.set(true)"
       >
-        Reject
+        {{ busy() ? 'Rejecting…' : 'Reject' }}
       </button>
       <button
         type="button"
@@ -102,13 +151,3 @@
     }
   </ng-container>
 </app-form-dialog>
-
-<app-reason-dialog
-  [visible]="rejectVisible()"
-  (visibleChange)="rejectVisible.set($event)"
-  heading="Reject submission"
-  subheading="The tenant will see this reason and can submit again."
-  label="Reason"
-  confirmLabel="Reject"
-  (confirmed)="onRejected($event)"
-/>

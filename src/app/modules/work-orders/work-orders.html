@@ -1,6 +1,128 @@
-<app-coming-soon
-  icon="wrench"
-  title="Work Orders"
-  description="Repairs and inspections by property, unit, and tenant."
-  [features]="features"
+<div class="flex flex-col gap-5">
+  <header class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="font-heading text-2xl font-semibold text-heading">Work Orders</h1>
+      <p class="mt-0.5 max-w-[68ch] text-sm text-muted">
+        Maintenance requests tenants file in Residence Care. Start one when someone is on it, then
+        resolve it when the work is done.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex h-9 shrink-0 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+      [disabled]="loading()"
+      (click)="refresh()"
+    >
+      <svg pIcon="refresh" [size]="14" aria-hidden="true"></svg>
+      <span>Refresh</span>
+    </button>
+  </header>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <app-segmented-control
+      [options]="viewOptions"
+      [value]="view()"
+      ariaLabel="Request status"
+      (valueChange)="onViewChange($event)"
+    />
+    @if (properties().length > 1) {
+      <label class="sr-only" for="work-orders-property">Property</label>
+      <p-select
+        inputId="work-orders-property"
+        [ngModel]="propertyId()"
+        (ngModelChange)="onPropertyChange($event)"
+        [options]="propertyOptions()"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-56"
+      />
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (s of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <app-error-banner [message]="message" [retryable]="true" (retry)="refresh()" />
+  } @else if (rows().length === 0) {
+    <app-empty-state
+      [icon]="emptyState().icon"
+      [heading]="emptyState().heading"
+      [description]="emptyState().description"
+    />
+  } @else {
+    <div class="overflow-x-auto rounded-base border border-border">
+      <table class="w-full min-w-[50rem] border-collapse text-left">
+        <caption class="sr-only">Maintenance requests, newest first</caption>
+        <thead class="border-b border-border bg-surface text-[12px] font-medium uppercase tracking-wide text-muted">
+          <tr>
+            <th scope="col" class="px-4 py-2.5">Request</th>
+            <th scope="col" class="px-4 py-2.5">Tenant</th>
+            <th scope="col" class="px-4 py-2.5">Unit</th>
+            <th scope="col" class="px-4 py-2.5">Submitted</th>
+            <th scope="col" class="px-4 py-2.5">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.request.id) {
+            <tr class="border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    class="rounded-[2px] text-left text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                    (click)="openDetail(row.request)"
+                  >
+                    {{ row.request.title }}
+                  </button>
+                  @if (row.photoCount > 0) {
+                    <span class="inline-flex shrink-0 items-center gap-1 text-[12px] text-muted">
+                      <svg pIcon="image" [size]="12" aria-hidden="true"></svg>
+                      <span class="tabular-nums" aria-hidden="true">{{ row.photoCount }}</span>
+                      <span class="sr-only">{{ row.photoLabel }}</span>
+                    </span>
+                  }
+                </div>
+                <p class="max-w-[26rem] truncate text-[12px] text-muted">{{ row.request.notes }}</p>
+              </td>
+              <td class="px-4 py-3">
+                <a
+                  [routerLink]="['/tenants', row.request.tenant.id]"
+                  class="rounded-[2px] text-[13px] text-body hover:text-primary hover:underline"
+                >
+                  {{ row.tenantName }}
+                </a>
+              </td>
+              <td class="px-4 py-3 text-[13px] text-body">
+                <a
+                  [routerLink]="['/properties', row.request.unit.property.id]"
+                  class="rounded-[2px] hover:text-primary hover:underline"
+                >
+                  {{ row.request.unit.unitNo }} <span class="text-muted">· {{ row.request.unit.property.name }}</span>
+                </a>
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 text-[13px] tabular-nums text-body">
+                {{ row.request.createdAt | date: 'MMM d, y' }}
+                <span class="block text-[12px] text-muted">{{ row.request.createdAt | date: 'h:mm a' }}</span>
+              </td>
+              <td class="px-4 py-3">
+                <app-status-badge [tone]="row.badge.tone" [label]="row.badge.label" />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination [meta]="meta()" (pageChange)="load($event)" />
+  }
+</div>
+
+<app-request-detail-dialog
+  [visible]="detailVisible()"
+  (visibleChange)="detailVisible.set($event)"
+  [request]="detailRequest()"
+  (changed)="onRequestChanged()"
 />

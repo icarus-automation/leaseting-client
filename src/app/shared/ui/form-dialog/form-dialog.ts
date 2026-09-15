@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  computed,
   effect,
   inject,
   input,
@@ -50,7 +51,14 @@ import { PIcon } from '@primeicons/angular/p-icon';
       <div #dialogBody class="flex flex-col" (keydown.escape)="requestClose()">
         <div class="flex w-full items-start justify-between gap-3 pb-3">
           <div class="flex flex-col gap-0.5">
-            <h2 class="font-heading text-lg font-semibold leading-tight text-heading">{{ heading() }}</h2>
+            <h2
+              #dialogHeading
+              [attr.id]="headingId()"
+              tabindex="-1"
+              class="font-heading text-lg font-semibold leading-tight text-heading"
+            >
+              {{ heading() }}
+            </h2>
             @if (subheading(); as sub) {
               <p class="text-[13px] font-normal text-muted">{{ sub }}</p>
             }
@@ -86,6 +94,15 @@ export class FormDialog {
   readonly dirty = input(false);
 
   private readonly content = viewChild<ElementRef<HTMLElement>>('dialogBody');
+  private readonly headingElement = viewChild<ElementRef<HTMLElement>>('dialogHeading');
+  private readonly dialog = viewChild(Dialog);
+
+  /**
+   * p-dialog points aria-labelledby at a title span it only renders with its
+   * own header, which this component turns off. Giving our h2 that id is what
+   * names the dialog for assistive tech.
+   */
+  readonly headingId = computed(() => this.dialog()?.ariaLabelledBy ?? null);
 
   constructor() {
     effect(() => {
@@ -101,10 +118,12 @@ export class FormDialog {
    */
   focusFirstField(): void {
     setTimeout(() => {
-      const target = this.content()?.nativeElement.querySelector<HTMLElement>(
+      const field = this.content()?.nativeElement.querySelector<HTMLElement>(
         'input:not([type="hidden"]):not([disabled]), select, textarea, [autofocus]',
       );
-      target?.focus();
+      // A dialog with nothing to fill in starts at its title, so focus is inside
+      // the dialog without scrolling to the footer buttons.
+      (field ?? this.headingElement()?.nativeElement)?.focus();
     });
   }
 

@@ -11,19 +11,14 @@
         Residence Care payment proof waiting for review. Approval records the submitted amount.
       </p>
     </div>
-    @if (pendingCount() > 0) {
-      <app-status-badge tone="warning" label="Pending" [count]="pendingCount()" />
-    }
   </header>
 
-  <div class="flex flex-wrap items-center gap-2">
-    <p-select
-      [ngModel]="filter()"
-      (ngModelChange)="onFilterChange($event)"
-      [options]="filterOptions"
-      optionLabel="label"
-      optionValue="value"
-      styleClass="w-52"
+  <div class="overflow-x-auto pb-1">
+    <app-segmented-control
+      [options]="viewOptions"
+      [value]="filter()"
+      ariaLabel="Submission status"
+      (valueChange)="onFilterChange($event)"
     />
   </div>
 

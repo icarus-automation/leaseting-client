@@ -56,9 +56,16 @@ Payments: amount, paidOn, method (Cash · Bank transfer · **GCash** · Check ·
 Utility bills carry a meter-reading breakdown — period, previous/present reading, multiplier, admin fee rate, VAT rate, withholding rate. Server derives the amount. Water supports Maynilad-style derived rate (provider total ÷ total consumption).
 **Utility billing run:** per-property batch — preview rows seeded from each lease's last reading, enter present readings, create bills in one pass (due date = each lease's `dueDay`), skipped rows reported with reasons. **AI receipt scan:** photograph a Meralco/Maynilad bill to prefill the run.
 **SOA:** select bills → generate statement w/ `soaNo`, statementDate, totalDue → optional SMS (Semaphore, flag-gated). `smsStatus`: NOT_SENT / SENT / FAILED.
+**Late fees:** Settings → Late fees (`/settings/late-fees`). One org rule: toggle, grace days (default 5), fixed pesos or percent of remaining unpaid rent, and the charge item to post as (never Rent). Off until an admin saves. Nightly (and boot) posts at most one fee per overdue rent bill. `POST /bills/late-fee-run` is the same run for the session org. Posted late fees are not SMS'd.
 
-**Maintenance & Work Orders** **[stub]** — `/work-orders` (`/maintenance` redirects here)
-Committed scope, published on the placeholder: queue Open → In Progress → Waiting on Vendor → Resolved → Closed; priority + assignee; requests linked to unit and tenant; resolution-time per property.
+**Payment submissions:** `/bills/submissions` reviews payment proof from Residence Care. Status tabs filter Pending review (default), Approved, Rejected, Cancelled, and All history. Review shows a width-fitted, scrollable proof preview plus Open full size. Reject accepts an optional tenant-visible reason inline on the Review modal; Approve exact amount remains beside it. Both keep the existing review APIs. The sidebar shows the Pending review count, hides zero, refreshes on navigation, and updates after review.
+
+**Maintenance & Work Orders** **[built]**: `/work-orders` (`/maintenance` redirects here)
+Staff queue for maintenance requests tenants file from Residence Care: title, notes, up to 3 photos. Unit, property, and tenant come from the tenant's active lease. Contract: `docs/fe-maintenance-request-api.md`.
+Statuses `OPEN` / `IN_PROGRESS` / `RESOLVED`, forward only: **Start** from Open, **Resolve** from In progress with optional `resolveNote` (max 500, tenant sees it). No skip, reopen, edit, or staff filing. Roles: owner, admin, member. A 409 on Start or Resolve means someone moved it first; the client re-reads and shows the current status.
+Queue: tabs Open (default) / In progress / Resolved / All, property filter, newest first, 20 per page. Sidebar badge on Work Orders: org-wide Open count (`OpenRequestsService` in `core/work-orders`), hidden at zero, re-read on every navigation and after queue status changes (GET cache keeps it to one request per 20s, no timer). Detail dialog: notes, photos (private, fetched with the session cookie, shown via object URLs), tenant, unit, property, started/resolved by whom and when. In progress adds the optional tenant note inline above Close and Resolve; Resolve submits the status change and note directly without another dialog.
+Routes used: `GET /maintenance-requests`, `GET /maintenance-requests/:id`, `GET /maintenance-requests/:id/photos/:index`, `POST /maintenance-requests/:id/start`, `POST /maintenance-requests/:id/resolve`.
+**Not built:** assignee, priority, vendor, SMS, resolution time per property. The original Waiting on Vendor and Closed statuses are dropped.
 
 **Parking** **[stub, satellite app]**
 Ships as a **separate deployed app** at `parking.leaseting.com`, reached from "Connected Apps" in the sidebar — not an in-app route. Placeholder component exists but is **not wired into `app.routes.ts`**. Scope: spot inventory (Available / Assigned / Reserved / Out of Service), assignments tied to units and leases, flags occupied units with no spot, utilization reporting. Treat Leaseting as one product with at least one satellite app.
@@ -82,6 +89,7 @@ A grouped index of cards, one per configurable area, each on its own child route
 - **General → Organization** — listed, marked *Soon*, not built.
 - **Configuration → Property types** (`/settings/property-types`): create, rename, archive (archived types stay attached to existing properties, hidden from pickers).
 - **Configuration → Charge items** (`/settings/charge-items`): the catalogue behind the onboarding wizard's rent charge lines — name, bill type, optional default amount; create, edit, archive. Also addable inline from the wizard.
+- **Property Management → Late fees** (`/settings/late-fees`): charge unpaid rent after a grace period. Four fields (toggle, grace, fixed or percent of remaining, Post as charge item). Missing rule means off.
 Catch-all names ("Other") sort last in both lists rather than alphabetically.
 Nothing else yet — no org profile, members, roles, or Kit thresholds.
 
@@ -90,7 +98,7 @@ Committed scope, no routes. Tenants are reached today by SMS'd statements, not a
 
 ## Known gaps → priority order
 
-1. Work orders — the only stubbed *core* module; backs the "needs attention" story.
+1. ~~Work orders~~: built as the maintenance request queue. Assignee, priority, and vendor are not.
 2. Expenses + Owners — unblocks 3 finance reports and the owner relationship.
 3. Rent Roll + Lease Expirations — highest-demand reports, no blocker, just unbuilt.
 4. Settings depth — members, roles, Kit thresholds.

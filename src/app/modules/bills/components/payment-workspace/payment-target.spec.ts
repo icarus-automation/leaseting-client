@@ -13,6 +13,8 @@ const bill = {
   createdAt: '',
   updatedAt: '',
   utilityDetail: null,
+  chargeName: null,
+  label: 'Rent',
   paidAmount: '0',
   balance: '10000',
   lease: {

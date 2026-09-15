@@ -14,6 +14,19 @@ describe('SETTINGS_GROUPS parking order', () => {
   });
 });
 
+describe('SETTINGS_GROUPS property management', () => {
+  it('lists late fees after charge items', () => {
+    const property = SETTINGS_GROUPS.find((group) => group.label === 'Property Management');
+    expect(property?.cards.map((card) => card.route)).toEqual([
+      'property-types',
+      'charge-items',
+      'late-fees',
+      'payment-destinations',
+    ]);
+    expect(property?.cards.every((card) => !card.comingSoon)).toBe(true);
+  });
+});
+
 describe('settingsSetupSteps', () => {
   it('chains vehicle types, rate plans, and parking rules', () => {
     expect(settingsSetupSteps('rate-plans')?.map((step) => step.route)).toEqual([

@@ -13,6 +13,11 @@ export const SETTINGS_ROUTES: Routes = [
       import('./pages/charge-items-settings/charge-items-settings').then(m => m.ChargeItemsSettingsPage),
   },
   {
+    path: 'late-fees',
+    loadComponent: () =>
+      import('./pages/late-fee-settings/late-fee-settings').then(m => m.LateFeeSettingsPage),
+  },
+  {
     path: 'payment-destinations',
     loadComponent: () =>
       import('./pages/payment-destinations-settings/payment-destinations-settings').then(

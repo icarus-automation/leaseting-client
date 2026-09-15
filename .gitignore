@@ -42,3 +42,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Verification skill: live instance + local proof (keep the skill text)
+.cursor/skills/verify-leaseting/.run/
+.cursor/skills/verify-leaseting/evidence/

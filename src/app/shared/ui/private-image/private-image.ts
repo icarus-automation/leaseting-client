@@ -18,7 +18,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   selector: 'app-private-image',
   template: `
     @if (src(); as url) {
-      <img [src]="url" [alt]="alt()" class="max-h-full max-w-full object-contain" />
+      <img
+        [src]="url"
+        [alt]="alt()"
+        [class]="fit() === 'width' ? 'block h-auto w-full' : 'max-h-full max-w-full object-contain'"
+      />
     } @else if (error(); as message) {
       <p class="text-[12.5px] text-destructive">{{ message }}</p>
     } @else {
@@ -33,6 +37,7 @@ export class PrivateImage {
 
   readonly url = input.required<string>();
   readonly alt = input('');
+  readonly fit = input<'contain' | 'width'>('contain');
 
   readonly src = signal<string | null>(null);
   readonly error = signal<string | null>(null);

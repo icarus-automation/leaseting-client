@@ -1,0 +1,146 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="current()?.title ?? 'Maintenance request'"
+  [subheading]="unitLabel()"
+  [dirty]="action() === 'resolve' && resolveFormErrors.dirty()"
+  width="40rem"
+>
+  @if (current(); as request) {
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        @if (badge(); as status) {
+          <app-status-badge [tone]="status.tone" [label]="status.label" />
+        }
+        <span class="text-[12.5px] tabular-nums text-muted">
+          Submitted {{ request.createdAt | date: 'MMM d, y, h:mm a' }}
+        </span>
+      </div>
+
+      <dl class="grid gap-3 text-[13px] sm:grid-cols-3">
+        <div>
+          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Tenant</dt>
+          <dd class="m-0 text-heading">{{ tenantName() }}</dd>
+        </div>
+        <div>
+          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Unit</dt>
+          <dd class="m-0 text-heading">{{ request.unit.unitNo }}</dd>
+        </div>
+        <div>
+          <dt class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Property</dt>
+          <dd class="m-0 text-heading">{{ request.unit.property.name }}</dd>
+        </div>
+      </dl>
+
+      <section class="flex flex-col gap-1">
+        <h3 class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Notes</h3>
+        <p class="whitespace-pre-line break-words text-[13.5px] leading-relaxed text-body">{{ request.notes }}</p>
+      </section>
+
+      @if (request.photoUrls.length > 0) {
+        <section class="flex flex-col gap-1.5">
+          <h3 class="text-[11.5px] font-medium uppercase tracking-wide text-muted">
+            Photos ({{ request.photoUrls.length }})
+          </h3>
+          <app-request-photos [urls]="request.photoUrls" [title]="request.title" />
+        </section>
+      }
+
+      @if (request.startedAt || request.resolvedAt) {
+        <section class="flex flex-col gap-1.5">
+          <h3 class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Activity</h3>
+          <ul class="flex flex-col gap-1 text-[13px] text-body">
+            @if (request.startedAt) {
+              <li>
+                Started by {{ request.startedBy?.name ?? 'staff' }}
+                <span class="tabular-nums text-muted">· {{ request.startedAt | date: 'MMM d, y, h:mm a' }}</span>
+              </li>
+            }
+            @if (request.resolvedAt) {
+              <li>
+                Resolved by {{ request.resolvedBy?.name ?? 'staff' }}
+                <span class="tabular-nums text-muted">· {{ request.resolvedAt | date: 'MMM d, y, h:mm a' }}</span>
+              </li>
+            }
+          </ul>
+          @if (request.resolveNote) {
+            <p class="whitespace-pre-line break-words rounded-base bg-surface px-3 py-2 text-[12.5px] leading-relaxed text-body">
+              <span class="font-medium text-heading">Note to tenant:</span> {{ request.resolveNote }}
+            </p>
+          }
+        </section>
+      }
+
+      @switch (action()) {
+        @case ('start') {
+          <p class="text-[12.5px] text-muted">Start it once someone is on it. The tenant sees it as In progress.</p>
+        }
+        @case ('resolve') {
+          <form
+            id="resolve-request-form"
+            class="flex flex-col gap-1.5"
+            [formGroup]="resolveForm"
+            (ngSubmit)="resolve()"
+            novalidate
+          >
+            <label class="text-[13px] font-medium text-heading" for="resolve-note">
+              Note for the tenant <span class="font-normal text-muted">(optional)</span>
+            </label>
+            <textarea
+              id="resolve-note"
+              rows="3"
+              formControlName="resolveNote"
+              [attr.maxlength]="noteMax"
+              aria-describedby="resolve-note-hint resolve-note-error"
+              class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+            ></textarea>
+            <p id="resolve-note-hint" class="text-[12px] text-muted">
+              The tenant sees this in Residence Care. {{ remainingNoteCharacters() }} characters left.
+            </p>
+            @if (resolveFormErrors.fieldError('resolveNote', { maxlength: noteTooLong }); as message) {
+              <p id="resolve-note-error" class="text-[12.5px] text-destructive">{{ message }}</p>
+            }
+          </form>
+        }
+      }
+
+      <!-- Beside the footer, where Start and Resolve were clicked, so a long request cannot scroll it out of view. -->
+      @if (error(); as message) {
+        <app-error-banner [message]="message" />
+      }
+    </div>
+  }
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Close
+    </button>
+    @switch (action()) {
+      @case ('start') {
+        <button
+          type="button"
+          class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+          [disabled]="busy()"
+          (click)="start()"
+        >
+          {{ busy() ? 'Starting…' : 'Start' }}
+        </button>
+      }
+      @case ('resolve') {
+        <button
+          type="submit"
+          form="resolve-request-form"
+          class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+          [disabled]="busy()"
+        >
+          {{ busy() ? 'Resolving…' : 'Resolve' }}
+        </button>
+      }
+    }
+  </ng-container>
+</app-form-dialog>

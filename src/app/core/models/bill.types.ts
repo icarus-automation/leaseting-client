@@ -37,6 +37,10 @@ export interface BillResponse {
   updatedAt: string;
   /** Meter-reading breakdown for utility bills; null for flat amounts. */
   utilityDetail: UtilityDetail | null;
+  /** Catalogue name snapshotted at posting. Null on bills created before that column. */
+  chargeName: string | null;
+  /** chargeName, or the bill-type label when chargeName is null. */
+  label: string;
   /** Sum of recorded payments; legacy bills settled before payments show "0". */
   paidAmount: string;
   /** What's still owed. Always "0" on PAID bills. */

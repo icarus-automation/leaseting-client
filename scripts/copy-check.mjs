@@ -63,6 +63,8 @@ const COPY_TS = new Set([
   'src/app/shared/ui/command-palette/command-palette.ts',
   'src/app/shared/ui/coming-soon/coming-soon.ts',
   'src/app/modules/work-orders/work-orders.ts',
+  'src/app/modules/work-orders/utils/maintenance-request.util.ts',
+  'src/app/modules/work-orders/components/request-detail-dialog/request-detail-dialog.ts',
   'src/app/modules/kit/kit-chat.ts',
   'src/app/modules/auth/auth-shell/auth-shell.ts',
   'src/app/modules/knowledge-base/knowledge-base.ts',
@@ -77,6 +79,8 @@ const INLINE_TEMPLATE_TS = new Set([
   'src/app/modules/reports/components/report-card/report-card.ts',
   'src/app/modules/reports/components/parking-scope-filter/parking-scope-filter.ts',
   'src/app/modules/settings/components/settings-page-shell/settings-page-shell.ts',
+  'src/app/modules/work-orders/components/request-photos/request-photos.ts',
+  'src/app/modules/work-orders/components/resolve-request-dialog/resolve-request-dialog.ts',
 ]);
 
 function stripTsComments(text) {

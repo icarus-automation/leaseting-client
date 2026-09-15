@@ -9,27 +9,29 @@ import {
   model,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { PaymentSubmissionResponse } from '../../../../core/models/payment-submission.types';
 import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
+import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { PrivateImage } from '../../../../shared/ui/private-image/private-image';
-import { ReasonDialog } from '../../../../shared/ui/reason-dialog/reason-dialog';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { PaymentSubmissionsService } from '../../services/payment-submissions.service';
 import { submissionStatusBadge } from '../../utils/submission-status.util';
 
 @Component({
   selector: 'app-submission-review-dialog',
-  imports: [DatePipe, PhpCurrencyPipe, ErrorBanner, FormDialog, PrivateImage, ReasonDialog, StatusBadge],
+  imports: [DatePipe, ReactiveFormsModule, PhpCurrencyPipe, ErrorBanner, FormDialog, PrivateImage, StatusBadge],
   templateUrl: './submission-review-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,6 +40,7 @@ export class SubmissionReviewDialog {
   private readonly auth = inject(AuthService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly fb = inject(FormBuilder);
 
   readonly visible = model.required<boolean>();
   readonly submissionId = input<string | null>(null);
@@ -49,7 +52,10 @@ export class SubmissionReviewDialog {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly busy = signal(false);
-  readonly rejectVisible = signal(false);
+  readonly rejectForm = this.fb.nonNullable.group({
+    reason: [''],
+  });
+  readonly rejectFormErrors = createFormErrors(this.rejectForm);
 
   readonly badge = computed(() => {
     const status = this.submission()?.status;
@@ -65,7 +71,12 @@ export class SubmissionReviewDialog {
     effect(() => {
       if (!this.visible()) return;
       const id = this.submissionId();
-      if (id) this.load(id);
+      if (!id) return;
+      untracked(() => {
+        this.rejectForm.reset({ reason: '' });
+        this.rejectFormErrors.reset();
+        this.load(id);
+      });
     });
   }
 
@@ -109,10 +120,12 @@ export class SubmissionReviewDialog {
       });
   }
 
-  onRejected(reason: string): void {
+  reject(): void {
     const submission = this.submission();
-    if (!submission || !this.canMutate()) return;
+    if (!submission || !this.canMutate() || !this.isPending() || this.busy()) return;
     this.busy.set(true);
+    this.error.set(null);
+    const reason = this.rejectForm.controls.reason.value.trim();
     this.submissions
       .reject(submission.id, reason)
       .pipe(takeUntilDestroyed(this.destroyRef))

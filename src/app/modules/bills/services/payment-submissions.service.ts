@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
 import type { Paginated } from '../../../core/models/api.types';
@@ -18,10 +18,6 @@ export class PaymentSubmissionsService {
   list(filters: PaymentSubmissionFilters = {}): Observable<Paginated<PaymentSubmissionResponse>> {
     const params = toHttpParams({ page: 1, limit: 10, ...filters });
     return this.http.get<Paginated<PaymentSubmissionResponse>>(this.base, { params });
-  }
-
-  pendingCount(): Observable<{ pendingCount: number }> {
-    return this.http.get<{ pendingCount: number }>(`${this.base}/pending-count`);
   }
 
   get(id: string): Observable<PaymentSubmissionResponse> {

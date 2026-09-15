@@ -16,6 +16,8 @@ function bill(id: string): BillListItem {
     createdAt: '2026-08-01T00:00:00.000Z',
     updatedAt: '2026-08-01T00:00:00.000Z',
     utilityDetail: null,
+    chargeName: null,
+    label: 'Rent',
     paidAmount: '0',
     balance: '8500',
     lease: {

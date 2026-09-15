@@ -8,6 +8,8 @@ import {
   subMonths,
 } from 'date-fns';
 
+import { parseApiDate } from '../../shared/utils/date.util';
+
 export type DateRangePreset = 'this-month' | 'last-month' | 'this-quarter' | 'year-to-date' | 'custom';
 
 export interface DateRange {
@@ -55,8 +57,8 @@ export function toIsoDate(date: Date): string {
 
 /** "1 Nov to 30 Nov 2026", collapsing the year when both ends share it. */
 export function rangeLabel(fromIso: string, toIso: string): string {
-  const from = new Date(`${fromIso}T00:00:00`);
-  const to = new Date(`${toIso}T00:00:00`);
+  const from = parseApiDate(fromIso);
+  const to = parseApiDate(toIso);
   const sameYear = from.getFullYear() === to.getFullYear();
   return `${format(from, sameYear ? 'd MMM' : 'd MMM yyyy')} to ${format(to, 'd MMM yyyy')}`;
 }

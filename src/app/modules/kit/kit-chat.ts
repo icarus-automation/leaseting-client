@@ -13,12 +13,13 @@ import { DatePipe, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { take, takeWhile, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import type { KitMood } from '../../core/kit/kit.model';
 import { apiErrorMessage } from '../../core/models/api.types';
+import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 import { KitHead } from '../../shared/ui/kit/kit-head';
 import { KitDocumentCard } from './components/kit-document-card/kit-document-card';
 import { KitMarkdown } from './components/kit-markdown/kit-markdown';
@@ -66,7 +67,7 @@ export class KitChat {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly toast = inject(MessageService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly transcript = viewChild<ElementRef<HTMLDivElement>>('transcript');
   private readonly highlight = viewChild<ElementRef<HTMLDivElement>>('highlight');
@@ -237,12 +238,11 @@ export class KitChat {
   remove(conversation: KitConversationSummary, event: Event): void {
     event.stopPropagation();
     event.preventDefault();
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Delete conversation',
       message: `"${conversation.title}" will be permanently removed. This cannot be undone.`,
-      acceptButtonProps: { label: 'Delete', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Delete',
+      onAccept: () => {
         this.chat
           .remove(conversation.id)
           .pipe(takeUntilDestroyed(this.destroyRef))

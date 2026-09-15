@@ -2,12 +2,12 @@ import { Component, ChangeDetectionStrategy, DestroyRef, computed, inject } from
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService } from 'primeng/api';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { NavDrawerService } from '../nav-drawer.service';
 import { CommandPaletteService } from '../../shared/ui/command-palette/command-palette.service';
 import { BrandLogo } from '../../shared/ui/brand-logo/brand-logo';
+import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 
 @Component({
   selector: 'app-header',
@@ -21,7 +21,7 @@ export class Header {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly palette = inject(CommandPaletteService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly drawer = inject(NavDrawerService);
 
   readonly user = this.auth.currentUser;
@@ -46,13 +46,11 @@ export class Header {
   }
 
   signOut(): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Sign out',
       message: 'You\'ll need to sign in again to continue.',
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Sign out', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Sign out',
+      onAccept: () => {
         this.auth
           .signOut()
           .pipe(takeUntilDestroyed(this.destroyRef))

@@ -9,11 +9,12 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { VehicleTypeResponse } from '../../../../core/models/vehicle-type.types';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { sortLookupRows } from '../../../../shared/utils/lookup-order.util';
@@ -27,7 +28,7 @@ import { VehicleTypesService } from '../../services/vehicle-types.service';
 })
 export class VehicleTypeSettings {
   private readonly vehicleTypes = inject(VehicleTypesService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -151,13 +152,11 @@ export class VehicleTypeSettings {
       this.archive(item);
       return;
     }
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Archive vehicle type',
       message: `Archive “${item.name}”? Rate plans keep any prices for it. It just leaves the picker for new vehicles.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Archive', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => this.archive(item),
+      acceptLabel: 'Archive',
+      onAccept: () => this.archive(item),
     });
   }
 

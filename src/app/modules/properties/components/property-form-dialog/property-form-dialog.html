@@ -197,6 +197,7 @@
 
       <app-image-dropzone
         [currentImageUrl]="property()?.imageUrl ?? null"
+        currentImageName="Current photo"
         idleHint="PNG, JPG, or WebP, up to 5 MB"
         [imagePreviewHeight]="170"
         (fileChange)="onImageChange($event)"

@@ -11,7 +11,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type {
@@ -20,6 +20,7 @@ import type {
   PropertyDetail,
   PropertyFloorItem,
 } from '../../../../core/models/property.types';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
@@ -61,7 +62,7 @@ export class PropertyDetailPage {
   private readonly properties = inject(PropertiesService);
   private readonly floors = inject(FloorsService);
   private readonly units = inject(UnitsService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -327,13 +328,11 @@ export class PropertyDetailPage {
   confirmDeleteFloor(): void {
     const floor = this.activeFloor();
     if (!floor) return;
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Delete floor',
       message: `Delete floor ${floor.level}? Its units must be moved or removed first.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Delete', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Delete',
+      onAccept: () => {
         this.floors
           .delete(floor.id)
           .pipe(takeUntilDestroyed(this.destroyRef))

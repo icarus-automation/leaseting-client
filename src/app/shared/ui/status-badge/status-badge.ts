@@ -10,7 +10,7 @@ export type BadgeTone = 'success' | 'destructive' | 'warning' | 'vacant' | 'neut
   selector: 'app-status-badge',
   template: `
     <span
-      class="inline-flex items-center gap-1.5 rounded-full border px-2 py-[3px] text-xs font-medium leading-none"
+      class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-[3px] text-xs font-medium leading-none"
       [class]="chipClass()"
     >
       <span class="h-1.5 w-1.5 shrink-0 rounded-full" [class]="dotClass()" aria-hidden="true"></span>

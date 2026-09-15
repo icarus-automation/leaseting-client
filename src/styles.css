@@ -290,6 +290,67 @@
   bottom: 5.5rem;
 }
 
+/* ── Confirm dialogs (ConfirmService) ──
+   PrimeNG lays the confirm body out as a flex row of icon + message. This app
+   ships no icon font (icons are SVG components), so any `icon` option rendered
+   as a blank 2rem box that shrank to a different width in every dialog and
+   pushed the message out of line with its own heading. ConfirmService no longer
+   passes one; hiding the slot keeps a stray icon from reopening the gap, and
+   block layout puts the message flush under the title where it belongs.
+
+   The rest matches the shared FormDialog: an 18px Poppins title, a hairline
+   above the buttons, the same gaps. A confirm and a form dialog are the same
+   object to the reader and should not announce themselves differently. */
+.p-confirmdialog-icon {
+  display: none;
+}
+
+.p-confirmdialog .p-dialog-header {
+  padding-bottom: 0.75rem;
+}
+
+.p-confirmdialog .p-dialog-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+
+.p-confirmdialog .p-dialog-content {
+  display: block;
+  padding-bottom: 0;
+}
+
+.p-confirmdialog-message {
+  display: block;
+  margin: 0;
+  color: var(--text-body);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  /* A long unbroken value (a unit code, an email) must not punch out of the box. */
+  overflow-wrap: anywhere;
+}
+
+.p-confirmdialog .p-dialog-footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+/* PrimeNG's own Button is used in exactly one place in this app, a confirm
+   dialog's footer, and it ships at 2.5rem/1rem, right next to the h-9/13px
+   buttons every other dialog footer and toolbar uses. Same reasoning as the
+   form-field normalisation above: match the app's button shape once, here. */
+.p-confirmdialog .p-button {
+  min-height: 2.25rem;
+  padding-block: 0;
+  padding-inline: 0.875rem;
+  font-size: 0.8125rem;
+}
+
+.p-confirmdialog .p-confirmdialog-accept-button {
+  font-weight: 600;
+}
+
 .app-form-dialog.p-dialog {
   animation: dialog-in 150ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }

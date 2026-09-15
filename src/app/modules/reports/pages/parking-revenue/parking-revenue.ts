@@ -13,6 +13,7 @@ import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { SegmentedControl } from '../../../../shared/ui/segmented-control/segmented-control';
 import type { SegmentedOption } from '../../../../shared/ui/segmented-control/segmented-control';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
+import { parseApiDate } from '../../../../shared/utils/date.util';
 import { ParkingScopeFilter } from '../../components/parking-scope-filter/parking-scope-filter';
 import { ReportHeader } from '../../components/report-header/report-header';
 import { downloadCsv, toCsv } from '../../csv-export.util';
@@ -137,7 +138,7 @@ export class ParkingRevenue {
   /** ISO dates are what the server groups by; readers want "3 Sep". */
   rowLabel(row: ParkingRevenueGroupRow): string {
     if (this.grouping() !== 'day') return row.label;
-    return format(new Date(`${row.label}T00:00:00`), 'EEE d MMM');
+    return format(parseApiDate(row.label), 'EEE d MMM');
   }
 
   stayLabel(minutes: number): string {

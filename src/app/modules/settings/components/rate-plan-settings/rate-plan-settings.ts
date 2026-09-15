@@ -11,7 +11,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { forkJoin } from 'rxjs';
@@ -25,6 +25,7 @@ import {
 import type { RatePlanAmountResponse, RatePlanResponse } from '../../../../core/models/rate-plan.types';
 import type { VehicleTypeResponse } from '../../../../core/models/vehicle-type.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { SegmentedControl } from '../../../../shared/ui/segmented-control/segmented-control';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
@@ -71,7 +72,7 @@ export class RatePlanSettings {
   private readonly fb = inject(FormBuilder);
   private readonly ratePlans = inject(RatePlansService);
   private readonly vehicleTypesApi = inject(VehicleTypesService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -247,13 +248,11 @@ export class RatePlanSettings {
   }
 
   confirmArchive(item: RatePlanResponse): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Archive rate plan',
       message: `Archive “${item.name}”? It leaves the picker for new parking stays. History that already used it is untouched.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Archive', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => this.archive(item),
+      acceptLabel: 'Archive',
+      onAccept: () => this.archive(item),
     });
   }
 

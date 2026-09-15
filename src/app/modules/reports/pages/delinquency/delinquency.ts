@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { Select } from 'primeng/select';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -13,6 +13,7 @@ import type {
   ReminderEntry,
 } from '../../../../core/models/report.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { BadgeTone, StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { BillsService } from '../../../bills/services/bills.service';
@@ -59,7 +60,7 @@ export class Delinquency {
   private readonly reports = inject(ReportsService);
   private readonly bills = inject(BillsService);
   private readonly filters = inject(ReportFiltersService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -223,15 +224,13 @@ export class Delinquency {
     const billId = tenant.chaseBillId;
     if (!billId) return;
 
-    this.confirmation.confirm({
+    this.confirm.proceed({
       header: 'Send payment reminder',
       message:
         `Text ${tenant.tenantName} at ${tenant.contactNo} about their oldest unpaid bill ` +
         `(${tenant.oldestDaysOverdue} days overdue)? This sends immediately and uses one SMS credit.`,
-      icon: 'pi pi-send',
-      acceptButtonProps: { label: 'Send now' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => this.send(tenant, billId),
+      acceptLabel: 'Send now',
+      onAccept: () => this.send(tenant, billId),
     });
   }
 

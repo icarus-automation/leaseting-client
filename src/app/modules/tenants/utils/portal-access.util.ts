@@ -13,7 +13,10 @@ export function portalAccessBadge(status: PortalAccessStatus): { label: string; 
     case 'DISABLED':
       return { label: 'Disabled', tone: 'destructive' };
     case 'MUST_CHANGE_PASSWORD':
-      return { label: 'Must change password', tone: 'warning' };
+      // Deliberately short: this chip shares a narrow card header with the
+      // "Residence Care" heading, and a sentence-length label wraps to three
+      // lines there. The card's own panel spells out what the tenant must do.
+      return { label: 'Password pending', tone: 'warning' };
   }
 }
 

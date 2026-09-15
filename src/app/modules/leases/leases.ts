@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import type { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 
@@ -12,6 +12,7 @@ import type { PageMeta } from '../../core/models/api.types';
 import type { GridFilters } from '../../core/models/grid-query.types';
 import type { LeaseListFilters, LeaseListItem } from '../../core/models/lease.types';
 import { PhpCurrencyPipe } from '../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { NlFilterBar } from '../../shared/ui/nl-filter-bar/nl-filter-bar';
 import { Pagination } from '../../shared/ui/pagination/pagination';
@@ -41,7 +42,7 @@ import { LeasesService } from './services/leases.service';
 })
 export class Leases {
   private readonly leases = inject(LeasesService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -137,13 +138,11 @@ export class Leases {
   }
 
   confirmTerminate(lease: LeaseListItem): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'End lease',
       message: `End the lease for ${lease.tenant.firstName} ${lease.tenant.lastName} on Unit ${lease.unit.unitNo}? The unit becomes vacant immediately.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'End lease', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'End lease',
+      onAccept: () => {
         this.leases
           .terminate(lease.id)
           .pipe(takeUntilDestroyed(this.destroyRef))

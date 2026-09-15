@@ -13,7 +13,7 @@ import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { KitService } from '../../../../core/kit/kit.service';
@@ -22,6 +22,7 @@ import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
 import type { BillListItem } from '../../../../core/models/bill.types';
 import type { UnitDetail, UnitOutstandingBill } from '../../../../core/models/property.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { isPastDue, leaseTermLabel, ordinal } from '../../../../shared/utils/date.util';
@@ -44,7 +45,7 @@ export class UnitPanel {
   private readonly kit = inject(KitService);
   private readonly onboardings = inject(OnboardingsService);
   private readonly router = inject(Router);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
@@ -124,13 +125,11 @@ export class UnitPanel {
   confirmEndLease(): void {
     const lease = this.unit()?.activeLease;
     if (!lease) return;
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'End lease',
       message: 'End this lease now? The unit becomes vacant.',
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'End lease', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'End lease',
+      onAccept: () => {
         this.leasesService
           .terminate(lease.id)
           .pipe(takeUntilDestroyed(this.destroyRef))
@@ -155,13 +154,11 @@ export class UnitPanel {
   confirmArchive(): void {
     const unit = this.unit();
     if (!unit) return;
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Archive unit',
       message: `Archive unit ${unit.unitNo}? It disappears from the floor plan and lists.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Archive', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Archive',
+      onAccept: () => {
         this.units
           .archive(unit.id)
           .pipe(takeUntilDestroyed(this.destroyRef))

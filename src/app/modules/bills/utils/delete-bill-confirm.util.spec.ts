@@ -39,4 +39,13 @@ describe('deleteBillConfirmMessage', () => {
       'Delete the unpaid Rent bill of ₱8,500.00 for Ana Cruz on Unit 4A, due Sep 1, 2026? This cannot be undone.',
     );
   });
+
+  // The API returns `dueDate` from a Prisma date column, which serializes as a
+  // full timestamp. Formatting that threw, so the confirm never opened and the
+  // Delete bill menu item did nothing.
+  it('reads a full ISO timestamp due date', () => {
+    expect(deleteBillConfirmMessage(unpaidBill({ dueDate: '2026-09-01T00:00:00.000Z' }))).toContain(
+      'due Sep 1, 2026?',
+    );
+  });
 });

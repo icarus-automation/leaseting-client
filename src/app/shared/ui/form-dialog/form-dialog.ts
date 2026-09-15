@@ -10,8 +10,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { Dialog } from 'primeng/dialog';
-import { ConfirmationService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
+
+import { ConfirmService } from '../confirm/confirm.service';
 
 /**
  * Centered modal used for all create/edit forms. Forms are short (2–6 fields)
@@ -84,7 +85,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormDialog {
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
 
   readonly visible = model.required<boolean>();
   readonly heading = input.required<string>();
@@ -132,13 +133,12 @@ export class FormDialog {
       this.visible.set(false);
       return;
     }
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Discard changes?',
       message: 'You have unsaved edits. Closing will throw them away.',
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Discard', severity: 'danger' },
-      rejectButtonProps: { label: 'Keep editing', severity: 'secondary', outlined: true },
-      accept: () => this.visible.set(false),
+      acceptLabel: 'Discard',
+      rejectLabel: 'Keep editing',
+      onAccept: () => this.visible.set(false),
     });
   }
 }

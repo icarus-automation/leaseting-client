@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
@@ -12,6 +12,7 @@ import type { OnboardingListItem } from '../../core/models/onboarding.types';
 import type { GridFilters } from '../../core/models/grid-query.types';
 import type { TenantListFilters, TenantListItem, TenantResponse } from '../../core/models/tenant.types';
 import { PhpCurrencyPipe } from '../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { NlFilterBar } from '../../shared/ui/nl-filter-bar/nl-filter-bar';
 import { Pagination } from '../../shared/ui/pagination/pagination';
@@ -43,7 +44,7 @@ export class Tenants {
   private readonly tenants = inject(TenantsService);
   private readonly onboardings = inject(OnboardingsService);
   private readonly router = inject(Router);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -109,13 +110,12 @@ export class Tenants {
 
   confirmCancelOnboarding(item: OnboardingListItem): void {
     const who = item.tenant ? `${item.tenant.firstName} ${item.tenant.lastName}` : 'this onboarding';
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Cancel onboarding?',
       message: `Stop onboarding ${who}? Progress is discarded, but the tenant and uploaded documents are kept.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Cancel onboarding', severity: 'danger' },
-      rejectButtonProps: { label: 'Keep it', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Cancel onboarding',
+      rejectLabel: 'Keep it',
+      onAccept: () => {
         this.onboardings
           .cancel(item.id)
           .pipe(takeUntilDestroyed(this.destroyRef))
@@ -194,13 +194,11 @@ export class Tenants {
   }
 
   confirmArchive(tenant: TenantResponse): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Archive tenant',
       message: `Archive ${tenant.firstName} ${tenant.lastName}? They disappear from this list, but their lease and payment history is kept.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Archive', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Archive',
+      onAccept: () => {
         this.tenants
           .archive(tenant.id)
           .pipe(takeUntilDestroyed(this.destroyRef))

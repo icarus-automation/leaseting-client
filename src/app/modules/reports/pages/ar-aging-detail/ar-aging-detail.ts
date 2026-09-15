@@ -14,6 +14,7 @@ import type {
 } from '../../../../core/models/report.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
+import { parseApiDate } from '../../../../shared/utils/date.util';
 import { AsOfSelection, asOfLabel, asOfParam, todaySelection } from '../../as-of.util';
 import { AsOfFilter } from '../../components/as-of-filter/as-of-filter';
 import { ReportHeader } from '../../components/report-header/report-header';
@@ -95,7 +96,7 @@ export class ArAgingDetailPage {
     const params = this.route.snapshot.queryParamMap;
     const asOf = params.get('asOf');
     // A pinned date arrived in the link; without one the report stays live.
-    if (asOf) this.asOf.set({ preset: 'custom', date: new Date(`${asOf}T00:00:00`) });
+    if (asOf) this.asOf.set({ preset: 'custom', date: parseApiDate(asOf) });
     this.propertyId.set(params.get('propertyId') ?? ALL_PROPERTIES);
     this.bucket.set(params.get('bucket') ?? ALL_BUCKETS);
   }

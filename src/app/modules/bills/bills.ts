@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import type { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { Select } from 'primeng/select';
@@ -16,6 +16,7 @@ import type { BillListFilters, BillListItem, BillsSummary } from '../../core/mod
 import type { GridFilters } from '../../core/models/grid-query.types';
 import { BILL_TYPE_LABELS, BILL_TYPE_OPTIONS, BillType } from '../../core/models/enums';
 import { PhpCurrencyPipe } from '../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { NlFilterBar } from '../../shared/ui/nl-filter-bar/nl-filter-bar';
 import { Pagination } from '../../shared/ui/pagination/pagination';
@@ -85,7 +86,7 @@ export class Bills {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -344,13 +345,11 @@ export class Bills {
   }
 
   confirmDelete(bill: BillListItem): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Delete bill',
       message: deleteBillConfirmMessage(bill),
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Delete', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Delete',
+      onAccept: () => {
         this.bills
           .delete(bill.id)
           .pipe(takeUntilDestroyed(this.destroyRef))

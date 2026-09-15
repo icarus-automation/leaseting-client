@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
 import type { PropertyListItem, PropertyResponse } from '../../core/models/property.types';
+import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { Pagination } from '../../shared/ui/pagination/pagination';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
@@ -25,7 +26,7 @@ export class Properties {
   private readonly properties = inject(PropertiesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -84,13 +85,11 @@ export class Properties {
   }
 
   confirmArchive(property: PropertyListItem): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Archive property',
       message: `Archive ${property.name}? It disappears from lists, but its floors, units, and history are kept.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Archive', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => this.archive(property),
+      acceptLabel: 'Archive',
+      onAccept: () => this.archive(property),
     });
   }
 

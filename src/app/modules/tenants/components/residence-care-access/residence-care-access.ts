@@ -11,12 +11,13 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { PortalAccessResponse } from '../../../../core/models/portal-access.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { copyToClipboard } from '../../../../shared/utils/clipboard.util';
 import { TenantsService } from '../../services/tenants.service';
@@ -37,7 +38,7 @@ export class ResidenceCareAccess {
   private readonly tenants = inject(TenantsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(MessageService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly tenantId = input.required<string>();
@@ -98,15 +99,21 @@ export class ResidenceCareAccess {
   }
 
   resetAccess(): void {
-    this.confirm('Reset access', 'Generate a new temporary password and revoke existing sessions?', 'Reset', () =>
-      this.run('reset', () => this.tenants.resetPortalAccess(this.tenantId())),
-    );
+    this.confirm.danger({
+      header: 'Reset access',
+      message: 'Generate a new temporary password and revoke existing sessions?',
+      acceptLabel: 'Reset',
+      onAccept: () => this.run('reset', () => this.tenants.resetPortalAccess(this.tenantId())),
+    });
   }
 
   disable(): void {
-    this.confirm('Disable access', 'The tenant cannot sign in until you reactivate. History is kept.', 'Disable', () =>
-      this.run('disable', () => this.tenants.disablePortalAccess(this.tenantId())),
-    );
+    this.confirm.danger({
+      header: 'Disable access',
+      message: 'The tenant cannot sign in until you reactivate. History is kept.',
+      acceptLabel: 'Disable',
+      onAccept: () => this.run('disable', () => this.tenants.disablePortalAccess(this.tenantId())),
+    });
   }
 
   reactivate(): void {
@@ -121,17 +128,6 @@ export class ResidenceCareAccess {
       severity: copied ? 'success' : 'error',
       summary: copied ? 'Password copied' : 'Could not copy',
       detail: copied ? 'Send it privately. It will not be shown again after you leave this page.' : undefined,
-    });
-  }
-
-  private confirm(header: string, message: string, accept: string, action: () => void): void {
-    this.confirmation.confirm({
-      header,
-      message,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: accept, severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: action,
     });
   }
 

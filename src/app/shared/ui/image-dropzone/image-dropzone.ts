@@ -1,4 +1,17 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, effect, inject, input, output, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  afterNextRender,
+  effect,
+  inject,
+  input,
+  output,
+  viewChild,
+} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import * as FilePond from 'filepond';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
@@ -9,6 +22,13 @@ FilePond.registerPlugin(
   FilePondPluginFileValidateType,
   FilePondPluginFileValidateSize,
 );
+
+/** Filename extension per accepted type, so the preview item reads like a file. */
+const EXTENSIONS: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+};
 
 /**
  * Single-image picker built on FilePond: drag & drop, paste, browse, inline
@@ -25,10 +45,13 @@ FilePond.registerPlugin(
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImageDropzone {
+  private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
 
   /** Existing stored image (edit mode) — shown as a removable preview. */
   readonly currentImageUrl = input<string | null>(null);
+  /** Name on the stored image's preview item; the URL is a UUID, not a label. */
+  readonly currentImageName = input('Current image');
   /** Short helper under the drop label, e.g. "A top-down floor plan works best." */
   readonly idleHint = input<string>('PNG, JPG, or WebP, up to 5 MB');
   readonly imagePreviewHeight = input(160);
@@ -38,8 +61,15 @@ export class ImageDropzone {
 
   private readonly pondInput = viewChild.required<ElementRef<HTMLInputElement>>('pondInput');
   private pond: FilePond.FilePond | null = null;
-  /** Guards event handlers while we programmatically reset the pond. */
-  private syncing = false;
+  /**
+   * FilePond emits `removefile` on a later tick, well after the call that asked
+   * for it returned, so a plain "am I syncing right now" flag never covers the
+   * event. Counting the removals we asked for does: anything beyond the count
+   * is the user clicking the item's X, which is a real "drop the photo".
+   */
+  private ownRemovals = 0;
+  /** Drops a slow image load whose dialog has already moved to another record. */
+  private syncToken = 0;
 
   constructor() {
     afterNextRender(() => {
@@ -60,13 +90,16 @@ export class ImageDropzone {
       if (!this.pond) return;
 
       this.pond.on('addfile', (error, item) => {
-        if (this.syncing || error) return;
+        if (error) return;
         if (item.origin === FilePond.FileOrigin.INPUT) {
           this.fileChange.emit(item.file as File);
         }
       });
       this.pond.on('removefile', () => {
-        if (this.syncing) return;
+        if (this.ownRemovals > 0) {
+          this.ownRemovals -= 1;
+          return;
+        }
         this.fileChange.emit(null);
       });
 
@@ -87,28 +120,44 @@ export class ImageDropzone {
 
   /** Clears any picked file (used by parents when the form resets). */
   reset(): void {
-    if (!this.pond) return;
-    this.syncing = true;
-    void this.pond.removeFiles({ revert: false });
     this.syncCurrentImage(this.currentImageUrl());
-    this.syncing = false;
   }
 
   private syncCurrentImage(url: string | null): void {
-    if (!this.pond) return;
-    this.syncing = true;
-    void this.pond.removeFiles({ revert: false });
-    if (url) {
-      // Documented FilePond "mock file" pattern: providing `file` info skips
-      // any fetch, and the image-preview plugin renders `metadata.poster`.
-      void this.pond
-        .addFile(url, {
-          type: 'local',
-          file: { name: 'current image', size: 0, type: 'image/jpeg' },
-          metadata: { poster: url },
-        } as never)
-        .catch(() => undefined);
-    }
-    this.syncing = false;
+    const pond = this.pond;
+    if (!pond) return;
+    const token = ++this.syncToken;
+
+    this.ownRemovals += pond.getFiles().length;
+    void pond.removeFiles({ revert: false });
+    if (!url) return;
+
+    /*
+     * The stored image has to arrive as real bytes. FilePond's "mock file"
+     * shortcut (name/size/type only) skips the load entirely, and the
+     * image-preview plugin has nothing to draw from. That is why the edit
+     * dialog used to show a black bar labelled "0 bytes" where the photo
+     * should be. Fetching it gives the plugin a blob and the item its size.
+     */
+    this.http
+      .get(url, { responseType: 'blob' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          if (token !== this.syncToken || !this.pond) return;
+          // Storage can hand back application/octet-stream. The item is
+          // display-only and is never re-uploaded, and the preview decodes the
+          // bytes rather than the label, so claiming JPEG keeps the accepted-type
+          // check from failing an image that is perfectly fine.
+          const type = EXTENSIONS[blob.type] ? blob.type : 'image/jpeg';
+          const file = new File([blob], `${this.currentImageName()}.${EXTENSIONS[type]}`, { type });
+          // 'local' origin marks it as already-stored, so it never reads as a
+          // fresh pick and never re-emits through fileChange.
+          void this.pond.addFile(file, { type: 'local' }).catch(() => undefined);
+        },
+        // A stored image that will not load is not worth blocking the form
+        // over: the dropzone just starts empty and a new upload still replaces it.
+        error: () => undefined,
+      });
   }
 }

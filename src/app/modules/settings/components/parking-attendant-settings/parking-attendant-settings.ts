@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { Observable } from 'rxjs';
 
@@ -18,6 +18,7 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ParkingAttendantResponse } from '../../../../core/models/parking-attendant.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge, type BadgeTone } from '../../../../shared/ui/status-badge/status-badge';
 import { ParkingAttendantsService } from '../../services/parking-attendants.service';
@@ -36,7 +37,7 @@ export class ParkingAttendantSettings {
   private readonly fb = inject(FormBuilder);
   private readonly attendants = inject(ParkingAttendantsService);
   private readonly auth = inject(AuthService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -161,24 +162,24 @@ export class ParkingAttendantSettings {
       return;
     }
 
-    this.confirm(
-      'Reset password',
-      `Every terminal signed in as ${item.name} is signed out and has to use the new password.`,
-      'Reset',
-      () => {
+    this.confirm.danger({
+      header: 'Reset password',
+      message: `Every terminal signed in as ${item.name} is signed out and has to use the new password.`,
+      acceptLabel: 'Reset',
+      onAccept: () => {
         this.runOnRow(item, () => this.attendants.setPassword(item.id, password), 'Password reset');
         this.cancelResetPassword();
       },
-    );
+    });
   }
 
   confirmDisable(item: ParkingAttendantResponse): void {
-    this.confirm(
-      'Disable attendant',
-      `${item.name} can no longer sign in, and any terminal signed in as them is signed out. Past transactions are kept.`,
-      'Disable',
-      () => this.runOnRow(item, () => this.attendants.disable(item.id), 'Attendant disabled'),
-    );
+    this.confirm.danger({
+      header: 'Disable attendant',
+      message: `${item.name} can no longer sign in, and any terminal signed in as them is signed out. Past transactions are kept.`,
+      acceptLabel: 'Disable',
+      onAccept: () => this.runOnRow(item, () => this.attendants.disable(item.id), 'Attendant disabled'),
+    });
   }
 
   enable(item: ParkingAttendantResponse): void {
@@ -217,14 +218,4 @@ export class ParkingAttendantSettings {
     );
   }
 
-  private confirm(header: string, message: string, accept: string, action: () => void): void {
-    this.confirmation.confirm({
-      header,
-      message,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: accept, severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: action,
-    });
-  }
 }

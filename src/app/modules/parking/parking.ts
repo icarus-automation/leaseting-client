@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { Select } from 'primeng/select';
 import { forkJoin, interval } from 'rxjs';
@@ -23,6 +23,7 @@ import type {
 import type { ParkingTerminalResponse } from '../../core/models/parking-terminal.types';
 import type { PropertyListItem } from '../../core/models/property.types';
 import { PhpCurrencyPipe, formatPhp } from '../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 import { ErrorBanner } from '../../shared/ui/error-banner/error-banner';
 import { ReasonDialog } from '../../shared/ui/reason-dialog/reason-dialog';
 import { SegmentedControl } from '../../shared/ui/segmented-control/segmented-control';
@@ -87,7 +88,7 @@ export class Parking {
   private readonly overviewApi = inject(ParkingOverviewService);
   private readonly propertiesApi = inject(PropertiesService);
   private readonly terminalsApi = inject(ParkingTerminalsService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
@@ -227,17 +228,15 @@ export class Parking {
   }
 
   askConfirmShift(shift: ParkingOverviewShift): void {
-    this.confirmation.confirm({
+    this.confirm.proceed({
       header: 'Confirm shift cash',
       message:
         `${shift.attendantName} at ${shift.terminalName} declared ` +
         `${peso(shift.declaredCash)} against ${peso(shift.expectedCash)} expected ` +
         `(${varianceLabel(shift.variance).toLowerCase()}). ` +
         'Confirming records your sign-off. Neither figure changes.',
-      icon: 'pi pi-check-circle',
-      acceptButtonProps: { label: 'Confirm' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => this.confirmShift(shift),
+      acceptLabel: 'Confirm',
+      onAccept: () => this.confirmShift(shift),
     });
   }
 

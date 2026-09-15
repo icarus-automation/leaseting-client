@@ -1,5 +1,17 @@
 import { differenceInCalendarDays, differenceInCalendarMonths, setDate, startOfDay } from 'date-fns';
 
+/**
+ * A date-only API value as local midnight, accepting either shape the backend
+ * sends. Prisma `@db.Date` columns (a bill's due date, a lease term) serialize
+ * as a full ISO timestamp, so the same field arrives as "2026-10-10" from one
+ * endpoint and "2026-10-10T00:00:00.000Z" from another. Appending a time to
+ * the second shape yields an Invalid Date, which throws the moment date-fns
+ * formats it. Taking the date part first is what makes both safe.
+ */
+export function parseApiDate(value: string): Date {
+  return new Date(`${value.slice(0, 10)}T00:00:00`);
+}
+
 /** 1 → "1st", 2 → "2nd", 15 → "15th" — used for "Every 5th of the month". */
 export function ordinal(day: number): string {
   const rem10 = day % 10;

@@ -11,7 +11,7 @@ import {
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { Select } from 'primeng/select';
 import { forkJoin } from 'rxjs';
@@ -19,6 +19,7 @@ import { forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ParkingTerminalResponse } from '../../../../core/models/parking-terminal.types';
 import type { PropertyListItem } from '../../../../core/models/property.types';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { PropertiesService } from '../../../properties/services/properties.service';
@@ -38,7 +39,7 @@ export class ParkingTerminalSettings {
   private readonly fb = inject(FormBuilder);
   private readonly terminalsApi = inject(ParkingTerminalsService);
   private readonly propertiesApi = inject(PropertiesService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -187,13 +188,11 @@ export class ParkingTerminalSettings {
   }
 
   confirmDelete(item: ParkingTerminalResponse): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Delete terminal',
       message: `Delete “${item.name}” at ${item.propertyName}? This cannot be undone.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Delete', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => this.delete(item),
+      acceptLabel: 'Delete',
+      onAccept: () => this.delete(item),
     });
   }
 

@@ -10,7 +10,7 @@ describe('portalAccessBadge', () => {
     expect(portalAccessBadge('ACTIVE')).toEqual({ label: 'Active', tone: 'success' });
     expect(portalAccessBadge('DISABLED')).toEqual({ label: 'Disabled', tone: 'destructive' });
     expect(portalAccessBadge('MUST_CHANGE_PASSWORD')).toEqual({
-      label: 'Must change password',
+      label: 'Password pending',
       tone: 'warning',
     });
   });

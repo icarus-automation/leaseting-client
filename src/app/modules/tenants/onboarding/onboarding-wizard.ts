@@ -11,7 +11,7 @@ import {
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 
 import { apiErrorMessage } from '../../../core/models/api.types';
 import {
@@ -25,6 +25,7 @@ import {
   type TurnoverStepData,
 } from '../../../core/models/onboarding.types';
 import { PhpCurrencyPipe } from '../../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../../shared/ui/confirm/confirm.service';
 import { ErrorBanner } from '../../../shared/ui/error-banner/error-banner';
 import { Skeleton } from '../../../shared/ui/skeleton/skeleton';
 import { Stepper, type StepperStep } from '../../../shared/ui/stepper/stepper';
@@ -70,7 +71,7 @@ export class OnboardingWizard {
   private readonly onboardings = inject(OnboardingsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -178,13 +179,12 @@ export class OnboardingWizard {
   }
 
   confirmCancel(): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Cancel onboarding?',
       message: 'Progress is discarded, but the tenant and any uploaded documents are kept.',
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Cancel onboarding', severity: 'danger' },
-      rejectButtonProps: { label: 'Keep going', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Cancel onboarding',
+      rejectLabel: 'Keep going',
+      onAccept: () => {
         this.onboardings
           .cancel(this.id())
           .pipe(takeUntilDestroyed(this.destroyRef))

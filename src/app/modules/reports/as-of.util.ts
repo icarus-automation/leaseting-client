@@ -1,5 +1,7 @@
 import { endOfMonth, endOfQuarter, endOfYear, format, subMonths, subQuarters, subYears } from 'date-fns';
 
+import { parseApiDate } from '../../shared/utils/date.util';
+
 /**
  * "As of" dates for point-in-time reports.
  *
@@ -82,5 +84,5 @@ export function toIsoDate(date: Date): string {
 
 /** "30 Nov 2026" from the ISO date the backend echoed back. */
 export function asOfLabel(iso: string): string {
-  return format(new Date(`${iso}T00:00:00`), 'd MMM yyyy');
+  return format(parseApiDate(iso), 'd MMM yyyy');
 }

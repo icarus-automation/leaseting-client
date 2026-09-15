@@ -3,7 +3,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
@@ -14,6 +14,7 @@ import type {
   TenantLeaseItem,
 } from '../../../../core/models/tenant.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../../../shared/ui/status-badge/status-badge';
 import { isPastDue, ordinal } from '../../../../shared/utils/date.util';
@@ -52,7 +53,7 @@ export class TenantDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly tenants = inject(TenantsService);
   private readonly toast = inject(MessageService);
-  private readonly confirmation = inject(ConfirmationService);
+  private readonly confirm = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly params = toSignal(this.route.paramMap, {
@@ -187,13 +188,11 @@ export class TenantDetailPage {
   }
 
   confirmDeleteDocument(document: TenantDocumentItem): void {
-    this.confirmation.confirm({
+    this.confirm.danger({
       header: 'Delete document',
       message: `Delete “${document.fileName}”? This cannot be undone.`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonProps: { label: 'Delete', severity: 'danger' },
-      rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
-      accept: () => {
+      acceptLabel: 'Delete',
+      onAccept: () => {
         this.deletingDocumentId.set(document.id);
         this.tenants
           .deleteDocument(document.id)

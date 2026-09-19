@@ -260,7 +260,6 @@ export class KitChat {
   private applyStream(event: KitStreamEvent): void {
     if (event.type === 'started') {
       this.bindConversation(event.conversationId);
-      if (event.userMessage) this.takeServerUser(event.userMessage);
       this.refreshHistory();
       return;
     }
@@ -277,29 +276,17 @@ export class KitChat {
     }
 
     this.bindConversation(event.conversationId);
-    if (event.conversation) {
-      this.messages.set(event.conversation.messages);
-    } else {
-      if (event.userMessage) this.takeServerUser(event.userMessage);
-      this.takeServerAssistant(event.message);
-    }
+    this.takeServerAssistant(event.message);
     this.pending.set(false);
     this.clearInFlight();
     this.refreshHistory();
     this.watchPendingDocuments();
   }
 
-  private bindConversation(conversationId: string): void {
+  private bindConversation(conversationId: string | undefined): void {
     if (!conversationId || this.activeId() === conversationId) return;
     this.activeId.set(conversationId);
     this.location.replaceState(`/kit/${conversationId}`);
-  }
-
-  private takeServerUser(user: KitChatMessage): void {
-    const id = this.inFlightUserId;
-    if (!id) return;
-    this.replaceMessage(id, user);
-    this.inFlightUserId = user.id;
   }
 
   private takeServerAssistant(message: KitChatMessage): void {

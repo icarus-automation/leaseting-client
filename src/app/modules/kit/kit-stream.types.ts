@@ -1,15 +1,14 @@
-import type { KitChatMessage, KitConversationDetail } from './kit-chat.types';
+import type { KitChatMessage } from './kit-chat.types';
 
 /**
- * SSE names and payload fields from leaseting-api
- * `docs/fe-ask-kit-streaming-api.md` (ICA-6). Successful streams are not
- * Success-envelope wrapped; pre-stream errors stay ordinary JSON.
+ * SSE names and payload fields from the ICA-6 FE note:
+ * `started` / `delta` / `done` / `error`. Request body is `{ content }`.
+ * Document poll statuses stay `PENDING` | `READY` | `FAILED`.
  */
 export type KitSseEventName = 'started' | 'delta' | 'done' | 'error';
 
 export interface KitSseStarted {
-  conversationId: string;
-  userMessage?: KitChatMessage;
+  conversationId?: string;
 }
 
 export interface KitSseDelta {
@@ -20,8 +19,6 @@ export interface KitSseDone {
   status: 'complete';
   conversationId: string;
   message: KitChatMessage;
-  userMessage?: KitChatMessage;
-  conversation?: KitConversationDetail;
 }
 
 export interface KitSseError {

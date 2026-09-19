@@ -42,9 +42,16 @@ describe('Ask Kit SSE framing', () => {
     expect(decodeKitSseFrame(frame)).toEqual({ event: { type: 'delta', text: 'Hi' } });
   });
 
-  it('accepts a started event that has not named the conversation yet', () => {
+  it('accepts a started event without extra fields', () => {
     const [frame] = parseSseBlock('event: started\ndata: {}');
-    expect(decodeKitSseFrame(frame)).toEqual({ event: { type: 'started', conversationId: '' } });
+    expect(decodeKitSseFrame(frame)).toEqual({ event: { type: 'started' } });
+  });
+
+  it('does not invent assistantMessage as a done field', () => {
+    const [frame] = parseSseBlock(
+      'event: done\ndata: {"status":"complete","conversationId":"c1","assistantMessage":{"id":"a1","role":"ASSISTANT","content":"nope","createdAt":"2026-09-19T00:00:00.000Z"}}',
+    );
+    expect(decodeKitSseFrame(frame)).toEqual({ error: 'Kit sent a reply Kit could not read.' });
   });
 
   it('surfaces an SSE error event as a readable failure', () => {

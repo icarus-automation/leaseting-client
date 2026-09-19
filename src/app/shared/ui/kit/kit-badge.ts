@@ -23,17 +23,6 @@ import {
 import { KitHead } from './kit-head';
 import { KitSetAside } from './kit-set-aside/kit-set-aside';
 
-/**
- * Kit, everywhere else in the app.
- *
- * The dashboard card is where Kit speaks unprompted; this is the way to reach
- * him from the other twelve screens without going home first. It stays a
- * badge, never a popup: it never auto-opens, never blocks anything, and
- * carries its count as text so the mascot's face is never the only signal.
- *
- * Deliberately hidden on the dashboard — the inline card is already saying the
- * same thing there, and two Kits on one screen is one too many.
- */
 @Component({
   selector: 'app-kit-badge',
   imports: [RouterLink, PIcon, KitHead, KitSetAside],
@@ -48,13 +37,11 @@ export class KitBadge {
   private readonly kit = inject(KitService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
-  /** Tracks the open→closed edge so the initial render doesn't grab focus. */
   private wasOpen = false;
 
   readonly severityLabels = KIT_SEVERITY_LABELS;
   readonly severityIcons = KIT_SEVERITY_ICONS;
 
-  /** Icon colour by severity. The label beside it still carries the meaning. */
   severityToneClass(severity: KitSeverity): string {
     return KIT_SEVERITY_TONES[severity];
   }
@@ -66,15 +53,12 @@ export class KitBadge {
 
   readonly count = computed(() => this.kit.events().length);
   readonly setAsideCount = this.kit.setAsideCount;
-  /** Kit may only claim everything is done when nothing is merely set aside. */
   readonly allClear = this.kit.allClear;
 
-  /** Event plus its deep link, resolved once per change rather than per binding. */
   readonly items = computed(() =>
     this.kit.events().map((event) => ({ event, link: kitEventLink(event) })),
   );
 
-  /** Worst active severity — drives the ring colour and the accessible label. */
   readonly worst = computed(() => this.kit.events()[0]?.severity ?? null);
 
   readonly ringClass = computed(() => {
@@ -101,8 +85,6 @@ export class KitBadge {
   constructor() {
     effect(() => {
       const open = this.open();
-      // Only on the closing edge: hand focus back to the button that opened
-      // the panel instead of dropping it on the body.
       if (this.wasOpen && !open) this.trigger()?.nativeElement.focus({ preventScroll: true });
       this.wasOpen = open;
     });
@@ -123,9 +105,6 @@ export class KitBadge {
 
   dismiss(event: KitEvent): void {
     this.kit.dismiss(event);
-    // Stay open when the last item was only set aside: closing on that would
-    // hide the one control that undoes it, moments after the user learned it
-    // exists.
     if (this.allClear()) this.close();
   }
 }

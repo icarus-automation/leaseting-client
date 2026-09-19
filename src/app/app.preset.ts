@@ -3,16 +3,6 @@ import Aura from '@primeuix/themes/aura';
 
 export const AppPreset = definePreset(Aura, {
   primitive: {
-    /*
-     * Aura's stock red is #ef4444, which is a different red from the app's
-     * --destructive and only reaches 3.76:1 against white text, under the AA
-     * minimum this project holds itself to. Re-anchoring the ramp on the theme
-     * token (500 = --destructive, 100 = --muted-destructive, both from
-     * styles.css) puts PrimeNG's destructive surfaces on the same red as every
-     * badge, figure, and button the app draws itself, and takes white-on-500
-     * to 5.6:1. Reaches: confirm dialog accept buttons, error toasts, and the
-     * invalid-field border on PrimeNG inputs.
-     */
     red: {
       50:  'oklch(0.97 0.018 15)',
       100: 'oklch(0.94 0.040 15)',

@@ -40,9 +40,6 @@ describe('deleteBillConfirmMessage', () => {
     );
   });
 
-  // The API returns `dueDate` from a Prisma date column, which serializes as a
-  // full timestamp. Formatting that threw, so the confirm never opened and the
-  // Delete bill menu item did nothing.
   it('reads a full ISO timestamp due date', () => {
     expect(deleteBillConfirmMessage(unpaidBill({ dueDate: '2026-09-01T00:00:00.000Z' }))).toContain(
       'due Sep 1, 2026?',

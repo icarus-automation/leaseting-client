@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { PIcon } from '@primeicons/angular/p-icon';
 
-/** The app's standard inline error strip (was copy-pasted across templates). */
 @Component({
   selector: 'app-error-banner',
   imports: [PIcon],
@@ -24,7 +23,6 @@ import { PIcon } from '@primeicons/angular/p-icon';
 })
 export class ErrorBanner {
   readonly message = input.required<string>();
-  /** Show a Retry action; emits on click. */
   readonly retryable = input(false);
   readonly retry = output<void>();
 }

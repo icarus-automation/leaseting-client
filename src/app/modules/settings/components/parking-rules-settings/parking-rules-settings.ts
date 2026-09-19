@@ -21,11 +21,6 @@ import { ParkingRulesService } from '../../services/parking-rules.service';
 import { RatePlansService } from '../../services/rate-plans.service';
 import { billedHint } from '../../utils/rate-plan-order.util';
 
-/**
- * Settings → Parking rules. Org-scoped gate math: grace, default transient
- * plan, rounding. Lost-ticket surcharge stays on the API unused in v1 and
- * is not shown here.
- */
 @Component({
   selector: 'app-parking-rules-settings',
   imports: [ReactiveFormsModule, RouterLink, PIcon, InputNumber, Select, SegmentedControl, Skeleton],

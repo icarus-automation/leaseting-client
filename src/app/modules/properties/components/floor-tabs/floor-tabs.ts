@@ -20,16 +20,8 @@ import { Select } from 'primeng/select';
 
 import type { PropertyFloorItem } from '../../../../core/models/property.types';
 
-/** Past this many floors a scan-the-strip search stops working — offer a jump select. */
 const JUMP_SELECT_THRESHOLD = 12;
 
-/**
- * Single-row floor switcher. Tabs never wrap (a 50-floor tower stays one row):
- * overflow scrolls horizontally with edge fades + arrow paddles, the active
- * tab keeps itself scrolled into view, and a jump-select appears for tall
- * buildings. Proper ARIA tablist: roving tabindex, arrow keys move focus,
- * Enter/Space activates (manual activation — switching floors fires a fetch).
- */
 @Component({
   selector: 'app-floor-tabs',
   imports: [FormsModule, PIcon, Select],
@@ -67,8 +59,6 @@ export class FloorTabs {
       this.destroyRef.onDestroy(() => observer.disconnect());
     });
 
-    // Keep the active tab visible (deep links can land on a far floor), and
-    // re-measure overflow whenever the floor list changes.
     effect(() => {
       this.floors();
       const id = this.selectedFloorId();

@@ -26,7 +26,6 @@ import { ImageDropzone } from '../../../../shared/ui/image-dropzone/image-dropzo
 import { FLOOR_PLAN_ASPECT } from '../../floor-plan.constants';
 import { FloorsService } from '../../services/floors.service';
 
-/** Matches the backend's image upload pipe. */
 const MAX_PLAN_BYTES = 5 * 1024 * 1024;
 
 @Component({
@@ -42,7 +41,6 @@ export class FloorFormDialog {
 
   readonly visible = model.required<boolean>();
   readonly propertyId = input.required<string>();
-  /** Null → create mode; a floor → edit mode (level/name/plan image). */
   readonly floor = input<PropertyFloorItem | null>(null);
   readonly saved = output<string>();
 
@@ -57,20 +55,10 @@ export class FloorFormDialog {
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
-  /** Picked but not yet cropped — the dialog shows the cropper while set. */
   readonly cropSource = signal<File | null>(null);
-  /** The cropped file that will actually be uploaded. */
   private readonly planFile = signal<File | null>(null);
-  /** Object URL for the cropped preview; revoked when it is replaced. */
   readonly croppedPreviewUrl = signal<string | null>(null);
-  /** User interacted with the picker — distinguishes "removed plan" from "untouched". */
   readonly planTouched = signal(false);
-  /**
-   * "Replace" was clicked but nothing new has been picked yet. Kept separate
-   * from `planTouched` on purpose: swapping the stored plan out of view must
-   * not arm the removal flag, or backing out of a replace would silently
-   * delete the plan on save.
-   */
   readonly replacing = signal(false);
 
   private readonly dropzone = viewChild(ImageDropzone);
@@ -79,7 +67,6 @@ export class FloorFormDialog {
   readonly isEdit = computed(() => this.floor() !== null);
   readonly heading = computed(() => (this.isEdit() ? 'Edit floor' : 'New floor'));
 
-  /** The cropped pick if there is one, else whatever is already stored. */
   readonly previewImage = computed(() => {
     const cropped = this.croppedPreviewUrl();
     if (cropped) return cropped;
@@ -111,7 +98,6 @@ export class FloorFormDialog {
     this.destroyRef.onDestroy(() => this.revokePreview());
   }
 
-  /** A raw pick goes straight into the cropper — nothing uploads uncropped. */
   onPlanPicked(file: File | null): void {
     if (!file) {
       this.clearPlan();
@@ -136,21 +122,18 @@ export class FloorFormDialog {
     this.dropzone()?.reset();
   }
 
-  /** Backing out of the crop leaves the floor as it was, not half-picked. */
   onCropCancelled(): void {
     this.cropSource.set(null);
     this.replacing.set(false);
     this.dropzone()?.reset();
   }
 
-  /** Swap the picker back in without arming a removal — see `replacing`. */
   replacePlan(): void {
     this.errorMessage.set(null);
     this.replacing.set(true);
     this.cropSource.set(null);
   }
 
-  /** Back out of a replace that never got as far as picking a file. */
   cancelReplace(): void {
     this.replacing.set(false);
   }

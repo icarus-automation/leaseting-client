@@ -13,7 +13,6 @@ export type OnboardingStepKey =
   | 'move-in-payment'
   | 'turnover';
 
-/** Walk order — mirrors the backend's ONBOARDING_STEP_KEYS. */
 export const ONBOARDING_STEP_ORDER: OnboardingStepKey[] = [
   'overview',
   'tenant',
@@ -36,7 +35,6 @@ export const ONBOARDING_STEP_LABELS: Record<OnboardingStepKey, string> = {
   turnover: 'Turnover',
 };
 
-/** Which unit, and for how long. The property is implied by the unit. */
 export interface OverviewStepData {
   unitId: string;
   startDate: string;
@@ -53,17 +51,11 @@ export interface RequirementsStepData {
   priorAddress?: boolean;
 }
 
-/** Recurring rent charges; their sum becomes the lease's monthly rent. */
 export interface LeaseTermsStepData {
   dueDay: number;
   charges: ChargeLine[];
 }
 
-/**
- * Money collected up front. Both are multiples of the monthly rent the lease
- * terms step settled, so neither repeats the charge lines behind it. A "no"
- * answer carries zero months.
- */
 export interface DepositStepData {
   collectsAdvance: boolean;
   advanceMonths: number;
@@ -78,7 +70,6 @@ export interface ContractStepData {
 
 export interface MoveInPaymentStepData {
   advanceAmount: number;
-  /** Total received against the deposit bills; allocated line by line. */
   depositAmount: number;
   paidOn: string;
   method: PaymentMethod;

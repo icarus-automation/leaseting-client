@@ -1,13 +1,3 @@
-/**
- * The report catalog: the single source of truth for what reporting exists,
- * what is live, and what is still owed.
- *
- * A report ships by flipping `route` from null to its path. Entries stay
- * listed while unbuilt on purpose: a manager who can see that "Lease
- * Expirations" is planned stops rebuilding it in a spreadsheet, and the list
- * doubles as the roadmap. `blockedBy` names the feature standing in the way so
- * "Soon" never has to be taken on faith.
- */
 
 export type ReportGroupKey =
   | 'business-overview'
@@ -25,17 +15,13 @@ export interface ReportGroup {
 }
 
 export interface ReportEntry {
-  /** Stable id. Persisted in favorites, so never renumber or reuse one. */
   key: string;
   title: string;
   summary: string;
   group: ReportGroupKey;
   icon: string;
-  /** Path under /reports, or null while the report is unbuilt. */
   route: string | null;
-  /** Feature the report waits on. Rendered on the card when unbuilt. */
   blockedBy?: string;
-  /** Extra search terms: old names, accounting jargon, synonyms. */
   keywords: string;
 }
 
@@ -78,7 +64,6 @@ export const REPORT_GROUPS: ReportGroup[] = [
 ];
 
 export const REPORT_ENTRIES: ReportEntry[] = [
-  // ── Business Overview ──────────────────────────────────
   {
     key: 'portfolio-overview',
     title: 'Portfolio Overview',
@@ -119,7 +104,6 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'landlord remittance disbursement payout fee',
   },
 
-  // ── Revenue ────────────────────────────────────────────
   {
     key: 'revenue-by-tenant',
     title: 'Revenue by Tenant',
@@ -167,7 +151,6 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'security advance bond liability refundable',
   },
 
-  // ── Receivables ────────────────────────────────────────
   {
     key: 'ar-aging-summary',
     title: 'AR Aging',
@@ -196,7 +179,6 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'delinquency late payers sms reminder ladder escalation collections chase repeat offenders',
   },
 
-  // ── Portfolio & Leases ─────────────────────────────────
   {
     key: 'occupancy-by-property',
     title: 'Occupancy by Property',
@@ -243,7 +225,6 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'turnover churn onboarding pipeline move out turnaround',
   },
 
-  // ── Utilities ──────────────────────────────────────────
   {
     key: 'utility-consumption',
     title: 'Utility Consumption by Unit',
@@ -263,7 +244,6 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'billing run recovery variance admin fee vat wht reconciliation',
   },
 
-  // ── Documents & Audit ──────────────────────────────────
   {
     key: 'soa-issued',
     title: 'Statements of Account',
@@ -274,11 +254,6 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'soa statement of account sent sms audit trail issued',
   },
 
-  // ── Parking ────────────────────────────────────────────
-  // The gate is transient parking: pay on exit, cash only, worked from a
-  // handheld. The three live reports read exactly that. The three below them
-  // describe a monthly-contract product that does not exist yet, and say so
-  // rather than rendering an empty page under a live-looking title.
   {
     key: 'parking-revenue',
     title: 'Parking Revenue',
@@ -340,7 +315,6 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   },
 ];
 
-/** True when the report can actually be opened. */
 export function isAvailable(entry: ReportEntry): boolean {
   return entry.route !== null;
 }

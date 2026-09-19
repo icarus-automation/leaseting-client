@@ -25,12 +25,6 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { sortLookupRows } from '../../../../shared/utils/lookup-order.util';
 import { ChargeItemsService } from '../../services/charge-items.service';
 
-/**
- * Settings → Charge items. Same shape as the property-type list, one row per
- * catalogue entry, but each row carries three things the onboarding wizard
- * needs: the label, the bill bucket it posts into, and an optional amount that
- * pre-fills the line when it is picked.
- */
 @Component({
   selector: 'app-charge-item-settings',
   imports: [ReactiveFormsModule, PIcon, InputNumber, Select, PhpCurrencyPipe, Skeleton, StatusBadge],
@@ -51,18 +45,15 @@ export class ChargeItemSettings {
   readonly billTypeOptions = BILL_TYPE_OPTIONS;
   readonly billTypeLabels = BILL_TYPE_LABELS;
 
-  /** Footer draft — the "add a charge" row. */
   readonly createForm = this.buildForm();
   readonly creating = signal(false);
   readonly createError = signal<string | null>(null);
 
-  /** Inline draft for the row being edited, if any. */
   readonly editForm = this.buildForm();
   readonly editingId = signal<string | null>(null);
   readonly saving = signal(false);
   readonly editError = signal<string | null>(null);
 
-  /** Row currently waiting on an archive/restore round-trip. */
   readonly busyId = signal<string | null>(null);
   readonly flashId = signal<string | null>(null);
 
@@ -117,7 +108,6 @@ export class ChargeItemSettings {
     });
     this.editingId.set(item.id);
     this.editError.set(null);
-    // The input renders on the next change-detection pass.
     queueMicrotask(() => this.editInput()?.nativeElement.focus());
   }
 
@@ -210,7 +200,6 @@ export class ChargeItemSettings {
     return this.fb.nonNullable.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
       billType: ['OTHER' as BillType, [Validators.required]],
-      // null = no default; the wizard then asks for the amount every time.
       defaultAmount: [null as number | null, [Validators.min(0)]],
     });
   }
@@ -220,7 +209,6 @@ export class ChargeItemSettings {
     return { name: name.trim(), billType, defaultAmount };
   }
 
-  /** Insert or update, keeping the order the server would have returned. */
   private replaceItem(item: ChargeItemResponse): void {
     this.items.update((items) =>
       sortLookupRows([...(items ?? []).filter((existing) => existing.id !== item.id), item]),

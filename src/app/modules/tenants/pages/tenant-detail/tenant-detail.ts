@@ -24,7 +24,6 @@ import { TenantRiskPanel } from '../../components/tenant-risk-panel/tenant-risk-
 import { ResidenceCareAccess } from '../../components/residence-care-access/residence-care-access';
 import { TenantsService } from '../../services/tenants.service';
 
-/** A bill row flattened with its lease context for the billing-history table. */
 interface BillingHistoryRow extends TenantLeaseBillItem {
   leaseId: string;
   unitNo: string;
@@ -79,7 +78,6 @@ export class TenantDetailPage {
     return `${tenant.firstName.charAt(0)}${tenant.lastName.charAt(0)}`.toUpperCase();
   });
 
-  /** The live lease, if any — drives the profile card's unit/rent facts. */
   readonly activeLease = computed(() => {
     const tenant = this.tenant();
     return tenant?.leases.find((lease) => isLeaseActive(lease)) ?? null;

@@ -30,14 +30,6 @@ interface ChargeOption {
   defaultAmount: number | null;
 }
 
-/**
- * The editable list of rent charge lines behind the wizard's "Lease terms"
- * step. It reads the org catalogue, so whatever the user curates in
- * Settings → Charge items is what they can charge — and a charge invented
- * mid-onboarding is added to that catalogue rather than stranded on one lease.
- *
- * The parent owns the FormArray; this component only edits it.
- */
 @Component({
   selector: 'app-charge-lines',
   imports: [ReactiveFormsModule, PIcon, InputNumber, Select],
@@ -51,7 +43,6 @@ export class ChargeLines {
 
   readonly lines = input.required<ChargeLineArray>();
   readonly busy = input(false);
-  /** Wording for the add action, e.g. "Add another charge". */
   readonly addLabel = input('Add another charge');
   readonly emptyMessage = input('No charges yet.');
 
@@ -71,10 +62,6 @@ export class ChargeLines {
 
   private readonly newItemInput = viewChild<ElementRef<HTMLInputElement>>('newItemInput');
 
-  /**
-   * Active catalogue items, plus any archived one a saved line still points at
-   * — resuming an onboarding must not silently swap out a charge.
-   */
   readonly options = computed<ChargeOption[]>(() => {
     const catalog = this.catalog();
     if (!catalog) return [];
@@ -98,9 +85,6 @@ export class ChargeLines {
   constructor() {
     this.loadCatalog();
 
-    // A line saved before its catalogue item was deleted, or translated from an
-    // onboarding started under the old wizard, has a name but no id. Keep it
-    // visible by giving the picker a matching entry rather than blanking it.
     effect(() => {
       const options = this.options();
       if (options.length === 0) return;
@@ -129,7 +113,6 @@ export class ChargeLines {
     this.lines().removeAt(index);
   }
 
-  /** Picking a charge stamps its name and bill type onto the line. */
   onChargePicked(group: ChargeLineGroup, chargeItemId: string): void {
     const option = this.options().find((candidate) => candidate.value === chargeItemId);
     if (!option) return;
@@ -144,7 +127,6 @@ export class ChargeLines {
     this.newItemForm.reset({ name: '', billType: 'OTHER' });
     this.newItemError.set(null);
     this.newItemMode.set(true);
-    // The input mounts on the next change-detection pass.
     queueMicrotask(() => this.newItemInput()?.nativeElement.focus());
   }
 
@@ -153,7 +135,6 @@ export class ChargeLines {
     this.newItemError.set(null);
   }
 
-  /** Adds to the org catalogue (so it shows in Settings too) and uses it here. */
   submitNewItem(): void {
     if (this.newItemForm.invalid) {
       this.newItemError.set('Use at least 2 characters.');
@@ -181,7 +162,6 @@ export class ChargeLines {
       });
   }
 
-  /** Re-links saved lines to the catalogue by name when the id is missing. */
   private adoptOrphanLines(options: ChargeOption[]): void {
     for (const group of this.lines().controls) {
       if (group.controls.chargeItemId.value) continue;

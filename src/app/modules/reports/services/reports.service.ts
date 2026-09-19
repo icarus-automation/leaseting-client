@@ -86,11 +86,6 @@ export class ReportsService {
   }
 }
 
-/**
- * An absent `asOf` is sent as an absent parameter, never as an empty string:
- * the server reads "no date given" as "date it as of now", and an empty value
- * would fail its date validation instead.
- */
 function agingParams(query: ArAgingQuery): HttpParams {
   let params = new HttpParams();
   if (query.asOf) params = params.set('asOf', query.asOf);

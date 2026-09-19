@@ -52,13 +52,6 @@ export class Leases {
   readonly error = signal<string | null>(null);
   readonly activeOnly = signal(true);
 
-  /**
-   * Filters produced by the natural-language bar.
-   *
-   * These and the Active/All toggle are one setting: a parse that says
-   * anything about which leases to show takes the toggle with it, so the two
-   * controls can never contradict each other on screen.
-   */
   readonly nlFilters = signal<GridFilters>({});
   readonly isFiltered = computed(() => Object.keys(this.nlFilters()).length > 0);
 
@@ -102,7 +95,6 @@ export class Leases {
     this.load(1);
   }
 
-  /** A new parse from the filter bar — it owns the view from here. */
   onFiltersChange(filters: GridFilters): void {
     this.nlFilters.set(filters);
     if (Object.keys(filters).length > 0) this.activeOnly.set(false);
@@ -113,7 +105,6 @@ export class Leases {
     return leaseStatus(lease);
   }
 
-  /** Days until the lease ends — used to surface "expiring soon" inline. */
   daysLeft(lease: LeaseListItem): number | null {
     if (lease.terminatedAt) return null;
     const days = daysUntil(lease.endDate);

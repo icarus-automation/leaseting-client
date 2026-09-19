@@ -36,7 +36,6 @@ export class Login {
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
-    // UI only — not sent to the API, not yet consumed.
     rememberMe: [false],
   });
 
@@ -45,8 +44,6 @@ export class Login {
   readonly showPassword = signal(false);
   private readonly submitted = signal(false);
 
-  // A reactive tick on any form change (value / touched / status) so validation
-  // display stays correct under OnPush without manual change detection.
   private readonly formTick = toSignal(this.form.events, { initialValue: null });
 
   readonly emailError = computed(() => {
@@ -112,7 +109,6 @@ export class Login {
   }
 
   private resolveError(error: unknown): string {
-    // Already user-facing: it names the app this account belongs to.
     if (error instanceof WrongAppError) return error.message;
     if (error instanceof Error && error.message === 'NO_ORGANIZATION') {
       return 'Your account has no organization yet. Ask your administrator for an invite.';

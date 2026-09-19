@@ -19,15 +19,7 @@
     </div>
   } @else if (tenant(); as t) {
     <div class="grid items-start gap-5 min-[1100px]:grid-cols-[340px_minmax(0,1fr)]">
-      <!--
-        Left column, as one grid child.
-        The profile card and the payment read used to be two children, with the
-        second forced back to column one — which pushed the right-hand column
-        down a row and left a hole beside the profile. Stacking them here keeps
-        the grid at two cells.
-      -->
       <div class="flex flex-col gap-5">
-        <!-- ── Profile card ─────────────────────────────────────── -->
         <aside class="flex flex-col gap-4 rounded-base border border-border bg-background p-4" aria-label="Tenant profile">
           <div class="flex items-start gap-3">
             @if (t.photoUrl) {
@@ -106,20 +98,12 @@
           </button>
         </aside>
 
-        <!--
-          A second opinion about the tenant rather than another fact about
-          them, so it sits beside the profile card rather than inside it. Loads
-          on its own — the bands need a year of bills and their payments, and
-          this page is fully usable before they arrive.
-        -->
         <app-residence-care-access [tenantId]="t.id" [defaultEmail]="t.email" />
 
         <app-tenant-risk-panel [tenantId]="t.id" />
       </div>
 
-      <!-- ── Right column ─────────────────────────────────────── -->
       <div class="flex min-w-0 flex-col gap-5">
-        <!-- Stat tiles -->
         <div class="grid gap-3 sm:grid-cols-3">
           <div
             class="rounded-base border p-3.5"
@@ -142,7 +126,6 @@
           </div>
         </div>
 
-        <!-- Billing history -->
         <section class="flex flex-col gap-2" aria-label="Billing history">
           <div class="flex items-baseline justify-between gap-2">
             <h2 class="font-heading text-base font-semibold text-heading">Billing history</h2>
@@ -190,7 +173,6 @@
           }
         </section>
 
-        <!-- Lease history -->
         <section class="flex flex-col gap-2" aria-label="Lease history">
           <h2 class="font-heading text-base font-semibold text-heading">Lease history</h2>
           @if (t.leases.length === 0) {
@@ -235,7 +217,6 @@
           }
         </section>
 
-        <!-- Documents -->
         <section class="flex flex-col gap-2" aria-label="Documents">
           <div class="flex items-baseline justify-between gap-2">
             <h2 class="font-heading text-base font-semibold text-heading">Documents</h2>

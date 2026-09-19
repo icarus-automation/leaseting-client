@@ -9,7 +9,6 @@ describe('csv-export.util', () => {
     });
 
     it('quotes a cell containing a comma so the column count survives', () => {
-      // A memo like this is ordinary; unquoted it would split into two columns.
       expect(toCsv([['Rent, water, and electricity']])).toBe('"Rent, water, and electricity"');
     });
 

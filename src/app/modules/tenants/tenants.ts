@@ -52,23 +52,14 @@ export class Tenants {
   readonly meta = signal<PageMeta | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
-  /** Row to flash after a create/update so the user sees where it landed. */
   readonly flashId = signal<string | null>(null);
 
-  /**
-   * Filters produced by the natural-language bar.
-   *
-   * Held rather than folded into `load()` so paging keeps whatever narrowing
-   * is on screen — a filtered page 2 that quietly reverts to everyone is the
-   * bug this signal exists to prevent.
-   */
   readonly filters = signal<GridFilters>({});
   readonly isFiltered = computed(() => Object.keys(this.filters()).length > 0);
 
   readonly drawerVisible = signal(false);
   readonly editTarget = signal<TenantResponse | null>(null);
 
-  /** Resumable move-in wizards — rendered as a strip above the table. */
   readonly inProgressOnboardings = signal<OnboardingListItem[]>([]);
   readonly startingOnboarding = signal(false);
 
@@ -77,7 +68,6 @@ export class Tenants {
   constructor() {
     this.load(1);
 
-    // "New tenant" entry points (palette, dashboard) now start an onboarding.
     watchCreateParam(() => this.startOnboarding());
     this.loadOnboardings();
   }
@@ -142,18 +132,15 @@ export class Tenants {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (items) => this.inProgressOnboardings.set(items),
-        // Non-blocking decoration — the tenants table must not fail with it.
         error: () => this.inProgressOnboardings.set([]),
       });
   }
 
-  /** A new parse from the filter bar — always back to page one. */
   onFiltersChange(filters: GridFilters): void {
     this.filters.set(filters);
     this.load(1);
   }
 
-  /** Row emphasis: what a manager is scanning this column for. */
   balanceTone(tenant: TenantListItem): BadgeTone {
     if (tenant.maxDaysOverdue > 0) return 'destructive';
     return 'warning';

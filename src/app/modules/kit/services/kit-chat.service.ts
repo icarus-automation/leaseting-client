@@ -25,7 +25,6 @@ export class KitChatService {
     return this.http.get<KitConversationDetail>(`${this.base}/${id}`);
   }
 
-  /** Opens a conversation with its first question; the reply comes back with it. */
   start(content: string): Observable<KitConversationDetail> {
     return this.http.post<KitConversationDetail>(this.base, { content });
   }
@@ -38,25 +37,16 @@ export class KitChatService {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
 
-  /**
-   * "That, but also X." Returns the new pending turn, which the transcript
-   * appends and then polls exactly like any other document.
-   */
   refineDocument(id: string, content: string): Observable<KitChatMessage> {
     return this.http.post<KitChatMessage>(`${this.documents}/${id}/refine`, { content });
   }
 
-  /** One poll of a generating document — never served from the GET cache. */
   pollDocument(id: string): Observable<KitDocumentTurn> {
     return this.http.get<KitDocumentTurn>(`${this.documents}/${id}`, {
       headers: new HttpHeaders({ [SKIP_CACHE_HEADER]: '1' }),
     });
   }
 
-  /**
-   * Authenticated download link. Plain navigation rather than a blob fetch, so
-   * the session cookie rides along — same approach as the SOA download.
-   */
   downloadUrl(id: string): string {
     return `${this.documents}/${id}/download`;
   }

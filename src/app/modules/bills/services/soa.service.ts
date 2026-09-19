@@ -28,10 +28,6 @@ export class SoaService {
     return this.http.post<SoaResponse>(`${this.base}/${id}/resend-sms`, {});
   }
 
-  /**
-   * Authenticated download link (session cookie rides along on navigation).
-   * Used as a plain href so the browser handles the file save.
-   */
   downloadUrl(id: string): string {
     return `${this.base}/${id}/download`;
   }

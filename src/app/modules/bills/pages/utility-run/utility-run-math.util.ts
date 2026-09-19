@@ -1,9 +1,3 @@
-/**
- * Client-side mirror of the server's utility math (utility-detail.util.ts):
- * subtotal = consumed × rate; admin fee, VAT computed on the subtotal and
- * added; withholding tax computed on the subtotal and deducted. Preview only —
- * the server recomputes and its figures are what's stored.
- */
 
 export interface UtilityRowMath {
   consumed: number;
@@ -15,9 +9,7 @@ export interface UtilityRowMath {
 }
 
 export interface UtilityRates {
-  /** ₱ per consumed unit. */
   ratePerUnit: number;
-  /** Percentages 0–100, as staff type them. */
   adminFeePct: number;
   vatPct: number;
   whtPct: number;
@@ -31,7 +23,6 @@ export function round4(value: number): number {
   return Math.round((value + Number.EPSILON) * 10_000) / 10_000;
 }
 
-/** Maynilad mode: the provider bill's total ÷ its total consumption. */
 export function deriveRate(totalBillAmount: number, totalConsumption: number): number | null {
   if (totalBillAmount <= 0 || totalConsumption <= 0) return null;
   return round4(totalBillAmount / totalConsumption);

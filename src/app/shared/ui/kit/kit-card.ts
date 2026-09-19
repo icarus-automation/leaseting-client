@@ -15,15 +15,6 @@ import {
   kitEventLink,
 } from '../../../core/kit/kit.model';
 
-/**
- * Kit on the dashboard: greeting, one prioritised item, and the mascot's
- * reaction to it. Proactive by design — nothing here waits to be opened, and
- * Kit surfaces the single highest-ranked event rather than a feed, so it reads
- * as "this one today" instead of an inbox.
- *
- * The drawing is decorative only (aria-hidden). Severity is always spelled out
- * in text beside it, because an expression is not an accessible signal.
- */
 @Component({
   selector: 'app-kit-card',
   imports: [DatePipe, RouterLink, PIcon, KitSetAside],
@@ -35,18 +26,11 @@ export class KitCard {
   private readonly kit = inject(KitService);
   private readonly auth = inject(AuthService);
 
-  /**
-   * One line of positive context for the nothing-is-wrong state, supplied by
-   * the host page (which already computes it). Without it Kit's good news is a
-   * bare checkmark that says nothing — the reference this card is modelled on
-   * always pairs "you're fine" with a reason to believe it.
-   */
   readonly summary = input('');
 
   readonly severityLabels = KIT_SEVERITY_LABELS;
   readonly severityIcons = KIT_SEVERITY_ICONS;
 
-  /** Icon colour by severity. Reinforcement only — the label carries the meaning. */
   severityToneClass(severity: KitSeverity): string {
     return KIT_SEVERITY_TONES[severity];
   }
@@ -57,17 +41,11 @@ export class KitCard {
   readonly remainingCount = this.kit.remainingCount;
   readonly celebrating = this.kit.celebrating;
 
-  /**
-   * Only true when there is nothing active *and* nothing set aside. Kit's good
-   * news has to be earned: an empty active list on its own means the user
-   * clicked things away, not that the work is done.
-   */
   readonly allClear = this.kit.allClear;
   readonly setAsideCount = this.kit.setAsideCount;
 
   readonly art = computed(() => KIT_ART[this.kit.mood()]);
 
-  /** Sulk holds; the idle drift resumes once Kit has better news. */
   readonly sulking = computed(() => !this.celebrating() && this.kit.mood() === 'sad');
   readonly idling = computed(() => !this.celebrating() && !this.sulking());
 
@@ -83,11 +61,6 @@ export class KitCard {
     return event ? kitEventLink(event) : null;
   });
 
-  /**
-   * Everything behind the headline item. Rendered as chips rather than a dead
-   * "3 more" count: the card is full width now, and a number you cannot click
-   * is a worse use of that space than three things you can.
-   */
   readonly restItems = computed(() =>
     this.kit.restEvents().map((event) => ({ event, link: kitEventLink(event) })),
   );

@@ -32,15 +32,6 @@ const BASIS_OPTIONS: { value: RevenueBasis; label: string; hint: string }[] = [
   { value: 'COLLECTED', label: 'Collected', hint: 'Payments received in the period' },
 ];
 
-/**
- * Revenue by Tenant — Detail.
- *
- * Every revenue transaction in a window, grouped under the tenant it came
- * from. The basis switch decides which ledger is being read: BILLED shows what
- * was charged, COLLECTED what was actually received. They are reported side by
- * side rather than blended because a manager chasing arrears and a manager
- * reconciling a bank statement need different answers from the same month.
- */
 @Component({
   selector: 'app-revenue-by-tenant',
   imports: [FormsModule, PIcon, DatePicker, Select, PhpCurrencyPipe, Skeleton, ReportHeader],
@@ -59,7 +50,6 @@ export class RevenueByTenant {
   readonly preset = signal<DateRangePreset>('this-month');
   readonly basis = signal<RevenueBasis>('BILLED');
   readonly propertyId = signal<string>(ALL_PROPERTIES);
-  /** One signal, so the two ends of the window can never drift out of step. */
   readonly range = signal<DateRange>(resolvePreset('this-month') ?? todayOnly());
 
   readonly report = signal<RevenueByTenantReport | null>(null);
@@ -71,13 +61,11 @@ export class RevenueByTenant {
 
   readonly accrual = computed(() => this.basis() === 'BILLED');
 
-  /** The window the loaded figures actually cover, not the one being edited. */
   readonly rangeText = computed(() => {
     const report = this.report();
     return report ? rangeLabel(report.from, report.to) : '';
   });
 
-  /** Print subtitle — the window and basis the figures were pulled under. */
   readonly caption = computed(() => {
     const report = this.report();
     if (!report) return null;
@@ -87,11 +75,6 @@ export class RevenueByTenant {
 
   readonly isEmpty = computed(() => (this.report()?.groups.length ?? 0) === 0);
 
-  /**
-   * How many leading columns a group heading or the grand total spans — every
-   * column up to and including Memo, leaving the money columns free to line up
-   * under their own headers.
-   */
   readonly labelColumnSpan = computed(() => (this.accrual() ? 4 : 5));
 
   constructor() {
@@ -127,12 +110,11 @@ export class RevenueByTenant {
   onPresetChange(preset: DateRangePreset): void {
     this.preset.set(preset);
     const range = resolvePreset(preset);
-    if (!range) return; // custom — the pickers drive the dates
+    if (!range) return;
     this.range.set(range);
     this.load();
   }
 
-  /** Editing either end by hand is what "custom" means — no extra click. */
   setFrom(from: Date): void {
     this.range.update((range) => ({ ...range, from }));
     this.preset.set('custom');
@@ -210,7 +192,6 @@ export class RevenueByTenant {
       : [group.tenantName, row.date, row.kind, row.unitLabel, row.referenceNo, row.memo, row.amount];
   }
 
-  /** Pads the leading blanks so subtotals land under the columns they total. */
   private csvSubtotal(group: RevenueTenantGroup): (string | null)[] {
     return this.accrual()
       ? ['', '', '', '', group.subtotal, group.subtotalPaid, group.subtotalBalance]
@@ -228,7 +209,6 @@ export class RevenueByTenant {
   }
 }
 
-/** Unreachable fallback — `resolvePreset` only returns null for `custom`. */
 function todayOnly(): DateRange {
   const today = new Date();
   return { from: today, to: today };

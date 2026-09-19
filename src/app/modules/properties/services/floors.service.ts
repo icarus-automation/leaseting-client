@@ -36,13 +36,11 @@ export class FloorsService {
     );
   }
 
-  /** Hard delete. Backend rejects with 409 while the floor still has units. */
   delete(id: string): Observable<FloorResponse> {
     return this.http.delete<FloorResponse>(`${API_BASE_URL}/floors/${id}`);
   }
 }
 
-/** Floor endpoints are multipart (`planImage` file field); numbers go as strings. */
 function toFormData(
   payload: Partial<CreateFloorPayload>,
   planImage: File | null,

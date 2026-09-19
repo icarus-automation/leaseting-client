@@ -4,7 +4,6 @@ import { map } from 'rxjs';
 
 import { AuthService } from './auth.service';
 
-/** Blocks the app shell until the cookie session is confirmed (or bounces to login). */
 export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
@@ -14,7 +13,6 @@ export const authGuard: CanActivateFn = () => {
     .pipe(map((authenticated) => (authenticated ? true : router.parseUrl('/login'))));
 };
 
-/** Keeps signed-in users out of the login screen. */
 export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);

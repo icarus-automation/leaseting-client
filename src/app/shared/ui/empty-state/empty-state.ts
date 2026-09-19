@@ -1,7 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { PIcon } from '@primeicons/angular/p-icon';
 
-/** Teaching empty state: says what will appear here and offers the primary action. */
 @Component({
   selector: 'app-empty-state',
   imports: [PIcon],

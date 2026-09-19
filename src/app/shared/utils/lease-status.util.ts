@@ -11,7 +11,6 @@ export interface LeaseStatusResult {
   tone: BadgeTone;
 }
 
-/** Single source of the lease lifecycle label (was duplicated per page). */
 export function leaseStatus(lease: LeaseStatusLike): LeaseStatusResult {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -21,7 +20,6 @@ export function leaseStatus(lease: LeaseStatusLike): LeaseStatusResult {
   return { label: 'Active', tone: 'success' };
 }
 
-/** True while the lease is the tenant's live contract. */
 export function isLeaseActive(lease: LeaseStatusLike): boolean {
   return leaseStatus(lease).label === 'Active';
 }

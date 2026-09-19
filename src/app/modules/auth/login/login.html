@@ -97,13 +97,6 @@
       <span class="text-[13px] text-body">Keep me signed in</span>
     </label>
 
-    <!--
-      Disabled here only ever means "in flight", so it darkens to the pressed
-      shade instead of dimming. An opacity fade would drop "Signing in…" to
-      roughly 2.5:1 — and that label is status the user has to be able to read,
-      not an inactive control the contrast rules exempt. The spinner and
-      cursor carry the not-clickable cue.
-    -->
     <button
       type="submit"
       class="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-base border-none bg-primary text-sm font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:bg-primary-active motion-reduce:transition-none"

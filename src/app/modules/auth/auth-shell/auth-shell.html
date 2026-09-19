@@ -1,23 +1,6 @@
-<!--
-  DIRECTION — Leaseting sign-in, "the morning brief"
-
-  THESIS: The threshold is a dated brief, not a decorative split. It refuses the
-  SaaS default of a drenched panel holding a slogan and three feature bullets.
-  OWN-WORLD: The product's own light system, one step of tonal layering — Panel
-  Surface sheet, pure-white card, hue-262 hairlines, the app's real status
-  chips, Poppins/Work Sans, 4px corners. No second palette; no dark surface.
-  STORY: A manager sees what the product watches while nobody is logged in,
-  meets Kit, and signs in — the card is the brightest thing on the page.
-  FIRST VIEWPORT: masthead lockup + dateline over a rule; left, the claim, Kit
-  standing on the sheet with one line, and a three-row ledger marked Example;
-  right, the white sign-in card, vertically centred. Foot rule closes the sheet.
-  FORM: two-column document under a masthead (candidate 5; seed a5743128).
--->
 <main
   class="mx-auto flex min-h-[100dvh] w-full max-w-[30rem] flex-col px-6 py-8 sm:px-8 lg:max-w-[69rem] lg:px-10 lg:py-10"
 >
-  <!-- Masthead. The lockup is the page's only brand identification, so it is
-       announced rather than decorative. -->
   <header class="flex items-center justify-between gap-4 border-b border-border pb-5">
     <app-brand-logo
       class="[--brand-logo-height:26px] sm:[--brand-logo-height:30px] lg:[--brand-logo-height:34px]"
@@ -28,9 +11,6 @@
   <div
     class="grid flex-1 grid-cols-1 content-center gap-y-12 py-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,23.5rem)] lg:items-center lg:gap-x-16 lg:py-8 xl:gap-x-24"
   >
-    <!-- The task, first in the DOM: keyboard and screen-reader users reach
-         sign-in before the brief. Grid placement moves it right on desktop, so
-         reading order and visual order can differ without an order utility. -->
     <div class="lg:col-start-2 lg:row-start-1">
       <div
         class="animate-form-in rounded-base border border-border bg-background p-6 motion-reduce:animate-none sm:p-7"
@@ -39,7 +19,6 @@
       </div>
     </div>
 
-    <!-- The brief -->
     <section class="min-w-0 lg:col-start-1 lg:row-start-1">
       <h2
         class="font-heading text-[27px] font-semibold leading-[1.15] tracking-[-0.02em] text-heading sm:text-[30px] lg:max-w-[21ch] lg:text-[40px] lg:leading-[1.1]"
@@ -54,7 +33,6 @@
         <span class="auth-kit-face animate-kit-idle motion-reduce:animate-none" aria-hidden="true"></span>
 
         <div class="auth-kit-bubble min-w-0 flex-1 rounded-base border border-border bg-background px-4 py-3.5">
-          <!-- Attribution, not decoration: this is the only thing that names him. -->
           <span class="font-heading text-[12.5px] font-semibold text-primary">Kit</span>
           <p class="mt-1.5 text-[13.5px] leading-[1.6] text-body">
             I check rent, renewals, and vacant units. What needs a decision is on the dashboard when you sign in.
@@ -65,7 +43,6 @@
       <div class="mt-8 border-t border-border pt-5">
         <div class="flex items-center justify-between gap-4">
           <h3 class="font-heading text-[13.5px] font-semibold text-heading">Examples</h3>
-          <!-- Nobody is signed in yet: this must never read as their portfolio. -->
           <span
             class="shrink-0 rounded-full border border-border bg-background px-2 py-[3px] text-[11px] font-medium text-muted"
           >Example</span>
@@ -83,7 +60,6 @@
                 <span class="mt-1 block text-[12.5px] leading-[1.5] text-muted">{{ item.detail }}</span>
               </span>
 
-              <!-- Colour never travels alone: dot-shaped icon plus the label. -->
               <span
                 class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11.5px] font-medium"
                 [class]="severityChip[item.severity]"

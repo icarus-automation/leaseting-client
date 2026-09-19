@@ -80,23 +80,18 @@ export class PropertyDetailPage {
 
   readonly selectedUnitId = signal<string | null>(null);
 
-  // Drawers
   readonly propertyDrawerVisible = signal(false);
   readonly floorDrawerVisible = signal(false);
   readonly floorEditTarget = signal<PropertyFloorItem | null>(null);
   readonly unitDrawerVisible = signal(false);
   readonly unitEditTarget = signal<UnitFormTarget | null>(null);
 
-  // Map-units mode
   readonly mapMode = signal(false);
   readonly mapTarget = signal<FloorUnitItem | null>(null);
   readonly savingCoordinates = signal(false);
-  /** Flashes the unit picker when the canvas is clicked with no target unit. */
   readonly pickerHint = signal(false);
-  /** After a save, target the next unmapped unit once the fresh floor arrives. */
   private readonly autoAdvance = signal(false);
 
-  /** The Konva polygon editor, present only while mapping. */
   readonly mapEditor = viewChild(FloorMapEditor);
 
   readonly activeFloor = computed(() => {
@@ -104,10 +99,8 @@ export class PropertyDetailPage {
     return this.property()?.floors.find((floor) => floor.id === id) ?? null;
   });
 
-  /** Mapping needs a plan image to draw on. */
   readonly canMapUnits = computed(() => !!this.activeFloor()?.planImageUrl);
 
-  /** Units without a shape yet — pick targets from these chips while mapping. */
   readonly unmappedUnits = computed(
     () =>
       this.floor()?.units.filter(
@@ -115,15 +108,11 @@ export class PropertyDetailPage {
       ) ?? [],
   );
 
-  /** Toolbar guidance for the current draft state, incl. the Enter shortcut. */
   readonly mapDrawHint = computed(() => {
     const editor = this.mapEditor();
     if (!editor) return '';
     if (editor.tapToFill()) {
       const rooms = editor.selectedRooms();
-      // Says the quiet part out loud: a unit is usually more than one room, and
-      // the second tap is the whole trick on a plan where the ensuite door is
-      // drawn shut.
       if (rooms === 0) return ' · tap inside a room, and its ensuite comes with it';
       return ` · ${rooms} room${rooms === 1 ? '' : 's'} · tap another to add it, tap one again to drop it`;
     }
@@ -135,12 +124,6 @@ export class PropertyDetailPage {
 
   readonly tapToFillOn = computed(() => this.mapEditor()?.tapToFill() ?? false);
 
-  /**
-   * Tap-to-fill traces one room from the plan image itself — no model, no
-   * upload. It stays a mode rather than becoming the default because it only
-   * works on a plan with closed walls, and a manager who taps and gets nothing
-   * should still have the hand-drawing they already know underneath.
-   */
   toggleTapToFill(): void {
     const editor = this.mapEditor();
     if (!editor) return;
@@ -272,7 +255,6 @@ export class PropertyDetailPage {
       });
   }
 
-  /** Removes the stored shape for the current target (keeps the unit itself). */
   clearMapping(): void {
     const target = this.mapTarget();
     if (!target || (target.mapCoordinates?.points?.length ?? 0) < 3) return;
@@ -391,10 +373,7 @@ export class PropertyDetailPage {
         next: (floor) => {
           this.floor.set(floor);
           this.floorLoading.set(false);
-          // Plan image may have been removed while mapping (floor edit drawer).
           if (this.mapMode() && !floor.planImageUrl) this.exitMapMode();
-          // Mapping flow: after a save, hand the user the next unmapped unit —
-          // resolved against the fresh floor so no stale unit refs survive.
           if (this.mapMode() && this.autoAdvance()) {
             this.autoAdvance.set(false);
             const next = floor.units.find(

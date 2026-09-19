@@ -19,16 +19,6 @@ import {
 import { ReportFiltersService } from '../../services/report-filters.service';
 import { ReportsService } from '../../services/reports.service';
 
-/**
- * Void Audit: the stays struck off the floor, with the reason and the person
- * who decided it.
- *
- * There is no money column and that is not an omission. A void only ever hits
- * an open stay, which was never priced and never collected on, so any peso
- * figure here would be one this system invented. What a void costs is the stay
- * it erased; what the audit is for is the pattern behind it, which is why the
- * page leads with who voided rather than with how many.
- */
 @Component({
   selector: 'app-void-audit',
   imports: [PIcon, Skeleton, ParkingScopeFilter, ReportHeader],

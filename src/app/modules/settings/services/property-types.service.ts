@@ -10,7 +10,6 @@ export class PropertyTypesService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/property-types`;
 
-  /** Full org list, archived included (Settings shows both; pickers filter). */
   list(): Observable<PropertyTypeResponse[]> {
     return this.http.get<PropertyTypeResponse[]>(this.base);
   }
@@ -23,7 +22,6 @@ export class PropertyTypesService {
     return this.http.patch<PropertyTypeResponse>(`${this.base}/${id}`, { name });
   }
 
-  /** Soft archive — the type leaves pickers but stays on existing properties. */
   archive(id: string): Observable<PropertyTypeResponse> {
     return this.http.delete<PropertyTypeResponse>(`${this.base}/${id}`);
   }

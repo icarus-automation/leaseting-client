@@ -41,16 +41,11 @@ export class PropertiesService {
     );
   }
 
-  /** Soft archive. Backend rejects with 409 while the property has active leases. */
   archive(id: string): Observable<PropertyResponse> {
     return this.http.delete<PropertyResponse>(`${this.base}/${id}`);
   }
 }
 
-/**
- * Property create/update are multipart endpoints (optional `image` file field).
- * Content-Type stays unset so the browser writes the multipart boundary.
- */
 function toFormData(
   payload: Partial<CreatePropertyPayload>,
   image: File | null,

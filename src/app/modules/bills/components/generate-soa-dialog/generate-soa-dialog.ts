@@ -36,11 +36,6 @@ interface LeaseOption {
   label: string;
 }
 
-/**
- * On-demand Statement of Account: pick a lease, tick the unpaid bills to
- * include, and get a styled .xlsx — replacing the spreadsheet the client used
- * to assemble by hand. Optionally texts the tenant a one-line summary.
- */
 @Component({
   selector: 'app-generate-soa-dialog',
   imports: [DatePipe, FormsModule, PIcon, Select, PhpCurrencyPipe, ErrorBanner, FormDialog, SoaLines],
@@ -56,7 +51,6 @@ export class GenerateSoaDialog {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly visible = model.required<boolean>();
-  /** Preselects the lease and hides the picker (e.g. from a lease row). */
   readonly presetLeaseId = input<string | null>(null);
   readonly generated = output<SoaResponse>();
 
@@ -71,7 +65,6 @@ export class GenerateSoaDialog {
   readonly sendSms = signal(false);
   readonly generating = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  /** Set once generation succeeds — the dialog flips to the download state. */
   readonly result = signal<SoaResponse | null>(null);
 
   readonly smsAvailable = computed(() => this.auth.features().sms);
@@ -176,7 +169,6 @@ export class GenerateSoaDialog {
       .subscribe({
         next: (page) => {
           this.unpaidBills.set(page.data);
-          // Everything checked by default — the common case is "all pending".
           this.checkedBillIds.set(new Set(page.data.map((bill) => bill.id)));
           this.loadingBills.set(false);
         },

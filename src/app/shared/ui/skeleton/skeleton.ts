@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
 
-/** Loading placeholder blocks. Purely decorative — hidden from AT. */
 @Component({
   selector: 'app-skeleton',
   template: `
@@ -43,6 +42,5 @@ import { Component, ChangeDetectionStrategy, computed, input } from '@angular/co
 })
 export class Skeleton {
   readonly variant = input<'card' | 'row' | 'panel'>('row');
-  /** Pseudo-random but stable line widths for the panel variant. */
   readonly lines = computed(() => [90, 65, 78, 50, 82, 60].slice(0, 6));
 }

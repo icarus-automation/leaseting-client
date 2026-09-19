@@ -14,7 +14,6 @@ export class RatePlansService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/rate-plans`;
 
-  /** Full org list, archived included (Settings shows both; pickers filter). */
   list(): Observable<RatePlanResponse[]> {
     return this.http.get<RatePlanResponse[]>(this.base);
   }
@@ -27,7 +26,6 @@ export class RatePlansService {
     return this.http.patch<RatePlanResponse>(`${this.base}/${id}`, payload);
   }
 
-  /** Soft archive — the plan leaves the picker; history that used it is untouched. */
   archive(id: string): Observable<RatePlanResponse> {
     return this.http.delete<RatePlanResponse>(`${this.base}/${id}`);
   }

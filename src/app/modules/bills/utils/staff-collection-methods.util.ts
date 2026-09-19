@@ -1,10 +1,6 @@
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from '../../../core/models/enums';
 import type { PaymentDestinationResponse } from '../../../core/models/payment-destination.types';
 
-/**
- * Enabled destinations that apply to this property — property rows win over
- * the organization fallback, matching GET /portal/bills/:id/destinations.
- */
 export function effectiveDestinationsForProperty(
   destinations: PaymentDestinationResponse[],
   propertyId: string | null | undefined,
@@ -17,7 +13,6 @@ export function effectiveDestinationsForProperty(
   return enabled.filter((destination) => destination.propertyId === null);
 }
 
-/** Methods staff can record. Walk-in cash only when nothing is configured. */
 export function staffCollectionMethods(
   destinations: PaymentDestinationResponse[],
   propertyId: string | null | undefined,

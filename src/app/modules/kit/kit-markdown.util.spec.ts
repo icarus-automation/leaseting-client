@@ -1,6 +1,5 @@
 import { parseMarkdown, parseSpans } from './kit-markdown.util';
 
-/** The visible text of a parsed line, ignoring which runs were emphasised. */
 const flatten = (text: string): string =>
   parseSpans(text)
     .map((span) => span.text)
@@ -8,8 +7,6 @@ const flatten = (text: string): string =>
 
 describe('parseSpans', () => {
   it('reads bold, which is the whole reason this exists', () => {
-    // The reported bug: "**Create a bill**: Go to Bills" arrived on screen
-    // with its asterisks showing.
     expect(parseSpans('**Create a bill**: Go to Bills')).toEqual([
       { text: 'Create a bill', bold: true, italic: false, code: false },
       { text: ': Go to Bills', bold: false, italic: false, code: false },
@@ -33,8 +30,6 @@ describe('parseSpans', () => {
   });
 
   it('leaves an unpaired marker as the character it is', () => {
-    // Losing text is far worse than showing a stray asterisk, so anything
-    // that does not close stays exactly as written.
     expect(flatten('2 * 3 = 6')).toBe('2 * 3 = 6');
     expect(flatten('a ** b')).toBe('a ** b');
     expect(flatten('half **open')).toBe('half **open');
@@ -42,8 +37,6 @@ describe('parseSpans', () => {
   });
 
   it('leaves underscores alone, because identifiers use them', () => {
-    // `snake_case_name` rendering as italics would be a worse bug than the
-    // one this file fixes.
     expect(flatten('the unpaid_bills dataset')).toBe('the unpaid_bills dataset');
     expect(parseSpans('the unpaid_bills dataset')).toHaveLength(1);
   });
@@ -53,8 +46,6 @@ describe('parseSpans', () => {
       ['plain text', 'plain text'],
       ['**a**b*c*d`e`f', 'abcdef'],
       ['**₱12,500.00** is due', '₱12,500.00 is due'],
-      // Nothing below closes cleanly, so nothing is treated as a marker and
-      // the text survives intact — the failure mode to prefer by far.
       ['****', '****'],
       ['`` ', '`` '],
       ['a ** b', 'a ** b'],
@@ -107,7 +98,6 @@ describe('parseMarkdown', () => {
   });
 
   it('does not turn a sentence that merely starts with a dash into a list', () => {
-    // "-5 days overdue" is a figure, not a bullet: a bullet needs the space.
     expect(parseMarkdown('-5 days overdue')[0].kind).toBe('paragraph');
   });
 

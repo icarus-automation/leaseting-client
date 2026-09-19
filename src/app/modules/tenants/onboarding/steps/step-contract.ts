@@ -22,10 +22,6 @@ const ACCEPTED_TYPES = 'application/pdf,image/png,image/jpeg,image/webp';
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const DOC_LABEL = 'Onboarding · Signed contract';
 
-/**
- * Step 4 — the signed lease contract, as a scan or photo. Signing sometimes
- * happens at physical turnover, so the upload can be explicitly deferred.
- */
 @Component({
   selector: 'app-step-contract',
   imports: [PIcon],
@@ -43,7 +39,6 @@ export class StepContract {
 
   readonly acceptedTypes = ACCEPTED_TYPES;
 
-  /** Saved step prefill on resume; local uploads/toggles overwrite. */
   readonly documentId = linkedSignal<string | null>(() => {
     const saved = this.detail().stepsState.contract?.data as Partial<ContractStepData> | undefined;
     return saved?.documentId ?? null;

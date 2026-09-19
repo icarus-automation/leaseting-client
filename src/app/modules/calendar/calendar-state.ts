@@ -46,7 +46,6 @@ export function readCalendarState(params: ParamMap, compact: boolean): CalendarS
     view: view === 'month' || view === 'week' || view === 'agenda' ? view : compact ? 'agenda' : 'month',
     propertyId: /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(property) ? property : '',
     q: (params.get('q') ?? '').trim().slice(0, 120),
-    // Explicit none survives reload; malformed links recover to the useful default.
     types: typeParam === 'none' ? [] : validTypes.length ? validTypes : [...ALL_EVENT_TYPES],
     scope: params.get('scope') === 'outstanding' ? 'outstanding' : 'all',
   };
@@ -69,7 +68,6 @@ export function matchesCalendarFilters(entry: CalendarEntry, state: CalendarStat
 }
 
 export function entryTone(entry: CalendarEntry): BadgeTone {
-  // Calendar color describes bill payment status only; milestone dates stay neutral.
   if (entry.type !== 'BILL_DUE') return 'neutral';
   if (entry.status === 'OVERDUE') return 'destructive';
   if (entry.status === 'PAID') return 'success';

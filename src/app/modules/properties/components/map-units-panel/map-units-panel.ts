@@ -3,11 +3,6 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import type { FloorUnitItem } from '../../../../core/models/property.types';
 
-/**
- * Right-rail checklist while mapping: every unit on the floor with its
- * mapped/unmapped state, live progress, and click-to-target. Replaces the old
- * below-the-canvas chip tray (out of sight) and the static how-to aside.
- */
 @Component({
   selector: 'app-map-units-panel',
   imports: [PIcon],

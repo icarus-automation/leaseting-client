@@ -28,7 +28,6 @@ export class PortfolioOverview {
   readonly aging = signal<AgingBucket[]>([]);
   readonly occupancy = signal<PropertyOccupancy[]>([]);
 
-  /** Best month drives the 100% bar; others scale against it. */
   readonly collectionsMax = computed(() =>
     this.collections().reduce((max, month) => Math.max(max, Number(month.total)), 0),
   );

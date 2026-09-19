@@ -1,9 +1,3 @@
-/*
- * Kept as CSS (not Tailwind): the ground colour has to reach past <main> so an
- * overscroll never flashes a different surface behind the sheet, and Kit's
- * crop is sprite arithmetic that arbitrary utilities would make unreadable.
- * Everything else lives in the template as utilities.
- */
 
 :host {
   display: block;
@@ -11,34 +5,23 @@
   background-color: var(--surface);
 }
 
-/*
- * Kit, standing on the sheet itself.
- *
- * The dashboard gives him a bordered stage because it drops him into a dense
- * page of data and he needs a frame to be read as a figure rather than an
- * illustration in a table. The sign-in sheet is quiet enough that the frame
- * would only add a box; the drawing's own black contour holds him against
- * Panel Surface unaided.
- *
- * Source PNGs are 1536x2048 with transparent padding; the opaque artwork sits
- * at x 404-1145, y 84-2009 (741 x 1925), identical across every mood file.
- * --kit-px is one source pixel. Resize Kit by changing --kit-w alone.
- */
 .auth-kit-face {
   --kit-w: 2.5rem;
+  --kit-sprite-width: 1536;
+  --kit-sprite-height: 2048;
+  --kit-face-left: 404;
+  --kit-face-top: 84;
+  --kit-face-height: 1925;
   --kit-px: calc(var(--kit-w) / 741);
 
   display: block;
   flex-shrink: 0;
   width: var(--kit-w);
-  height: calc(1925 * var(--kit-px));
-  /* Neutral, not happy: Kit is at rest and watching, and no event has been
-     computed yet. Moods are semantic here as everywhere else. */
+  height: calc(var(--kit-face-height) * var(--kit-px));
   background-image: url('/kit/kit-neutral.png');
   background-repeat: no-repeat;
-  background-size: calc(1536 * var(--kit-px)) calc(2048 * var(--kit-px));
-  background-position: calc(-404 * var(--kit-px)) calc(-84 * var(--kit-px));
-  /* Pivot at the key tip so the idle reads as a lean, not a spin. */
+  background-size: calc(var(--kit-sprite-width) * var(--kit-px)) calc(var(--kit-sprite-height) * var(--kit-px));
+  background-position: calc(var(--kit-face-left) * -1 * var(--kit-px)) calc(var(--kit-face-top) * -1 * var(--kit-px));
   transform-origin: bottom center;
 }
 
@@ -48,10 +31,6 @@
   }
 }
 
-/*
- * Speech-bubble notch: the bubble's own 1px border with one corner turned into
- * an arrow, held level with Kit's head. Matches the dashboard card's idiom.
- */
 .auth-kit-bubble {
   position: relative;
 }

@@ -20,7 +20,6 @@ export class UnitsService {
     return this.http.post<UnitResponse>(`${API_BASE_URL}/floors/${floorId}/units`, payload);
   }
 
-  /** Cross-property picker rows; filter by derived occupancy when given. */
   listAll(occupancy?: UnitStatus): Observable<UnitPickerItem[]> {
     const params = occupancy ? { params: { occupancy } } : {};
     return this.http.get<UnitPickerItem[]>(`${API_BASE_URL}/units`, params);
@@ -30,12 +29,10 @@ export class UnitsService {
     return this.http.get<UnitDetail>(`${API_BASE_URL}/units/${id}`);
   }
 
-  /** Also the endpoint for saving `mapCoordinates` from the map-units editor. */
   update(id: string, payload: UpdateUnitPayload): Observable<UnitResponse> {
     return this.http.patch<UnitResponse>(`${API_BASE_URL}/units/${id}`, payload);
   }
 
-  /** Soft archive. Backend rejects with 409 while the unit has an active lease. */
   archive(id: string): Observable<UnitResponse> {
     return this.http.delete<UnitResponse>(`${API_BASE_URL}/units/${id}`);
   }

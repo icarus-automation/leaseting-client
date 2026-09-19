@@ -90,31 +90,12 @@ export class FloorMapEditor {
   readonly target = input<FloorUnitItem | null>(null);
 
   readonly unitPicked = output<FloorUnitItem>();
-  /** Delete pressed on an untouched saved shape — parent removes the stored mapping. */
   readonly clearRequested = output<void>();
-  /** Canvas clicked with no target unit picked — parent nudges the unit picker. */
   readonly hintRequested = output<void>();
-  /** A tap-to-fill attempt that produced nothing usable, in the user's words. */
   readonly traceFailed = output<string>();
 
-  /**
-   * Tap-to-fill mode: one click inside a room traces its outline.
-   *
-   * Off by default. It is an accelerator over hand-drawing, not a replacement
-   * — the result lands as an ordinary editable draft with its own undo entry,
-   * so a trace that comes back slightly wrong is nudged rather than redone.
-   */
   readonly tapToFill = signal(false);
   readonly tracing = signal(false);
-  /**
-   * How many rooms the current outline is made of.
-   *
-   * Surfaced because on most plans a unit is more than one enclosure — a
-   * bedroom and its ensuite are separated by a partition with the door drawn
-   * shut, so they are two sealed areas that no single fill can return
-   * together. The count is how the manager knows whether the bathroom came
-   * along, without having to squint at the outline.
-   */
   readonly selectedRooms = signal(0);
 
   readonly points = signal<NormPoint[]>([]);
@@ -122,15 +103,9 @@ export class FloorMapEditor {
   readonly imageReady = signal(false);
   readonly imageError = signal(false);
 
-  /** Plan height / width, from the loaded image. 0.6 until it arrives. */
   private readonly aspect = signal(0.6);
   private readonly viewportHeight = signal(0);
 
-  /**
-   * Widest the canvas may be before the plan runs off the bottom of the page.
-   * The box is centred at that width, so a portrait plan stays fully visible
-   * instead of forcing a scroll for every click while mapping.
-   */
   readonly maxPlanWidth = computed(() => {
     const viewport = this.viewportHeight();
     if (viewport === 0) return null;
@@ -155,35 +130,19 @@ export class FloorMapEditor {
   private unitsLayer: Konva.Layer | null = null;
   private draftLayer: Konva.Layer | null = null;
   private planImage: HTMLImageElement | null = null;
-  /**
-   * Greyscale pixels behind the plan, sampled once per image.
-   *
-   * Cached because reading them costs a full canvas draw and a getImageData,
-   * and a manager mapping a floor taps a dozen rooms in a row.
-   */
   private planPixels: PlanLuminance | null = null;
-  /**
-   * The plan broken into rooms, built once per image.
-   *
-   * The expensive half — threshold, close, label every enclosure — does not
-   * depend on where anyone taps, and a manager mapping a floor taps a dozen
-   * rooms in a row.
-   */
   private planIndex: PlanIndex | null = null;
-  /** Which rooms the current outline covers, for add/remove on tap. */
   private selectedRegions = new Set<number>();
   private cursor: { x: number; y: number } | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private loadedUrl: string | null = null;
   private primaryColor = FALLBACK_PRIMARY;
 
-  /** Live draft nodes, kept around so a drag can reposition them instead of rebuilding. */
   private draftAnchors: Konva.Circle[] = [];
   private draftShapeLine: Konva.Line | null = null;
   private draftGuideLine: Konva.Line | null = null;
   private draftRenderedClosed = false;
 
-  /** Cleanup fn for the global keydown listener. */
   private keydownCleanup: (() => void) | null = null;
 
   constructor() {
@@ -214,8 +173,6 @@ export class FloorMapEditor {
       this.floor();
       if (!this.stage) return;
       untracked(() => {
-        // A different unit means a different outline; the rooms behind the old
-        // one are no longer anything a tap should toggle.
         this.clearRoomSelection();
         this.seedDraftFromTarget(target);
         this.renderGrid();
@@ -283,7 +240,6 @@ export class FloorMapEditor {
     this.cursor = null;
   }
 
-  // ── Stage setup ────────────────────────────────────────────────
 
   private initStage(): void {
     const host = this.container().nativeElement;
@@ -340,11 +296,6 @@ export class FloorMapEditor {
     image.src = url;
   }
 
-  /**
-   * The canvas fills its box, and the box is already capped by maxPlanWidth —
-   * so the stage keeps the image's exact aspect and normalized (0-1)
-   * coordinates go on mapping 1:1 whatever the viewport does.
-   */
   private fitStage(): void {
     if (!this.stage || !this.imageLayer) return;
     const host = this.container().nativeElement;
@@ -363,7 +314,6 @@ export class FloorMapEditor {
     this.renderDraft();
   }
 
-  // ── Keyboard shortcuts ─────────────────────────────────────────
 
   private bindKeyboard(): void {
     const listener = (e: KeyboardEvent) => {
@@ -405,10 +355,6 @@ export class FloorMapEditor {
     if (this.canSave()) this.saveRequested.emit();
   }
 
-  /**
-   * Delete on an untouched saved shape removes the stored mapping; any
-   * in-progress edit only discards the local draft.
-   */
   private onDeleteKey(): void {
     const savedShape = (this.target()?.mapCoordinates?.points?.length ?? 0) >= 3;
     const untouched = this.undoStack().length === 0 && this.redoStack().length === 0;
@@ -426,7 +372,6 @@ export class FloorMapEditor {
     return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (active as HTMLElement).isContentEditable;
   }
 
-  // ── Drawing interactions ───────────────────────────────────────
 
   private stagePointer(): { x: number; y: number } | null {
     const stage = this.stage;
@@ -443,8 +388,6 @@ export class FloorMapEditor {
     const pos = this.stagePointer();
     if (!pos || !this.stage) return;
 
-    // Tap-to-fill replaces the whole draft, so it is allowed on a closed shape
-    // — retracing a room you already outlined is the common correction.
     if (this.tapToFill()) {
       this.traceAt(pos);
       return;
@@ -466,28 +409,6 @@ export class FloorMapEditor {
     this.points.update((current) => [...current, this.toNorm(pos)]);
   }
 
-  /**
-   * One tap inside a room, turned into its outline.
-   *
-   * The result goes through the same undo stack as a hand-drawn shape, so a
-   * trace is always one Ctrl-Z from whatever was there before. Failures are
-   * reported rather than swallowed: a tap that silently does nothing reads as
-   * a broken canvas, and the reason is usually something the person can fix on
-   * their next tap.
-   */
-  /**
-   * One tap, turned into part of a unit's outline.
-   *
-   * Tapping an unselected room adds it — along with any sub-room that belongs
-   * with it, which is how a bedroom brings its ensuite. Tapping a room already
-   * in the outline takes it back out. That is the whole interaction, and it is
-   * deliberately the same two gestures on every plan: the automatic half is an
-   * accelerator, not a requirement, so a drawing whose conventions this code
-   * has never seen still maps in two taps per room instead of eight drags.
-   *
-   * Nothing is committed until the trace succeeds, so a rejected selection
-   * leaves the outline exactly as it was.
-   */
   private traceAt(pos: { x: number; y: number }): void {
     const index = this.planIndexOrBuild();
     if (!index || !this.stage) {
@@ -534,11 +455,6 @@ export class FloorMapEditor {
     this.closed.set(true);
   }
 
-  /**
-   * Forgotten whenever the outline stops being the one these rooms produced —
-   * an undo, a reset, a different unit. Without that, the next tap would
-   * toggle a room out of a shape it is no longer part of.
-   */
   private clearRoomSelection(): void {
     this.selectedRegions = new Set();
     this.selectedRooms.set(0);
@@ -560,8 +476,6 @@ export class FloorMapEditor {
   }
 
   private onStageMouseMove(): void {
-    // No rubber band in tap-to-fill: there is no partial shape being extended,
-    // and a line chasing the cursor would say otherwise.
     if (this.tapToFill() || this.closed() || this.points().length === 0) return;
     this.cursor = this.stagePointer();
     this.renderDraft();
@@ -574,7 +488,6 @@ export class FloorMapEditor {
     }
   }
 
-  // ── Rendering ──────────────────────────────────────────────────
 
   private renderGrid(): void {
     const layer = this.gridLayer;
@@ -764,7 +677,6 @@ export class FloorMapEditor {
       }
     }
 
-    // Vertex anchors — draggable once placed.
     px.forEach((p, index) => {
       const isFirst = index === 0;
       const snappable = isFirst && !closed && pts.length >= 3;
@@ -800,7 +712,6 @@ export class FloorMapEditor {
     layer.batchDraw();
   }
 
-  // ── Draft seeding ──────────────────────────────────────────────
 
   private seedDraftFromTarget(target: FloorUnitItem | null): void {
     this.selectedUnitId.set(target?.id ?? null);
@@ -815,7 +726,6 @@ export class FloorMapEditor {
     }
   }
 
-  // ── Helpers ────────────────────────────────────────────────────
 
   private toPx([x, y]: NormPoint): { x: number; y: number } {
     const stage = this.stage;
@@ -844,7 +754,6 @@ export class FloorMapEditor {
     return { x: sum.x / px.length, y: sum.y / px.length };
   }
 
-  /** Muted fill + solid status stroke, matching FloorPlanViewer's tone classes. */
   private unitFill(unit: FloorUnitItem): { fill: string; stroke: string } {
     switch (unitTone(unit)) {
       case 'vacant':

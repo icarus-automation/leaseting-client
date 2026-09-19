@@ -11,7 +11,14 @@ import {
   envelopeInterceptor,
   sessionExpiredInterceptor,
 } from './core/http/api.interceptors';
-import { cacheInterceptor } from './core/http/cache.interceptor';
+import { cacheWireResponseInterceptor } from './core/http/cache.interceptor';
+
+const httpInterceptorsOuterToInner = [
+  credentialsInterceptor,
+  envelopeInterceptor,
+  sessionExpiredInterceptor,
+  cacheWireResponseInterceptor,
+] as const;
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,15 +26,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(
       withFetch(),
-      // cacheInterceptor is last so it sits innermost: it stores the raw
-      // enveloped body and replays it back out through envelopeInterceptor,
-      // making a cache hit indistinguishable from a live response.
-      withInterceptors([
-        credentialsInterceptor,
-        envelopeInterceptor,
-        sessionExpiredInterceptor,
-        cacheInterceptor,
-      ]),
+      withInterceptors([...httpInterceptorsOuterToInner]),
     ),
     MessageService,
     ConfirmationService,

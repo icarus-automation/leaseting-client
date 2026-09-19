@@ -4,7 +4,6 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import { SETTINGS_GROUPS } from './settings-nav';
 
-/** Settings index: grouped cards, one per configurable area. */
 @Component({
   selector: 'app-settings',
   imports: [RouterLink, PIcon],

@@ -2,14 +2,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
 
-/**
- * Shared chrome for a single report: breadcrumb back to the catalog, title,
- * and a slot for the report's own toolbar.
- *
- * `caption` is the one line that survives printing — the window and basis the
- * figures were pulled under. A printed report that doesn't say what it covers
- * is a page of numbers nobody can defend in a meeting.
- */
 @Component({
   selector: 'app-report-header',
   imports: [RouterLink, PIcon],
@@ -45,6 +37,5 @@ import { PIcon } from '@primeicons/angular/p-icon';
 export class ReportHeader {
   readonly title = input.required<string>();
   readonly description = input.required<string>();
-  /** Print-only subtitle naming the exact window and basis. */
   readonly caption = input<string | null>(null);
 }

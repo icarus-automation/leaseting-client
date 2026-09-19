@@ -16,7 +16,6 @@ export class OnboardingsService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/onboardings`;
 
-  /** Both ids are optional prefills; see the backend CreateOnboardingDTO. */
   create(payload: { tenantId?: string; unitId?: string } = {}): Observable<OnboardingDetail> {
     return this.http.post<OnboardingDetail>(this.base, payload);
   }
@@ -29,12 +28,10 @@ export class OnboardingsService {
     return this.http.get<OnboardingDetail>(`${this.base}/${id}`);
   }
 
-  /** Persists one step (validated per-step server-side) and advances the resume point. */
   updateStep(id: string, stepKey: OnboardingStepKey, data: OnboardingStepData): Observable<OnboardingDetail> {
     return this.http.patch<OnboardingDetail>(`${this.base}/${id}/steps/${stepKey}`, { data });
   }
 
-  /** Creates the lease + opening bills + payments in one transaction. */
   complete(id: string): Observable<OnboardingDetail> {
     return this.http.post<OnboardingDetail>(`${this.base}/${id}/complete`, {});
   }

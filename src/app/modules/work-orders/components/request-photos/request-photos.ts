@@ -13,20 +13,10 @@ import type { Subscription } from 'rxjs';
 import { MaintenanceRequestsService } from '../../services/maintenance-requests.service';
 
 interface PhotoSlot {
-  /** Object URL once the photo has loaded. */
   src: string | null;
   failed: boolean;
 }
 
-/**
- * A request's photos, up to three: one large view, plus thumbnails to switch
- * it when there is more than one.
- *
- * The photos are private and served no-store, so each one is fetched once with
- * the session cookie and held as an object URL while the request is on screen.
- * The large view and its thumbnail share that URL instead of downloading the
- * same file twice.
- */
 @Component({
   selector: 'app-request-photos',
   imports: [PIcon],
@@ -87,7 +77,6 @@ export class RequestPhotos {
   private readonly requests = inject(MaintenanceRequestsService);
 
   readonly urls = input.required<string[]>();
-  /** The request title, for alt text. */
   readonly title = input.required<string>();
 
   readonly slots = signal<PhotoSlot[]>([]);
@@ -97,7 +86,6 @@ export class RequestPhotos {
     () => `${this.title()}, photo ${this.selected() + 1} of ${this.slots().length}`,
   );
 
-  /** A re-read request hands over a new array with the same URLs, which is no reason to download again. */
   private readonly photoUrls = computed(() => this.urls(), { equal: sameUrls });
 
   constructor() {

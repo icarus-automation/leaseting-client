@@ -57,7 +57,6 @@
       </button>
     </div>
   } @else if (isFirstRun()) {
-    <!-- First-run guided setup: teaches the core flow instead of empty zeros. -->
     <section class="rounded-base border border-border bg-background p-6" aria-label="Getting started">
       <h2 class="font-heading text-lg font-semibold text-heading">Set up your portfolio</h2>
       <p class="mt-1 max-w-[60ch] text-sm text-muted">
@@ -95,7 +94,6 @@
       </a>
     </section>
   } @else {
-    <!-- Stat strip — flat, bordered, every tile links to its surface. -->
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <a
         routerLink="/properties"
@@ -147,11 +145,7 @@
       </a>
     </div>
 
-    <!-- Overdue bills and expiring leases used to be listed here. Kit surfaces
-         both, ranked and with the same deep links, so the panels were the same
-         facts told twice — and drifted out of step with Kit between sweeps. -->
 
-    <!-- Portfolio at a glance: one row per property with an occupancy bar. -->
     <section class="flex flex-col overflow-hidden rounded-base border border-border" aria-label="Portfolio">
       <header class="flex items-center justify-between gap-2 border-b border-border bg-surface px-4 py-2.5">
         <h2 class="text-[13px] font-semibold text-heading">Portfolio</h2>

@@ -45,7 +45,6 @@ export class PropertyTypeSettings {
   readonly renaming = signal(false);
   readonly renameError = signal<string | null>(null);
 
-  /** Row currently waiting on an archive/restore round-trip. */
   readonly busyId = signal<string | null>(null);
   readonly flashId = signal<string | null>(null);
 
@@ -102,7 +101,6 @@ export class PropertyTypeSettings {
     this.editingId.set(item.id);
     this.editName.set(item.name);
     this.renameError.set(null);
-    // The input renders on the next change-detection pass.
     queueMicrotask(() => this.renameInput()?.nativeElement.focus());
   }
 
@@ -196,7 +194,6 @@ export class PropertyTypeSettings {
       });
   }
 
-  /** Insert or update, keeping the order the server would have returned. */
   private replaceItem(item: PropertyTypeResponse): void {
     this.items.update((items) =>
       sortLookupRows([...(items ?? []).filter((existing) => existing.id !== item.id), item]),

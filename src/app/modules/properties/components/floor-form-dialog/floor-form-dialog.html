@@ -47,7 +47,6 @@
       <span class="text-[13px] font-medium text-heading">Floor plan image <span class="font-normal text-muted">(optional)</span></span>
 
       @if (cropSource(); as source) {
-        <!-- Cropping happens in place; the plan is framed once, here. -->
         <app-image-cropper
           [file]="source"
           [aspect]="planAspect"
@@ -59,8 +58,6 @@
         />
       } @else if (previewImage(); as url) {
         <div class="flex flex-col gap-2 rounded-base border border-border p-2">
-          <!-- object-contain: plans uploaded before cropping existed are not
-               16:9 and must letterbox in the frame rather than stretch. -->
           <img
             [src]="url"
             alt="Floor plan preview"

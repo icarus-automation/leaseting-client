@@ -15,15 +15,6 @@ interface ParkedRow {
   longStay: boolean;
 }
 
-/**
- * What is on the floor right now, oldest stay first.
- *
- * The elapsed column is the one an admin reads: it answers "has anything been
- * sitting here since last night?" without arithmetic against an entry
- * timestamp. Stays past twelve hours are marked, because that is the shape a
- * missed exit takes. Voiding a stay is available, but not as a primary row
- * action — it lives in the overflow so it is not a sibling of routine reading.
- */
 @Component({
   selector: 'app-parked-table',
   host: { class: 'flex flex-col gap-2' },
@@ -33,13 +24,11 @@ interface ParkedRow {
 })
 export class ParkedTable {
   readonly sessions = input.required<ParkingOverviewSession[]>();
-  /** Ticked by the page so the elapsed column moves without a re-fetch. */
   readonly now = input.required<number>();
   readonly showProperty = input(false);
   readonly canVoid = input(false);
   readonly busyId = input<string | null>(null);
   readonly filtered = input(false);
-  /** The API returned a full page, so there may be more vehicles than shown. */
   readonly capped = input(false);
 
   readonly voidRequested = output<ParkingOverviewSession>();

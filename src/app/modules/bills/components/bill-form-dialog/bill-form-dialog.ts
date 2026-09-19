@@ -51,7 +51,6 @@ export class BillFormDialog {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly visible = model.required<boolean>();
-  /** Preselects the lease and hides the picker (e.g. from the Leases page). */
   readonly presetLeaseId = input<string | null>(null);
   readonly saved = output<void>();
 
@@ -66,7 +65,6 @@ export class BillFormDialog {
   });
   readonly errors = createFormErrors(this.form);
 
-  /** Meter-reading entry (electricity/water) — the server derives the amount. */
   readonly readingForm = this.fb.nonNullable.group({
     periodFrom: [null as Date | null, [Validators.required]],
     periodTo: [null as Date | null, [Validators.required]],
@@ -96,7 +94,6 @@ export class BillFormDialog {
   private readonly readingValues = toSignal(this.readingForm.valueChanges, {
     initialValue: this.readingForm.getRawValue(),
   });
-  /** Live preview mirroring the server math: consumed × rate, +admin fee, +VAT, −WHT. */
   readonly breakdown = computed(() => {
     if (!this.readingMode()) return null;
     const { previousReading, presentReading, multiplier, adminFeePct, vatPct, whtPct } = this.readingValues();
@@ -146,9 +143,6 @@ export class BillFormDialog {
       if (!this.presetLeaseId()) this.loadLeases();
     });
 
-    // Smart defaults: picking a lease (or switching back to RENT) pre-fills
-    // the amount from the lease's rent and the due date from its due day —
-    // the common case becomes two clicks instead of four fields.
     this.form.controls.leaseId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
@@ -159,7 +153,6 @@ export class BillFormDialog {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.applyLeaseDefaults();
-        // Readings only make sense for utility bills.
         if (!this.isUtilityType()) this.toggleReadingMode(false);
         else if (this.readingMode()) this.prefillFromLastReading();
       });
@@ -169,7 +162,6 @@ export class BillFormDialog {
     this.readingMode.set(on);
     const amountControl = this.form.controls.amount;
     if (on) {
-      // Amount becomes derived — the reading form is the source of truth.
       amountControl.disable();
       amountControl.setValue(null);
       this.prefillFromLastReading();
@@ -179,12 +171,6 @@ export class BillFormDialog {
     }
   }
 
-  /**
-   * Carries the previous cycle forward: the last utility bill's present
-   * reading becomes this bill's previous reading (and its rate the default),
-   * so staff only type the fresh meter figure. Untouched fields only — a
-   * manually entered value always wins.
-   */
   private prefillFromLastReading(): void {
     const { leaseId, type } = this.form.getRawValue();
     if (!leaseId || (type !== 'ELECTRICITY' && type !== 'WATER')) return;
@@ -282,8 +268,6 @@ export class BillFormDialog {
           this.saving.set(false);
           this.saved.emit();
           if (addAnother) {
-            // Billing runs log several charges in a row — keep the lease
-            // selection, clear the specifics, and refocus for the next one.
             this.toggleReadingMode(false);
             this.form.reset({ leaseId, type, amount: null, dueDate: null, notes: '' });
             this.readingForm.reset({

@@ -1,20 +1,10 @@
 import type { AgingBucketKey, AgingBucketTotals, DelinquencyTier } from '../../core/models/report.types';
 
-/**
- * How the aging buckets present.
- *
- * The escalation is deliberately a vocabulary rather than a gradient: nothing
- * for money that is not yet late, amber once it is, red once it has been late
- * long enough to be a problem. Every use pairs the tone with the bucket's own
- * label, so the colour is never carrying the meaning by itself.
- */
-
 export type BucketTone = 'neutral' | 'warning' | 'destructive';
 
 export interface BucketMeta {
   key: AgingBucketKey;
   label: string;
-  /** Column heading — shorter, because the table already says "days". */
   short: string;
   tone: BucketTone;
 }
@@ -33,7 +23,6 @@ export function bucketMeta(key: AgingBucketKey): BucketMeta {
   return AGING_BUCKETS.find((bucket) => bucket.key === key) ?? AGING_BUCKETS[0];
 }
 
-/** Fill for the aging bar's segments. */
 export function bucketFill(tone: BucketTone): string {
   switch (tone) {
     case 'destructive':
@@ -45,7 +34,6 @@ export function bucketFill(tone: BucketTone): string {
   }
 }
 
-/** Text colour for a figure sitting in that bucket. */
 export function bucketText(tone: BucketTone): string {
   switch (tone) {
     case 'destructive':
@@ -57,14 +45,6 @@ export function bucketText(tone: BucketTone): string {
   }
 }
 
-/**
- * Share of the total each bucket holds, as a percentage.
- *
- * Segments below a floor still render, because a bar that silently drops the
- * ₱900 sitting at 90+ days is hiding the one number a manager most needs to
- * see. The floor is taken back off the largest segment so the row still sums
- * to 100%.
- */
 export function bucketShares(buckets: AgingBucketTotals, total: string): { key: AgingBucketKey; percent: number }[] {
   const grand = Number(total);
   const present = AGING_BUCKETS.filter((bucket) => Number(buckets[bucket.key]) > 0);
@@ -85,11 +65,8 @@ export function bucketShares(buckets: AgingBucketTotals, total: string): { key: 
   return lifted;
 }
 
-// ── Delinquency tiers ────────────────────────────────────────────────────────
-
 export interface TierMeta {
   label: string;
-  /** What the tier actually means, shown as a tooltip and in the legend. */
   hint: string;
   tone: 'destructive' | 'warning' | 'neutral';
 }

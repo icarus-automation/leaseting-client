@@ -5,15 +5,6 @@ export interface SegmentedOption<T> {
   label: string;
 }
 
-/**
- * A row of mutually exclusive choices, styled as one control.
- *
- * Height is fixed at 2.5rem so it lines up with the app's inputs and with the
- * PrimeNG selects normalised to the same height in styles.css. Filter rows mix
- * this control with a dropdown constantly, and a segmented control sized only
- * by its own padding lands a few pixels short of one, which reads as a
- * misaligned toolbar on every page that has both.
- */
 @Component({
   selector: 'app-segmented-control',
   template: `

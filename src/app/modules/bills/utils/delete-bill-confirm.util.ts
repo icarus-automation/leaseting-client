@@ -5,7 +5,6 @@ import { BILL_TYPE_LABELS } from '../../../core/models/enums';
 import { formatPhp } from '../../../shared/pipes/php-currency-pipe';
 import { parseApiDate } from '../../../shared/utils/date.util';
 
-/** Names the unpaid bill and states that delete cannot be undone. */
 export function deleteBillConfirmMessage(bill: BillListItem): string {
   const tenant = `${bill.lease.tenant.firstName} ${bill.lease.tenant.lastName}`;
   const type = BILL_TYPE_LABELS[bill.type];

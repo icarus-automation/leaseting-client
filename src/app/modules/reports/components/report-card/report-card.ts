@@ -4,14 +4,6 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import { ReportEntry, isAvailable } from '../../report-catalog';
 
-/**
- * One report in the catalog.
- *
- * The card is a plain container with a stretched title link rather than a
- * wrapping anchor, so the favorite button can live inside it without nesting
- * one interactive element in another. Unbuilt reports keep the same shape but
- * lose the link — the layout never shifts as reports ship.
- */
 @Component({
   selector: 'app-report-card',
   imports: [RouterLink, PIcon],

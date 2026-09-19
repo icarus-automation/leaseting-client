@@ -48,7 +48,9 @@ Two things a neighboring property SaaS could not truthfully copy:
 
 **Stack.** Angular 21 (standalone, signals, zoneless-era idioms), PrimeNG 21 + `@primeuix/themes`, Tailwind v4, Konva (floor-plan editor), FilePond (uploads), Fuse.js (fuzzy search), hotkeys-js (shortcuts), date-fns. Vitest for tests. Separate backend service on `:8000`, `/api/v1`, responses wrapped in a `{ statusCode, message, data }` envelope except Better Auth routes, which are raw.
 
-**Built and live:** dashboard, properties (incl. floor-plan editor and viewer), tenants, leases, bills + SOA, Work Orders (maintenance request queue), tenant onboarding walk, knowledge base, reports, Parking Overview, settings (org-curated property types, charge items, late fees, vehicle types, flexible parking rate plans with duration tiers and optional overnight windows, parking rules, terminals, and parking attendants), Kit event feed, auth.
+**Built and live:** dashboard, properties (incl. floor-plan editor and viewer), tenants, leases, bills + SOA, Work Orders (maintenance request queue), tenant onboarding walk, knowledge base, reports, Parking Overview, settings (org-curated property types, charge items, late fees, vehicle types, flexible parking rate plans with duration tiers and optional overnight windows, parking rules, terminals, and parking attendants), Kit event feed and Ask Kit, auth.
+
+**Ask Kit (built).** `/kit` answers conversational questions grounded in the organization's records and creates PDF or Excel documents from natural requests such as “Export unpaid tenants to Excel.” `/document` remains an optional shortcut for explicitly forcing the same document path; it is not required syntax.
 
 **Work Orders (built).** `/work-orders` (`/maintenance` redirects here) is the staff queue for maintenance requests. A tenant files a request from Residence Care with a title, notes, and up to three photos. Unit, property, and tenant come from the tenant's active lease, never from the client. Staff see the whole organization's requests newest first, in status tabs (Open, In progress, Resolved, All), and can narrow the queue to one property. The sidebar shows the organization's Open count beside Work Orders, so a new request is visible from any page. Opening a request shows its notes, photos, tenant, unit, and property, plus who started and resolved it.
 
@@ -68,7 +70,7 @@ Revenue charts and a parking report catalog are not built. Settings manage vehic
 
 **Terminology drift from the original PRD — the code is authoritative.** Unit status is derived by the backend from active leases and is binary (`OCCUPIED` / `VACANT`), not the PRD's five-state list. Leases carry no status enum; state is derived from dates and `terminatedAt`. Property types are org-curated data fetched from `/property-types`, not a hardcoded enum.
 
-**Open product decisions.** Kit's phase-2 conversational Q&A and guided actions are described in the PRD but uncommitted. Rent Roll reporting is deferred. Per-org configurable Kit thresholds are specified but not shipped.
+**Open product decisions.** Guided Kit actions with confirmation are uncommitted. Rent Roll reporting is deferred. Per-org configurable Kit thresholds are specified but not shipped.
 
 ## Brand Commitments
 

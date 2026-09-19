@@ -1,8 +1,6 @@
 <div class="app-shell">
   <app-sidebar [class.sidebar-host--open]="drawerOpen()" />
 
-  <!-- Drawer scrim. Only exists below the breakpoint, where the sidebar floats
-       over the page; Escape and the nav links close it too. -->
   @if (drawerOpen()) {
     <button
       type="button"

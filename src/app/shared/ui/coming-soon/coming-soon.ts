@@ -1,11 +1,6 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { PIcon } from '@primeicons/angular/p-icon';
 
-/**
- * Honest placeholder for modules whose backend isn't wired yet: names the
- * page, shows what it will do, and points at what works today. No fake data,
- * no dead controls.
- */
 @Component({
   selector: 'app-coming-soon',
   imports: [PIcon],

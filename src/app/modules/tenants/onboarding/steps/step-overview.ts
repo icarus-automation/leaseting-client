@@ -36,11 +36,6 @@ interface UnitOption {
   rent: string | null;
 }
 
-/**
- * Step 1 — what this lease is for: the property, the unit inside it, and the
- * term. Property first, then unit: picking from a few hundred units across the
- * whole portfolio in one list is the part that used to slow this down.
- */
 @Component({
   selector: 'app-step-overview',
   imports: [ReactiveFormsModule, PIcon, DatePicker, Select, PhpCurrencyPipe],
@@ -56,7 +51,6 @@ export class StepOverview {
   readonly busy = input(false);
   readonly next = output<OverviewStepData>();
 
-  /** Every vacant unit in the portfolio, plus the chosen one if it fell out. */
   private readonly vacantUnits = signal<UnitPickerItem[]>([]);
   readonly loadingUnits = signal(true);
   readonly errorMessage = signal<string | null>(null);
@@ -92,13 +86,11 @@ export class StepOverview {
       }));
   });
 
-  /** The unit's asking rent — context for the lease-terms step that follows. */
   readonly askingRent = computed(() => {
     const unitId = this.formValue().unitId;
     return this.unitOptions().find((option) => option.value === unitId)?.rent ?? null;
   });
 
-  /** "1 year", "6 months" — reassurance that the dates say what was meant. */
   readonly termLabel = computed(() => {
     const { startDate, endDate } = this.formValue();
     if (!startDate || !endDate || endDate <= startDate) return null;
@@ -108,14 +100,11 @@ export class StepOverview {
   constructor() {
     this.loadUnits();
 
-    // One-time prefill once the onboarding arrives: the saved step wins, else
-    // the unit the wizard was launched from (Properties → Onboard tenant).
     effect(() => {
       const detail = this.detail();
       untracked(() => this.prefill(detail));
     });
 
-    // Changing property invalidates the unit chosen under the previous one.
     this.form.controls.propertyId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((propertyId) => {
@@ -128,7 +117,6 @@ export class StepOverview {
       });
   }
 
-  /** A year from the start date is the common case — offer it, don't impose it. */
   suggestOneYear(): void {
     const start = this.form.controls.startDate.value;
     if (!start) return;
@@ -185,10 +173,6 @@ export class StepOverview {
     this.ensureChosenUnitVisible();
   }
 
-  /**
-   * The chosen unit must stay pickable on resume even if it left the VACANT
-   * list (someone else quick-assigned it — completion will 409 loudly).
-   */
   private ensureChosenUnitVisible(): void {
     const unitId = this.form.controls.unitId.value;
     const unit = this.detail().unit;

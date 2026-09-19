@@ -34,17 +34,11 @@ export class MainLayout {
     { initialValue: this.router.url },
   );
 
-  /**
-   * Hidden where Kit is already present: the dashboard renders him inline and
-   * unprompted, and the Ask Kit page *is* him. Either way a floating badge
-   * would be the same voice twice on one screen.
-   */
   readonly showKitBadge = computed(() => {
     const url = this.url();
     return !url.startsWith('/dashboard') && !url.startsWith('/kit');
   });
 
-  /** Wide unless a route sets `data.contentWidth` to `standard`. */
   readonly contentWidth = computed(() => {
     void this.url();
     return contentWidthFromSnapshot(this.router.routerState.snapshot.root);

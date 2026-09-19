@@ -21,16 +21,9 @@ import type {
 } from '../../../../core/models/onboarding.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 
-/** PH move-in practice: one month of rent in advance, two months held. */
 const DEFAULT_ADVANCE_MONTHS = 1;
 const DEFAULT_DEPOSIT_MONTHS = 2;
 
-/**
- * Step 5 — everything collected up front. Both figures are multiples of the
- * monthly rent settled in the previous step, so neither restates the charge
- * lines that already add up to it: two identical questions, two numbers, and
- * a running total of what the tenant owes on move-in day.
- */
 @Component({
   selector: 'app-step-deposit',
   imports: [ReactiveFormsModule, PIcon, InputNumber, PhpCurrencyPipe],
@@ -56,7 +49,6 @@ export class StepDeposit {
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
-  /** The monthly rent agreed in the previous step — both figures scale off it. */
   readonly monthlyRent = computed(() => {
     const saved = this.detail().stepsState['lease-terms']?.data as LeaseTermsStepData | undefined;
     return (saved?.charges ?? []).reduce((total, charge) => total + charge.amount, 0);
@@ -74,17 +66,12 @@ export class StepDeposit {
   readonly moveInTotal = computed(() => this.advanceTotal() + this.depositTotal());
 
   constructor() {
-    // One-time prefill once the onboarding arrives.
     effect(() => {
       const detail = this.detail();
       untracked(() => this.prefill(detail));
     });
   }
 
-  /**
-   * Answering "no" takes the month count out of the form's validity — the
-   * question is no longer being asked, so a stale value must not block Next.
-   */
   setCollectsAdvance(collects: boolean): void {
     this.form.controls.collectsAdvance.setValue(collects);
     this.syncEnabled(this.form.controls.advanceMonths, collects, DEFAULT_ADVANCE_MONTHS);

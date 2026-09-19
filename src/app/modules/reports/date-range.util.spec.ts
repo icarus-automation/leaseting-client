@@ -1,7 +1,6 @@
 import { rangeLabel, resolvePreset, toIsoDate } from './date-range.util';
 
-// Local noon keeps the fixture clear of the timezone edges the util guards.
-const today = new Date(2026, 7, 4, 12, 0, 0); // 4 Aug 2026
+const today = new Date(2026, 7, 4, 12, 0, 0);
 
 describe('date-range.util', () => {
   describe('resolvePreset', () => {

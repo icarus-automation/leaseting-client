@@ -21,19 +21,6 @@ import {
   withoutChip,
 } from '../../../core/models/grid-query.types';
 
-/**
- * A search box that accepts a sentence and answers with filters you can see.
- *
- * The chips are the point. A sentence that silently becomes a result set is a
- * black box a manager has to take on faith, and the failure mode — a filter
- * that was misread — looks exactly like a correct answer with fewer rows. Here
- * the same sentence becomes labelled, removable chips: readable before the
- * rows are, correctable without retyping, and a way to learn what this table
- * can actually be filtered by.
- *
- * Nothing is applied until the parse comes back, and what is applied is
- * exactly what the chips say.
- */
 @Component({
   selector: 'app-nl-filter-bar',
   imports: [PIcon],
@@ -45,14 +32,8 @@ export class NlFilterBar {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly grid = input.required<GridId>();
-  /** An example query, so the box teaches what it accepts. */
   readonly placeholder = input('Describe what you want to see…');
 
-  /**
-   * The filters to run, emitted whenever they change — a parse, a removed
-   * chip, or a clear. The parent owns the request; this component never
-   * fetches rows itself.
-   */
   readonly filtersChange = output<GridFilters>();
 
   readonly text = signal('');
@@ -65,15 +46,8 @@ export class NlFilterBar {
   readonly source = signal<QuerySource | null>(null);
 
   readonly hasFilters = computed(() => this.chips().length > 0);
-  /** True once a parse has run and produced nothing to show. */
   readonly foundNothing = computed(() => this.source() === 'none' && !this.parsing());
 
-  /**
-   * How the sentence was read, in the user's words.
-   *
-   * Worth saying out loud: a manager who can see that most of their searches
-   * never left the building is better placed to judge the one that did.
-   */
   readonly sourceLabel = computed(() => {
     switch (this.source()) {
       case 'keywords':
@@ -115,13 +89,6 @@ export class NlFilterBar {
       });
   }
 
-  /**
-   * Drops one chip and re-runs with the rest.
-   *
-   * Done locally rather than by re-parsing the sentence: the user is
-   * correcting the parse, and sending the same words back would produce the
-   * same chip again.
-   */
   removeChip(chip: FilterChip): void {
     const remaining = withoutChip(this.filters(), chip);
     this.filters.set(remaining);

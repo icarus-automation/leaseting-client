@@ -26,14 +26,8 @@ import {
   type ChargeLineArray,
 } from '../components/charge-lines/charge-line-form';
 
-/** Every lease starts with a rent line; the rest is up to the landlord. */
 const STARTER_CHARGE: Partial<ChargeLine> = { name: 'Monthly Rent', billType: 'RENT' };
 
-/**
- * Step 4 — what this tenant is charged every month. The lines sum to the
- * lease's monthly rent, which is what the nightly rent run bills; the
- * breakdown rides along on the lease so a statement can show it.
- */
 @Component({
   selector: 'app-step-lease-terms',
   imports: [ReactiveFormsModule, PIcon, InputNumber, PhpCurrencyPipe, ChargeLines],
@@ -59,14 +53,13 @@ export class StepLeaseTerms {
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
   readonly monthlyTotal = computed(() => {
-    this.formValue(); // recompute on any line edit
+    this.formValue();
     return chargeLinesTotal(this.charges);
   });
 
   readonly dueDayLabel = computed(() => ordinal(this.formValue().dueDay ?? 5));
 
   constructor() {
-    // One-time prefill once the onboarding arrives.
     effect(() => {
       const detail = this.detail();
       untracked(() => this.prefill(detail));

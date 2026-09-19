@@ -27,14 +27,12 @@ import { ImageDropzone } from '../../../../shared/ui/image-dropzone/image-dropzo
 import { PropertyTypesService } from '../../../settings/services/property-types.service';
 import { PropertiesService } from '../../services/properties.service';
 
-/** Picker option; archived only appears for the property's current type. */
 interface TypeOption {
   id: string;
   name: string;
   isArchived: boolean;
 }
 
-/** Above this the chip grid stops scanning well — switch to a filterable select. */
 const MAX_CHIP_OPTIONS = 8;
 
 @Component({
@@ -55,7 +53,6 @@ export class PropertyFormDialog {
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
-    // No default — picking a type is an explicit decision.
     propertyTypeId: ['', [Validators.required]],
     addressLine: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
     city: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -65,10 +62,8 @@ export class PropertyFormDialog {
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
   private readonly imageFile = signal<File | null>(null);
-  /** User interacted with the picker — distinguishes "removed photo" from "untouched". */
   readonly imageTouched = signal(false);
 
-  /** null = loading. */
   readonly typeList = signal<PropertyTypeResponse[] | null>(null);
   readonly typesError = signal<string | null>(null);
   readonly newTypeMode = signal(false);
@@ -82,10 +77,6 @@ export class PropertyFormDialog {
   readonly isEdit = computed(() => this.property() !== null);
   readonly heading = computed(() => (this.isEdit() ? 'Edit property' : 'New property'));
 
-  /**
-   * Active types, plus the property's own type when archived (labelled so) —
-   * editing another field must not silently reassign the type.
-   */
   readonly pickerOptions = computed<TypeOption[]>(() => {
     const list = this.typeList();
     if (!list) return [];
@@ -143,7 +134,6 @@ export class PropertyFormDialog {
     this.newTypeMode.set(true);
     this.newTypeName.set('');
     this.newTypeError.set(null);
-    // Input mounts on the next change-detection pass.
     queueMicrotask(() => this.newTypeInput()?.nativeElement.focus());
   }
 

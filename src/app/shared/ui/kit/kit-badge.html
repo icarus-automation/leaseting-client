@@ -1,7 +1,3 @@
-<!--
-  Anchored bottom-right. Sits below the toast stack in z-order and the toast
-  container is lifted clear of it in styles.css, so a toast never lands on Kit.
--->
 <div class="fixed bottom-4 right-4 z-[var(--z-dropdown)] flex flex-col items-end gap-2 sm:bottom-6 sm:right-6">
   @if (open()) {
     <div
@@ -38,8 +34,6 @@
               All caught up.
             </p>
           } @else {
-            <!-- Nothing active, but things were set aside without being acted
-                 on. "All caught up" over those is a claim Kit cannot make. -->
             <p class="mb-2 flex items-center gap-2 text-[13px] text-body">
               <svg pIcon="inbox" class="shrink-0 text-muted" [size]="15" aria-hidden="true"></svg>
               Nothing new right now.
@@ -51,8 +45,6 @@
         <ul class="flex max-h-[min(24rem,50vh)] flex-col overflow-y-auto overscroll-contain" role="list">
           @for (item of items(); track item.event.id) {
             <li class="flex items-start gap-2 border-b border-border px-3.5 py-2.5 last:border-b-0">
-              <!-- Three tones, not two: amber for a date approaching is the
-                   distinction that was collapsing into grey alongside INFO. -->
               <svg
                 [pIcon]="severityIcons[item.event.severity]"
                 class="mt-0.5 shrink-0"
@@ -69,7 +61,6 @@
                 >
                   {{ item.event.message }}
                 </a>
-                <!-- Severity as text, never colour or mascot mood alone. -->
                 <p class="mt-0.5 text-[11.5px] text-muted">
                   {{ severityLabels[item.event.severity] }}
                   @if (item.event.flavor) {
@@ -97,8 +88,6 @@
         </div>
       }
 
-      <!-- The badge carries reminders only; a real conversation deserves a
-           page you can re-read, search and come back to. -->
       <a
         routerLink="/kit"
         class="flex items-center justify-center gap-2 border-t border-border px-3.5 py-2.5 text-[13px] font-medium text-primary transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"

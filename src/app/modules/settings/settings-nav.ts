@@ -1,14 +1,8 @@
-/**
- * The Settings index. One source of truth so the hub cards and each detail
- * page's header stay in step — add a section here and it appears in both.
- */
 export interface SettingsCard {
   label: string;
   description: string;
   icon: string;
-  /** Child path under /settings. Unused while `comingSoon` is set. */
   route: string;
-  /** Listed so the shape of Settings is visible, but not built yet. */
   comingSoon?: boolean;
 }
 
@@ -109,7 +103,6 @@ export interface SettingsSetupStep {
   route: string;
 }
 
-/** Pages that belong to a setup sequence shown under the Settings title. */
 const SETTINGS_SETUP_CHAPTERS: { routes: string[]; steps: SettingsSetupStep[] }[] = [
   {
     routes: ['vehicle-types', 'rate-plans', 'parking-rules'],

@@ -161,8 +161,6 @@
             These logins work only on the handheld. This web app will refuse them.
           </p>
 
-          <!-- Held back until submit: tabbing across three inputs should not
-               light up three identical errors before anything was sent. -->
           @if (errors.submitted()) {
             @if (errors.fieldError('name', fieldMessages.name); as message) {
               <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>

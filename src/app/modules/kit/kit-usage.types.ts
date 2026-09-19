@@ -1,4 +1,3 @@
-/** Mirrors KitUsageReport on the server. Cost is null when a model is unpriced. */
 export interface KitUsageTotals {
   calls: number;
   costUsd: number | null;

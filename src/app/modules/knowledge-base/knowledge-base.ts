@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
 
 interface KbArticle {
-  /** Route slug under /knowledge-base, or null for a not-yet-written article. */
   slug: string | null;
   title: string;
   summary: string;
@@ -12,8 +11,6 @@ interface KbArticle {
   readMinutes: number | null;
 }
 
-// The knowledge base grows by adding entries here (and, for published ones, a
-// route + component). Articles without a slug render as "coming soon" cards.
 const ARTICLES: KbArticle[] = [
   {
     slug: 'utility-billing',

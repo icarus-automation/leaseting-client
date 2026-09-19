@@ -25,10 +25,6 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { PropertiesService } from '../../../properties/services/properties.service';
 import { ParkingTerminalsService } from '../../services/parking-terminals.service';
 
-/**
- * Settings → Terminals. A named handheld bound to one property (Brickstone →
- * Basement). Disable takes it off the floor; delete removes the row.
- */
 @Component({
   selector: 'app-parking-terminal-settings',
   imports: [ReactiveFormsModule, RouterLink, PIcon, Select, Skeleton, StatusBadge],

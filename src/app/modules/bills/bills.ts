@@ -123,8 +123,7 @@ export class Bills {
   readonly overflowItems = signal<MenuItem[]>([]);
   readonly overflowForId = signal<string | null>(null);
   private readonly overflowMenu = viewChild.required<Menu>('overflowMenu');
-  /** Deep-link `?billId=` opens the bill once; reloads after pay must not reopen it. */
-  private openedQueryBillId: string | null = null;
+  private consumedQueryBillId: string | null = null;
 
   constructor() {
     const status = this.route.snapshot.queryParamMap.get('status');
@@ -232,7 +231,7 @@ export class Bills {
 
   clearBillFilter(): void {
     this.billIdFilter.set(null);
-    this.openedQueryBillId = null;
+    this.consumedQueryBillId = null;
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { billId: null },
@@ -242,12 +241,11 @@ export class Bills {
     this.load(1);
   }
 
-  /** Calendar and palette land on `?billId=` — open that bill instead of leaving staff on a one-row list. */
   private maybeOpenQueriedBill(bills: BillListItem[]): void {
     const billId = this.billIdFilter();
-    const match = queriedBillToOpen(bills, billId, this.openedQueryBillId);
+    const match = queriedBillToOpen(bills, billId, this.consumedQueryBillId);
     if (!match || !billId) return;
-    this.openedQueryBillId = billId;
+    this.consumedQueryBillId = billId;
     this.openBill(match.id);
   }
 

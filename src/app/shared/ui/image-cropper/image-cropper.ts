@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import { PIcon } from '@primeicons/angular/p-icon';
 
-/** Crop rectangle in the source image's own pixels. */
 interface CropRect {
   x: number;
   y: number;
@@ -24,8 +23,6 @@ interface CropRect {
 
 type Handle = 'nw' | 'ne' | 'se' | 'sw';
 
-// Mouse affordance only — the keyboard path is arrow/shift+arrow on the
-// selection itself, so these stay out of the accessibility tree.
 const HANDLES: { key: Handle; position: string }[] = [
   { key: 'nw', position: '-left-1.5 -top-1.5 cursor-nwse-resize' },
   { key: 'ne', position: '-right-1.5 -top-1.5 cursor-nesw-resize' },
@@ -33,22 +30,10 @@ const HANDLES: { key: Handle; position: string }[] = [
   { key: 'sw', position: '-bottom-1.5 -left-1.5 cursor-nesw-resize' },
 ];
 
-/** Below this the selection is too small to be a usable plan. */
 const MIN_CROP_PX = 120;
-/** Cropped output is capped here — plans past this are detail nobody zooms to. */
 const MAX_OUTPUT_WIDTH = 2400;
-/** Arrow-key nudge, in source pixels. */
 const NUDGE_PX = 12;
 
-/**
- * Fixed-ratio image cropper. The caller hands it a picked File and gets back a
- * cropped one of exactly `aspect` — nothing downstream has to think about the
- * shape of what a user happened to upload.
- *
- * Renders inline (no dialog of its own) so it can live inside a form that is
- * already in a dialog. Drag the selection to move it, drag a corner to resize;
- * arrow keys nudge and shift+arrows resize, so it works without a mouse.
- */
 @Component({
   selector: 'app-image-cropper',
   imports: [PIcon],
@@ -59,7 +44,6 @@ export class ImageCropper {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly file = input.required<File>();
-  /** width / height the output is forced to. */
   readonly aspect = input(16 / 9);
   readonly title = input('Crop the image');
   readonly hint = input('Drag to reposition, drag a corner to resize. Everything outside the frame is trimmed.');
@@ -82,7 +66,6 @@ export class ImageCropper {
   private drag: { pointerId: number; mode: 'move' | Handle; startX: number; startY: number; start: CropRect } | null =
     null;
 
-  /** Percent geometry so the overlay tracks the image at any rendered size. */
   readonly rectStyle = computed(() => {
     const { x, y, width, height } = this.rect();
     if (this.naturalWidth === 0 || this.naturalHeight === 0) return null;
@@ -96,11 +79,6 @@ export class ImageCropper {
 
   readonly ready = computed(() => this.rect().width > 0);
 
-  /**
-   * A full-cover rectangle with the selection punched out of it, so everything
-   * the crop discards is visibly dimmed. Built here rather than in the template
-   * because it is one long string of geometry, not markup.
-   */
   readonly maskPath = computed(() => {
     const box = this.rectStyle();
     if (!box) return null;
@@ -133,8 +111,6 @@ export class ImageCropper {
     this.loadError.set(true);
   }
 
-  // ── Pointer drag ───────────────────────────────────────────────
-
   startDrag(event: PointerEvent, mode: 'move' | Handle): void {
     if (!this.ready()) return;
     event.preventDefault();
@@ -166,8 +142,6 @@ export class ImageCropper {
     this.drag = null;
   }
 
-  // ── Keyboard ───────────────────────────────────────────────────
-
   onSelectionKeydown(event: KeyboardEvent): void {
     const deltas: Record<string, [number, number]> = {
       ArrowLeft: [-NUDGE_PX, 0],
@@ -181,15 +155,12 @@ export class ImageCropper {
 
     const current = this.rect();
     if (event.shiftKey) {
-      // Shift resizes from the top-left corner, keeping the ratio.
       const step = delta[0] !== 0 ? delta[0] : delta[1];
       this.rect.set(this.resizedRect(current, 'se', step, step / this.aspect()));
     } else {
       this.rect.set(this.movedRect(current, delta[0], delta[1]));
     }
   }
-
-  // ── Output ─────────────────────────────────────────────────────
 
   async confirm(): Promise<void> {
     const image = this.imageEl()?.nativeElement;
@@ -219,15 +190,11 @@ export class ImageCropper {
 
     const context = canvas.getContext('2d');
     if (!context) return null;
-    // Plans are line art on white — a transparent PNG source would otherwise
-    // composite onto black once flattened into JPEG.
     context.fillStyle = '#ffffff';
     context.fillRect(0, 0, width, height);
     context.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, width, height);
 
     const source = this.file();
-    // PNG keeps line art crisp; anything else is already lossy, so re-encode
-    // as JPEG rather than inflating a photo into a huge PNG.
     const type = source.type === 'image/png' ? 'image/png' : 'image/jpeg';
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, 0.92));
     if (!blob) return null;
@@ -235,8 +202,6 @@ export class ImageCropper {
     const name = source.name.replace(/\.[^.]+$/, '') + (type === 'image/png' ? '.png' : '.jpg');
     return new File([blob], name, { type, lastModified: Date.now() });
   }
-
-  // ── Geometry ───────────────────────────────────────────────────
 
   private displayScale(): number {
     const image = this.imageEl()?.nativeElement;
@@ -263,11 +228,6 @@ export class ImageCropper {
     };
   }
 
-  /**
-   * Resizes from the grabbed corner with the opposite one pinned, then clamps
-   * the result into the image. Width drives height so the ratio is exact by
-   * construction rather than by correction.
-   */
   private resizedRect(start: CropRect, handle: Handle, dx: number, dy: number): CropRect {
     const aspect = this.aspect();
     const anchorX = handle === 'nw' || handle === 'sw' ? start.x + start.width : start.x;
@@ -275,8 +235,6 @@ export class ImageCropper {
     const growsRight = handle === 'ne' || handle === 'se';
     const growsDown = handle === 'sw' || handle === 'se';
 
-    // Take whichever axis the pointer moved further along, so a diagonal drag
-    // does not fight itself.
     const widthFromX = start.width + (growsRight ? dx : -dx);
     const widthFromY = (start.height + (growsDown ? dy : -dy)) * aspect;
     let width = Math.abs(dx) > Math.abs(dy) * aspect ? widthFromX : widthFromY;
@@ -303,8 +261,6 @@ export class ImageCropper {
   private loadFile(file: File): void {
     this.revoke();
     this.loadError.set(false);
-    // Clear the previous image's geometry too, or a swapped-in file is briefly
-    // measured against the old one's dimensions.
     this.naturalWidth = 0;
     this.naturalHeight = 0;
     this.rect.set({ x: 0, y: 0, width: 0, height: 0 });

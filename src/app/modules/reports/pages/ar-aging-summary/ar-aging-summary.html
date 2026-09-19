@@ -24,7 +24,6 @@
     </button>
   </app-report-header>
 
-  <!-- ── Controls ──────────────────────────────────────────── -->
   <section
     class="grid gap-4 rounded-base border border-border bg-background p-4 print:hidden min-[1100px]:grid-cols-4"
     aria-label="Report filters"
@@ -91,7 +90,6 @@
         </div>
       </div>
     } @else {
-      <!-- ── Totals ──────────────────────────────────────────── -->
       <div class="grid gap-3 sm:grid-cols-3">
         <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
           <span class="text-[12.5px] font-medium text-muted">Owed in total</span>
@@ -120,7 +118,6 @@
         </div>
       </div>
 
-      <!-- ── The aging bar ───────────────────────────────────── -->
       <section class="flex flex-col gap-3 rounded-base border border-border bg-background p-4">
         <h2 class="font-heading text-[15px] font-semibold text-heading">How the balance ages</h2>
 
@@ -147,7 +144,6 @@
         </ul>
       </section>
 
-      <!-- ── Per-tenant matrix ───────────────────────────────── -->
       <div class="overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
         <table class="w-full border-collapse text-left">
           <caption class="sr-only">

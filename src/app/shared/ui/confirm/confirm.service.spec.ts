@@ -45,10 +45,7 @@ describe('ConfirmService', () => {
   });
 
   /*
-   * The icon slot is a blank 2rem box in this app: icons are SVG components and
-   * the primeicons font is never loaded. It used to shrink to a different width
-   * in every dialog, indenting each message by a different amount. No confirm
-   * may pass one again.
+   * PrimeNG's icon slot is empty here: the primeicons font is never loaded.
    */
   it('never renders the empty icon slot that knocked messages out of line', () => {
     const dialog = open((confirm) =>

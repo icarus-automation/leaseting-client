@@ -13,14 +13,6 @@ import type {
 } from '../../../core/models/parking-overview.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
 
-/**
- * The staff parking API. Read the floor, void a wrong entry, sign off a till.
- *
- * There is deliberately no `parkingIn` or `parkingOut` here, and there is no
- * endpoint to call if one were added: entry and exit belong to the guard at the
- * barrier, on the handheld, and the web client is not given a way to fake
- * either.
- */
 @Injectable({ providedIn: 'root' })
 export class ParkingOverviewService {
   private readonly http = inject(HttpClient);
@@ -38,7 +30,6 @@ export class ParkingOverviewService {
     });
   }
 
-  /** Open stays only. The backend refuses a collected exit, reason required. */
   voidSession(id: string, reason: string): Observable<ParkingOverviewSession> {
     return this.http.post<ParkingOverviewSession>(`${this.base}/sessions/${id}/void`, { reason });
   }

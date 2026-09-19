@@ -26,7 +26,6 @@
       </button>
     </div>
   } @else {
-    <!-- Search existing -->
     <div class="flex flex-col gap-2">
       <label class="text-[13px] font-medium text-heading" for="tenant-search">Find an existing tenant</label>
       <div class="relative">
@@ -60,7 +59,6 @@
       }
     </div>
 
-    <!-- Or create new -->
     @if (!creating()) {
       <button
         type="button"

@@ -21,7 +21,6 @@ import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { UnitsService } from '../../services/units.service';
 
-/** The slice of a unit this form edits — satisfied by FloorUnitItem and UnitDetail. */
 export interface UnitFormTarget {
   id: string;
   unitNo: string;
@@ -42,7 +41,6 @@ export class UnitFormDialog {
 
   readonly visible = model.required<boolean>();
   readonly floorId = input.required<string>();
-  /** Null → create mode; a unit → edit mode. */
   readonly unit = input<UnitFormTarget | null>(null);
   readonly saved = output<string>();
 
@@ -106,8 +104,6 @@ export class UnitFormDialog {
         this.saving.set(false);
         this.saved.emit(unit.id);
         if (addAnother) {
-          // Adding a whole floor's rooms is the common flow — stay open,
-          // clear for the next unit, and put the cursor back in the first field.
           this.form.reset({ unitNo: '', monthlyRent: null, notes: '' });
           this.errors.reset();
           this.dialog().focusFirstField();

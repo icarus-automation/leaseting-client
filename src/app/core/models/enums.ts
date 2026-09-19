@@ -1,5 +1,3 @@
-// Property types are org-curated data now (see property-type.types.ts), not
-// an enum — fetched from /property-types instead of hardcoded here.
 
 export type BillType =
   | 'RENT'
@@ -47,7 +45,6 @@ export const PAYMENT_SOURCE_LABELS: Record<PaymentSource, string> = {
   LEGACY: 'Legacy',
 };
 
-/** Derived occupancy — computed by the backend from active leases. */
 export type UnitStatus = 'OCCUPIED' | 'VACANT';
 
 export type ParkingBillingBasis = 'PER_MINUTE' | 'PER_HOUR' | 'PER_DAY';

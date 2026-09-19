@@ -14,18 +14,12 @@ export function ratePlanIncrementMinutes(
   return BILLING_BASIS_MINUTES[billingBasis] * increment;
 }
 
-/** "Billed per hour" / "Billed every 7 days". */
 export function billedHint(billingBasis: ParkingBillingBasis, increment: number): string {
   const unit = PARKING_BILLING_BASIS_UNIT[billingBasis];
   if (increment === 1) return `Billed per ${unit}`;
   return `Billed every ${increment} ${unit}s`;
 }
 
-/**
- * Display order for parking rate plans, mirroring the backend: live rows
- * first, then by how long one billed slice is, then name. Used when a row is
- * inserted client-side after a create or edit.
- */
 export function sortRatePlans<
   T extends {
     name: string;

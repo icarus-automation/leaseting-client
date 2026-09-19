@@ -105,8 +105,7 @@ export class OpsCalendar {
     dayHeaderFormat: { weekday: 'short' },
     moreLinkText: (count) => `+${count} more`,
     noEventsText: 'No entries in this range.',
-    // All entries are date-only. This pins the today highlight to the operational clock.
-    now: () => `${this.today()}T12:00:00`,
+    now: () => fullCalendarNow(this.today()),
     datesSet: (info) => this.onDatesSet(info),
     eventClick: (info) => this.openEntry(this.eventEntry(info.event), info.el),
     eventDidMount: (info) => {
@@ -243,7 +242,6 @@ export class OpsCalendar {
     this.title.set(info.view.title);
     if (this.range()?.start !== start || this.range()?.end !== end) this.range.set({ start, end });
     const view = (Object.keys(VIEWS) as CalendarView[]).find((key) => VIEWS[key] === info.view.type)!;
-    // Keep the URL anchored within the displayed range without altering a deliberate day selection.
     if (this.state().view !== view || this.state().date < start || this.state().date >= end) {
       this.setState({ date: start, view });
     }
@@ -252,4 +250,8 @@ export class OpsCalendar {
   private localDate(date: Date): string {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
+}
+
+function fullCalendarNow(dateOnly: string): string {
+  return `${dateOnly}T12:00:00`;
 }

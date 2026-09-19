@@ -1,6 +1,5 @@
 <div class="flex flex-col gap-4">
   @if (!floor().planImageUrl && floor().units.length === 0) {
-    <!-- Brand-new floor: one combined empty state instead of two stacked cards. -->
     <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border px-6 py-10 text-center">
       <span class="flex h-11 w-11 items-center justify-center rounded-full bg-surface">
         <svg pIcon="map" class="text-muted" [size]="18" aria-hidden="true"></svg>
@@ -32,10 +31,6 @@
       </div>
     </div>
   } @else if (floor().planImageUrl; as planUrl) {
-    <!--
-      The frame takes the plan's own aspect ratio and is capped by the viewport,
-      so the image fills it exactly: nothing to letterbox, nothing to scroll.
-    -->
     <div
       class="relative mx-auto w-full overflow-hidden rounded-base border border-border bg-white"
       [style.aspect-ratio]="planAspect()"

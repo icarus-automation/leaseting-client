@@ -5,14 +5,8 @@ const STORAGE_KEY = 'll.report-favorites';
 /**
  * Starred reports, kept in this browser.
  *
- * Deliberately client-side: there is no user-preferences table yet, and a
- * migration is a steep price for a bookmark. The storage call is the only
- * thing that would change if favorites move server-side later — every consumer
- * talks to the signal, not to localStorage.
- *
  * Reads and writes are guarded because storage throws in private-mode Safari
- * and when a quota is exhausted. Losing a bookmark is acceptable; taking the
- * reports page down over one is not.
+ * and when a quota is exhausted.
  */
 @Injectable({ providedIn: 'root' })
 export class ReportFavoritesService {

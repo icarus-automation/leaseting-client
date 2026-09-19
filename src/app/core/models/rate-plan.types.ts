@@ -1,17 +1,9 @@
 import { ParkingBillingBasis } from './enums';
 
-/**
- * Org-curated parking rate board. Each plan has a billing basis, an increment
- * of that basis, succeeding amounts per vehicle type, optional opening
- * duration tiers (flat bands), and an optional clock window with overtime
- * ₱/hour. A missing succeeding amount means that type is not offered.
- * Archived plans leave the picker; history is untouched.
- */
 export interface RatePlanAmountResponse {
   vehicleTypeId: string;
   vehicleTypeName: string;
   vehicleTypeIsArchived: boolean;
-  /** Prisma Decimal — serialized as a string. */
   amount: string;
 }
 
@@ -25,7 +17,6 @@ export interface RatePlanResponse {
   name: string;
   billingBasis: ParkingBillingBasis;
   increment: number;
-  /** Derived: basis unit minutes × increment. Terminal fee math uses this. */
   incrementMinutes: number;
   windowStartMinute: number | null;
   windowEndMinute: number | null;

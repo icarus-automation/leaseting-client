@@ -45,7 +45,6 @@ export class VehicleTypeSettings {
   readonly renaming = signal(false);
   readonly renameError = signal<string | null>(null);
 
-  /** Row currently waiting on an archive/restore round-trip. */
   readonly busyId = signal<string | null>(null);
   readonly flashId = signal<string | null>(null);
 
@@ -204,7 +203,6 @@ export class VehicleTypeSettings {
       });
   }
 
-  /** Insert or update, keeping the order the server would have returned. */
   private replaceItem(item: VehicleTypeResponse): void {
     this.items.update((items) =>
       sortLookupRows([...(items ?? []).filter((existing) => existing.id !== item.id), item]),

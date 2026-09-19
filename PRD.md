@@ -81,7 +81,7 @@ Owed: Rent Roll · Lease Expirations · Occupancy by Property · Vacant Units ·
 
 **Kit — proactive monitoring** **[built]** — dashboard card + `/kit`
 Event types shipped: `RENT_OVERDUE` · `LEASE_EXPIRING` · `UNIT_VACANT`. Severity `INFO` / `WARNING` / `URGENT`, always readable as text — expression and colour are reinforcement, never the only cue. `message` is templated and deterministic; `flavor` is AI commentary and is null when DeepSeek is unset or fails. Dismissible, one card at a time ("this one today", not a feed). Nightly sweep, no polling. Five moods (neutral / concern / sad / happy / thinking) with full-body + 1:1 head art; celebration capped at 2.5s — a mascot that never stops moving is the Clippy failure mode.
-**Ask Kit** **[built]** — conversational Q&A grounded in org data, at `/kit`: conversation list, start, send, delete. This was PRD phase 2; it shipped.
+**Ask Kit** **[built]** — conversational Q&A grounded in org data, at `/kit`: conversation list, start, send, delete, plus PDF and Excel document creation from natural requests such as “Export unpaid tenants to Excel.” `/document` remains an optional shortcut that forces the same document path. This was PRD phase 2; it shipped.
 **Not built:** per-org configurable thresholds · guided actions w/ confirmation (e.g. draft renewal notice) · configurable tone · global unread badge.
 
 **Settings** **[partial]** — `/settings`

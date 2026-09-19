@@ -1,5 +1,4 @@
 <div class="flex flex-col gap-4">
-  <!-- Recap of what completion writes -->
   @if (summary(); as recap) {
     <div class="flex flex-col gap-3 rounded-base border border-border bg-surface px-4 py-3.5">
       <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Completing will create</span>
@@ -36,7 +35,6 @@
         }
       </div>
 
-      <!-- The lines behind the rent figure, so nothing is signed off unseen. -->
       @if (recap.charges.length > 1) {
         <ul class="m-0 flex list-none flex-col gap-0.5 border-t border-border p-0 pt-2.5">
           @for (charge of recap.charges; track $index) {

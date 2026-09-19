@@ -18,7 +18,6 @@ export class ParkingAttendantsService {
     return this.http.post<ParkingAttendantResponse>(this.base, { name, email, password });
   }
 
-  /** Also signs out every handheld still holding the old password. */
   setPassword(id: string, password: string): Observable<ParkingAttendantResponse> {
     return this.http.post<ParkingAttendantResponse>(`${this.base}/${id}/password`, { password });
   }

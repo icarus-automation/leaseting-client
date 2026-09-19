@@ -25,14 +25,6 @@ export const DATE_RANGE_PRESETS: { value: DateRangePreset; label: string }[] = [
   { value: 'custom', label: 'Custom' },
 ];
 
-/**
- * Resolves a preset against today. Returns null for `custom`, where the dates
- * come from the pickers instead.
- *
- * Ranges that would run past today are clipped to it — a report whose window
- * extends into the future invites the reader to treat a partial month as a
- * finished one.
- */
 export function resolvePreset(preset: DateRangePreset, today = new Date()): DateRange | null {
   switch (preset) {
     case 'this-month':
@@ -50,12 +42,10 @@ export function resolvePreset(preset: DateRangePreset, today = new Date()): Date
   }
 }
 
-/** yyyy-MM-dd in the user's own calendar — the day they picked, not UTC's. */
 export function toIsoDate(date: Date): string {
   return format(date, 'yyyy-MM-dd');
 }
 
-/** "1 Nov to 30 Nov 2026", collapsing the year when both ends share it. */
 export function rangeLabel(fromIso: string, toIso: string): string {
   const from = parseApiDate(fromIso);
   const to = parseApiDate(toIso);

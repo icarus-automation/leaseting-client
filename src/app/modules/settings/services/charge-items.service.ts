@@ -14,7 +14,6 @@ export class ChargeItemsService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/charge-items`;
 
-  /** Full org list, archived included (Settings shows both; pickers filter). */
   list(): Observable<ChargeItemResponse[]> {
     return this.http.get<ChargeItemResponse[]>(this.base);
   }
@@ -27,7 +26,6 @@ export class ChargeItemsService {
     return this.http.patch<ChargeItemResponse>(`${this.base}/${id}`, payload);
   }
 
-  /** Soft archive — the item leaves the pickers but stays on existing leases. */
   archive(id: string): Observable<ChargeItemResponse> {
     return this.http.delete<ChargeItemResponse>(`${this.base}/${id}`);
   }

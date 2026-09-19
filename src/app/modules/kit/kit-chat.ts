@@ -27,17 +27,6 @@ import type { KitChatMessage, KitConversationSummary, KitDocumentTurn } from './
 import { splitCommand, toMessageView } from './kit-command.util';
 import { KitChatService } from './services/kit-chat.service';
 
-/**
- * Openers for the blank state. A general-purpose assistant with an empty box
- * is a hard thing to start using — these show what Kit is actually good for,
- * one from each side of it: their own records, and everything else.
- *
- * The `/document` opener leads deliberately. It is the one thing here nobody
- * discovers by typing, because it needs a trigger word to exist at all — a
- * feature reachable only by knowing a magic word is, for most users, a feature
- * that does not exist. Showing it first and letting it render its own trigger
- * teaches the syntax by example rather than by instruction.
- */
 const SUGGESTIONS = [
   '/document a list of unpaid tenants with their contact numbers',
   'Who has an unpaid balance right now?',
@@ -45,13 +34,6 @@ const SUGGESTIONS = [
   'Draft a polite reminder for a tenant who is two weeks late on rent.',
 ];
 
-/**
- * Polling cadence for a generating document.
- *
- * The ceiling deliberately outlasts the server's own three-minute cutoff, so
- * the last poll reads the FAILED it writes rather than the card spinning on
- * past it forever.
- */
 const POLL_INTERVAL_MS = 2_000;
 const MAX_POLLS = 110;
 
@@ -72,12 +54,6 @@ export class KitChat {
   private readonly transcript = viewChild<ElementRef<HTMLDivElement>>('transcript');
   private readonly highlight = viewChild<ElementRef<HTMLDivElement>>('highlight');
 
-  /**
-   * Openers pre-split, so a suggestion carrying `/document` renders the
-   * trigger in the same styling the composer and the transcript give it. One
-   * splitter, three places: the user sees the same token everywhere it means
-   * the same thing.
-   */
   readonly suggestions = SUGGESTIONS.map((text) => ({ text, ...splitCommand(text) }));
 
   readonly kitAvatarMood: KitMood = 'neutral';
@@ -94,30 +70,21 @@ export class KitChat {
   readonly isBlank = computed(() => this.messages().length === 0 && !this.loadingThread());
   readonly canSend = computed(() => this.draft().trim().length > 0 && !this.pending());
 
-  /** The transcript with each turn's command split out so it can be styled. */
   readonly view = computed(() => this.messages().map(toMessageView));
 
-  /** The draft split the same way, for the composer's highlight overlay. */
   readonly draftParts = computed(() => splitCommand(this.draft()));
 
-  /** Flags the composer while the draft is a document request. */
   readonly isDocumentDraft = computed(() => this.draftParts().command !== null);
 
-  /** Documents already being watched, so a re-render cannot double-poll. */
   private readonly watched = new Set<string>();
 
   constructor() {
     this.refreshHistory();
 
-    // /kit and /kit/:id share this component, so Angular reuses the instance
-    // and the param stream is what tells us the thread changed. Driving off
-    // the URL keeps back/forward and deep links working for free.
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => this.openFromRoute(params.get('id')));
 
-    // Keep the newest turn in view without yanking the page around mid-read:
-    // this only runs when the transcript actually changes.
     effect(() => {
       this.messages();
       this.pending();
@@ -126,7 +93,6 @@ export class KitChat {
     });
   }
 
-  /** Called by the template whenever the :id segment changes. */
   openFromRoute(id: string | null): void {
     if (id === this.activeId()) return;
     this.activeId.set(id);
@@ -141,7 +107,6 @@ export class KitChat {
         next: (conversation) => {
           this.messages.set(conversation.messages);
           this.loadingThread.set(false);
-          // A thread reopened mid-generation still has work in flight.
           this.watchPendingDocuments();
         },
         error: () => {
@@ -163,17 +128,11 @@ export class KitChat {
     this.draft.set(text);
   }
 
-  /**
-   * Scrolls the styled copy in step with the field it sits on top of. Only
-   * bites once a draft outgrows the composer, but without it the highlight
-   * slides off the text it belongs to.
-   */
   syncHighlight(event: Event): void {
     const overlay = this.highlight()?.nativeElement;
     if (overlay) overlay.scrollTop = (event.target as HTMLTextAreaElement).scrollTop;
   }
 
-  /** Enter sends; Shift+Enter is a newline, which longer questions need. */
   onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter' || event.shiftKey) return;
     event.preventDefault();
@@ -186,7 +145,6 @@ export class KitChat {
 
     this.draft.set('');
     this.pending.set(true);
-    // Optimistic bubble so the question appears the instant it is asked.
     const optimistic: KitChatMessage = {
       id: `pending-${Date.now()}`,
       role: 'USER',
@@ -222,13 +180,6 @@ export class KitChat {
           this.messages.set(conversation.messages);
           this.refreshHistory();
           this.watchPendingDocuments();
-          // replaceState rather than router.navigate: /kit and /kit/:id are two
-          // route entries pointing at this component, so routing between them
-          // destroys and rebuilds the whole view — which is the flash the user
-          // sees the instant their first message lands. The URL still needs to
-          // become deep-linkable, so update the address bar without routing.
-          // The blank page was never a destination worth going back to, so
-          // replace rather than push.
           this.location.replaceState(`/kit/${conversation.id}`);
         },
         error: (error: unknown) => this.failSend(error, content, optimistic.id),
@@ -262,10 +213,6 @@ export class KitChat {
     });
   }
 
-  /**
-   * Starts a poll for every document still generating in the open thread.
-   * Safe to call after any transcript change — `watched` makes it idempotent.
-   */
   private watchPendingDocuments(): void {
     for (const message of this.messages()) {
       const document = message.document;
@@ -275,13 +222,6 @@ export class KitChat {
     }
   }
 
-  /**
-   * Polls one document until it is no longer pending.
-   *
-   * `takeWhile(..., true)` keeps the terminal reading, which is the one that
-   * carries the finished file — dropping it would leave the card stuck on the
-   * last "still working" answer.
-   */
   private watch(documentId: string): void {
     this.watched.add(documentId);
 
@@ -294,24 +234,17 @@ export class KitChat {
       )
       .subscribe({
         next: (turn) => this.applyDocumentTurn(turn),
-        // A dropped poll is not worth a toast: the card keeps its last state
-        // and reopening the conversation picks the document up again.
         error: () => this.watched.delete(documentId),
         complete: () => this.watched.delete(documentId),
       });
   }
 
-  /**
-   * A refinement produced a new turn. Appended and watched exactly like any
-   * other document request, because on the server it is one.
-   */
   onRefined(message: KitChatMessage): void {
     this.messages.update((messages) => [...messages, message]);
     this.refreshHistory();
     this.watchPendingDocuments();
   }
 
-  /** Replaces the turn in place, keeping its position in the transcript. */
   private applyDocumentTurn(turn: KitDocumentTurn): void {
     this.messages.update((messages) =>
       messages.map((message) =>
@@ -322,7 +255,6 @@ export class KitChat {
     );
   }
 
-  /** Hands the question back rather than swallowing it into a failed send. */
   private failSend(error: unknown, content: string, optimisticId: string): void {
     this.pending.set(false);
     this.messages.update((messages) => messages.filter((message) => message.id !== optimisticId));

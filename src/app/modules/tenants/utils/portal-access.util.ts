@@ -13,14 +13,10 @@ export function portalAccessBadge(status: PortalAccessStatus): { label: string; 
     case 'DISABLED':
       return { label: 'Disabled', tone: 'destructive' };
     case 'MUST_CHANGE_PASSWORD':
-      // Deliberately short: this chip shares a narrow card header with the
-      // "Residence Care" heading, and a sentence-length label wraps to three
-      // lines there. The card's own panel spells out what the tenant must do.
       return { label: 'Password pending', tone: 'warning' };
   }
 }
 
-/** One-time passwords exist only on the activate/reset response body. */
 export function visibleOneTimePassword(temporaryPassword: string | undefined | null): string | null {
   return temporaryPassword?.length ? temporaryPassword : null;
 }

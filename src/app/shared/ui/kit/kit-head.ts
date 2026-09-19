@@ -4,13 +4,6 @@ import { KIT_HEAD_ART, type KitMood } from '../../../core/kit/kit.model';
 
 type KitHeadVariant = 'avatar' | 'badge' | 'hero' | 'panel';
 
-/**
- * The only non-dashboard rendering of Kit.
- *
- * Keeping the head crop here prevents feature components from accidentally
- * reaching for the full-body artwork, which belongs exclusively to the
- * dashboard card.
- */
 @Component({
   selector: 'app-kit-head',
   template: '',

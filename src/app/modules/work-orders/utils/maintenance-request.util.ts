@@ -4,18 +4,12 @@ import type {
 } from '../../../core/models/maintenance-request.types';
 import type { BadgeTone } from '../../../shared/ui/status-badge/status-badge';
 
-/** The API caps a resolve note at 500 characters. */
 export const RESOLVE_NOTE_MAX = 500;
 
-/** A queue tab: one status, or every request. */
 export type RequestView = MaintenanceRequestStatus | 'ALL';
 
 export type RequestAction = 'start' | 'resolve';
 
-/**
- * Open is the status that needs someone, so it alone carries the warning tone.
- * In progress is being handled and Resolved is done.
- */
 export function requestStatusBadge(status: MaintenanceRequestStatus): { label: string; tone: BadgeTone } {
   switch (status) {
     case 'OPEN':
@@ -27,10 +21,6 @@ export function requestStatusBadge(status: MaintenanceRequestStatus): { label: s
   }
 }
 
-/**
- * The one step staff can take from a status: Start from Open, Resolve from In
- * progress, nothing once Resolved. No skipping ahead and no going back.
- */
 export function nextRequestAction(status: MaintenanceRequestStatus): RequestAction | null {
   switch (status) {
     case 'OPEN':
@@ -50,7 +40,6 @@ export function requestTenantName(request: Pick<MaintenanceRequest, 'tenant'>): 
   return `${request.tenant.firstName} ${request.tenant.lastName}`.trim();
 }
 
-/** "Unit 106 · Brickstone Boarding House" */
 export function requestUnitLabel(request: Pick<MaintenanceRequest, 'unit'>): string {
   return `Unit ${request.unit.unitNo} · ${request.unit.property.name}`;
 }
@@ -59,7 +48,6 @@ export function photoCountLabel(count: number): string {
   return count === 1 ? '1 photo' : `${count} photos`;
 }
 
-/** What an empty tab says. A property filter gets its own line, since the org may have requests elsewhere. */
 export function requestEmptyState(
   view: RequestView,
   propertyFiltered: boolean,

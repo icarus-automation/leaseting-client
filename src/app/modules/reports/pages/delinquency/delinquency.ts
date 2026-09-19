@@ -31,15 +31,6 @@ const WINDOW_OPTIONS = [
   { value: 24, label: 'Last 24 months' },
 ];
 
-/**
- * Delinquency & Reminders.
- *
- * Aging says how much is owed; this says who the problem is and whether
- * anything has already been done about it. The reminder ladder has been
- * running and logging every send since it shipped — this is the first surface
- * that reads that trail back, which is what turns "we should chase them" into
- * "we have chased them nine times and it is not working".
- */
 @Component({
   selector: 'app-delinquency',
   imports: [
@@ -77,7 +68,6 @@ export class Delinquency {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly expanded = signal<ReadonlySet<string>>(new Set());
-  /** Tenant id whose reminder is in flight — keeps the button honest. */
   readonly sending = signal<string | null>(null);
 
   readonly asOfText = computed(() => {
@@ -93,7 +83,6 @@ export class Delinquency {
 
   readonly isEmpty = computed(() => (this.report()?.tenants.length ?? 0) === 0);
 
-  /** Widest bar in the effectiveness panel, so the rest scale against it. */
   readonly peakSent = computed(() =>
     Math.max(1, ...(this.report()?.effectiveness ?? []).map((stat) => stat.sent)),
   );
@@ -175,7 +164,6 @@ export class Delinquency {
     }
   }
 
-  /** "Late 5 of 14" — the ratio is the pattern; the count alone is not. */
   patternText(tenant: DelinquencyTenant): string {
     if (tenant.billsConsidered === 0) return 'No bills due yet in this period';
     return `Late on ${tenant.lateCount} of ${tenant.billsConsidered}`;
@@ -216,10 +204,6 @@ export class Delinquency {
     return Boolean(this.report()?.smsEnabled) && tenant.chaseBillId !== null;
   }
 
-  /**
-   * Sending costs a real SMS credit and reaches a real person, so it always
-   * goes through a confirm naming who is being texted and about what.
-   */
   confirmSend(tenant: DelinquencyTenant): void {
     const billId = tenant.chaseBillId;
     if (!billId) return;
@@ -248,8 +232,6 @@ export class Delinquency {
               summary: `Reminder sent to ${tenant.tenantName}`,
               detail: result.recipient,
             });
-            // Reload so the trail shows the send that just happened rather
-            // than a stale count next to a fresh toast.
             this.load();
           } else {
             this.toast.add({

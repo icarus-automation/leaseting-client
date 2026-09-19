@@ -4,13 +4,6 @@ import { floodFill } from './flood-fill.util';
 import { DEFAULT_TRACE_OPTIONS, indexPlan, selectAt, traceRegions } from './plan-trace';
 import { absorbSubRooms, regionAt } from './segment.util';
 
-/**
- * A plan as ASCII: '#' is wall, '.' is open floor.
- *
- * Written this way because every bug in this pipeline is a spatial one, and a
- * grid you can read is the only way to tell "the fill leaked" apart from "the
- * contour cut a corner".
- */
 function planFrom(rows: string[]): { luminance: Uint8Array; width: number; height: number } {
   const height = rows.length;
   const width = rows[0].length;
@@ -23,7 +16,6 @@ function planFrom(rows: string[]): { luminance: Uint8Array; width: number; heigh
   return { luminance, width, height };
 }
 
-/** Two plain rooms side by side, separated by one solid wall. */
 const PLAIN_ROOMS = [
   '####################',
   '#........##........#',
@@ -36,15 +28,6 @@ const PLAIN_ROOMS = [
   '####################',
 ];
 
-/**
- * The shape the real plans are drawn in: units either side of a corridor, each
- * a bedroom with an ensuite carved out of one corner. Both doors are drawn
- * shut, so every room is its own sealed enclosure — which is exactly why a
- * single flood fill returns a bedroom without its bathroom.
- *
- * Columns 1–9 are the left unit (bedroom above, ensuite bottom-left), 11–13
- * the corridor, 15–23 the right unit.
- */
 const UNITS_WITH_ENSUITES = [
   '#########################',
   '#.........#...#.........#',
@@ -57,14 +40,6 @@ const UNITS_WITH_ENSUITES = [
   '#########################',
 ];
 
-/**
- * Ray casting, so a test can ask the question that actually matters: is the
- * bathroom inside the outline the manager would have got?
- *
- * Comparing bounding boxes or point counts only ever proves the polygon
- * changed shape, which it does for plenty of reasons that are not "it reached
- * the ensuite".
- */
 function polygonContains(points: [number, number][], x: number, y: number): boolean {
   let inside = false;
   for (let i = 0, j = points.length - 1; i < points.length; j = i, i += 1) {
@@ -77,8 +52,6 @@ function polygonContains(points: [number, number][], x: number, y: number): bool
 
 const traceOptions = {
   ...DEFAULT_TRACE_OPTIONS,
-  // These fixtures are a couple of dozen pixels across, so the production
-  // radii and area floors would swallow them whole.
   closeRadius: 0,
   bridgeRadius: 1,
   minAreaRatio: 0.0001,
@@ -88,8 +61,6 @@ const traceOptions = {
 describe('otsuThreshold', () => {
   it('finds a cut between ink and paper', () => {
     const { luminance } = planFrom(PLAIN_ROOMS);
-    // Otsu names the last level in the darker group, so on a two-valued image
-    // it lands on the ink value itself — which binarizeInk includes.
     expect(otsuThreshold(luminance)).toBeGreaterThanOrEqual(20);
     expect(otsuThreshold(luminance)).toBeLessThan(235);
   });
@@ -109,7 +80,6 @@ describe('floodFill', () => {
   });
 
   it('does not squeeze diagonally between two corner-touching walls', () => {
-    // Four-connectivity is what keeps a doorway jamb from joining two rooms.
     const ink = bitmapFromRows(['00000', '00100', '01010', '00100', '00000']);
     expect(floodFill(ink, 2, 2).area).toBe(1);
   });
@@ -120,7 +90,6 @@ describe('morphology', () => {
     const broken = bitmapFromRows(['0000000', '0000000', '1110111', '0000000', '0000000']);
     const sealed = closeGaps(broken, 1);
     expect(sealed.data[2 * 7 + 3]).toBe(1);
-    // The rows either side stay open — the wall is still one pixel thick.
     expect(sealed.data[1 * 7 + 3]).toBe(0);
     expect(sealed.data[3 * 7 + 3]).toBe(0);
   });
@@ -130,8 +99,6 @@ describe('morphology', () => {
   });
 
   it('dilate grows by the radius in every direction', () => {
-    // The passes are separable now, and a horizontal-only bug would be
-    // invisible in a finished trace but would ruin every bridge.
     const dot = bitmapFromRows(['00000', '00000', '00100', '00000', '00000']);
     expect(countSet(dilate(dot, 1))).toBe(9);
     expect(countSet(dilate(dot, 2))).toBe(25);
@@ -142,7 +109,6 @@ describe('segmentOpenSpace', () => {
   it('labels every sealed room separately', () => {
     const { luminance, width, height } = planFrom(UNITS_WITH_ENSUITES);
     const index = indexPlan(luminance, width, height, traceOptions);
-    // Two bedrooms, two ensuites, one corridor.
     expect(index.segmentation.regions.size).toBe(5);
   });
 
@@ -171,9 +137,6 @@ describe('absorbSubRooms', () => {
   });
 
   it('refuses to swallow the floor from a corridor', () => {
-    // A corridor's bounding box spans the building, so every small room in it
-    // looks like a candidate. The cap on how many one room may absorb is the
-    // only thing separating that from a bedroom with an ensuite.
     const { luminance, width, height } = planFrom(UNITS_WITH_ENSUITES);
     const index = indexPlan(luminance, width, height, traceOptions);
 
@@ -217,14 +180,10 @@ describe('traceRegions', () => {
     if (!result.ok) return;
 
     expect(result.points.length).toBeGreaterThanOrEqual(3);
-    // The unit is the left third; nothing should reach the corridor.
     for (const [x] of result.points) expect(x).toBeLessThan(0.5);
   });
 
   it('encloses the ensuite, which a plain fill never would', () => {
-    // This is the bug the whole rework exists for: with the ensuite door drawn
-    // shut, one fill returns the bedroom and leaves the bathroom outside the
-    // unit it belongs to.
     const { luminance, width, height } = planFrom(UNITS_WITH_ENSUITES);
     const index = indexPlan(luminance, width, height, traceOptions);
     const selection = selectAt(index, 6, 2, traceOptions)!;
@@ -235,7 +194,6 @@ describe('traceRegions', () => {
     expect(whole.ok && bedroomOnly.ok).toBe(true);
     if (!whole.ok || !bedroomOnly.ok) return;
 
-    // A point in the middle of the ensuite, in normalized coordinates.
     const bathX = 2 / width;
     const bathY = 6.5 / height;
 
@@ -251,7 +209,6 @@ describe('traceRegions', () => {
     const right = selectAt(index, 15, 4, traceOptions)!;
     const result = traceRegions(index, [...left.regionIds, ...right.regionIds], {
       ...traceOptions,
-      // Wide enough to bridge the two-pixel wall between them.
       bridgeRadius: 2,
     });
 

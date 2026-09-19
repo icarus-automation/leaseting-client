@@ -144,7 +144,6 @@ describe('operations calendar interactions', () => {
     expect(fixture.nativeElement.querySelector('.fc-listMonth-view')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.fc-list-event')?.textContent).toContain('Overdue');
     expect(fixture.nativeElement.querySelector('.fc-list-event')?.textContent).toContain('outstanding');
-    // The source preview uses the same typed projection as calendar entries.
     component.selected.set(entry);
     await fixture.whenStable();
     const preview: HTMLElement = fixture.nativeElement.querySelector('[aria-label="Calendar entry details"]');
@@ -197,7 +196,6 @@ describe('operations calendar interactions', () => {
     requests[0].next(feed([dueBill]));
     await fixture.whenStable();
     const calls = service.events.mock.calls.length;
-    // 00:30 to the next midnight in Manila, independent of the machine timezone.
     vi.advanceTimersByTime(23.5 * 60 * 60 * 1000);
     await fixture.whenStable();
     expect(component.today()).toBe('2026-09-06');

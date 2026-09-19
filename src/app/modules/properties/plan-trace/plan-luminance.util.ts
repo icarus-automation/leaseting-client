@@ -4,24 +4,8 @@ export interface PlanLuminance {
   height: number;
 }
 
-/**
- * Longest side the trace runs at.
- *
- * A phone photo is 3–4000px wide, and the morphology pass is O(pixels ×
- * radius²) — at full size one tap would lock the tab for seconds. At 1200 a
- * room boundary is still several hundred pixels across, which is far more
- * precision than a polygon anyone drags by hand needs, and the whole pipeline
- * finishes inside a frame or two.
- */
 const MAX_WORKING_EDGE = 1200;
 
-/**
- * Rec. 601 luma. Floor plans are effectively greyscale already, but a photo of
- * one carries a colour cast from whatever light it was taken under, and
- * averaging the channels turns a warm cast into a brightness shift that moves
- * the threshold. Weighting them the way the eye does keeps ink and paper where
- * they belong.
- */
 function luma(r: number, g: number, b: number): number {
   return (r * 299 + g * 587 + b * 114) / 1000;
 }

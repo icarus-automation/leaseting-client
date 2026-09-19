@@ -35,11 +35,6 @@ const ACCEPTED_TYPES = 'application/pdf,image/png,image/jpeg,image/webp';
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const RECEIPT_LABEL = 'Onboarding · Payment receipt';
 
-/**
- * Step 7 — money received at move-in. The amounts here become payments against
- * the opening bills (rent advance + security deposit) at completion; a partial
- * amount leaves its bill open.
- */
 @Component({
   selector: 'app-step-move-in-payment',
   imports: [ReactiveFormsModule, PIcon, DatePicker, InputNumber, Select, PhpCurrencyPipe],
@@ -63,11 +58,6 @@ export class StepMoveInPayment {
   readonly receiptName = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
 
-  /**
-   * The opening bills this step collects against — the ceilings for both
-   * inputs. Rent charges set the monthly figure; the deposit step decides how
-   * many months of it are advanced and what deposits are held alongside.
-   */
   readonly terms = computed(() => {
     const stepsState = this.detail().stepsState;
     const terms = stepsState['lease-terms']?.data as LeaseTermsStepData | undefined;
@@ -97,7 +87,6 @@ export class StepMoveInPayment {
   private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
   constructor() {
-    // One-time prefill: the saved step on resume, else the full billed amounts.
     effect(() => {
       const detail = this.detail();
       untracked(() => this.prefill(detail));

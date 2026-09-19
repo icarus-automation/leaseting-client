@@ -15,7 +15,6 @@ interface PickedTenant {
   lastName: string;
 }
 
-/** Step 2 — pick an existing tenant or create one on the spot. */
 @Component({
   selector: 'app-step-tenant',
   imports: [ReactiveFormsModule, PIcon],

@@ -21,10 +21,6 @@ const CHECKLIST: { key: TurnoverKey; label: string; hint: string }[] = [
   { key: 'utilitiesRead', label: 'Utility meters read', hint: 'Opening electric/water readings noted for the first bill.' },
 ];
 
-/**
- * Step 8 — physical turnover checklist plus a recap of everything completion
- * is about to write: the lease, its opening bills, and the move-in payments.
- */
 @Component({
   selector: 'app-step-turnover',
   imports: [DatePipe, PIcon, PhpCurrencyPipe],
@@ -53,7 +49,6 @@ export class StepTurnover {
     return state.keysHanded && state.unitInspected && state.utilitiesRead;
   });
 
-  /** Everything completion is about to write, read back from the saved steps. */
   readonly summary = computed(() => {
     const stepsState = this.detail().stepsState;
     const overview = stepsState.overview?.data as OverviewStepData | undefined;

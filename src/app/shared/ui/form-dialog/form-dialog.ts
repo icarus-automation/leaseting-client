@@ -14,17 +14,6 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import { ConfirmService } from '../confirm/confirm.service';
 
-/**
- * Centered modal used for all create/edit forms. Forms are short (2–6 fields)
- * and entered repeatedly by staff, so the dialog lands at eye-line, autofocuses
- * its first field, and submits on Enter (native form behavior — footer submit
- * buttons carry the form="..." attribute). Closing is always routed through
- * requestClose(): a dirty form asks before discarding, which is why the
- * built-in close paths (X, Esc, mask click) are disabled and re-implemented.
- *
- * Project form content directly; project footer actions with the
- * `dialog-footer` attribute.
- */
 @Component({
   selector: 'app-form-dialog',
   imports: [Dialog, PIcon],
@@ -91,7 +80,6 @@ export class FormDialog {
   readonly heading = input.required<string>();
   readonly subheading = input<string | null>(null);
   readonly width = input('30rem');
-  /** Bind the form's dirty state — a dirty dialog confirms before closing. */
   readonly dirty = input(false);
 
   private readonly content = viewChild<ElementRef<HTMLElement>>('dialogBody');
@@ -122,8 +110,6 @@ export class FormDialog {
       const field = this.content()?.nativeElement.querySelector<HTMLElement>(
         'input:not([type="hidden"]):not([disabled]), select, textarea, [autofocus]',
       );
-      // A dialog with nothing to fill in starts at its title, so focus is inside
-      // the dialog without scrolling to the footer buttons.
       (field ?? this.headingElement()?.nativeElement)?.focus();
     });
   }

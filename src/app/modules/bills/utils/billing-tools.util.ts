@@ -7,12 +7,6 @@ export interface BillingToolsCommands {
   generateRentBills: () => void;
 }
 
-/**
- * Periodic billing ops for the Bills header menu.
- *
- * New bill and Payment submissions stay out: create is a primary header
- * action, and submissions already has its own Money nav entry.
- */
 export function billingToolsMenuItems(
   generatingRent: boolean,
   commands: BillingToolsCommands,

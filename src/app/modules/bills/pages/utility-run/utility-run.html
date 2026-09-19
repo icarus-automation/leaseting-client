@@ -174,8 +174,6 @@
             <p-inputnumber inputId="run-total-consumption" formControlName="totalConsumption" [min]="0" [maxFractionDigits]="2" placeholder="e.g. 189" styleClass="w-full" />
           </div>
           <div class="flex flex-col justify-end gap-1.5">
-            <!-- min-h-10 matches the inputs beside it, so the row reads as one
-                 line of controls rather than one that sits low. -->
             <p class="flex min-h-10 items-center gap-1 rounded-base bg-surface px-3 text-[13px] text-body">
               <span>Price per {{ unitLabel() }}:</span>
               @if (effectiveRate(); as rate) {

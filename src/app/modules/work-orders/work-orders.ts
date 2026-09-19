@@ -34,14 +34,6 @@ import type { RequestView } from './utils/maintenance-request.util';
 const ALL_PROPERTIES = 'all';
 const PAGE_SIZE = 20;
 
-/**
- * Work Orders: the staff queue for maintenance requests tenants file in
- * Residence Care.
- *
- * It opens on Open, the requests nobody has picked up. A request only moves
- * forward, Start then Resolve, and only from its detail, where the tenant's
- * notes and photos are.
- */
 @Component({
   selector: 'app-work-orders',
   imports: [
@@ -130,7 +122,6 @@ export class WorkOrders {
     this.detailVisible.set(true);
   }
 
-  /** After Start or Resolve: reload in place, without swapping the table for a skeleton. */
   onRequestChanged(): void {
     this.load(this.meta()?.page ?? 1, { quiet: true });
     this.openRequests.refresh();
@@ -150,7 +141,6 @@ export class WorkOrders {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
-          // Moving the last request off a later page leaves that page empty.
           if (result.data.length === 0 && result.meta.total > 0 && result.meta.lastPage < page) {
             this.load(result.meta.lastPage, { quiet });
             return;
@@ -166,7 +156,6 @@ export class WorkOrders {
       });
   }
 
-  /** The filter only shows with more than one property, so a failed read just leaves it hidden. */
   private loadProperties(): void {
     this.propertiesApi
       .list(1, 50)

@@ -3,12 +3,6 @@ import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import type { ChargeLine } from '../../../../../core/models/charge-item.types';
 import type { BillType } from '../../../../../core/models/enums';
 
-/**
- * One money line on a lease, as a form group. `name` and `billType` are held
- * alongside the catalogue id on purpose: they are snapshotted onto the lease so
- * renaming or archiving the catalogue item later never rewrites a lease that
- * already went out.
- */
 export type ChargeLineGroup = FormGroup<{
   chargeItemId: FormControl<string | null>;
   name: FormControl<string>;
@@ -39,7 +33,6 @@ export function createChargeLineArray(lines: Partial<ChargeLine>[]): ChargeLineA
   return new FormArray(lines.map((line) => createChargeLineGroup(line)));
 }
 
-/** The payload shape the onboarding step DTOs expect. */
 export function toChargeLines(array: ChargeLineArray): ChargeLine[] {
   return array.controls.map((group) => {
     const { chargeItemId, name, billType, description, amount } = group.getRawValue();

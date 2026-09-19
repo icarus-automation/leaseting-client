@@ -3,7 +3,6 @@ import { computeRow, deriveRate, round2, round4 } from './utility-run-math.util'
 describe('utility-run-math.util', () => {
   describe('deriveRate', () => {
     it('divides the provider total by its consumption at 4 decimals', () => {
-      // Maynilad receipt: ₱27,493.93 over 189 cu.m.
       expect(deriveRate(27493.93, 189)).toBe(145.4705);
     });
 
@@ -19,7 +18,6 @@ describe('utility-run-math.util', () => {
     it('mirrors the server math: subtotal + admin fee', () => {
       const row = computeRow(668, 804, rates);
       expect(row).not.toBeNull();
-      // 136 × 13.04 = 1,773.44 + 3% (53.20) = 1,826.64
       expect(row!.consumed).toBe(136);
       expect(row!.subtotal).toBe(1773.44);
       expect(row!.adminFee).toBe(53.2);
@@ -28,7 +26,6 @@ describe('utility-run-math.util', () => {
 
     it('applies VAT and WHT on the subtotal, like the backend', () => {
       const row = computeRow(833, 907, { ratePerUnit: 13.64, adminFeePct: 0, vatPct: 12, whtPct: 2 });
-      // Matches the backend spec's sample: 1,009.36 + 121.12 − 20.19.
       expect(row!.subtotal).toBe(1009.36);
       expect(row!.vat).toBe(121.12);
       expect(row!.wht).toBe(20.19);

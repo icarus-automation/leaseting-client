@@ -1,12 +1,4 @@
-/**
- * Client-side CSV export.
- *
- * Built from the rows already on screen rather than a second server round
- * trip, so what downloads is exactly what was read — no risk of the export
- * and the table disagreeing because a payment landed between the two calls.
- */
 
-/** Quotes a field only when it needs it, per RFC 4180. */
 function escapeCell(value: string | number | null | undefined): string {
   const text = value === null || value === undefined ? '' : String(value);
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;

@@ -5,7 +5,6 @@ export interface DestinationGroup {
   destinations: PaymentDestinationResponse[];
 }
 
-/** Organization fallback first, then each property's destinations. */
 export function groupDestinationsByScope(
   destinations: PaymentDestinationResponse[],
 ): DestinationGroup[] {

@@ -35,7 +35,6 @@ import { computeRow, deriveRate, type UtilityRowMath } from './utility-run-math.
 type UtilityType = Extract<BillType, 'ELECTRICITY' | 'WATER'>;
 type RateMode = 'direct' | 'derived';
 
-/** One lease's editable line in the run. */
 interface RunRow extends UtilityRunPreviewRow {
   previous: number | null;
   present: number | null;
@@ -90,15 +89,12 @@ export class UtilityRun {
   readonly setupForm = this.fb.nonNullable.group({
     propertyId: ['', [Validators.required]],
     type: ['ELECTRICITY' as UtilityType, [Validators.required]],
-    // Smart defaults: bill the current month, meter read up to today. The
-    // period start is filled from the last cycle once the property is picked.
     billingMonth: [firstOfMonth(new Date()) as Date | null, [Validators.required]],
     periodFrom: [null as Date | null, [Validators.required]],
     periodTo: [startOfDay(new Date()) as Date | null, [Validators.required]],
   });
   readonly setupErrors = createFormErrors(this.setupForm);
 
-  /** Billing month is clamped to last month → this month; no future, no old backlog. */
   readonly monthMin = firstOfMonth(addMonths(new Date(), -1));
   readonly monthMax = startOfDay(new Date());
 
@@ -111,9 +107,6 @@ export class UtilityRun {
     whtPct: [0, [Validators.min(0), Validators.max(100)]],
   });
 
-  // Most landlords get one provider bill and split it across sub-meters, so
-  // "from total bill" is the default; staff switch to a fixed per-unit rate
-  // (e.g. a known ₱/kWh) only when they have one.
   readonly rateMode = signal<RateMode>('derived');
   readonly propertyOptions = signal<PropertyListItem[]>([]);
   readonly rows = signal<RunRow[]>([]);
@@ -121,7 +114,6 @@ export class UtilityRun {
   readonly rowsError = signal<string | null>(null);
   readonly saving = signal(false);
   readonly scanning = signal(false);
-  /** Collapsed-by-default sections — the defaults are usually right. */
   readonly showDates = signal(false);
   readonly showTaxes = signal(false);
 
@@ -134,7 +126,6 @@ export class UtilityRun {
     initialValue: this.rateForm.getRawValue(),
   });
 
-  /** The ₱/unit rate in force — typed directly or derived from the totals. */
   readonly effectiveRate = computed(() => {
     const values = this.rateValues();
     if (this.rateMode() === 'direct') {
@@ -144,7 +135,6 @@ export class UtilityRun {
     return deriveRate(values.totalBillAmount, values.totalConsumption);
   });
 
-  /** Per-row math aligned by index with rows(); null = incomplete/invalid row. */
   readonly rowMath = computed<(UtilityRowMath | null)[]>(() => {
     const rate = this.effectiveRate();
     const { adminFeePct, vatPct, whtPct } = this.rateValues();
@@ -167,20 +157,16 @@ export class UtilityRun {
 
   readonly unitLabel = computed(() => (this.setupValues().type === 'WATER' ? 'cu.m' : 'kWh'));
 
-  /** Named after the unit in force, so the choice reads the same as the fields. */
   readonly rateModes = computed(() => [
     { value: 'derived' as RateMode, label: 'From total bill' },
     { value: 'direct' as RateMode, label: `Rate per ${this.unitLabel()}` },
   ]);
 
-  /** No carried readings at all — this property has never been billed for this
-   *  utility, so staff seed each meter's current figure as the baseline. */
   readonly firstRun = computed(() => {
     const rows = this.rows();
     return rows.length > 0 && rows.every((row) => row.previous == null);
   });
 
-  /** The auto-filled coverage window, for the collapsed "Billing period" summary. */
   readonly periodSummary = computed(() => {
     const { periodFrom, periodTo } = this.setupValues();
     return periodFrom ? { from: periodFrom, to: periodTo } : null;
@@ -192,8 +178,6 @@ export class UtilityRun {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => this.propertyOptions.set(result.data));
 
-    // A run is property+type scoped: whenever either changes, refetch the
-    // leases and their carried-over readings.
     let lastKey = '';
     effect(() => {
       const { propertyId, type } = this.setupValues();
@@ -243,7 +227,6 @@ export class UtilityRun {
       });
   }
 
-  /** Prefills only untouched fields — staff-entered values always win. */
   private applyScan(scan: ReceiptScanResult): void {
     const filled: string[] = [];
     const setup = this.setupForm.controls;
@@ -263,8 +246,6 @@ export class UtilityRun {
       rate.totalConsumption.setValue(scan.totalConsumption);
       filled.push('total bill + consumption');
     }
-    // Period dates carry sensible defaults, so a scan overrides them only while
-    // staff haven't edited by hand — a manual value always wins.
     if (scan.billingPeriodFrom && setup.periodFrom.pristine) {
       setup.periodFrom.setValue(new Date(scan.billingPeriodFrom));
       filled.push('period start');
@@ -285,7 +266,6 @@ export class UtilityRun {
   onSubmit(): void {
     this.setupErrors.submitted.set(true);
     if (this.setupForm.invalid) {
-      // Surface an error hidden inside the collapsed "Billing period" section.
       const { periodFrom, periodTo } = this.setupForm.controls;
       if (periodFrom.invalid || periodTo.invalid) this.showDates.set(true);
       this.setupForm.markAllAsTouched();
@@ -392,10 +372,6 @@ export class UtilityRun {
       });
   }
 
-  /**
-   * Fills the period start once, so staff rarely touch dates: continue from the
-   * last cycle's end where there's history, else from the first of the month.
-   */
   private applyPeriodDefaults(rows: UtilityRunPreviewRow[]): void {
     const fromControl = this.setupForm.controls.periodFrom;
     if (fromControl.value !== null) return;

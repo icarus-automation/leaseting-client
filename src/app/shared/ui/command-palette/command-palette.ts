@@ -65,11 +65,6 @@ const COMMANDS: Command[] = [
   { id: 'act-unpaid-bills', label: 'View unpaid bills', hint: 'Filter', icon: 'exclamation-circle', group: 'Actions', keywords: 'overdue outstanding due money', route: '/bills', queryParams: { status: 'UNPAID' } },
 ];
 
-/**
- * Global ⌘K / Ctrl+K palette: fuzzy navigation (fuse.js), quick create
- * actions, and live tenant search against the API. Keyboard-first per the
- * design principles — the fastest path to any entity or action.
- */
 @Component({
   selector: 'app-command-palette',
   imports: [A11yModule, PIcon],
@@ -97,7 +92,6 @@ export class CommandPalette {
 
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
-  /** Live tenant results for queries of 2+ characters. */
   private readonly tenantResults = toSignal(
     toObservable(this.query).pipe(
       debounceTime(200),
@@ -138,24 +132,19 @@ export class CommandPalette {
     return [...tenantItems, ...commandItems];
   });
 
-  /** Group headers are derived per-row: show when the group changes. */
   showGroupHeader(index: number): boolean {
     const items = this.items();
     return index === 0 || items[index].group !== items[index - 1].group;
   }
 
   constructor() {
-    hotkeys.filter = () => true; // fire inside inputs too — palette is global
+    hotkeys.filter = () => true;
     hotkeys('ctrl+k,command+k', (event) => {
       event.preventDefault();
       this.palette.toggle();
     });
     this.destroyRef.onDestroy(() => hotkeys.unbind('ctrl+k,command+k'));
 
-    // Reset when opening. Focus is deferred to onOpenAnimationEnd() — focusing
-    // immediately races the 200ms pop-in transform and feels like the input
-    // "grabs" you mid-animation. Reduced-motion skips the animation entirely
-    // (no animationend to wait for), so focus right away in that case.
     effect(() => {
       if (!this.isOpen()) return;
       this.query.set('');
@@ -165,7 +154,6 @@ export class CommandPalette {
       }
     });
 
-    // Clamp the active row whenever results change.
     effect(() => {
       const count = this.items().length;
       if (this.activeIndex() >= count) this.activeIndex.set(Math.max(0, count - 1));

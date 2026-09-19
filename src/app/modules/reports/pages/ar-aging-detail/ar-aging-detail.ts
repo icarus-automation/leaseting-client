@@ -25,14 +25,6 @@ import { ReportsService } from '../../services/reports.service';
 
 const ALL_BUCKETS = '';
 
-/**
- * A/R Aging — Detail.
- *
- * Every open bill, oldest debt first, under the tenant who owes it. This is the
- * worklist the summary points at: the ordering is deliberately by exposure
- * rather than alphabetical, so the first name on the page is the first call of
- * the day.
- */
 @Component({
   selector: 'app-ar-aging-detail',
   imports: [FormsModule, RouterLink, PIcon, Select, PhpCurrencyPipe, Skeleton, ReportHeader, AsOfFilter],
@@ -91,20 +83,14 @@ export class ArAgingDetailPage {
     this.load();
   }
 
-  /** Drill-through from the summary arrives as query params; honour them. */
   private readQueryParams(): void {
     const params = this.route.snapshot.queryParamMap;
     const asOf = params.get('asOf');
-    // A pinned date arrived in the link; without one the report stays live.
     if (asOf) this.asOf.set({ preset: 'custom', date: parseApiDate(asOf) });
     this.propertyId.set(params.get('propertyId') ?? ALL_PROPERTIES);
     this.bucket.set(params.get('bucket') ?? ALL_BUCKETS);
   }
 
-  /**
-   * Filters live in the URL so a drilled-into view can be shared, reloaded, or
-   * reached with the back button and still show the same figures.
-   */
   private syncQueryParams(): void {
     void this.router.navigate([], {
       relativeTo: this.route,
@@ -179,7 +165,6 @@ export class ArAgingDetailPage {
     this.collapsed.set(new Set(this.report()?.groups.map((group) => group.tenantId) ?? []));
   }
 
-  /** "12 days late" / "due in 4 days" — the phrasing carries the sign. */
   ageLabel(row: AgingBillRow): string {
     if (row.daysOverdue > 0) return `${row.daysOverdue} day${row.daysOverdue === 1 ? '' : 's'} late`;
     if (row.daysOverdue === 0) return 'Due today';
@@ -230,7 +215,6 @@ export class ArAgingDetailPage {
     downloadCsv(`ar-aging-detail_${report.asOf}${suffix}.csv`, toCsv(rows));
   }
 
-  /** Their open bills in the Bills view, where a payment can be recorded. */
   billsLink(group: AgingDetailGroup): { path: string[]; params: Record<string, string> } {
     return { path: ['/bills'], params: { tenantId: group.tenantId, status: 'UNPAID' } };
   }

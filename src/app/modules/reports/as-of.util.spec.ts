@@ -2,8 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { asOfLabel, asOfParam, resolveAsOf, toIsoDate, todaySelection } from './as-of.util';
 
-/** Mid-month, mid-quarter — so every period-end lands somewhere different. */
-const TODAY = new Date(2026, 7, 5); // 5 Aug 2026, local time
+const TODAY = new Date(2026, 7, 5);
 
 describe('as-of.util', () => {
   describe('resolveAsOf', () => {
@@ -35,7 +34,6 @@ describe('as-of.util', () => {
 
   describe('toIsoDate', () => {
     it('keeps the calendar day the user picked, not its UTC shadow', () => {
-      // Late evening east of UTC formats as the next day if read as UTC.
       expect(toIsoDate(new Date(2026, 10, 30, 23, 30))).toBe('2026-11-30');
     });
 

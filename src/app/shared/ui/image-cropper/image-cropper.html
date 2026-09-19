@@ -10,10 +10,6 @@
     </p>
   } @else if (sourceUrl(); as url) {
     <div class="flex justify-center rounded-base bg-[color-mix(in_oklab,var(--text-heading)_6%,transparent)] p-3">
-      <!--
-        The stage is sized by the image itself, so the selection overlay can be
-        positioned in plain percentages of it and stays aligned at any width.
-      -->
       <div class="relative w-fit select-none">
         <img
           #sourceImage
@@ -26,7 +22,6 @@
         />
 
         @if (rectStyle(); as box) {
-          <!-- Dim everything the crop will discard. -->
           <div
             class="pointer-events-none absolute inset-0 bg-[color-mix(in_oklab,var(--text-heading)_45%,transparent)]"
             aria-hidden="true"
@@ -48,7 +43,6 @@
             (pointercancel)="endDrag($event)"
             (keydown)="onSelectionKeydown($event)"
           >
-            <!-- Thirds guides: the cheapest way to judge a crop. -->
             <div class="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3" aria-hidden="true">
               @for (cell of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track cell) {
                 <span class="border border-[color-mix(in_oklab,white_35%,transparent)]"></span>

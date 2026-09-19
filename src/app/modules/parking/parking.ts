@@ -39,33 +39,15 @@ import { varianceLabel } from './utils/parking-overview.util';
 
 type OverviewTab = 'in-park' | 'activity' | 'cash';
 
-/** The tiles a void or a confirm can move without re-reading the floor. */
 type SummaryCounter = 'inParkCount' | 'voidsToday' | 'shiftsPendingConfirm';
 
 const ALL = 'all';
 
-/** Elapsed stays are the point of the in-park table, so the clock has to move. */
 const ELAPSED_TICK_MS = 30_000;
 
-/**
- * The API caps a page at 200. Asking for the ceiling on the floor keeps a busy
- * gate whole; if a property ever fills past it, the table says so rather than
- * quietly showing a partial floor as if it were the whole one.
- */
 const IN_PARK_LIMIT = 200;
 const ACTIVITY_LIMIT = 50;
 
-/**
- * Parking Overview: the admin read of a floor that is worked entirely from
- * handhelds.
- *
- * The two corrections an admin is allowed live here and nowhere else. A wrong
- * entry is struck off with a reason (open stays only, because a collected exit
- * is money that already changed hands), and a guard's declared cash is signed
- * off against what the API expected. Entry and exit are absent by design: this
- * page cannot raise a barrier or take a peso, and there is no endpoint for it
- * to call if someone tried.
- */
 @Component({
   selector: 'app-parking',
   imports: [
@@ -93,7 +75,6 @@ export class Parking {
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
-  /** Voiding and confirming both move money, so both are owner/admin only. */
   readonly canCorrect = this.auth.isFinancialAdmin;
 
   readonly properties = signal<PropertyListItem[]>([]);
@@ -119,11 +100,9 @@ export class Parking {
     return plate ? `Void ${plate}` : 'Void stay';
   });
 
-  /** Ticks the elapsed column without re-fetching the floor. */
   readonly now = signal(Date.now());
 
   readonly activityLimit = ACTIVITY_LIMIT;
-  /** True when the floor is bigger than one page, so the table can say so. */
   readonly inParkCapped = computed(() => this.inPark().length >= IN_PARK_LIMIT);
 
   readonly propertyOptions = computed(() => [
@@ -131,7 +110,6 @@ export class Parking {
     ...this.properties().map((property) => ({ label: property.name, value: property.id })),
   ]);
 
-  /** A terminal belongs to one property, so narrowing the property narrows this. */
   readonly terminalOptions = computed(() => {
     const propertyId = this.propertyId();
     const scoped = this.terminals().filter(
@@ -155,7 +133,6 @@ export class Parking {
     ];
   });
 
-  /** Plate search runs over the loaded floor: no round trip for three keystrokes. */
   readonly visibleInPark = computed(() => {
     const query = this.plateQuery().trim().toUpperCase();
     if (!query) return this.inPark();
@@ -172,7 +149,6 @@ export class Parking {
 
   onPropertyChange(value: string): void {
     this.propertyId.set(value);
-    // The selected terminal may belong to the property just filtered away.
     const stillVisible = this.terminalOptions().some((option) => option.value === this.terminalId());
     if (!stillVisible) this.terminalId.set(ALL);
     this.load();
@@ -203,8 +179,6 @@ export class Parking {
         next: (voided) => {
           this.busyId.set(null);
           this.voidTarget.set(null);
-          // The stay leaves the floor and joins the activity log, where the
-          // reason and the actor are now on the record.
           this.inPark.update((rows) => rows.filter((row) => row.id !== voided.id));
           this.activity.update((rows) => [voided, ...rows]);
           this.bumpSummary({ inParkCount: -1, voidsToday: 1 });
@@ -221,7 +195,6 @@ export class Parking {
             summary: 'Void failed',
             detail: apiErrorMessage(error, 'Could not void this stay.'),
           });
-          // A 409 means the gate got there first, so the floor on screen is stale.
           this.load();
         },
       });
@@ -276,7 +249,6 @@ export class Parking {
       .subscribe({
         next: (confirmed) => {
           this.busyId.set(null);
-          // The queue holds declared shifts only, so a confirmed one leaves it.
           this.shifts.update((rows) => rows.filter((row) => row.id !== confirmed.id));
           this.bumpSummary({ shiftsPendingConfirm: -1 });
           this.toast.add({
@@ -306,11 +278,6 @@ export class Parking {
     };
   }
 
-  /**
-   * Keeps the tiles honest after a void or a confirm without a second round
-   * trip. Only the counters this page can actually move are adjusted; anything
-   * else waits for the next load.
-   */
   private bumpSummary(delta: Partial<Record<SummaryCounter, number>>): void {
     this.summary.update((current) => {
       if (!current) return current;

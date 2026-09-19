@@ -24,7 +24,6 @@ import { StatusBadge, type BadgeTone } from '../../../../shared/ui/status-badge/
 import { ParkingAttendantsService } from '../../services/parking-attendants.service';
 import { parkingAttendantBadge, sortAttendants } from '../../utils/parking-attendant.util';
 
-/** Shortest password the API accepts. Mirrors the DTO. */
 const MIN_PASSWORD_LENGTH = 8;
 
 @Component({
@@ -50,11 +49,9 @@ export class ParkingAttendantSettings {
 
   readonly creating = signal(false);
   readonly createError = signal<string | null>(null);
-  /** Row waiting on a password reset or a disable/enable round-trip. */
   readonly busyId = signal<string | null>(null);
   readonly flashId = signal<string | null>(null);
 
-  /** Row whose password is being retyped inline, and what has been typed. */
   readonly resettingId = signal<string | null>(null);
   readonly newPassword = signal('');
   readonly resetError = signal<string | null>(null);
@@ -73,10 +70,6 @@ export class ParkingAttendantSettings {
   });
   readonly errors = createFormErrors(this.form);
 
-  /**
-   * Named per field: three rows of "This field is required." under one line of
-   * inputs says nothing about which input is at fault.
-   */
   readonly fieldMessages = {
     name: { required: 'Enter a name for this login.', minlength: 'Use at least 2 characters.' },
     email: { required: 'Enter the login email.' },

@@ -1,10 +1,4 @@
 #!/usr/bin/env node
-/**
- * Fails if leaseting-client UI copy still has banned marketing phrases,
- * cute report titles, or off-glossary words in templates.
- *
- * Usage: node scripts/copy-check.mjs
- */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';

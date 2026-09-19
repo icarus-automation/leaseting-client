@@ -16,7 +16,6 @@ import { BillsService } from '../bills/services/bills.service';
 import { LeasesService } from '../leases/services/leases.service';
 import { PropertiesService } from '../properties/services/properties.service';
 
-/** Leases ending within this window count as "expiring soon". */
 const EXPIRY_WINDOW_DAYS = 60;
 
 @Component({
@@ -39,7 +38,6 @@ export class Home {
   readonly unpaidBillsTotal = signal(0);
   readonly loadFailed = signal(false);
 
-  /** Portfolio-wide unit occupancy, aggregated from the property summaries. */
   readonly occupancy = computed(() => {
     const summary = this.propertyItems().reduce(
       (acc, property) => ({
@@ -77,14 +75,8 @@ export class Home {
       .slice(0, 6),
   );
 
-  /** First-run: no properties yet → show the guided setup instead of stats. */
   readonly isFirstRun = computed(() => !this.loading() && this.propertiesTotal() === 0);
 
-  /**
-   * Positive context for Kit's all-clear state. Kit's own events only describe
-   * what is wrong, so a quiet day would otherwise leave it with nothing to say
-   * but a checkmark — this hands it the reassurance the dashboard already knows.
-   */
   readonly kitSummary = computed(() => {
     const { occupied, total } = this.occupancy();
     const parts: string[] = [];
@@ -129,7 +121,6 @@ export class Home {
       });
   }
 
-  /** Width (%) of each occupancy segment for a property's mini bar. */
   segment(property: PropertyListItem, part: 'settled' | 'overdue' | 'vacant'): number {
     const { total } = property.unitSummary;
     if (total === 0) return 0;

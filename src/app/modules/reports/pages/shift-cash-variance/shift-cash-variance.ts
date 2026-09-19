@@ -33,18 +33,6 @@ const VIEWS: SegmentedOption<ShiftView>[] = [
   { value: 'awaiting', label: 'Awaiting confirm' },
 ];
 
-/**
- * Shift Cash Variance: what each till was expected to hold against what the
- * guard actually handed over.
- *
- * Only declared tills appear. An open shift has no figure anybody has stood
- * behind, and pricing one live would put a number on the page that moves every
- * time it is refreshed. Watching a shift fill up is the Overview's job.
- *
- * `expectedCash` is the snapshot taken when the guard declared, never a
- * re-pricing against today's rate plans: the reader is holding someone to the
- * figure they were shown at the time.
- */
 @Component({
   selector: 'app-shift-cash-variance',
   imports: [
@@ -86,12 +74,6 @@ export class ShiftCashVariance {
 
   readonly isEmpty = computed(() => (this.report()?.rows.length ?? 0) === 0);
 
-  /**
-   * Narrowing happens here rather than server-side because the totals above
-   * the table describe the whole period and must not follow the filter. A
-   * reader looking only at the tills that went wrong still needs to see them
-   * against everything that was declared.
-   */
   readonly rows = computed<ShiftCashRow[]>(() => {
     const rows = this.report()?.rows ?? [];
     switch (this.view()) {
@@ -104,7 +86,6 @@ export class ShiftCashVariance {
     }
   });
 
-  /** True when a filter is hiding rows, so the table can say so. */
   readonly filtered = computed(() => this.rows().length !== (this.report()?.rows.length ?? 0));
 
   constructor() {
@@ -146,7 +127,6 @@ export class ShiftCashVariance {
     return varianceTone(row.state);
   }
 
-  /** "Confirmed by Ben Cruz" or the fact that nobody has signed it off yet. */
   confirmText(row: ShiftCashRow): string {
     if (row.status !== 'CONFIRMED') return 'Awaiting confirm';
     return row.confirmedByName ? `Confirmed by ${row.confirmedByName}` : 'Confirmed';

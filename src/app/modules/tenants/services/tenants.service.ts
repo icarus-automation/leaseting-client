@@ -27,12 +27,6 @@ export class TenantsService {
     return this.http.get<Paginated<TenantListItem>>(this.base, { params });
   }
 
-  /**
-   * How this tenant is paying, and whether the lease looks like it will renew.
-   *
-   * A separate call from {@link get} on purpose: the bands need a year of
-   * bills and their payments, and the profile is useful before they arrive.
-   */
   risk(id: string): Observable<TenantRiskProfile> {
     return this.http.get<TenantRiskProfile>(`${this.base}/${id}/risk`);
   }
@@ -54,7 +48,6 @@ export class TenantsService {
     return this.http.patch<TenantResponse>(`${this.base}/${id}`, toFormData(payload, photo, removePhoto));
   }
 
-  /** Soft archive. Backend rejects with 409 while the tenant has an active lease. */
   archive(id: string): Observable<TenantResponse> {
     return this.http.delete<TenantResponse>(`${this.base}/${id}`);
   }
@@ -93,10 +86,6 @@ export class TenantsService {
   }
 }
 
-/**
- * Tenant create/update are multipart endpoints (optional `photo` file field).
- * Content-Type stays unset so the browser writes the multipart boundary.
- */
 function toFormData(payload: UpdateTenantPayload, photo: File | null, removePhoto = false): FormData {
   const form = new FormData();
   for (const [key, value] of Object.entries(payload)) {

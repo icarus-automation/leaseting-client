@@ -11,17 +11,10 @@ import {
 } from './report-catalog';
 import { ReportFavoritesService } from './services/report-favorites.service';
 
-/** A catalog group with the entries that survived the current search. */
 interface RenderedGroup extends ReportGroup {
   entries: ReportEntry[];
 }
 
-/**
- * The reports catalog: what can be run today, what is coming, and what each
- * one is waiting on. Search matches titles, summaries, and the keyword list,
- * so an accountant typing "sales by customer" still lands on the report that
- * replaced it.
- */
 @Component({
   selector: 'app-reports',
   imports: [PIcon, ReportCard],
@@ -44,7 +37,6 @@ export class Reports {
     );
   });
 
-  /** Starred reports, lifted to their own group above everything else. */
   readonly favoriteEntries = computed(() =>
     this.matches().filter((entry) => this.favorites().has(entry.key)),
   );

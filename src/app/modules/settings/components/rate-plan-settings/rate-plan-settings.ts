@@ -48,11 +48,6 @@ interface PriceCell {
   isArchived: boolean;
 }
 
-/**
- * Settings → Rate plans. One row per named plan; succeeding prices sit in a
- * grid keyed by vehicle type. Optional opening bands (flat) and an optional
- * overnight window (overtime ₱/hour) live on the plan, not on Parking rules.
- */
 @Component({
   selector: 'app-rate-plan-settings',
   imports: [

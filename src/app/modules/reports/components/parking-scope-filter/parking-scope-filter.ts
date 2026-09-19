@@ -7,19 +7,6 @@ import { DATE_RANGE_PRESETS, DateRangePreset, resolvePreset } from '../../date-r
 import { ParkingReportScope } from '../../parking-report.util';
 import { ReportFiltersService } from '../../services/report-filters.service';
 
-/**
- * The filter bar the three gate-cash reports share: a period, a property, and
- * a gate.
- *
- * One component rather than the same five controls pasted into three pages,
- * because these reports are meant to be read against each other. A variance on
- * a till is explained by the exits on it and the voids taken off it, and that
- * cross-check only holds if "September, Basement Gate" means the same thing on
- * every page.
- *
- * The host is `display: contents` so the fields drop into whatever grid the
- * report lays out.
- */
 @Component({
   selector: 'app-parking-scope-filter',
   imports: [FormsModule, Select, DatePicker],
@@ -101,23 +88,14 @@ export class ParkingScopeFilter {
   private readonly filters = inject(ReportFiltersService);
 
   readonly value = input.required<ParkingReportScope>();
-  /** Prefix for the field ids, so one page can host more than one bar. */
   readonly idPrefix = input('parking-report');
   readonly valueChange = output<ParkingReportScope>();
 
   readonly presets = DATE_RANGE_PRESETS;
-  /** A gate cannot have taken money on a day that has not happened. */
   readonly today = new Date();
 
   readonly propertyOptions = this.filters.propertyOptions;
 
-  /**
-   * Gates are listed across every property rather than filtered to the one
-   * picked. Narrowing the list would silently drop the gate already selected
-   * whenever the property above it changes, and the server intersects the two
-   * filters anyway: a gate elsewhere returns an empty report, which is the
-   * honest answer to what was asked.
-   */
   readonly terminalOptions = this.filters.terminalOptions;
 
   constructor() {
@@ -131,12 +109,9 @@ export class ParkingScopeFilter {
 
   onPresetChange(preset: DateRangePreset): void {
     const range = resolvePreset(preset, this.today);
-    // "Custom" only arms the two date fields; the window showing stays put
-    // until one of them is actually edited.
     this.emit(range ? { preset, range } : { preset });
   }
 
-  /** Editing either end by hand is what "custom" means, so no second click. */
   onFromChange(from: Date): void {
     this.emit({ preset: 'custom', range: { ...this.value().range, from } });
   }
@@ -149,11 +124,6 @@ export class ParkingScopeFilter {
     this.emit({ terminalId });
   }
 
-  /**
-   * Changing the property clears the gate below it. Leaving a gate from another
-   * property selected would intersect to an empty report, and an empty page is
-   * the one result a reader cannot tell from a broken one.
-   */
   onPropertyChange(propertyId: string): void {
     const terminal = this.terminalOptions().find(
       (option) => option.value === this.value().terminalId,

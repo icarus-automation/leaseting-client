@@ -17,12 +17,6 @@
   top: 0;
 }
 
-/*
- * Drawer mode. The host collapses to zero so it stops reserving a grid column,
- * and the panel itself slides in over the content. `visibility` is animated
- * alongside the transform so the offscreen panel is not a tab stop while
- * closed — a transform alone leaves its links focusable.
- */
 @media (max-width: 1023px) {
   :host {
     width: 0;
@@ -46,7 +40,6 @@
   }
 }
 
-/* Brand */
 .sidebar-brand {
   display: flex;
   align-items: center;
@@ -62,7 +55,6 @@
   outline-offset: -3px;
 }
 
-/* Nav */
 .sidebar-nav {
   flex: 1;
   padding: 12px 10px 16px;
@@ -72,7 +64,6 @@
   gap: 2px;
 }
 
-/* Section */
 .nav-section {
   padding-top: 14px;
 }
@@ -86,7 +77,6 @@
   margin-top: 8px;
   border-top: 1px solid var(--border);
 }
-
 
 .nav-section-label {
   display: block;
@@ -109,7 +99,6 @@
   gap: 2px;
 }
 
-/* Nav items */
 .nav-item {
   display: flex;
   align-items: center;
@@ -165,8 +154,6 @@
   opacity: 0.7;
 }
 
-
-/* Icons */
 .nav-icon {
   width: 16px;
   height: 16px;
@@ -204,7 +191,6 @@
   color: var(--primary);
 }
 
-/* Bottom pinned */
 .sidebar-bottom {
   padding: 10px 10px 14px;
   border-top: 1px solid var(--border);

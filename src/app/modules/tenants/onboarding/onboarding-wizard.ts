@@ -40,12 +40,6 @@ import { StepRequirements } from './steps/step-requirements';
 import { StepTenant } from './steps/step-tenant';
 import { StepTurnover } from './steps/step-turnover';
 
-/**
- * Full-page resumable move-in wizard. Every "Next" persists its step to the
- * backend before advancing, so closing the tab loses nothing: reopening the
- * onboarding lands on the first unfinished step. The lease and its opening
- * bills only exist after the final completion call.
- */
 @Component({
   selector: 'app-onboarding-wizard',
   imports: [
@@ -95,7 +89,6 @@ export class OnboardingWizard {
       key,
       label: ONBOARDING_STEP_LABELS[key],
       status: key === active ? 'current' : done.has(key) ? 'done' : 'upcoming',
-      // Visited = already saved once, or the backend's resume point.
       clickable: key !== active && (done.has(key) || key === detail?.currentStepKey),
     }));
   });
@@ -106,7 +99,6 @@ export class OnboardingWizard {
     return tenant ? `${tenant.firstName} ${tenant.lastName}` : null;
   });
 
-  /** Context rail: the term agreed in the Overview step, once it exists. */
   readonly leaseTerm = computed(() => {
     const saved = this.detail()?.stepsState.overview?.data as OverviewStepData | undefined;
     if (!saved?.startDate || !saved.endDate) return null;
@@ -118,7 +110,6 @@ export class OnboardingWizard {
     };
   });
 
-  /** Context rail: the sum of the rent charges, once the terms step is saved. */
   readonly monthlyRent = computed(() => {
     const saved = this.detail()?.stepsState['lease-terms']?.data as LeaseTermsStepData | undefined;
     if (!saved?.charges?.length) return null;
@@ -126,8 +117,6 @@ export class OnboardingWizard {
   });
 
   constructor() {
-    // Route param arrives after construction (and can change in place when
-    // navigating between onboardings) — reload whenever it does.
     effect(() => {
       const id = this.id();
       if (!id) return;
@@ -145,7 +134,6 @@ export class OnboardingWizard {
     if (index > 0) this.jumpTo(ONBOARDING_STEP_ORDER[index - 1]);
   }
 
-  /** Persist a step, then move forward one. */
   saveStep(stepKey: OnboardingStepKey, data: OnboardingStepData): void {
     this.persistStep(stepKey, data, () => {
       const index = ONBOARDING_STEP_ORDER.indexOf(stepKey);
@@ -153,7 +141,6 @@ export class OnboardingWizard {
     });
   }
 
-  /** Final step: persist turnover, then run the completion transaction. */
   completeFlow(data: TurnoverStepData): void {
     this.persistStep('turnover', data, () => {
       this.saving.set(true);

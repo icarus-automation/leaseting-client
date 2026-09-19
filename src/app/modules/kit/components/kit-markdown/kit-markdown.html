@@ -1,4 +1,3 @@
-<!-- One definition of an inline run, used by every block kind below. -->
 <ng-template #spans let-runs>
   @for (run of runs; track $index) {
     @if (run.bold) {
@@ -19,9 +18,6 @@
 @for (block of blocks(); track $index) {
   @switch (block.kind) {
     @case ('paragraph') {
-      <!-- pre-line, not pre-wrap: Kit puts single newlines inside a paragraph
-           for short dashed lines, and those should survive — but the
-           template's own indentation should not. -->
       <p class="whitespace-pre-line">
         <ng-container [ngTemplateOutlet]="spans" [ngTemplateOutletContext]="{ $implicit: block.spans }" />
       </p>

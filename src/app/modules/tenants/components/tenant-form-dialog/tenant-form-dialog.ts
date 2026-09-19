@@ -33,9 +33,7 @@ export class TenantFormDialog {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly visible = model.required<boolean>();
-  /** Null → create mode; a tenant → edit mode. */
   readonly tenant = input<TenantResponse | null>(null);
-  /** Emits the saved tenant so lists can highlight the row it landed on. */
   readonly saved = output<TenantResponse>();
 
   readonly form = this.fb.nonNullable.group({
@@ -50,7 +48,6 @@ export class TenantFormDialog {
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
   private readonly photoFile = signal<File | null>(null);
-  /** User interacted with the picker — distinguishes "removed photo" from "untouched". */
   readonly photoTouched = signal(false);
 
   private readonly dropzone = viewChild(ImageDropzone);

@@ -5,15 +5,9 @@ export interface StepperStep {
   key: string;
   label: string;
   status: 'done' | 'current' | 'upcoming';
-  /** Only visited steps navigate — upcoming ones stay inert. */
   clickable: boolean;
 }
 
-/**
- * Wizard progress rail: vertical on md+ (left column layouts), compact
- * horizontal dots below. Done = filled check, current = ringed number,
- * upcoming = muted number.
- */
 @Component({
   selector: 'app-stepper',
   imports: [PIcon],
@@ -68,7 +62,6 @@ export interface StepperStep {
       }
     </ol>
 
-    <!-- Compact horizontal variant for small screens. -->
     <ol class="flex items-center gap-1.5 md:hidden" aria-label="Progress">
       @for (step of steps(); track step.key; let index = $index) {
         <li class="flex flex-1 flex-col items-stretch gap-1">

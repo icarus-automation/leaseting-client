@@ -35,15 +35,6 @@ import {
 } from '../../utils/maintenance-request.util';
 import { RequestPhotos } from '../request-photos/request-photos';
 
-/**
- * One maintenance request: what the tenant wrote, their photos, and the single
- * step it can take next (Start from Open, Resolve from In progress).
- *
- * It opens on the row the queue already holds, so there is no loading flash,
- * and re-reads the request in the background. A 409 on Start or Resolve means
- * someone else moved it first: the dialog shows the API's message beside the
- * request as it stands now, and the queue is told to reload.
- */
 @Component({
   selector: 'app-request-detail-dialog',
   imports: [DatePipe, ReactiveFormsModule, ErrorBanner, FormDialog, StatusBadge, RequestPhotos],
@@ -57,12 +48,9 @@ export class RequestDetailDialog {
   private readonly fb = inject(FormBuilder);
 
   readonly visible = model.required<boolean>();
-  /** The queue row to show. */
   readonly request = input<StaffMaintenanceRequest | null>(null);
-  /** The request moved, here or by someone else. The queue should reload. */
   readonly changed = output<void>();
 
-  /** The row, replaced by a fresher read or by what Start and Resolve return. */
   readonly current = linkedSignal(() => this.request());
   readonly error = signal<string | null>(null);
   readonly busy = signal(false);
@@ -176,10 +164,6 @@ export class RequestDetailDialog {
       });
   }
 
-  /**
-   * Re-reads the request. A status that differs from the one on screen means
-   * someone else moved it, so the queue is told to reload too.
-   */
   private refresh(id: string): void {
     this.cancelRefresh();
     this.refreshSubscription = this.requests
@@ -192,15 +176,10 @@ export class RequestDetailDialog {
           this.current.set(fresh);
           if (shown.status !== fresh.status) this.changed.emit();
         },
-        // The row on screen is still usable. Start and Resolve report their own failures.
         error: () => undefined,
       });
   }
 
-  /**
-   * A read still in flight when Start or Resolve goes out would land after it
-   * with the old status, and the GET cache would keep that stale answer.
-   */
   private cancelRefresh(): void {
     this.refreshSubscription?.unsubscribe();
     this.refreshSubscription = null;

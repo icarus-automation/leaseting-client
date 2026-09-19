@@ -4,13 +4,6 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import { findSettingsCard, settingsSetupSteps } from '../../settings-nav';
 
-/**
- * Chrome shared by every Settings detail page: breadcrumb back to the index
- * plus the title and blurb the hub card already promised, read from the same
- * SETTINGS_GROUPS entry so the two can never drift apart. Title, blurb, setup
- * chain, and the page card share the standard Settings column — no narrower
- * copy column inside it.
- */
 @Component({
   selector: 'app-settings-page-shell',
   imports: [RouterLink, PIcon],
@@ -58,7 +51,6 @@ import { findSettingsCard, settingsSetupSteps } from '../../settings-nav';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPageShell {
-  /** Child path under /settings — the key into SETTINGS_GROUPS. */
   readonly section = input.required<string>();
 
   readonly card = computed(() => findSettingsCard(this.section()));

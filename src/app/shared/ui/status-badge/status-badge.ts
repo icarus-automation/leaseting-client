@@ -2,10 +2,6 @@ import { Component, ChangeDetectionStrategy, computed, input } from '@angular/co
 
 export type BadgeTone = 'success' | 'destructive' | 'warning' | 'vacant' | 'neutral';
 
-/**
- * Status chip: colored dot + label (+ optional count). Color is never the sole
- * differentiator — the label always names the state (WCAG / design rule).
- */
 @Component({
   selector: 'app-status-badge',
   template: `

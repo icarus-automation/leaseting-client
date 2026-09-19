@@ -22,7 +22,6 @@ interface Faq {
 export class UtilityBillingGuide {
   private readonly document = inject(DOCUMENT);
 
-  /** In-page table of contents — order matches the sections below. */
   readonly sections: GuideSection[] = [
     { id: 'overview', label: 'What it does' },
     { id: 'dates', label: 'The three dates' },
@@ -34,7 +33,6 @@ export class UtilityBillingGuide {
     { id: 'faq', label: 'Questions & fixes' },
   ];
 
-  /** Numbered walkthrough of the billing-run page (light markup allowed). */
   readonly runSteps: string[] = [
     'Pick the <strong class="font-medium text-heading">property</strong> and the <strong class="font-medium text-heading">utility</strong> (Electricity or Water). The units and their carried-over previous readings load on their own.',
     'Set the <strong class="font-medium text-heading">rate</strong>: the provider\'s total bill for the building, or a fixed price per unit if you know it. The app shows the working rate as you type.',

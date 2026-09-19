@@ -6,7 +6,6 @@ export interface LeaseResponse {
   startDate: string;
   endDate: string;
   monthlyRent: string;
-  /** null for older, hand-entered, or malformed rent charge snapshots. */
   rentCharges: ChargeLine[] | null;
   dueDay: number;
   terminatedAt: string | null;
@@ -36,7 +35,6 @@ export interface LeaseBillItem {
 }
 
 export interface LeaseDetail extends LeaseListItem {
-  /** Ordered by dueDate descending. */
   bills: LeaseBillItem[];
 }
 
@@ -46,13 +44,9 @@ export interface LeaseListFilters {
   unitId?: string;
   tenantId?: string;
   propertyId?: string;
-  /** Part of the tenant's name. */
   q?: string;
-  /** true = in force now; false = past, ended or future. */
   active?: boolean;
-  /** The renewal horizon in days, at most 365. */
   expiringInDays?: number;
-  /** Inclusive end-date window (yyyy-MM-dd). */
   endFrom?: string;
   endTo?: string;
 }

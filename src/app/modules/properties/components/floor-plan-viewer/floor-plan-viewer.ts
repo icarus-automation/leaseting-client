@@ -16,21 +16,6 @@ import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { PLAN_MIN_HEIGHT_PX, PLAN_VIEWPORT_RESERVE_PX } from '../../floor-plan.constants';
 import { unitTone, unitToneLabel } from '../../../../shared/utils/unit-tone.util';
 
-/**
- * Read-only floor-plan view: the plan image with an SVG polygon overlay.
- * Coordinates are normalized (0–1) in image space; the SVG uses
- * `viewBox="0 0 100 100"` + `preserveAspectRatio="none"` so polygons stretch
- * exactly with the image. Editing shapes lives in FloorMapEditor (Konva).
- *
- * The frame takes the plan's own aspect ratio and is capped to the viewport,
- * so the whole floor is on screen at once and nothing ever scrolls — not the
- * page, not the frame. New plans are cropped to a consistent ratio at upload
- * (see ImageCropper in the floor dialog); older ones still render whole.
- *
- * Status → color comes from the shared unitTone rule; shapes render as a
- * muted fill with a solid status-colored stroke so the plan reads calm
- * instead of blocks of saturated green/red.
- */
 @Component({
   selector: 'app-floor-plan-viewer',
   imports: [PIcon, EmptyState],
@@ -47,15 +32,9 @@ export class FloorPlanViewer {
   readonly uploadPlanRequested = output<void>();
   readonly addUnitRequested = output<void>();
 
-  /** width / height of the loaded plan; the frame matches it exactly. */
   readonly planAspect = signal(16 / 9);
   private readonly viewportHeight = signal(0);
 
-  /**
-   * Widest the frame may be before the plan runs off the bottom of the page.
-   * Height is the scarce axis here — the frame is centred at whatever width
-   * keeps the whole floor visible.
-   */
   readonly maxPlanWidth = computed(() => {
     const viewport = this.viewportHeight();
     if (viewport === 0) return null;
@@ -75,7 +54,6 @@ export class FloorPlanViewer {
     ),
   );
 
-  /** Units shown as chips: unmapped ones, or all of them when there's no plan image. */
   readonly chipUnits = computed(() =>
     this.floor().planImageUrl ? this.unmappedUnits() : this.floor().units,
   );

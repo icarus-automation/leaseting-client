@@ -61,7 +61,6 @@ a.ops-button-primary:hover { background: var(--primary-hover); }
 .ops-detail-facts dd { font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
 .ops-detail-action { flex-shrink: 0; margin-left: auto; }
 
-/* FullCalendar generates its own DOM. All overrides stay inside this feature. */
 :host ::ng-deep .ops-calendar .fc {
   --fc-border-color: var(--border); --fc-page-bg-color: var(--background);
   --fc-neutral-bg-color: var(--surface); --fc-neutral-text-color: var(--text-muted);

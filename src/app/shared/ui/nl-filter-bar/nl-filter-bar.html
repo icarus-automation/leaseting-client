@@ -39,10 +39,6 @@
     }
   </form>
 
-  <!--
-    One live region for every outcome, so a screen reader hears the result of a
-    parse once rather than hearing each part announce itself separately.
-  -->
   <div id="nl-filter-status" class="flex flex-col gap-2" role="status" aria-live="polite">
     @if (error(); as message) {
       <p

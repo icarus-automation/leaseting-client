@@ -25,15 +25,6 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'name', label: 'Tenant name' },
 ];
 
-/**
- * A/R Aging — Summary.
- *
- * One row per tenant, one column per age band: the shape of what is owed, on a
- * single date. It leads with the aging bar because the first question is never
- * "how much" but "how bad" — and a proportional bar answers that before a
- * column of figures can. Every segment is a link into the detail report, so
- * reading the shape and acting on it are the same gesture.
- */
 @Component({
   selector: 'app-ar-aging-summary',
   imports: [FormsModule, RouterLink, PIcon, Select, PhpCurrencyPipe, Skeleton, ReportHeader, AsOfFilter],
@@ -71,7 +62,6 @@ export class ArAgingSummaryPage {
 
   readonly isEmpty = computed(() => (this.report()?.groups.length ?? 0) === 0);
 
-  /** Segment widths for the aging bar, already floored so nothing vanishes. */
   readonly shares = computed(() => {
     const report = this.report();
     if (!report) return [];
@@ -82,7 +72,6 @@ export class ArAgingSummaryPage {
     }));
   });
 
-  /** Overdue as a share of everything owed — the one derived headline figure. */
   readonly overduePercent = computed(() => {
     const report = this.report();
     if (!report || Number(report.total) <= 0) return 0;
@@ -97,7 +86,7 @@ export class ArAgingSummaryPage {
       case 'oldest':
         return groups.sort((a, b) => b.oldestDaysOverdue - a.oldestDaysOverdue);
       default:
-        return groups; // the backend already ordered by exposure
+        return groups;
     }
   });
 
@@ -136,13 +125,6 @@ export class ArAgingSummaryPage {
     this.load();
   }
 
-  /**
-   * Query params that carry the current filters into the detail report.
-   *
-   * A live "Today" is passed on as nothing at all, so the detail report dates
-   * itself the same way this one did rather than pinning yesterday's date on a
-   * link opened tomorrow.
-   */
   detailParams(bucket?: AgingBucketKey): Record<string, string> {
     const params: Record<string, string> = {};
     const asOf = asOfParam(this.asOf());
@@ -156,7 +138,6 @@ export class ArAgingSummaryPage {
     return bucketFill(bucketMeta(key).tone);
   }
 
-  /** Zero reads as absence, not as a figure — the eye should skip it. */
   cellClass(key: AgingBucketKey, amount: string): string {
     if (Number(amount) <= 0) return 'text-muted/50';
     return `font-medium ${bucketText(bucketMeta(key).tone)}`;

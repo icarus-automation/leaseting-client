@@ -10,7 +10,6 @@ export class VehicleTypesService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/vehicle-types`;
 
-  /** Full org list, archived included (Settings shows both; pickers filter). */
   list(): Observable<VehicleTypeResponse[]> {
     return this.http.get<VehicleTypeResponse[]>(this.base);
   }
@@ -23,7 +22,6 @@ export class VehicleTypesService {
     return this.http.patch<VehicleTypeResponse>(`${this.base}/${id}`, { name });
   }
 
-  /** Soft archive — the type leaves pickers but stays on existing rate amounts. */
   archive(id: string): Observable<VehicleTypeResponse> {
     return this.http.delete<VehicleTypeResponse>(`${this.base}/${id}`);
   }

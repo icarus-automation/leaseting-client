@@ -46,24 +46,6 @@ const RETENTION_TONE: Record<RetentionBand, BadgeTone> = {
   LIKELY_LEAVE: 'warning',
 };
 
-/**
- * Two separate readings of a tenant, and the arithmetic behind both.
- *
- * They are separate because they call for opposite actions. A tenant heading
- * for default should be chased; a good tenant heading for the door should be
- * kept. One combined "risk score" gets the second group treated like the
- * first, which is how a landlord loses the tenants they most wanted.
- *
- * The numbers are shown, not hidden behind the badge. "Last four rents were 2,
- * 7, 14 and 21 days late" can be checked against the bills listed further down
- * this same page — so a band that is wrong is visibly wrong, rather than
- * mysteriously wrong. A score nobody can check is one that gets either ignored
- * or obeyed blindly, and both are worse than no score.
- *
- * Nothing here is decided by a model, and nothing here acts on its own: no
- * automatic reminders, no automatic notices. It is advice for a person who
- * makes the call.
- */
 @Component({
   selector: 'app-tenant-risk-panel',
   imports: [PIcon, PhpCurrencyPipe, StatusBadge],
@@ -78,13 +60,6 @@ export class TenantRiskPanel {
 
   readonly profile = signal<TenantRiskProfile | null>(null);
   readonly loading = signal(true);
-  /**
-   * Failure is silent by design.
-   *
-   * This is a read-only second opinion beside a profile that is already fully
-   * usable. An error banner here would put a scary red box on a page where
-   * nothing is actually wrong.
-   */
   readonly failed = signal(false);
   readonly showWorking = signal(false);
 
@@ -106,12 +81,6 @@ export class TenantRiskPanel {
     return band ? RETENTION_TONE[band] : 'neutral';
   });
 
-  /**
-   * The lateness series, newest last, as the popover renders it.
-   *
-   * Capped at six: the point is to make a trend legible at a glance, and a
-   * twelve-item strip of numbers is read as noise rather than as a pattern.
-   */
   readonly latenessTrail = computed(() => {
     const series = this.profile()?.signals.payment.latenessDays ?? [];
     return series.slice(-6);
@@ -145,7 +114,6 @@ export class TenantRiskPanel {
     return drop > 0 ? `${Math.round(drop * 100)}% below usual` : 'normal';
   });
 
-  /** "+7 days late" / "3 days early" — a bare number reads ambiguously here. */
   latenessLabel(days: number): string {
     if (days === 0) return 'on time';
     return days > 0 ? `${days}d late` : `${Math.abs(days)}d early`;

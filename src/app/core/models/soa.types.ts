@@ -24,7 +24,6 @@ export interface SoaFlatLine {
   description: string;
   dueDate: string;
   netDue: string;
-  /** Absent on non-rent lines and statements generated before itemisation. */
   breakdown?: { label: string; amount: string }[];
 }
 
@@ -33,13 +32,11 @@ export type SoaLine = SoaUtilityLine | SoaFlatLine;
 export interface SoaResponse {
   id: string;
   soaNo: string;
-  /** ISO date — the day the statement was generated. */
   statementDate: string;
   totalDue: string;
   smsStatus: SoaSmsStatus;
   leaseId: string;
   createdAt: string;
-  /** Frozen at generation time; historical lines simply lack `breakdown`. */
   lines: SoaLine[];
   lease: {
     id: string;

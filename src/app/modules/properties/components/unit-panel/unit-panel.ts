@@ -51,7 +51,6 @@ export class UnitPanel {
   private readonly auth = inject(AuthService);
 
   readonly unitId = input.required<string | null>();
-  /** Any mutation that changes floor colors / summaries happened. */
   readonly changed = output<void>();
   readonly editRequested = output<UnitDetail>();
   readonly closeRequested = output<void>();
@@ -77,7 +76,6 @@ export class UnitPanel {
     return unit ? unitToneLabel(unit) : 'Vacant';
   });
 
-  /** Lease term derived client-side from start/end dates, e.g. "5 years". */
   readonly leaseTerm = computed(() => {
     const lease = this.unit()?.activeLease;
     return lease ? leaseTermLabel(lease.startDate, lease.endDate) : null;
@@ -180,7 +178,6 @@ export class UnitPanel {
     });
   }
 
-  /** Guided move-in — the only way tenants get a lease. */
   startOnboarding(): void {
     const unit = this.unit();
     if (!unit) return;

@@ -33,28 +33,23 @@ export class BillsService {
     return this.http.get<Paginated<BillListItem>>(this.base, { params });
   }
 
-  /** Open-bill counts and outstanding totals for the summary cards. */
   summary(): Observable<BillsSummary> {
     return this.http.get<BillsSummary>(`${this.base}/summary`);
   }
 
-  /** Manually triggers the idempotent rent-bill generation for this org. */
   rentRun(): Observable<{ created: number; skipped: number }> {
     return this.http.post<{ created: number; skipped: number }>(`${this.base}/rent-run`, {});
   }
 
-  /** Active leases of a property with carried-over meter readings. */
   utilityRunPreview(propertyId: string, type: BillType): Observable<UtilityRunPreviewRow[]> {
     const params = new HttpParams().set('propertyId', propertyId).set('type', type);
     return this.http.get<UtilityRunPreviewRow[]>(`${this.base}/utility-run/preview`, { params });
   }
 
-  /** Creates one utility bill per row in a single transaction. */
   createUtilityRun(payload: CreateUtilityRunPayload): Observable<UtilityRunResult> {
     return this.http.post<UtilityRunResult>(`${this.base}/utility-run`, payload);
   }
 
-  /** OCRs a Meralco/Maynilad bill photo into prefill values (501 when off). */
   scanReceipt(image: File): Observable<ReceiptScanResult> {
     const form = new FormData();
     form.append('image', image, image.name);
@@ -73,10 +68,6 @@ export class BillsService {
     return this.http.get(`${API_BASE_URL}/payments/${paymentId}/proof`, { responseType: 'blob' });
   }
 
-  /**
-   * Text this bill's tenant now, outside the nightly reminder ladder. Costs a
-   * real SMS credit and reaches a real person — confirm before calling.
-   */
   remind(id: string): Observable<ManualReminderResult> {
     return this.http.post<ManualReminderResult>(`${this.base}/${id}/remind`, {});
   }
@@ -100,12 +91,10 @@ export class BillsService {
     return this.http.get<PaymentResponse[]>(`${this.base}/${billId}/payments`);
   }
 
-  /** Voids a confirmed payment. History stays; the bill reopens if needed. */
   voidPayment(paymentId: string, reason: string): Observable<PaymentResponse> {
     return this.http.post<PaymentResponse>(`${API_BASE_URL}/payments/${paymentId}/void`, { reason });
   }
 
-  /** Only UNPAID bills without recorded payments can be deleted — 409 otherwise. */
   delete(id: string): Observable<BillResponse> {
     return this.http.delete<BillResponse>(`${this.base}/${id}`);
   }

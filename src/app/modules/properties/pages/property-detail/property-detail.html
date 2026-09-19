@@ -19,11 +19,13 @@
     <header class="flex flex-wrap items-end justify-between gap-3">
       <div class="flex min-w-0 items-center gap-3.5">
         @if (p.imageUrl) {
-          <img
+          <app-media-thumb
+            class="hidden h-14 w-20 shrink-0 rounded-base border border-border sm:block"
             [src]="p.imageUrl"
-            alt=""
-            class="hidden h-14 w-20 shrink-0 rounded-base border border-border object-cover sm:block"
-          />
+            [alt]="''"
+          >
+            <svg pIcon="building" class="text-muted" [size]="18" aria-hidden="true"></svg>
+          </app-media-thumb>
         }
         <div class="min-w-0">
           <div class="flex min-w-0 items-center gap-2">

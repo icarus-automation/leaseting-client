@@ -6,6 +6,7 @@ import {
   computed,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
 } from '@angular/core';
@@ -14,11 +15,12 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import type { FloorDetail, FloorUnitItem } from '../../../../core/models/property.types';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { PLAN_MIN_HEIGHT_PX, PLAN_VIEWPORT_RESERVE_PX } from '../../floor-plan.constants';
+import { PlanLoadFrame } from '../plan-load-frame/plan-load-frame';
 import { unitTone, unitToneLabel } from '../../../../shared/utils/unit-tone.util';
 
 @Component({
   selector: 'app-floor-plan-viewer',
-  imports: [PIcon, EmptyState],
+  imports: [PIcon, EmptyState, PlanLoadFrame],
   templateUrl: './floor-plan-viewer.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -34,6 +36,11 @@ export class FloorPlanViewer {
 
   readonly planAspect = signal(16 / 9);
   private readonly viewportHeight = signal(0);
+  private readonly planSrc = computed(() => this.floor().planImageUrl);
+  readonly planReady = linkedSignal(() => {
+    this.planSrc();
+    return false;
+  });
 
   readonly maxPlanWidth = computed(() => {
     const viewport = this.viewportHeight();
@@ -67,8 +74,8 @@ export class FloorPlanViewer {
     });
   }
 
-  onPlanLoad(event: Event): void {
-    const image = event.target as HTMLImageElement;
+  onPlanDecoded(image: HTMLImageElement): void {
+    this.planReady.set(true);
     if (image.naturalHeight > 0) this.planAspect.set(image.naturalWidth / image.naturalHeight);
   }
 

@@ -50,6 +50,8 @@ Two things a neighboring property SaaS could not truthfully copy:
 
 **Built and live:** dashboard, properties (incl. floor-plan editor and viewer), tenants, leases, bills + SOA, Work Orders (maintenance request queue), tenant onboarding walk, knowledge base, reports, Parking Overview, settings (org-curated property types, charge items, late fees, vehicle types, flexible parking rate plans with duration tiers and optional overnight windows, parking rules, terminals, and parking attendants), Kit event feed and Ask Kit, auth.
 
+Property list cards and photo pickers load a thumbnail WebP. The floor-plan viewer and Map units editor load a map-sized WebP. Original uploads stay in R2 for non-hot paths and are not requested by those screens.
+
 **Ask Kit (built).** `/kit` answers conversational questions grounded in the organization's records and creates PDF or Excel documents from natural requests such as “Export unpaid tenants to Excel.” `/document` remains an optional shortcut for explicitly forcing the same document path; it is not required syntax.
 
 **Work Orders (built).** `/work-orders` (`/maintenance` redirects here) is the staff queue for maintenance requests. A tenant files a request from Residence Care with a title, notes, and up to three photos. Unit, property, and tenant come from the tenant's active lease, never from the client. Staff see the whole organization's requests newest first, in status tabs (Open, In progress, Resolved, All), and can narrow the queue to one property. The sidebar shows the organization's Open count beside Work Orders, so a new request is visible from any page. Opening a request shows its notes, photos, tenant, unit, and property, plus who started and resolved it.

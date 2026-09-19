@@ -23,6 +23,7 @@ import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { ImageCropper } from '../../../../shared/ui/image-cropper/image-cropper';
 import { ImageDropzone } from '../../../../shared/ui/image-dropzone/image-dropzone';
+import { MediaThumb } from '../media-thumb/media-thumb';
 import { FLOOR_PLAN_ASPECT } from '../../floor-plan.constants';
 import { FloorsService } from '../../services/floors.service';
 
@@ -30,7 +31,7 @@ const MAX_PLAN_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-floor-form-dialog',
-  imports: [ReactiveFormsModule, PIcon, ErrorBanner, FormDialog, ImageCropper, ImageDropzone],
+  imports: [ReactiveFormsModule, PIcon, ErrorBanner, FormDialog, ImageCropper, ImageDropzone, MediaThumb],
   templateUrl: './floor-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -71,7 +72,7 @@ export class FloorFormDialog {
     const cropped = this.croppedPreviewUrl();
     if (cropped) return cropped;
     if (this.replacing() || this.planTouched()) return null;
-    return this.floor()?.planImageUrl ?? null;
+    return this.floor()?.planThumbUrl ?? null;
   });
 
   constructor() {

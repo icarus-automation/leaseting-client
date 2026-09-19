@@ -31,6 +31,7 @@ Email/password sign-in, forgot-password, `authGuard`/`guestGuard`, org list + se
 Property: name, type (**org-curated data from `/property-types`, not an enum**), addressLine, city, image. Floors: level, name, plan image. Unit: unitNo, monthlyRent, `mapCoordinates` (normalized 0–1 polygon), notes.
 **Unit status is derived by the backend from active leases and is binary: `OCCUPIED` / `VACANT`** — plus a separate `hasOverdueBills` flag. The original five-state list (Reserved / Under Maintenance / Action Required) is **not** implemented.
 Floor-plan editor (Konva) + viewer, floor tabs, map-units panel, unit panel w/ active lease + outstanding bills. Per-property `unitSummary`: total / settled / overdue / vacant.
+List cards and pickers use thumbnail WebP. The floor-plan viewer and Map units editor use a map-sized WebP. Originals remain in R2 for non-hot paths.
 **Not built:** owner, amenities, beds/baths/sqft, bulk add/import, audit log.
 
 **Tenant Mgmt** **[built]** — `/tenants`, `/tenants/:id`

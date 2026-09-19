@@ -1,35 +1,94 @@
 > Building...
 √ Building...
 Initial chunk files | Names               |  Raw size
-styles.css          | styles              | 117.63 kB | 
-main.js             | main                |  10.51 kB | 
-chunk-MRDQ6YFJ.js   | -                   |   5.61 kB | 
-chunk-DFOH74JA.js   | -                   |   1.29 kB | 
+styles.css          | styles              | 118.61 kB | 
+main.js             | main                |  10.47 kB | 
+chunk-3JLC5MOX.js   | -                   |   4.55 kB | 
+chunk-GBMGSX77.js   | -                   |   1.31 kB | 
 chunk-VUJOFXKG.js   | -                   | 938 bytes | 
-chunk-LVX3DW7C.js   | -                   | 881 bytes | 
+chunk-REJLTQOQ.js   | -                   | 531 bytes | 
 
-                    | Initial total       | 136.85 kB
+                    | Initial total       | 136.41 kB
 
 Lazy chunk files    | Names               |  Raw size
-chunk-E4SREZRA.js   | property-detail     | 303.69 kB | 
-chunk-A3J5N4OY.js   | onboarding-wizard   | 280.99 kB | 
-chunk-RYKW2HP4.js   | rate-plans-settings | 116.30 kB | 
-chunk-NDH5W5E6.js   | tenant-detail       | 115.41 kB | 
-chunk-RVYJB35F.js   | bills               | 108.78 kB | 
-chunk-IBG5SCPT.js   | main-layout         | 101.11 kB | 
-chunk-DIPLJTBE.js   | parking             |  89.01 kB | 
-chunk-FQL6Z4U6.js   | kit-chat            |  88.72 kB | 
-chunk-S3SEBKRH.js   | calendar            |  79.82 kB | 
-chunk-66TPYFE6.js   | utility-run         |  73.19 kB | 
-chunk-G6FPKO37.js   | home                |  69.52 kB | 
-chunk-Z6IEAMYR.js   | delinquency         |  61.28 kB | 
-chunk-HAE6XOL3.js   | revenue-by-tenant   |  58.80 kB | 
-chunk-5UIM35PJ.js   | -                   |  54.18 kB | 
-chunk-HFIUE2L4.js   | utility-billing     |  53.12 kB | 
-...and 90 more lazy chunks files. Use "--verbose" to show all the files.
+chunk-BSQNT427.js   | property-detail     | 307.60 kB | 
+chunk-BLEDGC6C.js   | onboarding-wizard   | 277.92 kB | 
+chunk-AHEWG2KD.js   | rate-plans-settings | 116.16 kB | 
+chunk-KSEPKWZN.js   | bills               | 116.03 kB | 
+chunk-2VBIFC5H.js   | tenant-detail       | 113.39 kB | 
+chunk-73VQNA2A.js   | main-layout         | 101.72 kB | 
+chunk-DWAM623F.js   | parking             |  88.70 kB | 
+chunk-CHYKETPW.js   | kit-chat            |  84.47 kB | 
+chunk-3FMSIXU4.js   | calendar            |  79.31 kB | 
+chunk-XPB5T3MB.js   | work-orders         |  76.27 kB | 
+chunk-RWFGLI6P.js   | utility-run         |  72.46 kB | 
+chunk-4ZCESRLA.js   | home                |  67.16 kB | 
+chunk-2YAVZOWE.js   | delinquency         |  60.39 kB | 
+chunk-P37CK5KV.js   | revenue-by-tenant   |  58.03 kB | 
+chunk-RTUU5ADJ.js   | payment-submissions |  54.24 kB | 
+...and 96 more lazy chunks files. Use "--verbose" to show all the files.
 
-Application bundle generation complete. [49.398 seconds] - 2026-09-15T05:45:29.111Z
+Application bundle generation complete. [79.476 seconds] - 2026-09-19T14:04:18.831Z
 
 Watch mode enabled. Watching for file changes...
 NOTE: Raw file sizes do not reflect development server per-request transformations.
+10:04:20 PM [vite] (client) Re-optimizing dependencies because lockfile has changed
   ➜  Local:   http://127.0.0.1:4210/
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names               |  Raw size
+main.js             | main                |  10.47 kB | 
+chunk-3O3CUGON.js   | -                   |   4.55 kB | 
+chunk-2VLR5M7F.js   | -                   |   1.31 kB | 
+chunk-RXVIKUEV.js   | -                   | 531 bytes | 
+
+Lazy chunk files    | Names               |  Raw size
+chunk-AASX4U73.js   | property-detail     | 307.60 kB | 
+chunk-4XDOIULO.js   | onboarding-wizard   | 277.92 kB | 
+chunk-OUDVQTR7.js   | rate-plans-settings | 116.16 kB | 
+chunk-Y6ZCMWP2.js   | bills               | 116.03 kB | 
+chunk-NWRB4KLH.js   | tenant-detail       | 113.39 kB | 
+chunk-NOZAVHGH.js   | main-layout         | 101.72 kB | 
+chunk-X2OPXBMW.js   | parking             |  88.70 kB | 
+chunk-6YBHLX2A.js   | kit-chat            |  84.47 kB | 
+chunk-R5GT6MZK.js   | calendar            |  79.31 kB | 
+chunk-QKXKIKAY.js   | work-orders         |  76.27 kB | 
+chunk-CDE3JJJI.js   | utility-run         |  72.46 kB | 
+chunk-SVPVQWBN.js   | home                |  67.16 kB | 
+chunk-AQMB3JWI.js   | delinquency         |  60.39 kB | 
+chunk-K6MTRHP4.js   | revenue-by-tenant   |  58.03 kB | 
+chunk-RUZZ3MXA.js   | payment-submissions |  54.24 kB | 
+...and 58 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [14.025 seconds] - 2026-09-19T14:11:18.836Z
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names               |  Raw size
+main.js             | main                |  10.47 kB | 
+chunk-6UMXTHQD.js   | -                   |   4.55 kB | 
+chunk-DTLEXTEC.js   | -                   |   1.31 kB | 
+chunk-L55UYK35.js   | -                   | 530 bytes | 
+
+Lazy chunk files    | Names               |  Raw size
+chunk-4NHU2H64.js   | property-detail     | 307.60 kB | 
+chunk-FMI7XX5L.js   | onboarding-wizard   | 277.92 kB | 
+chunk-PY74RFZA.js   | rate-plans-settings | 116.16 kB | 
+chunk-X74WXMAK.js   | bills               | 116.03 kB | 
+chunk-FIDPVQG6.js   | tenant-detail       | 113.39 kB | 
+chunk-5RWSDZ6L.js   | main-layout         | 101.72 kB | 
+chunk-WR4NKOYQ.js   | parking             |  88.70 kB | 
+chunk-ITCIGS52.js   | kit-chat            |  84.47 kB | 
+chunk-ABGA5MN2.js   | calendar            |  79.31 kB | 
+chunk-HBXFMONS.js   | work-orders         |  76.27 kB | 
+chunk-COPWMQM7.js   | utility-run         |  72.46 kB | 
+chunk-RONIVLTY.js   | home                |  67.16 kB | 
+chunk-4YVD73GA.js   | delinquency         |  60.39 kB | 
+chunk-IH7WB4GS.js   | revenue-by-tenant   |  58.03 kB | 
+chunk-F2JXM5C5.js   | payment-submissions |  54.24 kB | 
+...and 58 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [3.263 seconds] - 2026-09-19T14:13:52.885Z
+
+Page reload sent to client(s).

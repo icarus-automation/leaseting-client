@@ -36,38 +36,35 @@
       [style.aspect-ratio]="planAspect()"
       [style.max-width.px]="maxPlanWidth()"
     >
-      <img
-        [src]="planUrl"
-        alt=""
-        class="block h-full w-full select-none"
-        draggable="false"
-        (load)="onPlanLoad($event)"
-      />
-      <svg
-        class="pointer-events-none absolute inset-0 h-full w-full"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        role="group"
-        [attr.aria-label]="'Units on floor ' + floor().level"
-      >
-        @for (unit of mappedUnits(); track unit.id) {
-          <polygon
-            [attr.points]="pointsAttr(unit)"
-            vector-effect="non-scaling-stroke"
-            class="pointer-events-auto cursor-pointer outline-none [fill-opacity:0.75] [stroke-width:1.5] transition-[fill-opacity] duration-150 ease-out hover:[fill-opacity:0.95] focus-visible:[fill-opacity:0.95] focus-visible:stroke-primary focus-visible:[stroke-width:2.5] data-[selected]:[fill-opacity:1] data-[selected]:stroke-primary data-[selected]:[stroke-width:2.5] motion-reduce:transition-none"
-            [class]="fillClass(unit)"
-            [attr.data-selected]="unit.id === selectedUnitId() ? '' : null"
-            role="button"
-            tabindex="0"
-            [attr.aria-label]="unitTitle(unit)"
-            [attr.aria-pressed]="unit.id === selectedUnitId()"
-            (click)="unitClicked.emit(unit)"
-            (keydown)="onPolygonKeydown($event, unit)"
-          >
-            <title>{{ unitTitle(unit) }}</title>
-          </polygon>
+      <app-plan-load-frame [src]="planUrl" (decoded)="onPlanDecoded($event)">
+        @if (planReady()) {
+        <svg
+          class="pointer-events-none absolute inset-0 h-full w-full"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          role="group"
+          [attr.aria-label]="'Units on floor ' + floor().level"
+        >
+          @for (unit of mappedUnits(); track unit.id) {
+            <polygon
+              [attr.points]="pointsAttr(unit)"
+              vector-effect="non-scaling-stroke"
+              class="pointer-events-auto cursor-pointer outline-none [fill-opacity:0.75] [stroke-width:1.5] transition-[fill-opacity] duration-150 ease-out hover:[fill-opacity:0.95] focus-visible:[fill-opacity:0.95] focus-visible:stroke-primary focus-visible:[stroke-width:2.5] data-[selected]:[fill-opacity:1] data-[selected]:stroke-primary data-[selected]:[stroke-width:2.5] motion-reduce:transition-none"
+              [class]="fillClass(unit)"
+              [attr.data-selected]="unit.id === selectedUnitId() ? '' : null"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="unitTitle(unit)"
+              [attr.aria-pressed]="unit.id === selectedUnitId()"
+              (click)="unitClicked.emit(unit)"
+              (keydown)="onPolygonKeydown($event, unit)"
+            >
+              <title>{{ unitTitle(unit) }}</title>
+            </polygon>
+          }
+        </svg>
         }
-      </svg>
+      </app-plan-load-frame>
     </div>
   } @else {
     <app-empty-state

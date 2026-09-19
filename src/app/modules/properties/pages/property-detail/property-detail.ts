@@ -28,6 +28,7 @@ import { FloorFormDialog } from '../../components/floor-form-dialog/floor-form-d
 import { FloorMapEditor } from '../../components/floor-map-editor/floor-map-editor';
 import { FloorTabs } from '../../components/floor-tabs/floor-tabs';
 import { MapUnitsPanel } from '../../components/map-units-panel/map-units-panel';
+import { MediaThumb } from '../../components/media-thumb/media-thumb';
 import { FloorPlanViewer } from '../../components/floor-plan-viewer/floor-plan-viewer';
 import { PropertyFormDialog } from '../../components/property-form-dialog/property-form-dialog';
 import { UnitFormDialog, UnitFormTarget } from '../../components/unit-form-dialog/unit-form-dialog';
@@ -49,6 +50,7 @@ import { UnitsService } from '../../services/units.service';
     FloorPlanViewer,
     FloorTabs,
     MapUnitsPanel,
+    MediaThumb,
     PropertyFormDialog,
     UnitFormDialog,
     UnitPanel,

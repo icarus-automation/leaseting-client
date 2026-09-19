@@ -24,6 +24,7 @@ import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { ImageDropzone } from '../../../../shared/ui/image-dropzone/image-dropzone';
+import { MediaThumb } from '../media-thumb/media-thumb';
 import { PropertyTypesService } from '../../../settings/services/property-types.service';
 import { PropertiesService } from '../../services/properties.service';
 
@@ -37,7 +38,7 @@ const MAX_CHIP_OPTIONS = 8;
 
 @Component({
   selector: 'app-property-form-dialog',
-  imports: [ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog, ImageDropzone],
+  imports: [ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog, ImageDropzone, MediaThumb],
   templateUrl: './property-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

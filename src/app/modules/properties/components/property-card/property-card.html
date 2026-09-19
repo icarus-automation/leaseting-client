@@ -8,17 +8,9 @@
       [attr.aria-label]="p.name + ', open floor plans'"
     >
       <div class="flex h-36 items-center justify-center overflow-hidden bg-surface">
-        @if (p.imageUrl && !imageFailed()) {
-          <img
-            [src]="p.imageUrl"
-            [alt]="''"
-            class="h-full w-full object-cover"
-            loading="lazy"
-            (error)="imageFailed.set(true)"
-          />
-        } @else {
+        <app-media-thumb class="h-full w-full" [src]="p.imageUrl" [alt]="''">
           <svg pIcon="building" class="text-muted" [size]="32" aria-hidden="true"></svg>
-        }
+        </app-media-thumb>
       </div>
 
       <div class="flex flex-col gap-1 p-3.5 pb-2">

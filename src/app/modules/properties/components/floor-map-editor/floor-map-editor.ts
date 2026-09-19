@@ -19,6 +19,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import type { FloorDetail, FloorUnitItem } from '../../../../core/models/property.types';
 import { PLAN_MIN_HEIGHT_PX, PLAN_VIEWPORT_RESERVE_PX } from '../../floor-plan.constants';
+import { createPlanBoardLoad } from '../../plan-board-load';
 import { unitTone } from '../../../../shared/utils/unit-tone.util';
 import { readPlanLuminance, type PlanLuminance } from '../../plan-trace/plan-luminance.util';
 import {
@@ -64,20 +65,31 @@ const TOKEN_FALLBACKS: Record<string, string> = {
           <p class="text-[13px] font-medium text-muted">Floor plan editing requires a larger screen.</p>
           <p class="text-[12.5px] text-muted">Please use a laptop or PC.</p>
         </div>
-      } @else if (imageError()) {
-        <div class="flex h-40 flex-col items-center justify-center gap-2 px-4 text-center" role="alert">
-          <svg pIcon="exclamation-circle" class="text-destructive" [size]="20" aria-hidden="true"></svg>
-          <p class="text-[13px] font-medium text-body">Couldn't load the floor plan.</p>
-          <button
-            type="button"
-            class="inline-flex h-8 items-center rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-            (click)="retryLoad()"
-          >
-            Retry
-          </button>
-        </div>
-      } @else if (!imageReady()) {
-        <div class="flex h-40 items-center justify-center text-[13px] text-muted">Loading plan…</div>
+      } @else {
+        <div #stageHost id="stageHost" class="w-full"></div>
+        @switch (planLoad.status()) {
+          @case ('loading') {
+            <div class="absolute inset-0 z-10 flex items-center justify-center bg-white text-[13px] text-muted">
+              Loading plan…
+            </div>
+          }
+          @case ('error') {
+            <div
+              class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-white px-4 text-center"
+              role="alert"
+            >
+              <svg pIcon="exclamation-circle" class="text-destructive" [size]="20" aria-hidden="true"></svg>
+              <p class="text-[13px] font-medium text-body">Couldn't load the floor plan.</p>
+              <button
+                type="button"
+                class="inline-flex h-8 items-center rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                (click)="retryLoad()"
+              >
+                Retry
+              </button>
+            </div>
+          }
+        }
       }
     </div>
   `,
@@ -100,8 +112,9 @@ export class FloorMapEditor {
 
   readonly points = signal<NormPoint[]>([]);
   readonly closed = signal(false);
-  readonly imageReady = signal(false);
-  readonly imageError = signal(false);
+
+  readonly planLoad = createPlanBoardLoad();
+  private readonly hostReady = signal(false);
 
   private readonly aspect = signal(0.6);
   private readonly viewportHeight = signal(0);
@@ -123,6 +136,7 @@ export class FloorMapEditor {
   readonly pcOnly = signal(false);
 
   private readonly container = viewChild.required<ElementRef<HTMLDivElement>>('container');
+  private readonly stageHost = viewChild<ElementRef<HTMLDivElement>>('stageHost');
 
   private stage: Konva.Stage | null = null;
   private imageLayer: Konva.Layer | null = null;
@@ -135,7 +149,6 @@ export class FloorMapEditor {
   private selectedRegions = new Set<number>();
   private cursor: { x: number; y: number } | null = null;
   private resizeObserver: ResizeObserver | null = null;
-  private loadedUrl: string | null = null;
   private primaryColor = FALLBACK_PRIMARY;
 
   private draftAnchors: Konva.Circle[] = [];
@@ -153,13 +166,27 @@ export class FloorMapEditor {
       const onResize = () => this.viewportHeight.set(window.innerHeight);
       window.addEventListener('resize', onResize);
       this.destroyRef.onDestroy(() => window.removeEventListener('resize', onResize));
-      this.initStage();
-      this.loadImage();
+      this.hostReady.set(true);
     });
 
     effect(() => {
+      const ready = this.hostReady();
       const url = this.floor().planImageUrl;
-      if (this.stage && url !== this.loadedUrl) this.loadImage();
+      if (!ready) return;
+      untracked(() => {
+        this.planLoad.start(url, { crossOrigin: 'anonymous' }); // canvas stays untainted for tap-to-fill
+      });
+    });
+
+    effect(() => {
+      const ready = this.hostReady();
+      const status = this.planLoad.status();
+      const image = this.planLoad.image();
+      if (!ready) return;
+      untracked(() => {
+        if (status === 'ready' && image) this.mountPlan(image);
+        else this.teardownStage();
+      });
     });
 
     // Re-seed + render whenever the target unit or floor data changes. The render calls
@@ -171,7 +198,7 @@ export class FloorMapEditor {
     effect(() => {
       const target = this.target();
       this.floor();
-      if (!this.stage) return;
+      if (!this.stage || this.planLoad.status() !== 'ready') return;
       untracked(() => {
         this.clearRoomSelection();
         this.seedDraftFromTarget(target);
@@ -188,10 +215,8 @@ export class FloorMapEditor {
     });
 
     this.destroyRef.onDestroy(() => {
-      this.resizeObserver?.disconnect();
-      this.keydownCleanup?.();
-      this.stage?.destroy();
-      this.stage = null;
+      this.planLoad.abort();
+      this.teardownStage();
     });
   }
 
@@ -242,7 +267,9 @@ export class FloorMapEditor {
 
 
   private initStage(): void {
-    const host = this.container().nativeElement;
+    // Konva injects canvases into this node. Overlays stay siblings so they can cover the board.
+    const host = this.stageHost()?.nativeElement;
+    if (!host) return;
     this.stage = new Konva.Stage({ container: host, width: host.clientWidth || 600, height: 320 });
     this.imageLayer = new Konva.Layer({ listening: false });
     this.gridLayer = new Konva.Layer({ listening: false });
@@ -262,38 +289,40 @@ export class FloorMapEditor {
     this.cachePrimaryColor();
 
     this.resizeObserver = new ResizeObserver(() => this.fitStage());
-    this.resizeObserver.observe(host);
+    this.resizeObserver.observe(this.container().nativeElement);
   }
 
   retryLoad(): void {
-    this.loadImage();
+    this.planLoad.retry();
   }
 
-  private loadImage(): void {
-    const url = this.floor().planImageUrl;
-    this.loadedUrl = url;
-    this.imageReady.set(false);
-    this.imageError.set(false);
-    if (!url) return;
-    const image = new Image();
-    // Keep 'anonymous': the media route is public, and a CORS-approved image
-    // keeps the Konva canvas untainted.
-    image.crossOrigin = 'anonymous';
-    image.onload = () => {
-      this.planImage = image;
-      this.planPixels = null;
-      this.planIndex = null;
-      this.clearRoomSelection();
-      this.aspect.set(image.naturalHeight / image.naturalWidth);
-      this.imageReady.set(true);
-      this.fitStage();
-    };
-    image.onerror = () => {
-      this.imageReady.set(false);
-      this.imageError.set(true);
-      this.loadedUrl = null;
-    };
-    image.src = url;
+  private mountPlan(image: HTMLImageElement): void {
+    this.planImage = image;
+    this.planPixels = null;
+    this.planIndex = null;
+    this.clearRoomSelection();
+    this.aspect.set(image.naturalHeight / image.naturalWidth);
+    if (!this.stage) this.initStage();
+    this.fitStage();
+  }
+
+  private teardownStage(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    this.keydownCleanup?.();
+    this.keydownCleanup = null;
+    this.stage?.destroy();
+    this.stage = null;
+    this.imageLayer = null;
+    this.gridLayer = null;
+    this.unitsLayer = null;
+    this.draftLayer = null;
+    this.planImage = null;
+    this.planPixels = null;
+    this.planIndex = null;
+    this.draftAnchors = [];
+    this.draftShapeLine = null;
+    this.draftGuideLine = null;
   }
 
   private fitStage(): void {
@@ -380,6 +409,7 @@ export class FloorMapEditor {
   }
 
   private onStagePointerDown(e: Konva.KonvaEventObject<MouseEvent | TouchEvent>): void {
+    if (this.planLoad.status() !== 'ready') return;
     if (e.target !== this.stage && !(e.target instanceof Konva.Image)) return;
     if (!this.target()) {
       this.hintRequested.emit();
@@ -528,7 +558,7 @@ export class FloorMapEditor {
 
   private renderUnits(): void {
     const layer = this.unitsLayer;
-    if (!layer || !this.stage) return;
+    if (!layer || !this.stage || this.planLoad.status() !== 'ready') return;
     layer.destroyChildren();
 
     const targetId = this.target()?.id;
@@ -586,7 +616,7 @@ export class FloorMapEditor {
 
   private renderDraft(): void {
     const layer = this.draftLayer;
-    if (!layer || !this.stage) return;
+    if (!layer || !this.stage || this.planLoad.status() !== 'ready') return;
 
     const pts = this.points();
     const closed = this.closed();

@@ -34,6 +34,7 @@ export interface PropertyFloorItem {
   level: number;
   name: string | null;
   planImageUrl: string | null;
+  planThumbUrl: string | null;
 }
 
 export interface PropertyDetail extends PropertyResponse {
@@ -52,6 +53,7 @@ export interface FloorResponse {
   level: number;
   name: string | null;
   planImageUrl: string | null;
+  planThumbUrl: string | null;
   propertyId: string;
   createdAt: string;
   updatedAt: string;

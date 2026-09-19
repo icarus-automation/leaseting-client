@@ -14,11 +14,9 @@
   @if (isEdit() && property(); as p) {
     <div class="mb-5 flex items-start gap-3 rounded-base border border-border bg-surface p-3">
       <div class="flex h-16 w-20 shrink-0 items-center justify-center overflow-hidden rounded-base border border-border bg-white">
-        @if (p.imageUrl) {
-          <img [src]="p.imageUrl" alt="" class="h-full w-full object-cover" />
-        } @else {
+        <app-media-thumb class="h-full w-full" [src]="p.imageUrl" [alt]="''">
           <svg pIcon="building" class="text-muted" [size]="22" aria-hidden="true"></svg>
-        }
+        </app-media-thumb>
       </div>
       <div class="min-w-0 pt-1">
         <p class="truncate font-heading text-[15px] font-semibold text-heading">{{ p.name }}</p>

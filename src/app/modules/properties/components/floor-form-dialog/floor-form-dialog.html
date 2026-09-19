@@ -58,12 +58,22 @@
         />
       } @else if (previewImage(); as url) {
         <div class="flex flex-col gap-2 rounded-base border border-border p-2">
-          <img
-            [src]="url"
-            alt="Floor plan preview"
-            class="block w-full rounded-[2px] border border-border bg-white object-contain"
-            [style.aspect-ratio]="planAspect"
-          />
+          @if (croppedPreviewUrl()) {
+            <img
+              [src]="url"
+              alt="Floor plan preview"
+              class="block w-full rounded-[2px] border border-border bg-white object-contain"
+              [style.aspect-ratio]="planAspect"
+            />
+          } @else {
+            <app-media-thumb
+              class="block w-full rounded-[2px] border border-border bg-white"
+              [style.aspect-ratio]="planAspect"
+              [src]="url"
+              alt="Floor plan preview"
+              fit="contain"
+            />
+          }
           <div class="flex items-center justify-end gap-2">
             <button
               type="button"

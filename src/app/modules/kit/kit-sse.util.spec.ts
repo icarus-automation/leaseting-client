@@ -42,6 +42,11 @@ describe('Ask Kit SSE framing', () => {
     expect(decodeKitSseFrame(frame)).toEqual({ event: { type: 'delta', text: 'Hi' } });
   });
 
+  it('accepts a started event that has not named the conversation yet', () => {
+    const [frame] = parseSseBlock('event: started\ndata: {}');
+    expect(decodeKitSseFrame(frame)).toEqual({ event: { type: 'started', conversationId: '' } });
+  });
+
   it('surfaces an SSE error event as a readable failure', () => {
     const [frame] = parseSseBlock('event: error\ndata: {"message":"DeepSeek timed out"}');
     expect(decodeKitSseFrame(frame)).toEqual({ error: 'DeepSeek timed out' });

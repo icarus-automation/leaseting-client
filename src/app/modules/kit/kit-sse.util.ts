@@ -50,10 +50,8 @@ export function decodeKitSseFrame(
     return { event: { type: 'delta', text: data['text'] } };
   }
 
-  const conversationId = readConversationId(data);
-  if (!conversationId) return { error: 'Kit sent a reply Kit could not read.' };
-
   if (frame.event === 'started') {
+    const conversationId = readConversationId(data) ?? '';
     const userMessage = readMessage(data['userMessage']);
     return {
       event: userMessage
@@ -61,6 +59,9 @@ export function decodeKitSseFrame(
         : { type: 'started', conversationId },
     };
   }
+
+  const conversationId = readConversationId(data);
+  if (!conversationId) return { error: 'Kit sent a reply Kit could not read.' };
 
   if (data['status'] !== 'complete') {
     return { error: readErrorMessage(payload) };

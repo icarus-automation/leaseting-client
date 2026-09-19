@@ -290,7 +290,7 @@ export class KitChat {
   }
 
   private bindConversation(conversationId: string): void {
-    if (this.activeId() === conversationId) return;
+    if (!conversationId || this.activeId() === conversationId) return;
     this.activeId.set(conversationId);
     this.location.replaceState(`/kit/${conversationId}`);
   }

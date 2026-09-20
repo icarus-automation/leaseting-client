@@ -48,6 +48,7 @@ Keep implementation details out of the map. Name only user paths, stable handles
 - [Command palette](./command-palette.md) covers Ctrl+K / header search, navigation, create actions, and empty results.
 - [Bills](./bills.md) covers the bills list, new-bill dialog, billing tools, and related money routes.
 - [Late fees](./late-fees.md) covers Settings → Late fees, the four-field rule, and Save gating.
+- [Organization](./organization.md) covers Settings → Organization, the live General card, and save-then-reload.
 - [Work Orders](./work-orders.md) covers the maintenance request queue, request detail with photos, Start, and Resolve.
 
-Unmapped but live (add files when a change lands there): Calendar, Ask Kit, Tenants / onboarding, Leases, Parking Overview, Knowledge Base, Reports, Settings (except Late fees).
+Unmapped but live (add files when a change lands there): Calendar, Ask Kit, Tenants / onboarding, Leases, Parking Overview, Knowledge Base, Reports, Settings (except Late fees and Organization).

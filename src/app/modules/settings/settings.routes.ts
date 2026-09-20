@@ -3,6 +3,11 @@ import { Routes } from '@angular/router';
 export const SETTINGS_ROUTES: Routes = [
   { path: '', loadComponent: () => import('./settings').then(m => m.Settings) },
   {
+    path: 'organization',
+    loadComponent: () =>
+      import('./pages/organization-settings/organization-settings').then(m => m.OrganizationSettingsPage),
+  },
+  {
     path: 'property-types',
     loadComponent: () =>
       import('./pages/property-types-settings/property-types-settings').then(m => m.PropertyTypesSettingsPage),

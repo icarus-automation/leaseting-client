@@ -1,5 +1,13 @@
 import { SETTINGS_GROUPS, settingsSetupSteps } from './settings-nav';
 
+describe('SETTINGS_GROUPS general', () => {
+  it('lists organization as a live card', () => {
+    const general = SETTINGS_GROUPS.find((group) => group.label === 'General');
+    expect(general?.cards.map((card) => card.route)).toEqual(['organization']);
+    expect(general?.cards.every((card) => !card.comingSoon)).toBe(true);
+  });
+});
+
 describe('SETTINGS_GROUPS parking order', () => {
   it('lists parking config as vehicle types, rate plans, rules, terminals, attendants', () => {
     const parking = SETTINGS_GROUPS.find((group) => group.label === 'Parking Management');

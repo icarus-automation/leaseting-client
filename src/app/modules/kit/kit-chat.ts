@@ -14,8 +14,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
-import { take, takeWhile, timer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Subscription, take, takeWhile, timer } from 'rxjs';
+import { finalize, switchMap } from 'rxjs/operators';
 
 import type { KitMood } from '../../core/kit/kit.model';
 import { apiErrorMessage } from '../../core/models/api.types';
@@ -25,6 +25,7 @@ import { KitDocumentCard } from './components/kit-document-card/kit-document-car
 import { KitMarkdown } from './components/kit-markdown/kit-markdown';
 import type { KitChatMessage, KitConversationSummary, KitDocumentTurn } from './kit-chat.types';
 import { splitCommand, toMessageView } from './kit-command.util';
+import type { KitStreamEvent } from './kit-stream.types';
 import { KitChatService } from './services/kit-chat.service';
 
 const SUGGESTIONS = [
@@ -76,7 +77,16 @@ export class KitChat {
 
   readonly isDocumentDraft = computed(() => this.draftParts().command !== null);
 
+  readonly showThinking = computed(() => {
+    if (!this.pending()) return false;
+    const last = this.messages().at(-1);
+    return last?.role !== 'ASSISTANT' || last.content.length === 0;
+  });
+
   private readonly watched = new Set<string>();
+  private streamSub?: Subscription;
+  private inFlightUserId: string | null = null;
+  private inFlightAssistantId: string | null = null;
 
   constructor() {
     this.refreshHistory();
@@ -89,12 +99,14 @@ export class KitChat {
       this.messages();
       this.pending();
       const element = this.transcript()?.nativeElement;
-      if (element) queueMicrotask(() => element.scrollTo({ top: element.scrollHeight }));
+      if (!element || typeof element.scrollTo !== 'function') return;
+      queueMicrotask(() => element.scrollTo({ top: element.scrollHeight }));
     });
   }
 
   openFromRoute(id: string | null): void {
     if (id === this.activeId()) return;
+    this.abandonStream();
     this.activeId.set(id);
     this.messages.set([]);
     if (!id) return;
@@ -145,44 +157,34 @@ export class KitChat {
 
     this.draft.set('');
     this.pending.set(true);
-    const optimistic: KitChatMessage = {
+
+    const now = new Date().toISOString();
+    const user: KitChatMessage = {
       id: `pending-${Date.now()}`,
       role: 'USER',
       content,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
     };
-    this.messages.update((messages) => [...messages, optimistic]);
+    const assistant: KitChatMessage = {
+      id: `pending-assistant-${Date.now()}`,
+      role: 'ASSISTANT',
+      content: '',
+      createdAt: now,
+    };
+    this.inFlightUserId = user.id;
+    this.inFlightAssistantId = assistant.id;
+    this.messages.update((messages) => [...messages, user, assistant]);
 
     const id = this.activeId();
-    if (id) {
-      this.chat
-        .send(id, content)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (reply) => {
-            this.messages.update((messages) => [...messages, reply]);
-            this.pending.set(false);
-            this.refreshHistory();
-            this.watchPendingDocuments();
-          },
-          error: (error: unknown) => this.failSend(error, content, optimistic.id),
-        });
-      return;
-    }
-
-    this.chat
-      .start(content)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    const stream$ = id ? this.chat.streamFollowUp(id, content) : this.chat.streamStart(content);
+    this.streamSub = stream$
+      .pipe(
+        finalize(() => this.dropAbandonedTurn()),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
-        next: (conversation) => {
-          this.pending.set(false);
-          this.activeId.set(conversation.id);
-          this.messages.set(conversation.messages);
-          this.refreshHistory();
-          this.watchPendingDocuments();
-          this.location.replaceState(`/kit/${conversation.id}`);
-        },
-        error: (error: unknown) => this.failSend(error, content, optimistic.id),
+        next: (event) => this.applyStream(event),
+        error: (error: unknown) => this.failSend(error, content),
       });
   }
 
@@ -255,9 +257,86 @@ export class KitChat {
     );
   }
 
-  private failSend(error: unknown, content: string, optimisticId: string): void {
+  private applyStream(event: KitStreamEvent): void {
+    if (event.type === 'started') {
+      this.bindConversation(event.conversationId);
+      this.refreshHistory();
+      return;
+    }
+
+    if (event.type === 'delta') {
+      const id = this.inFlightAssistantId;
+      if (!id || !event.text) return;
+      this.messages.update((messages) =>
+        messages.map((message) =>
+          message.id === id ? { ...message, content: message.content + event.text } : message,
+        ),
+      );
+      return;
+    }
+
+    this.bindConversation(event.conversationId);
+    this.takeServerAssistant(event.message);
     this.pending.set(false);
-    this.messages.update((messages) => messages.filter((message) => message.id !== optimisticId));
+    this.clearInFlight();
+    this.refreshHistory();
+    this.watchPendingDocuments();
+  }
+
+  private bindConversation(conversationId: string | undefined): void {
+    if (!conversationId || this.activeId() === conversationId) return;
+    this.activeId.set(conversationId);
+    this.location.replaceState(`/kit/${conversationId}`);
+  }
+
+  private takeServerAssistant(message: KitChatMessage): void {
+    const id = this.inFlightAssistantId;
+    if (!id) return;
+    const current = this.messages().find((candidate) => candidate.id === id);
+    this.replaceMessage(id, {
+      ...message,
+      content: message.content || current?.content || '',
+      document: message.document ?? current?.document,
+    });
+    this.inFlightAssistantId = message.id;
+  }
+
+  private replaceMessage(id: string, next: KitChatMessage): void {
+    this.messages.update((messages) =>
+      messages.map((message) => (message.id === id ? next : message)),
+    );
+  }
+
+  private abandonStream(): void {
+    this.streamSub?.unsubscribe();
+    this.streamSub = undefined;
+  }
+
+  private dropAbandonedTurn(): void {
+    if (!this.pending()) return;
+    this.dropInFlight();
+    this.pending.set(false);
+    this.clearInFlight();
+  }
+
+  private dropInFlight(): void {
+    const userId = this.inFlightUserId;
+    const assistantId = this.inFlightAssistantId;
+    this.messages.update((messages) =>
+      messages.filter((message) => message.id !== userId && message.id !== assistantId),
+    );
+  }
+
+  private clearInFlight(): void {
+    this.inFlightUserId = null;
+    this.inFlightAssistantId = null;
+    this.streamSub = undefined;
+  }
+
+  private failSend(error: unknown, content: string): void {
+    this.pending.set(false);
+    this.dropInFlight();
+    this.clearInFlight();
     this.draft.set(content);
     this.toast.add({
       severity: 'error',

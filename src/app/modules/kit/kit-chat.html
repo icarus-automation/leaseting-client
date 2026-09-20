@@ -82,7 +82,11 @@
       </a>
     </header>
 
-    <div #transcript class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3.5 py-4">
+    <div
+      #transcript
+      class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3.5 py-4"
+      [attr.aria-busy]="pending() ? 'true' : null"
+    >
       @if (loadingThread()) {
         <p class="text-[13px] text-muted">Loading…</p>
       } @else if (isBlank()) {
@@ -150,7 +154,10 @@
                 [mood]="kitAvatarMood"
                 class="mt-0.5 shrink-0"
               />
-              <div class="flex max-w-[85%] min-w-0 flex-col gap-2 sm:max-w-[70%]">
+              <div
+                class="flex max-w-[85%] min-w-0 flex-col gap-2 sm:max-w-[70%]"
+                [attr.aria-live]="pending() && message.role === 'ASSISTANT' ? 'polite' : null"
+              >
                 @if (message.blocks.length > 0) {
                   <div
                     class="flex flex-col gap-2 rounded-base border border-border bg-surface px-3 py-2 text-[13.5px] leading-relaxed text-body"
@@ -165,7 +172,7 @@
             </div>
           }
         }
-        @if (pending()) {
+        @if (showThinking()) {
           <div class="flex items-center gap-2" aria-live="polite">
             <app-kit-head variant="avatar" [mood]="kitThinkingMood" class="shrink-0" />
             <p class="text-[13px] text-muted">Kit is thinking…</p>

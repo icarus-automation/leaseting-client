@@ -9,6 +9,15 @@
   background-position: center;
 }
 
+:host([data-variant='avatar']) {
+  --kit-head-size: 2rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background-color: var(--background);
+}
+
 :host([data-variant='badge']) {
   --kit-head-size: 2.5rem;
 }

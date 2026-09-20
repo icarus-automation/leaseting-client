@@ -78,8 +78,12 @@ describe('KitChat streaming', () => {
     vi.useRealTimers();
   });
 
+  function host(): HTMLElement {
+    return fixture.nativeElement as HTMLElement;
+  }
+
   function text(): string {
-    return (fixture.nativeElement as HTMLElement).textContent ?? '';
+    return host().textContent ?? '';
   }
 
   function send(question: string): void {
@@ -88,15 +92,38 @@ describe('KitChat streaming', () => {
     fixture.detectChanges();
   }
 
+  function thinkingStatus(): HTMLElement | null {
+    return host().querySelector('[aria-label="Kit is thinking"]');
+  }
+
+  function kitHeads(): NodeListOf<Element> {
+    return host().querySelectorAll('app-kit-head');
+  }
+
+  it('shows one Kit avatar and a circular spinner while thinking', () => {
+    send('Who has an unpaid balance right now?');
+
+    const status = thinkingStatus();
+    expect(status).not.toBeNull();
+    expect(kitHeads()).toHaveLength(1);
+    expect(status!.querySelectorAll('app-kit-head')).toHaveLength(1);
+    expect(status!.querySelector('.animate-spinner')).not.toBeNull();
+    expect(status!.textContent).toMatch(/Thinking/);
+    expect(status!.textContent).not.toMatch(/Kit is thinking/);
+    expect(status!.querySelector('details, [aria-expanded]')).toBeNull();
+  });
+
   it('shows assistant text incrementally as delta events arrive', () => {
     send('Who has an unpaid balance right now?');
-    expect(text()).toContain('Kit is thinking…');
+    expect(thinkingStatus()).not.toBeNull();
+    expect(kitHeads()).toHaveLength(1);
 
     start$.next({ type: 'started', conversationId: 'c1' });
     start$.next({ type: 'delta', text: 'Mina ' });
     fixture.detectChanges();
     expect(text()).toContain('Mina');
-    expect(text()).not.toContain('Kit is thinking…');
+    expect(thinkingStatus()).toBeNull();
+    expect(kitHeads()).toHaveLength(1);
 
     start$.next({ type: 'delta', text: 'Santos is late.' });
     fixture.detectChanges();
@@ -154,7 +181,8 @@ describe('KitChat streaming', () => {
 
     send('/document unpaid tenants');
     start$.next({ type: 'started', conversationId: 'c1' });
-    expect(text()).toContain('Kit is thinking…');
+    expect(thinkingStatus()).not.toBeNull();
+    expect(kitHeads()).toHaveLength(1);
 
     start$.next({
       type: 'done',
@@ -166,7 +194,7 @@ describe('KitChat streaming', () => {
     fixture.detectChanges();
 
     expect(text()).toContain('Building your document…');
-    expect(text()).not.toContain('Kit is thinking…');
+    expect(thinkingStatus()).toBeNull();
     expect(api.pollDocument).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(2_000);

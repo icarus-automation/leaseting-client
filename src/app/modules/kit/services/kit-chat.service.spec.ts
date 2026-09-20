@@ -105,11 +105,51 @@ describe('KitChatService streams', () => {
     ]);
   });
 
+  it('reads the API start-stream body that puts the thread on done.conversation', async () => {
+    const conversation = {
+      id: '3c2d1b0a-9f8e-7d6c-5b4a-3210fedcba98',
+      title: 'How do I record a partial payment?',
+      updatedAt: '2026-09-19T19:12:03.104Z',
+      messages: [
+        {
+          id: '11111111-1111-1111-1111-111111111111',
+          role: 'USER' as const,
+          content: 'How do I record a partial payment?',
+          createdAt: '2026-09-19T19:12:03.080Z',
+        },
+        {
+          id: '22222222-2222-2222-2222-222222222222',
+          role: 'ASSISTANT' as const,
+          content: 'Partial payments go on the bill itself. Open the bill and record what came in.',
+          createdAt: '2026-09-19T19:12:03.095Z',
+        },
+      ],
+    };
+    fetchMock.mockResolvedValue(
+      sseResponse([
+        'event: started\ndata: {"status":"started","mode":"chat"}',
+        'event: delta\ndata: {"text":"Partial payments "}',
+        `event: done\ndata: ${JSON.stringify({ status: 'complete', conversation })}`,
+      ]),
+    );
+
+    const events = await firstValueFrom(service.streamStart('How do I record a partial payment?').pipe(toArray()));
+    const done = events.at(-1);
+
+    expect(events.map((event) => event.type)).toEqual(['started', 'delta', 'done']);
+    expect(done).toEqual({
+      type: 'done',
+      status: 'complete',
+      conversationId: conversation.id,
+      message: conversation.messages[1],
+    });
+  });
+
   it('sends follow-ups to /kit/conversations/:id/messages/stream', async () => {
     fetchMock.mockResolvedValue(
       sseResponse([
-        'event: started\ndata: {"conversationId":"c1"}',
-        `event: done\ndata: ${JSON.stringify({ status: 'complete', conversationId: 'c1', message: assistant })}`,
+        'event: started\ndata: {"status":"started","mode":"chat","conversationId":"c1"}',
+        `event: done\ndata: ${JSON.stringify({ status: 'complete', message: assistant })}`,
       ]),
     );
 

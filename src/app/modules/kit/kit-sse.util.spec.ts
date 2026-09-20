@@ -54,6 +54,43 @@ describe('Ask Kit SSE framing', () => {
     expect(decodeKitSseFrame(frame)).toEqual({ error: 'Kit sent a reply Kit could not read.' });
   });
 
+  it('reads a new-thread done event that carries conversation, not conversationId plus message', () => {
+    const [frame] = parseSseBlock(
+      'event: done\ndata: {"status":"complete","conversation":{"id":"3c2d1b0a-9f8e-7d6c-5b4a-3210fedcba98","title":"How do I record a partial payment?","updatedAt":"2026-09-19T19:12:03.104Z","messages":[{"id":"11111111-1111-1111-1111-111111111111","role":"USER","content":"How do I record a partial payment?","createdAt":"2026-09-19T19:12:03.080Z"},{"id":"22222222-2222-2222-2222-222222222222","role":"ASSISTANT","content":"Partial payments go on the bill itself. Open the bill and record what came in.","createdAt":"2026-09-19T19:12:03.095Z"}]}}',
+    );
+    expect(decodeKitSseFrame(frame)).toEqual({
+      event: {
+        type: 'done',
+        status: 'complete',
+        conversationId: '3c2d1b0a-9f8e-7d6c-5b4a-3210fedcba98',
+        message: {
+          id: '22222222-2222-2222-2222-222222222222',
+          role: 'ASSISTANT',
+          content: 'Partial payments go on the bill itself. Open the bill and record what came in.',
+          createdAt: '2026-09-19T19:12:03.095Z',
+        },
+      },
+    });
+  });
+
+  it('reads a follow-up done event that carries message and omits conversationId', () => {
+    const [frame] = parseSseBlock(
+      'event: done\ndata: {"status":"complete","message":{"id":"a2","role":"ASSISTANT","content":"Unit 2 is current.","createdAt":"2026-09-19T00:00:00.000Z"}}',
+    );
+    expect(decodeKitSseFrame(frame)).toEqual({
+      event: {
+        type: 'done',
+        status: 'complete',
+        message: {
+          id: 'a2',
+          role: 'ASSISTANT',
+          content: 'Unit 2 is current.',
+          createdAt: '2026-09-19T00:00:00.000Z',
+        },
+      },
+    });
+  });
+
   it('surfaces an SSE error event as a readable failure', () => {
     const [frame] = parseSseBlock('event: error\ndata: {"message":"DeepSeek timed out"}');
     expect(decodeKitSseFrame(frame)).toEqual({ error: 'DeepSeek timed out' });
@@ -68,5 +105,33 @@ describe('Ask Kit SSE framing', () => {
     if (!decoded || !('event' in decoded) || decoded.event.type !== 'done') return;
     expect(decoded.event.message.document?.status).toBe('PENDING');
     expect(decoded.event.message.document?.id).toBe('d1');
+  });
+
+  it('reads a pending document from done.conversation.messages', () => {
+    const [frame] = parseSseBlock(
+      'event: done\ndata: {"status":"complete","conversation":{"id":"c1","title":"Unpaid tenants","updatedAt":"2026-09-19T00:00:00.000Z","messages":[{"id":"u1","role":"USER","content":"/document unpaid","createdAt":"2026-09-19T00:00:00.000Z"},{"id":"a1","role":"ASSISTANT","content":"","createdAt":"2026-09-19T00:00:00.000Z","document":{"id":"d1","status":"PENDING","format":"XLSX","title":"Unpaid tenants","fileName":null,"error":null,"expiresAt":"2026-09-19T01:00:00.000Z"}}]}}',
+    );
+    expect(decodeKitSseFrame(frame)).toEqual({
+      event: {
+        type: 'done',
+        status: 'complete',
+        conversationId: 'c1',
+        message: {
+          id: 'a1',
+          role: 'ASSISTANT',
+          content: '',
+          createdAt: '2026-09-19T00:00:00.000Z',
+          document: {
+            id: 'd1',
+            status: 'PENDING',
+            format: 'XLSX',
+            title: 'Unpaid tenants',
+            fileName: null,
+            error: null,
+            expiresAt: '2026-09-19T01:00:00.000Z',
+          },
+        },
+      },
+    });
   });
 });

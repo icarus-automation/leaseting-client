@@ -1,10 +1,5 @@
 import type { KitChatMessage } from './kit-chat.types';
 
-/**
- * SSE names and payload fields from the ICA-6 FE note:
- * `started` / `delta` / `done` / `error`. Request body is `{ content }`.
- * Document poll statuses stay `PENDING` | `READY` | `FAILED`.
- */
 export type KitSseEventName = 'started' | 'delta' | 'done' | 'error';
 
 export interface KitSseStarted {
@@ -17,7 +12,7 @@ export interface KitSseDelta {
 
 export interface KitSseDone {
   status: 'complete';
-  conversationId: string;
+  conversationId?: string;
   message: KitChatMessage;
 }
 

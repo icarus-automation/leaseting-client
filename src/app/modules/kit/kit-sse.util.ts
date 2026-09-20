@@ -58,25 +58,46 @@ export function decodeKitSseFrame(
       : { event: { type: 'started' } };
   }
 
+  return readDone(data, payload);
+}
+
+function readDone(
+  data: Record<string, unknown>,
+  payload: unknown,
+): { event: KitStreamEvent } | { error: string } {
   if (data['status'] !== 'complete') {
     return { error: readErrorMessage(payload) };
   }
 
-  if (typeof data['conversationId'] !== 'string' || !data['conversationId']) {
-    return { error: 'Kit sent a reply Kit could not read.' };
-  }
-
-  const message = readMessage(data['message']);
+  const conversation = readConversation(data['conversation']);
+  const message = readMessage(data['message']) ?? conversation?.assistant ?? null;
   if (!message) return { error: 'Kit sent a reply Kit could not read.' };
 
+  const conversationId = readId(data['conversationId']) ?? conversation?.id;
   return {
-    event: {
-      type: 'done',
-      status: 'complete',
-      conversationId: data['conversationId'],
-      message,
-    },
+    event: conversationId
+      ? { type: 'done', status: 'complete', conversationId, message }
+      : { type: 'done', status: 'complete', message },
   };
+}
+
+function readId(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+function readConversation(
+  value: unknown,
+): { id: string; assistant: KitChatMessage } | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const conversation = value as Record<string, unknown>;
+  const id = readId(conversation['id']);
+  if (!id || !Array.isArray(conversation['messages'])) return null;
+
+  for (let i = conversation['messages'].length - 1; i >= 0; i -= 1) {
+    const message = readMessage(conversation['messages'][i]);
+    if (message?.role === 'ASSISTANT') return { id, assistant: message };
+  }
+  return null;
 }
 
 function parseJson(raw: string): unknown {

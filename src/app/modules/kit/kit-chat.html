@@ -147,7 +147,7 @@
                 class="max-w-[85%] whitespace-pre-wrap rounded-base bg-primary px-3 py-2 text-[13.5px] leading-relaxed text-primary-foreground sm:max-w-[70%]"
               >{{ message.lead }}@if (message.command; as command) {<span class="rounded-[3px] bg-[color-mix(in_oklab,var(--primary-foreground)_22%,transparent)] px-1 font-semibold">{{ command }}</span>}{{ message.body }}</p>
             </div>
-          } @else {
+          } @else if (message.blocks.length > 0 || message.document) {
             <div class="flex items-start gap-2">
               <app-kit-head
                 variant="avatar"
@@ -173,9 +173,18 @@
           }
         }
         @if (showThinking()) {
-          <div class="flex items-center gap-2" aria-live="polite">
+          <div
+            class="flex items-center gap-2.5"
+            role="status"
+            aria-live="polite"
+            aria-label="Kit is thinking"
+          >
             <app-kit-head variant="avatar" [mood]="kitThinkingMood" class="shrink-0" />
-            <p class="text-[13px] text-muted">Kit is thinking…</p>
+            <span
+              class="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-[color-mix(in_oklab,var(--primary)_40%,transparent)] border-t-[var(--primary)] animate-spinner motion-reduce:[animation-duration:1300ms]"
+              aria-hidden="true"
+            ></span>
+            <p class="text-[13px] text-muted">Thinking</p>
           </div>
         }
       }

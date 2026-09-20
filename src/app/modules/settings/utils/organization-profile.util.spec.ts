@@ -45,7 +45,7 @@ describe('parseOrganizationProfile', () => {
         city: 'Cebu City',
         slug: 'acme',
         logoUrl: 'https://cdn.example/logo.png',
-      } as never),
+      }),
     ).toEqual({
       id: 'org-1',
       name: 'Acme Rentals',
@@ -55,10 +55,9 @@ describe('parseOrganizationProfile', () => {
   });
 
   it('rejects a payload whose name is not a string', () => {
-    expect(() => parseOrganizationProfile({} as never)).toThrow('Organization name is required.');
-    expect(() => parseOrganizationProfile({ name: 12 } as never)).toThrow(
-      'Organization name is required.',
-    );
+    expect(() => parseOrganizationProfile({})).toThrow('Organization name is required.');
+    expect(() => parseOrganizationProfile({ name: 12 })).toThrow('Organization name is required.');
+    expect(() => parseOrganizationProfile(null)).toThrow('Organization name is required.');
   });
 });
 

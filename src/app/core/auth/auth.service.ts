@@ -26,6 +26,10 @@ export class AuthService {
     return role === 'owner' || role === 'admin';
   });
 
+  updateActiveOrganization(id: string, patch: Pick<Organization, 'name'>): void {
+    this.organization.update((org) => (org && org.id === id ? { ...org, ...patch } : org));
+  }
+
   signIn(credentials: SignInCredentials): Observable<SessionUser> {
     return this.http
       .post<SignInResponse>(`${API_BASE_URL}${AUTH_ENDPOINTS.signInEmail}`, credentials)

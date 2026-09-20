@@ -17,7 +17,7 @@ const pendingDocument: KitDocument = {
   title: 'Unpaid tenants',
   fileName: null,
   error: null,
-  expiresAt: '2026-09-20T00:00:00.000Z',
+  expiresAt: '2027-09-20T00:00:00.000Z',
 };
 
 const assistant = (content: string, document?: KitDocument): KitChatMessage => ({
@@ -115,6 +115,24 @@ describe('KitChat streaming', () => {
     expect(component.activeId()).toBe('c1');
     expect(TestBed.inject(Location).replaceState).toHaveBeenCalledWith('/kit/c1');
     expect(api.streamStart).toHaveBeenCalledWith('Who has an unpaid balance right now?');
+  });
+
+  it('binds the conversation from done when started omitted the id', () => {
+    send('Who is late?');
+    start$.next({ type: 'started' });
+    start$.next({ type: 'delta', text: 'Mina is late.' });
+    start$.next({
+      type: 'done',
+      status: 'complete',
+      conversationId: 'c1',
+      message: assistant('Mina is late.'),
+    });
+    start$.complete();
+    fixture.detectChanges();
+
+    expect(component.activeId()).toBe('c1');
+    expect(component.pending()).toBe(false);
+    expect(TestBed.inject(Location).replaceState).toHaveBeenCalledWith('/kit/c1');
   });
 
   it('sends follow-ups through the conversation message stream', () => {

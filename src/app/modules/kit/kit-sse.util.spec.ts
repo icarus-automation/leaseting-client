@@ -106,4 +106,32 @@ describe('Ask Kit SSE framing', () => {
     expect(decoded.event.message.document?.status).toBe('PENDING');
     expect(decoded.event.message.document?.id).toBe('d1');
   });
+
+  it('reads a pending document from done.conversation.messages', () => {
+    const [frame] = parseSseBlock(
+      'event: done\ndata: {"status":"complete","conversation":{"id":"c1","title":"Unpaid tenants","updatedAt":"2026-09-19T00:00:00.000Z","messages":[{"id":"u1","role":"USER","content":"/document unpaid","createdAt":"2026-09-19T00:00:00.000Z"},{"id":"a1","role":"ASSISTANT","content":"","createdAt":"2026-09-19T00:00:00.000Z","document":{"id":"d1","status":"PENDING","format":"XLSX","title":"Unpaid tenants","fileName":null,"error":null,"expiresAt":"2026-09-19T01:00:00.000Z"}}]}}',
+    );
+    expect(decodeKitSseFrame(frame)).toEqual({
+      event: {
+        type: 'done',
+        status: 'complete',
+        conversationId: 'c1',
+        message: {
+          id: 'a1',
+          role: 'ASSISTANT',
+          content: '',
+          createdAt: '2026-09-19T00:00:00.000Z',
+          document: {
+            id: 'd1',
+            status: 'PENDING',
+            format: 'XLSX',
+            title: 'Unpaid tenants',
+            fileName: null,
+            error: null,
+            expiresAt: '2026-09-19T01:00:00.000Z',
+          },
+        },
+      },
+    });
+  });
 });

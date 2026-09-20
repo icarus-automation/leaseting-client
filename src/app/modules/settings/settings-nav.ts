@@ -20,7 +20,6 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
         description: 'Company name, address, and branding.',
         icon: 'building',
         route: 'organization',
-        comingSoon: true,
       },
     ],
   },

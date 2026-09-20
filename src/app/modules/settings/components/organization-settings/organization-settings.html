@@ -1,0 +1,80 @@
+<section class="flex flex-col gap-3" aria-label="Organization">
+  @if (state(); as current) {
+    @switch (current.kind) {
+      @case ('loading') {
+        <app-skeleton variant="panel" />
+      }
+      @case ('error') {
+        <app-error-banner [message]="current.message" [retryable]="true" (retry)="load()" />
+      }
+      @case ('ready') {
+        <form
+          class="flex flex-col gap-5 rounded-base border border-border bg-background px-4 py-4"
+          [formGroup]="form"
+          (ngSubmit)="submit()"
+          novalidate
+        >
+          <label class="flex w-full flex-col gap-1.5">
+            <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Company name</span>
+            <input
+              type="text"
+              formControlName="name"
+              [readonly]="!canEdit()"
+              [attr.aria-readonly]="!canEdit()"
+              aria-label="Company name"
+              class="h-10 w-full rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+            />
+            <span class="text-[12.5px] leading-relaxed text-muted">
+              Shown in the header and wherever Leaseting names your organization.
+            </span>
+          </label>
+
+          <fieldset class="flex flex-col gap-1.5 border-0 p-0">
+            <legend class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Address</legend>
+            <input
+              type="text"
+              formControlName="addressLine"
+              placeholder="Street, building, unit"
+              [readonly]="!canEdit()"
+              [attr.aria-readonly]="!canEdit()"
+              aria-label="Address line"
+              class="h-10 w-full rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+            />
+            <input
+              type="text"
+              formControlName="city"
+              placeholder="City"
+              [readonly]="!canEdit()"
+              [attr.aria-readonly]="!canEdit()"
+              aria-label="City"
+              class="h-10 w-full rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+            />
+          </fieldset>
+
+          <div class="flex flex-wrap items-center gap-3">
+            @if (canEdit()) {
+              <button
+                type="submit"
+                class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                [disabled]="saving()"
+              >
+                @if (saving()) {
+                  <span
+                    class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner"
+                    aria-hidden="true"
+                  ></span>
+                }
+                <span>Save</span>
+              </button>
+              @if (saveError(); as message) {
+                <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+              }
+            } @else {
+              <p class="text-[12.5px] text-muted">Only owners and admins can change organization details.</p>
+            }
+          </div>
+        </form>
+      }
+    }
+  }
+</section>

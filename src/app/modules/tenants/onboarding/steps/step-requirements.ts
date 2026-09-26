@@ -18,6 +18,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { OnboardingDetail, RequirementsStepData } from '../../../../core/models/onboarding.types';
 import type { TenantDocumentItem } from '../../../../core/models/tenant.types';
+import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { TenantsService } from '../../services/tenants.service';
 
 type RequirementKey = 'validId' | 'proofOfIncome' | 'priorAddress';
@@ -65,6 +66,7 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 })
 export class StepRequirements {
   private readonly tenants = inject(TenantsService);
+  private readonly confirm = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly detail = input.required<OnboardingDetail>();
@@ -77,18 +79,14 @@ export class StepRequirements {
 
   readonly onFile = signal<Partial<Record<RequirementKey, TenantDocumentItem[]>>>({});
   readonly loadingProfile = signal(false);
-
-  readonly checked = signal<Record<RequirementKey, boolean>>({
-    validId: false,
-    proofOfIncome: false,
-    priorAddress: false,
-  });
-
   readonly uploadingKey = signal<RequirementKey | null>(null);
+  readonly removingId = signal<string | null>(null);
   readonly uploads = signal<{ key: RequirementKey; document: TenantDocumentItem }[]>([]);
   readonly errorMessage = signal<string | null>(null);
 
-  readonly canProceed = computed(() => this.checked().validId);
+  readonly canProceed = computed(() =>
+    REQUIREMENTS.filter((item) => item.required).every((item) => this.isAttached(item.key)),
+  );
 
   readonly carriedOverCount = computed(
     () => Object.values(this.onFile()).filter((documents) => (documents?.length ?? 0) > 0).length,
@@ -101,15 +99,12 @@ export class StepRequirements {
   constructor() {
     effect(() => {
       const detail = this.detail();
-      untracked(() => {
-        this.seedFromSavedStep(detail);
-        this.loadFiledDocuments(detail.tenant?.id ?? null);
-      });
+      untracked(() => this.loadFiledDocuments(detail.tenant?.id ?? null));
     });
   }
 
-  toggle(key: RequirementKey): void {
-    this.checked.update((state) => ({ ...state, [key]: !state[key] }));
+  isAttached(key: RequirementKey): boolean {
+    return this.filedFor(key).length > 0 || this.uploadsFor(key).length > 0;
   }
 
   attach(key: RequirementKey): void {
@@ -145,13 +140,21 @@ export class StepRequirements {
         next: (document) => {
           this.uploadingKey.set(null);
           this.uploads.update((list) => [...list, { key, document }]);
-          this.checked.update((state) => ({ ...state, [key]: true }));
         },
         error: (error: unknown) => {
           this.uploadingKey.set(null);
           this.errorMessage.set(apiErrorMessage(error, 'The upload did not go through. Try again.'));
         },
       });
+  }
+
+  confirmRemove(key: RequirementKey, document: TenantDocumentItem): void {
+    this.confirm.danger({
+      header: 'Remove file',
+      message: `Remove “${document.fileName}” from this requirement? It is also deleted from the tenant’s profile.`,
+      acceptLabel: 'Remove',
+      onAccept: () => this.removeDocument(key, document),
+    });
   }
 
   filedFor(key: RequirementKey): TenantDocumentItem[] {
@@ -165,22 +168,34 @@ export class StepRequirements {
   }
 
   submit(): void {
-    const state = this.checked();
+    if (!this.canProceed()) return;
     this.next.emit({
-      validId: state.validId,
-      proofOfIncome: state.proofOfIncome,
-      priorAddress: state.priorAddress,
+      validId: this.isAttached('validId'),
+      proofOfIncome: this.isAttached('proofOfIncome'),
+      priorAddress: this.isAttached('priorAddress'),
     });
   }
 
-  private seedFromSavedStep(detail: OnboardingDetail): void {
-    const saved = detail.stepsState.requirements?.data as Partial<RequirementsStepData> | undefined;
-    if (!saved) return;
-    this.checked.set({
-      validId: saved.validId ?? false,
-      proofOfIncome: saved.proofOfIncome ?? false,
-      priorAddress: saved.priorAddress ?? false,
-    });
+  private removeDocument(key: RequirementKey, document: TenantDocumentItem): void {
+    this.errorMessage.set(null);
+    this.removingId.set(document.id);
+    this.tenants
+      .deleteDocument(document.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.removingId.set(null);
+          this.uploads.update((list) => list.filter((upload) => upload.document.id !== document.id));
+          this.onFile.update((filed) => ({
+            ...filed,
+            [key]: (filed[key] ?? []).filter((item) => item.id !== document.id),
+          }));
+        },
+        error: (error: unknown) => {
+          this.removingId.set(null);
+          this.errorMessage.set(apiErrorMessage(error, 'The file could not be removed. Try again.'));
+        },
+      });
   }
 
   private loadFiledDocuments(tenantId: string | null): void {
@@ -196,13 +211,7 @@ export class StepRequirements {
       .subscribe({
         next: (tenant) => {
           this.loadingProfile.set(false);
-          const filed = this.groupByRequirement(tenant.documents);
-          this.onFile.set(filed);
-          this.checked.update((state) => ({
-            validId: state.validId || (filed.validId?.length ?? 0) > 0,
-            proofOfIncome: state.proofOfIncome || (filed.proofOfIncome?.length ?? 0) > 0,
-            priorAddress: state.priorAddress || (filed.priorAddress?.length ?? 0) > 0,
-          }));
+          this.onFile.set(this.groupByRequirement(tenant.documents));
         },
         error: () => this.loadingProfile.set(false),
       });

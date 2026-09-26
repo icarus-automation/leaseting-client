@@ -130,10 +130,14 @@ describe('StepRequirements', () => {
     await render();
 
     const box = checkbox('Valid government ID');
+    expect(box.classList.contains('pointer-events-none')).toBe(true);
     expect(box.getAttribute('aria-readonly')).toBe('true');
-    box.click();
-    box.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
+    expect(box.tabIndex).toBe(-1);
+
+    box.checked = true;
+    const event = new Event('change', { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'target', { value: box });
+    component.rejectManualCheck(event, 'validId');
 
     expect(component.isAttached('validId')).toBe(false);
     expect(checkbox('Valid government ID').checked).toBe(false);

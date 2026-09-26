@@ -36,7 +36,8 @@
                 [attr.aria-checked]="isAttached(item.key)"
                 [attr.aria-label]="item.label + (isAttached(item.key) ? ', file attached' : ', no file attached')"
                 aria-readonly="true"
-                (click)="$event.preventDefault()"
+                (click)="rejectManualCheck($event, item.key)"
+                (change)="rejectManualCheck($event, item.key)"
                 (keydown)="$event.preventDefault()"
               />
             </span>

@@ -107,6 +107,12 @@ export class StepRequirements {
     return this.filedFor(key).length > 0 || this.uploadsFor(key).length > 0;
   }
 
+  rejectManualCheck(event: Event, key: RequirementKey): void {
+    event.preventDefault();
+    event.stopPropagation();
+    (event.target as HTMLInputElement).checked = this.isAttached(key);
+  }
+
   attach(key: RequirementKey): void {
     this.pendingKey = key;
     this.fileInput().nativeElement.click();

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&display=swap');
 @import 'tailwindcss';
 
 
@@ -80,8 +80,8 @@
   --color-ring:               var(--ring);
   --color-ring-destructive:   var(--ring-destructive);
 
-  --font-heading: 'Poppins', sans-serif;
-  --font-body:    'Work Sans', sans-serif;
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
 
   --radius-base: var(--radius);
   --max-width-content-standard: var(--content-width-standard);
@@ -245,7 +245,7 @@
    passes one; hiding the slot keeps a stray icon from reopening the gap, and
    block layout puts the message flush under the title where it belongs.
 
-   The rest matches the shared FormDialog: an 18px Poppins title, a hairline
+   The rest matches the shared FormDialog: an 18px DM Sans title, a hairline
    above the buttons, the same gaps. A confirm and a form dialog are the same
    object to the reader and should not announce themselves differently. */
 .p-confirmdialog-icon {
@@ -257,7 +257,7 @@
 }
 
 .p-confirmdialog .p-dialog-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.125rem;
   line-height: 1.3;
 }
@@ -345,7 +345,7 @@
   }
 
   body {
-    font-family: 'Work Sans', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px;
     line-height: 1.6;
     color: var(--text-body);
@@ -353,7 +353,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-heading);
     color: var(--text-heading);
     text-wrap: balance;
     margin: 0;
@@ -418,7 +418,7 @@
 
 
 .filepond--root {
-  font-family: 'Work Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   margin-bottom: 0;
 }

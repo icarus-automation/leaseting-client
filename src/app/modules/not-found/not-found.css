@@ -11,7 +11,7 @@
 .not-found-code {
   font-size: 72px;
   font-weight: 700;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-heading);
   color: var(--border);
   line-height: 1;
   margin: 0 0 16px;

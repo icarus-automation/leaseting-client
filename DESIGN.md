@@ -26,38 +26,38 @@ colors:
   ring-destructive: "oklch(0.54 0.22 15 / 0.25)"
 typography:
   display:
-    fontFamily: "Poppins, sans-serif"
+    fontFamily: "DM Sans, sans-serif"
     fontSize: "24px"
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: "normal"
   headline:
-    fontFamily: "Poppins, sans-serif"
+    fontFamily: "DM Sans, sans-serif"
     fontSize: "18px"
     fontWeight: 600
     lineHeight: 1.25
   title:
-    fontFamily: "Poppins, sans-serif"
+    fontFamily: "DM Sans, sans-serif"
     fontSize: "15px"
     fontWeight: 600
     lineHeight: 1.3
   body:
-    fontFamily: "Work Sans, sans-serif"
+    fontFamily: "DM Sans, sans-serif"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.6
   label:
-    fontFamily: "Work Sans, sans-serif"
+    fontFamily: "DM Sans, sans-serif"
     fontSize: "13px"
     fontWeight: 500
     lineHeight: 1.4
   micro:
-    fontFamily: "Work Sans, sans-serif"
+    fontFamily: "DM Sans, sans-serif"
     fontSize: "12.5px"
     fontWeight: 500
     lineHeight: 1.4
   eyebrow:
-    fontFamily: "Work Sans, sans-serif"
+    fontFamily: "DM Sans, sans-serif"
     fontSize: "10.5px"
     fontWeight: 600
     lineHeight: 1.4
@@ -155,7 +155,7 @@ The system rejects Buildium and AppFolio's corporate-beige forms, generic SaaS t
 - One hue family: everything neutral is tinted toward 262, so "gray" is never actually gray
 - Flat at rest — depth is tonal layering and 1px hairlines; shadows only for genuinely floating layers
 - 4px corners on everything except pills, which are fully round
-- Two families, no third: Poppins for headings, Work Sans for everything else
+- One family: DM Sans for headings and body. Do not import a second.
 - Status is a vocabulary, never a color — every tone ships with a label
 - Motion confirms and then stops, at 150ms — with Kit as the one scoped, documented exception
 - Keyboard-first: `Ctrl+K` palette, `outline`-based focus rings that never shift layout
@@ -213,20 +213,20 @@ There is no third ground. The sign-in sheet — historically the one place tempt
 
 ## Typography
 
-**Heading Font:** Poppins (500 / 600 / 700), with `sans-serif` fallback
-**Body Font:** Work Sans (400 / 500 / 600), with `sans-serif` fallback
+**Heading Font:** DM Sans (500 / 600 / 700), with `sans-serif` fallback
+**Body Font:** DM Sans (400 / 500 / 600), with `sans-serif` fallback
 
-**Character:** A geometric pairing with almost no contrast between the two — Poppins is rounder and more constructed, Work Sans is more open and reads better at 12–14px in dense rows. The distinction is felt rather than seen. Neither family is expressive, and that is the point: the type is a delivery mechanism for numbers and names, and the moment a reader notices the typeface, the type has failed. Both are already loaded globally; do not import a third family.
+**Character:** One family. DM Sans carries headings and body. Hierarchy comes from weight and size, not from a second face. It stays even at 12–14px in dense rows, and its tabular figures line up money and counts. Do not import another family.
 
 ### Hierarchy
 
-- **Display** (Poppins 600, 24px, line-height 1.2): Page titles. One per screen. Fixed size, not fluid — product UIs are viewed at consistent DPI and a clamp would only add jitter.
-- **Headline** (Poppins 600, 18px, line-height 1.25): Dialog headings, major section titles.
-- **Title** (Poppins 600, 15px, line-height 1.3): Card headers, empty-state headlines, panel titles, the sidebar brand name.
-- **Body** (Work Sans 400, 14px, line-height 1.6): Default text everywhere, set globally on `body`. Prose caps at ~70ch; empty-state descriptions cap at 42ch.
-- **Label** (Work Sans 500, 13px, line-height 1.4): Form labels, buttons, nav items, primary table cell text. The workhorse size.
-- **Micro** (Work Sans 500, 12.5px, line-height 1.4): Table column headers, secondary row metadata, field errors, chip text, timestamps.
-- **Eyebrow** (Work Sans 600, 10.5px, letter-spacing 0.055em, uppercase): Sidebar section labels and the dashboard date line only. The single sanctioned uppercase treatment in the system.
+- **Display** (DM Sans 600, 24px, line-height 1.2): Page titles. One per screen. Fixed size, not fluid — product UIs are viewed at consistent DPI and a clamp would only add jitter.
+- **Headline** (DM Sans 600, 18px, line-height 1.25): Dialog headings, major section titles.
+- **Title** (DM Sans 600, 15px, line-height 1.3): Card headers, empty-state headlines, panel titles, the sidebar brand name.
+- **Body** (DM Sans 400, 14px, line-height 1.6): Default text everywhere, set globally on `body`. Prose caps at ~70ch; empty-state descriptions cap at 42ch.
+- **Label** (DM Sans 500, 13px, line-height 1.4): Form labels, buttons, nav items, primary table cell text. The workhorse size.
+- **Micro** (DM Sans 500, 12.5px, line-height 1.4): Table column headers, secondary row metadata, field errors, chip text, timestamps.
+- **Eyebrow** (DM Sans 600, 10.5px, letter-spacing 0.055em, uppercase): Sidebar section labels and the dashboard date line only. The single sanctioned uppercase treatment in the system.
 
 ### Named Rules
 
@@ -392,7 +392,7 @@ The only places the system permits a face and sustained motion — and the rules
 - **Don't** recreate enterprise ERP density: 11px body text, zero gutters, gray-on-gray rows. Rows may be tight; the air around a data region may not be removed.
 - **Don't** use gradient text, glassmorphism, colored left-stripe accents, animated metric counters, or a shadow on a resting element.
 - **Don't** introduce a radius other than 4px, full, or 2px-for-small-internals — and never `32px+`.
-- **Don't** import a third font family or a new weight. Poppins and Work Sans are loaded; hierarchy comes from weight and size within them.
+- **Don't** import a second font family or a weight outside 400-700. DM Sans is the only family loaded. Hierarchy comes from weight and size.
 - **Don't** introduce a true gray or a neutral tinted toward a hue other than 262.
 - **Don't** override PrimeNG component colors inline. Extend `app.preset.ts`'s semantic block so the change lands everywhere at once.
 - **Don't** reach for a modal first. Exhaust inline editing, drawers, and progressive disclosure before blocking the surface — and when a dialog is right, route every close path through a dirty-check.

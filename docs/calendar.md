@@ -82,7 +82,7 @@ The feature lives in `src/app/modules/calendar/`: `calendar.ts` coordinates view
 
 `@fullcalendar/angular`, `@fullcalendar/core`, `@fullcalendar/daygrid` and `@fullcalendar/list` are deliberately pinned to **6.1.20**, preserving the suggested v6 split-package layout. The installed Angular adapter declares Angular peer support from 12 through 21. The feature uses day-grid and list plugins only.
 
-The surface inherits [DESIGN.md](../DESIGN.md) and [PRODUCT.md](../PRODUCT.md). White and panel surfaces, Ledger Indigo controls, Poppins headings, Work Sans data, tight corners and restrained semantic status fills remain the established system. Calendar-specific spacing and grid rules do not become new global tokens.
+The surface inherits [DESIGN.md](../DESIGN.md) and [PRODUCT.md](../PRODUCT.md). White and panel surfaces, Ledger Indigo controls, DM Sans for headings and data, tight corners and restrained semantic status fills remain the established system. Calendar-specific spacing and grid rules do not become new global tokens.
 
 Work orders remain a future source. Add them only when the domain records a real scheduled or due date, using a distinct entry type, bounded organization-scoped query, stable source ID, explicit status labels and source navigation. Creation time must not imply a deadline. Any future unissued-rent forecast requires a separately labelled projection contract.
 

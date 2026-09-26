@@ -603,7 +603,7 @@ export class FloorMapEditor {
         text: unit.unitNo,
         fontSize: 12,
         fontStyle: '600',
-        fontFamily: 'Work Sans, sans-serif',
+        fontFamily: 'DM Sans, sans-serif',
         fill: 'rgba(20, 22, 34, 0.85)',
         listening: false,
       });

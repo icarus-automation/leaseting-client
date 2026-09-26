@@ -18,8 +18,8 @@ You must follow the project theme. The source of truth is:
 
 ## Typography
 
-- Headings (`h1`–`h6`): `font-heading` (Poppins) — already applied globally in `styles.css`, do not re-import or override.
-- Body, buttons, inputs: `font-body` (Work Sans) — already global.
+- Headings (`h1`–`h6`): `font-heading` (DM Sans) — already applied globally in `styles.css`, do not re-import or override.
+- Body, buttons, inputs: `font-body` (DM Sans) — already global.
 - Do NOT import additional Google Fonts or font families.
 
 ## Radius & spacing

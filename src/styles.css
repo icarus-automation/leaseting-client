@@ -395,20 +395,6 @@
 }
 
 
-/*
- * Global rather than component-scoped on purpose: the fields are projected
- * from the page into <app-auth-shell>, so they carry the page's encapsulation
- * attribute and the shell's own stylesheet cannot reach them. The same
- * unlayered rules cover field-host, auth-field, ops-search, and the PrimeNG
- * field hosts (p-select, p-multiselect, p-datepicker, p-inputnumber).
- *
- * These hosts wrap a bare input in a bordered box, so focus is drawn on the
- * wrapper. Without the descendant rule the global :focus-visible outline lands
- * on the inner control, inside the box, stacked on the wrapper indicator, and
- * still primary-coloured while an invalid auth-field has gone destructive.
- * Unlayered on purpose: Tailwind's `outline-none` sits in @layer utilities
- * and loses to the unlayered :focus-visible rule.
- */
 .field-host:focus-within,
 .auth-field:focus-within,
 .ops-search:focus-within,

@@ -13,10 +13,8 @@ a.ops-button-primary:hover { background: var(--primary-hover); }
 .ops-filters { display: flex; flex-direction: column; gap: 14px; }
 .ops-filter-fields { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px) minmax(180px, 220px); gap: 14px; }
 .ops-filter-fields label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; }
-.ops-search { display: flex; align-items: center; gap: 10px; height: 2.5rem; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); }
-.ops-search:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
+.ops-search { display: flex; align-items: center; gap: 10px; height: var(--control-height); padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); }
 .ops-search input { width: 100%; min-width: 0; height: 100%; font-size: 14px; color: var(--text-body); caret-color: var(--primary); }
-.ops-search input:focus-visible { outline: none; }
 .ops-search input::placeholder { color: var(--text-muted); }
 .ops-type-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .ops-types { display: flex; flex-wrap: wrap; gap: 8px; }

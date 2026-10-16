@@ -53,6 +53,18 @@
 
   --content-width-standard: 56rem;
 
+  --control-height: 2.5rem;
+  --control-font-size: 0.875rem;
+  --control-line-height: 1.25;
+  --control-border-width: 1px;
+  --control-padding-y: calc(
+    (var(--control-height) - var(--control-font-size) * var(--control-line-height) - 2 * var(--control-border-width)) / 2
+  );
+
+  --focus-outline-width: 2px;
+  --focus-outline-offset: 2px;
+  --focus-outline-color: var(--primary);
+
 }
 
 
@@ -85,6 +97,7 @@
 
   --radius-base: var(--radius);
   --max-width-content-standard: var(--content-width-standard);
+  --height-control: var(--control-height);
 
   --shadow-lifted: var(--shadow-lifted);
   --shadow-modal:  var(--shadow-modal);
@@ -176,23 +189,25 @@
   color: var(--destructive);
 }
 
-.p-inputtext,
 .p-select,
 .p-multiselect,
 .p-inputnumber,
-.p-datepicker {
-  font-size: 0.875rem;
-}
-
-.p-select,
-.p-multiselect,
-.p-inputnumber-input,
+.p-datepicker,
 .p-inputtext:not(textarea) {
-  min-height: 2.5rem;
+  height: var(--control-height);
+  font-size: var(--control-font-size);
+  line-height: var(--control-line-height);
 }
 
-.p-datepicker {
-  min-height: 2.5rem;
+.p-select-label,
+.p-multiselect-label {
+  font-size: var(--control-font-size);
+  line-height: var(--control-line-height);
+  padding-block: var(--control-padding-y);
+}
+
+.p-inputtext:not(textarea) {
+  padding-block: var(--control-padding-y);
 }
 
 .p-datepicker .p-datepicker-dropdown {
@@ -374,27 +389,51 @@
 
 
 :focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: var(--radius);
+  outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+  box-shadow: none;
 }
 
 
 /*
  * Global rather than component-scoped on purpose: the fields are projected
  * from the page into <app-auth-shell>, so they carry the page's encapsulation
- * attribute and the shell's own stylesheet cannot reach them.
+ * attribute and the shell's own stylesheet cannot reach them. The same
+ * unlayered rules cover field-host, auth-field, ops-search, and the PrimeNG
+ * field hosts (p-select, p-multiselect, p-datepicker, p-inputnumber).
  *
- * These fields wrap a bare <input> in a bordered box with an icon, so focus is
- * drawn on the wrapper. Without this the global :focus-visible outline lands
- * on the input instead — inside the box, hugging the text, stacked on top of
- * the wrapper's own indicator, and still primary-coloured while the wrapper
- * has gone destructive. Unlayered on purpose: Tailwind's `outline-none` sits
- * in @layer utilities and loses to the unlayered :focus-visible rule.
+ * These hosts wrap a bare input in a bordered box, so focus is drawn on the
+ * wrapper. Without the descendant rule the global :focus-visible outline lands
+ * on the inner control, inside the box, stacked on the wrapper indicator, and
+ * still primary-coloured while an invalid auth-field has gone destructive.
+ * Unlayered on purpose: Tailwind's `outline-none` sits in @layer utilities
+ * and loses to the unlayered :focus-visible rule.
  */
-.auth-field input:focus,
-.auth-field input:focus-visible {
+.field-host:focus-within,
+.auth-field:focus-within,
+.ops-search:focus-within,
+.p-select:focus-within,
+.p-multiselect:focus-within,
+.p-datepicker:focus-within,
+.p-inputnumber:focus-within {
+  outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+  box-shadow: none;
+}
+
+.field-host :focus-visible,
+.auth-field :focus-visible,
+.ops-search :focus-visible,
+.p-select :focus-visible,
+.p-multiselect :focus-visible,
+.p-datepicker :focus-visible,
+.p-inputnumber :focus-visible {
   outline: none;
+  box-shadow: none;
+}
+
+.auth-field[data-invalid]:focus-within {
+  outline-color: var(--destructive);
 }
 
 /*

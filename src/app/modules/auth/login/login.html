@@ -18,7 +18,7 @@
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="email">Email</label>
       <div
-        class="auth-field group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong focus-within:border-primary focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary data-[invalid]:border-destructive data-[invalid]:hover:border-destructive data-[invalid]:focus-within:border-destructive data-[invalid]:focus-within:outline-destructive motion-reduce:transition-none"
+        class="auth-field group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong data-[invalid]:border-destructive data-[invalid]:hover:border-destructive data-[invalid]:focus-within:border-destructive motion-reduce:transition-none"
         [attr.data-invalid]="emailError() ? '' : null"
       >
         <svg
@@ -57,7 +57,7 @@
         >Forgot password?</a>
       </div>
       <div
-        class="auth-field group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong focus-within:border-primary focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary data-[invalid]:border-destructive data-[invalid]:hover:border-destructive data-[invalid]:focus-within:border-destructive data-[invalid]:focus-within:outline-destructive motion-reduce:transition-none"
+        class="auth-field group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong data-[invalid]:border-destructive data-[invalid]:hover:border-destructive data-[invalid]:focus-within:border-destructive motion-reduce:transition-none"
         [attr.data-invalid]="passwordError() ? '' : null"
       >
         <svg

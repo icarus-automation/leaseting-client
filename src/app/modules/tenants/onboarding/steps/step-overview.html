@@ -42,8 +42,12 @@
     />
     @if (form.controls.unitId.invalid && form.controls.unitId.touched) {
       <p class="text-[12px] text-destructive">Pick the unit this tenant is moving into.</p>
-    } @else if (askingRent(); as rent) {
-      <p class="text-[12px] text-muted">Asking rent {{ rent | phpCurrency }}/mo. You set the actual charges next.</p>
+    } @else if (chosenUnit(); as unit) {
+      @if (unit.pricingBasis === 'PER_SQM' && unit.computedMonthlyRent !== null) {
+        <p class="text-[12px] text-muted">Monthly rent {{ unit.computedMonthlyRent | phpCurrency }}/mo. You set the actual charges next.</p>
+      } @else if (unit.pricingBasis !== 'PER_SQM' && unit.monthlyRent) {
+        <p class="text-[12px] text-muted">Asking rent {{ unit.monthlyRent | phpCurrency }}/mo. You set the actual charges next.</p>
+      }
     }
   </div>
 

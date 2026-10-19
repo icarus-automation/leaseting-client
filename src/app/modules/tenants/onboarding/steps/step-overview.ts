@@ -19,9 +19,10 @@ import { Select } from 'primeng/select';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { OnboardingDetail, OverviewStepData } from '../../../../core/models/onboarding.types';
-import type { UnitPickerItem } from '../../../../core/models/property.types';
+import type { UnitPickerItem, UnitQuote } from '../../../../core/models/property.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { leaseTermLabel } from '../../../../shared/utils/date.util';
+import { vacantPlaceholder } from '../../../../shared/utils/per-sqm-quote';
 import { UnitsService } from '../../../properties/services/units.service';
 
 interface PropertyOption {
@@ -33,7 +34,6 @@ interface PropertyOption {
 interface UnitOption {
   label: string;
   value: string;
-  rent: string | null;
 }
 
 @Component({
@@ -52,6 +52,7 @@ export class StepOverview {
   readonly next = output<OverviewStepData>();
 
   private readonly vacantUnits = signal<UnitPickerItem[]>([]);
+  private quotedUnitId: string | null = null;
   readonly loadingUnits = signal(true);
   readonly errorMessage = signal<string | null>(null);
 
@@ -82,13 +83,13 @@ export class StepOverview {
       .map((unit) => ({
         label: `Unit ${unit.unitNo}`,
         value: unit.id,
-        rent: unit.monthlyRent,
       }));
   });
 
-  readonly askingRent = computed(() => {
+  readonly chosenUnit = computed(() => {
     const unitId = this.formValue().unitId;
-    return this.unitOptions().find((option) => option.value === unitId)?.rent ?? null;
+    if (!unitId) return null;
+    return this.vacantUnits().find((unit) => unit.id === unitId) ?? null;
   });
 
   readonly termLabel = computed(() => {
@@ -151,13 +152,14 @@ export class StepOverview {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (items) => {
-          this.loadingUnits.set(false);
           this.vacantUnits.set(items);
+          this.loadingUnits.set(false);
           this.ensureChosenUnitVisible();
         },
         error: (error: unknown) => {
           this.loadingUnits.set(false);
           this.errorMessage.set(apiErrorMessage(error, 'Could not load vacant units.'));
+          this.ensureChosenUnitVisible();
         },
       });
   }
@@ -174,24 +176,43 @@ export class StepOverview {
   }
 
   private ensureChosenUnitVisible(): void {
+    if (this.loadingUnits()) return;
     const unitId = this.form.controls.unitId.value;
-    const unit = this.detail().unit;
-    if (!unitId || !unit || unit.id !== unitId) return;
-    if (this.vacantUnits().some((candidate) => candidate.id === unitId)) {
-      this.form.controls.propertyId.setValue(unit.property.id, { emitEvent: false });
-      return;
+    const chosen = this.detail().unit;
+    if (!unitId || !chosen || chosen.id !== unitId) return;
+
+    if (!this.vacantUnits().some((candidate) => candidate.id === unitId)) {
+      this.vacantUnits.update((units) => [
+        vacantPlaceholder({
+          id: chosen.id,
+          unitNo: chosen.unitNo,
+          property: chosen.property,
+        }),
+        ...units,
+      ]);
+      if (this.quotedUnitId !== unitId) {
+        this.quotedUnitId = unitId;
+        this.units
+          .get(unitId)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (detail) => {
+              const quote: UnitQuote = {
+                pricingBasis: detail.pricingBasis,
+                monthlyRent: detail.monthlyRent,
+                computedMonthlyRent: detail.computedMonthlyRent,
+              };
+              this.vacantUnits.update((units) => {
+                if (!units.some((candidate) => candidate.id === unitId)) return units;
+                return units.map((candidate) =>
+                  candidate.id === unitId ? { ...candidate, ...quote } : candidate,
+                );
+              });
+            },
+          });
+      }
     }
-    this.vacantUnits.update((units) => [
-      {
-        id: unit.id,
-        unitNo: unit.unitNo,
-        monthlyRent: null,
-        status: 'VACANT',
-        floor: { id: '', level: 0 },
-        property: unit.property,
-      },
-      ...units,
-    ]);
-    this.form.controls.propertyId.setValue(unit.property.id, { emitEvent: false });
+
+    this.form.controls.propertyId.setValue(chosen.property.id, { emitEvent: false });
   }
 }

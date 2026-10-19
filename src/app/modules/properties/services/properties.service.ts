@@ -53,9 +53,23 @@ function toFormData(
 ): FormData {
   const form = new FormData();
   for (const [key, value] of Object.entries(payload)) {
-    if (value !== undefined && value !== null) form.append(key, String(value));
+    appendPropertyField(form, key, value);
   }
   if (image) form.append('image', image);
   else if (removeImage) form.append('removeImage', 'true');
   return form;
+}
+
+/**
+ * Multipart has no JSON null. An empty `defaultRatePerSqm` field is how staff clear the rate.
+ * Every other null stays off the body, and an omitted key leaves the stored value alone.
+ */
+export function appendPropertyField(form: FormData, key: string, value: unknown): void {
+  if (value === undefined) return;
+  if (key === 'defaultRatePerSqm' && value === null) {
+    form.append(key, '');
+    return;
+  }
+  if (value === null) return;
+  form.append(key, String(value));
 }

@@ -11,14 +11,26 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule, Validators, type AbstractControl, type ValidatorFn } from '@angular/forms';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { InputNumber } from 'primeng/inputnumber';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
+import { PRICING_BASIS_LABELS, type PricingBasis } from '../../../../core/models/enums';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
+import { SegmentedControl, type SegmentedOption } from '../../../../shared/ui/segmented-control/segmented-control';
+import {
+  PER_SQM_AREA_ERROR,
+  PER_SQM_RATE_ERROR,
+  formatPerSqmBreakdown,
+  perSqmArea,
+  perSqmFieldErrors,
+  perSqmRate,
+  previewPerSqm,
+  unitFormPayload,
+} from '../../../../shared/utils/per-sqm-quote';
 import { UnitsService } from '../../services/units.service';
 
 export interface UnitFormTarget {
@@ -26,11 +38,23 @@ export interface UnitFormTarget {
   unitNo: string;
   monthlyRent: string | null;
   notes: string | null;
+  pricingBasis: PricingBasis;
+  floorAreaSqm: number | null;
+  ratePerSqmOverride: number | null;
 }
+
+const BLANK_UNIT = {
+  unitNo: '',
+  notes: '',
+  pricingBasis: 'FIXED' as PricingBasis,
+  monthlyRent: null,
+  floorAreaSqm: null,
+  ratePerSqmOverride: null,
+};
 
 @Component({
   selector: 'app-unit-form-dialog',
-  imports: [ReactiveFormsModule, InputNumber, ErrorBanner, FormDialog],
+  imports: [ReactiveFormsModule, InputNumber, SegmentedControl, ErrorBanner, FormDialog],
   templateUrl: './unit-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -42,12 +66,35 @@ export class UnitFormDialog {
   readonly visible = model.required<boolean>();
   readonly floorId = input.required<string>();
   readonly unit = input<UnitFormTarget | null>(null);
+  readonly propertyDefaultRatePerSqm = input<number | null>(null);
   readonly saved = output<string>();
+
+  readonly pricingBasisOptions: readonly SegmentedOption<PricingBasis>[] = (
+    Object.entries(PRICING_BASIS_LABELS) as [PricingBasis, string][]
+  ).map(([value, label]) => ({ value, label }));
+
+  readonly areaErrors = { [perSqmArea]: PER_SQM_AREA_ERROR };
+  readonly rateErrors = { [perSqmRate]: PER_SQM_RATE_ERROR };
+
+  private readonly areaValidator: ValidatorFn = (control) => {
+    const errors = this.errorsFor(control, { floorAreaSqm: (control.value ?? null) as number | null });
+    return errors?.floorAreaSqm ? { [perSqmArea]: true } : null;
+  };
+
+  private readonly rateValidator: ValidatorFn = (control) => {
+    const errors = this.errorsFor(control, {
+      ratePerSqmOverride: (control.value ?? null) as number | null,
+    });
+    return errors?.ratePerSqmOverride ? { [perSqmRate]: true } : null;
+  };
 
   readonly form = this.fb.nonNullable.group({
     unitNo: ['', [Validators.required, Validators.maxLength(20)]],
-    monthlyRent: [null as number | null, [Validators.min(0)]],
     notes: ['', [Validators.maxLength(2000)]],
+    pricingBasis: ['FIXED' as PricingBasis],
+    monthlyRent: [null as number | null, [Validators.min(0)]],
+    floorAreaSqm: [null as number | null, [Validators.min(0), this.areaValidator]],
+    ratePerSqmOverride: [null as number | null, [Validators.min(0), this.rateValidator]],
   });
   readonly errors = createFormErrors(this.form);
 
@@ -55,11 +102,35 @@ export class UnitFormDialog {
   readonly errorMessage = signal<string | null>(null);
 
   private readonly dialog = viewChild.required(FormDialog);
+  private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
   readonly isEdit = computed(() => this.unit() !== null);
   readonly heading = computed(() => (this.isEdit() ? 'Edit unit' : 'New unit'));
+  readonly perSqmSentence = computed(() => {
+    this.formValue();
+    const { pricingBasis, floorAreaSqm, ratePerSqmOverride } = this.form.getRawValue();
+    if (pricingBasis !== 'PER_SQM') return null;
+    const preview = previewPerSqm({
+      floorAreaSqm,
+      ratePerSqmOverride,
+      propertyDefaultRatePerSqm: this.propertyDefaultRatePerSqm(),
+    });
+    if (!preview) return null;
+    return formatPerSqmBreakdown({
+      rentPricingBasis: 'PER_SQM',
+      rentFloorAreaSqm: preview.areaSqm,
+      rentRatePerSqm: preview.ratePerSqm,
+      monthlyRent: preview.amount,
+    });
+  });
 
   constructor() {
+    effect(() => {
+      this.propertyDefaultRatePerSqm();
+      this.form.controls.floorAreaSqm.updateValueAndValidity();
+      this.form.controls.ratePerSqmOverride.updateValueAndValidity();
+    });
+
     effect(() => {
       if (!this.visible()) return;
       const unit = this.unit();
@@ -70,12 +141,23 @@ export class UnitFormDialog {
         unit
           ? {
               unitNo: unit.unitNo,
-              monthlyRent: unit.monthlyRent !== null ? Number(unit.monthlyRent) : null,
               notes: unit.notes ?? '',
+              pricingBasis: unit.pricingBasis === 'PER_SQM' ? 'PER_SQM' : 'FIXED',
+              monthlyRent: unit.monthlyRent !== null ? Number(unit.monthlyRent) : null,
+              floorAreaSqm: unit.floorAreaSqm,
+              ratePerSqmOverride: unit.ratePerSqmOverride,
             }
-          : { unitNo: '', monthlyRent: null, notes: '' },
+          : BLANK_UNIT,
       );
     });
+  }
+
+  selectPricingBasis(basis: PricingBasis): void {
+    const control = this.form.controls.pricingBasis;
+    control.setValue(basis);
+    control.markAsDirty();
+    this.form.controls.floorAreaSqm.updateValueAndValidity();
+    this.form.controls.ratePerSqmOverride.updateValueAndValidity();
   }
 
   onSubmit(addAnother = false): void {
@@ -86,12 +168,8 @@ export class UnitFormDialog {
       return;
     }
 
-    const { unitNo, monthlyRent, notes } = this.form.getRawValue();
-    const payload = {
-      unitNo: unitNo.trim(),
-      monthlyRent: monthlyRent ?? undefined,
-      notes: notes.trim() || undefined,
-    };
+    const payload = unitFormPayload(this.form.getRawValue(), this.propertyDefaultRatePerSqm());
+    if (!payload) return;
     const target = this.unit();
 
     this.saving.set(true);
@@ -104,7 +182,7 @@ export class UnitFormDialog {
         this.saving.set(false);
         this.saved.emit(unit.id);
         if (addAnother) {
-          this.form.reset({ unitNo: '', monthlyRent: null, notes: '' });
+          this.form.reset(BLANK_UNIT);
           this.errors.reset();
           this.dialog().focusFirstField();
         } else {
@@ -117,6 +195,28 @@ export class UnitFormDialog {
           apiErrorMessage(error, 'Could not save the unit. This unit number may already exist.'),
         );
       },
+    });
+  }
+
+  private errorsFor(
+    control: AbstractControl,
+    patch: { floorAreaSqm?: number | null; ratePerSqmOverride?: number | null },
+  ) {
+    const parent = control.parent;
+    if (!parent) return null;
+    const basis = parent.get('pricingBasis')?.value as PricingBasis | undefined;
+    if (basis !== 'FIXED' && basis !== 'PER_SQM') return null;
+    return perSqmFieldErrors({
+      pricingBasis: basis,
+      floorAreaSqm:
+        patch.floorAreaSqm !== undefined
+          ? patch.floorAreaSqm
+          : ((parent.get('floorAreaSqm')?.value ?? null) as number | null),
+      ratePerSqmOverride:
+        patch.ratePerSqmOverride !== undefined
+          ? patch.ratePerSqmOverride
+          : ((parent.get('ratePerSqmOverride')?.value ?? null) as number | null),
+      propertyDefaultRatePerSqm: this.propertyDefaultRatePerSqm(),
     });
   }
 }

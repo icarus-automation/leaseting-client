@@ -1,7 +1,13 @@
-import type { BillStatus, BillType } from './enums';
+import type { BillStatus, BillType, PricingBasis } from './enums';
 import type { ChargeLine } from './charge-item.types';
 
-export interface LeaseResponse {
+export interface LeaseRentSnapshot {
+  rentPricingBasis: PricingBasis;
+  rentFloorAreaSqm: number | null;
+  rentRatePerSqm: number | null;
+}
+
+export interface LeaseResponse extends LeaseRentSnapshot {
   id: string;
   startDate: string;
   endDate: string;

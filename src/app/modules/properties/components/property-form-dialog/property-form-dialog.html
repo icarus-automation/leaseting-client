@@ -191,6 +191,31 @@
     </div>
 
     <div class="flex flex-col gap-4">
+      <p class="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted">Pricing</p>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="property-default-rate">
+          Default rate per sqm <span class="font-normal text-muted">(optional, ₱)</span>
+        </label>
+        <p-inputnumber
+          inputId="property-default-rate"
+          formControlName="defaultRatePerSqm"
+          mode="currency"
+          currency="PHP"
+          locale="en-PH"
+          [min]="0"
+          [showClear]="true"
+          placeholder="e.g. ₱650.00"
+          styleClass="w-full"
+        />
+        <p class="text-[12px] text-muted">Units priced per sqm use this when they have no rate of their own.</p>
+        @if (errors.fieldError('defaultRatePerSqm'); as message) {
+          <p class="text-[12.5px] text-destructive" id="property-default-rate-error">{{ message }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
       <p class="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted">Photo</p>
 
       <app-image-dropzone

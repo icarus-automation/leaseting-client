@@ -1,4 +1,5 @@
 import type { BillStatus, BillType, PaymentMethod, PaymentSource } from './enums';
+import type { LeaseRentSnapshot } from './lease.types';
 
 export interface UtilityDetail {
   periodFrom: string;
@@ -32,8 +33,9 @@ export interface BillResponse {
 }
 
 export interface BillListItem extends BillResponse {
-  lease: {
+  lease: LeaseRentSnapshot & {
     id: string;
+    monthlyRent: string;
     tenant: { id: string; firstName: string; lastName: string };
     unit: {
       id: string;

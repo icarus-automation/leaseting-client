@@ -163,7 +163,16 @@
     } @else {
       <section class="flex flex-col gap-3 border-t border-border pt-3">
         <dl class="flex flex-col gap-1.5 text-[13px]">
-          @if (u.monthlyRent !== null) {
+          @if (u.pricingBasis === 'PER_SQM') {
+            @if (u.computedMonthlyRent !== null) {
+              <div class="flex justify-between gap-2">
+                <dt class="text-muted">Monthly rent</dt>
+                <dd class="font-medium text-body">{{ u.computedMonthlyRent | phpCurrency }}/mo</dd>
+              </div>
+            } @else {
+              <p class="text-[12.5px] text-muted">Add floor area and a rate to price this unit.</p>
+            }
+          } @else if (u.monthlyRent !== null) {
             <div class="flex justify-between gap-2">
               <dt class="text-muted">Asking rent</dt>
               <dd class="font-medium text-body">{{ u.monthlyRent | phpCurrency }}/mo</dd>

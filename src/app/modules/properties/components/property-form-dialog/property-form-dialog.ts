@@ -37,6 +37,10 @@ interface TypeOption {
 
 const MAX_CHIP_OPTIONS = 8;
 
+function defaultRateOnCreate(rate: number | null): number | undefined {
+  return rate === null ? undefined : rate;
+}
+
 @Component({
   selector: 'app-property-form-dialog',
   imports: [ReactiveFormsModule, PIcon, InputNumber, Select, ErrorBanner, FormDialog, ImageDropzone, MediaThumb],
@@ -187,10 +191,9 @@ export class PropertyFormDialog {
 
     const raw = this.form.getRawValue();
     const target = this.property();
-    // A blank rate on create is "no default", so the key stays off the body.
-    // On edit, null is the clear signal appendPropertyField turns into an empty field.
-    const payload =
-      raw.defaultRatePerSqm === null && !target ? { ...raw, defaultRatePerSqm: undefined } : raw;
+    const payload = target
+      ? raw
+      : { ...raw, defaultRatePerSqm: defaultRateOnCreate(raw.defaultRatePerSqm) };
     const image = this.imageFile();
     const removeImage = !!target?.imageUrl && this.imageTouched() && !image;
 

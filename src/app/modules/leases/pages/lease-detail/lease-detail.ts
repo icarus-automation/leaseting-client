@@ -11,7 +11,7 @@ import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge, type BadgeTone } from '../../../../shared/ui/status-badge/status-badge';
 import { isPastDue, leaseTermLabel, ordinal } from '../../../../shared/utils/date.util';
-import { formatPerSqmBreakdown } from '../../../../shared/utils/per-sqm-quote';
+import { formatStoredPerSqmRent } from '../../../../shared/utils/per-sqm-quote';
 import { leaseStatus } from '../../../../shared/utils/lease-status.util';
 import { LeasesService } from '../../services/leases.service';
 
@@ -49,7 +49,7 @@ export class LeaseDetailPage {
 
   readonly rentBreakdown = computed(() => {
     const lease = this.lease();
-    return lease ? formatPerSqmBreakdown(lease) : null;
+    return lease ? formatStoredPerSqmRent(lease) : null;
   });
 
   constructor() {

@@ -15,7 +15,7 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { PaymentWorkspace } from '../../components/payment-workspace/payment-workspace';
 import { paymentTargetFromRow, type PaymentTarget } from '../../components/payment-workspace/payment-target';
 import { BillsService } from '../../services/bills.service';
-import { formatPerSqmBreakdown } from '../../../../shared/utils/per-sqm-quote';
+import { formatStoredPerSqmRent } from '../../../../shared/utils/per-sqm-quote';
 import { billStatusBadge } from '../../utils/bill-status.util';
 
 @Component({
@@ -54,7 +54,7 @@ export class BillDetailPage {
   readonly rentBreakdown = computed(() => {
     const bill = this.bill();
     if (!bill || bill.type !== 'RENT') return null;
-    return formatPerSqmBreakdown(bill.lease);
+    return formatStoredPerSqmRent(bill.lease);
   });
 
   constructor() {

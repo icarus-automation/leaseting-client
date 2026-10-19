@@ -24,7 +24,7 @@ import { SegmentedControl, type SegmentedOption } from '../../../../shared/ui/se
 import {
   PER_SQM_AREA_ERROR,
   PER_SQM_RATE_ERROR,
-  formatPerSqmBreakdown,
+  formatStoredPerSqmRent,
   perSqmArea,
   perSqmFieldErrors,
   perSqmRate,
@@ -116,7 +116,7 @@ export class UnitFormDialog {
       propertyDefaultRatePerSqm: this.propertyDefaultRatePerSqm(),
     });
     if (!preview) return null;
-    return formatPerSqmBreakdown({
+    return formatStoredPerSqmRent({
       rentPricingBasis: 'PER_SQM',
       rentFloorAreaSqm: preview.areaSqm,
       rentRatePerSqm: preview.ratePerSqm,

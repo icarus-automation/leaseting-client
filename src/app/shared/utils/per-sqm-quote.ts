@@ -84,24 +84,19 @@ function listedArea(area: number | null): number | null {
   return area;
 }
 
-function listedRate(override: number | null, propertyDefault: number | null): number | null {
-  // A typed override is a choice, including 0 and a negative. Do not replace it with the property default.
-  if (override !== null) {
-    return Number.isFinite(override) && override >= 0 ? override : null;
-  }
-  if (
-    propertyDefault !== null &&
-    Number.isFinite(propertyDefault) &&
-    propertyDefault >= 0
-  ) {
-    return propertyDefault;
-  }
-  return null;
+type RateChoice = { inherit: true } | { inherit: false; rate: number };
+
+function chooseRate(override: number | null, propertyDefault: number | null): number | null {
+  const choice: RateChoice =
+    override === null ? { inherit: true } : { inherit: false, rate: override };
+  const picked = choice.inherit ? propertyDefault : choice.rate;
+  if (picked === null || !Number.isFinite(picked) || picked < 0) return null;
+  return picked;
 }
 
 export function previewPerSqm(input: PerSqmInputs): PerSqmPreview | null {
   const areaSqm = listedArea(input.floorAreaSqm);
-  const ratePerSqm = listedRate(input.ratePerSqmOverride, input.propertyDefaultRatePerSqm);
+  const ratePerSqm = chooseRate(input.ratePerSqmOverride, input.propertyDefaultRatePerSqm);
   if (areaSqm === null || ratePerSqm === null) return null;
   return { amount: Math.round(areaSqm * ratePerSqm), areaSqm, ratePerSqm };
 }
@@ -199,12 +194,11 @@ function peso(value: number): string {
   return `₱${PESO_FORMAT.format(value)}`;
 }
 
-export function formatPerSqmBreakdown(input: PerSqmBreakdownInput): string | null {
+export function formatStoredPerSqmRent(input: PerSqmBreakdownInput): string | null {
   if (input.rentPricingBasis !== 'PER_SQM') return null;
   const area = parsePiece(input.rentFloorAreaSqm);
   const rate = parsePiece(input.rentRatePerSqm);
   const total = parsePiece(input.monthlyRent);
   if (area === null || rate === null || total === null) return null;
-  // The lease stores the peso total. Multiplying again would hide a snapshot that no longer matches it.
   return `${AREA_FORMAT.format(area)} sqm × ${peso(rate)} = ${peso(total)}`;
 }

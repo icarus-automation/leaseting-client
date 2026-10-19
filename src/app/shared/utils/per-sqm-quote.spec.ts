@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { appendPropertyField } from '../../modules/properties/services/properties.service';
 import {
-  formatPerSqmBreakdown,
+  appendDefaultRatePerSqm,
+  appendPropertyValue,
+} from '../../modules/properties/services/properties.service';
+import {
+  formatStoredPerSqmRent,
   perSqmFieldErrors,
   previewPerSqm,
   starterRentFill,
@@ -219,10 +222,10 @@ describe('starterRentFill', () => {
   });
 });
 
-describe('formatPerSqmBreakdown', () => {
+describe('formatStoredPerSqmRent', () => {
   it('prints the stored area, rate, and rent', () => {
     expect(
-      formatPerSqmBreakdown({
+      formatStoredPerSqmRent({
         rentPricingBasis: 'PER_SQM',
         rentFloorAreaSqm: 45.5,
         rentRatePerSqm: 650,
@@ -233,7 +236,7 @@ describe('formatPerSqmBreakdown', () => {
 
   it('prints the stored rent when it is not the area times the rate', () => {
     expect(
-      formatPerSqmBreakdown({
+      formatStoredPerSqmRent({
         rentPricingBasis: 'PER_SQM',
         rentFloorAreaSqm: 45.5,
         rentRatePerSqm: 650,
@@ -244,7 +247,7 @@ describe('formatPerSqmBreakdown', () => {
 
   it('returns null for a fixed lease', () => {
     expect(
-      formatPerSqmBreakdown({
+      formatStoredPerSqmRent({
         rentPricingBasis: 'FIXED',
         rentFloorAreaSqm: 45.5,
         rentRatePerSqm: 650,
@@ -254,24 +257,24 @@ describe('formatPerSqmBreakdown', () => {
   });
 });
 
-describe('appendPropertyField', () => {
-  it('writes an empty field for a null rate, digits for a number, and omits undefined', () => {
+describe('appendDefaultRatePerSqm', () => {
+  it('writes an empty field for null, digits for a number, and omits undefined', () => {
     const cleared = new FormData();
-    appendPropertyField(cleared, 'defaultRatePerSqm', null);
+    appendDefaultRatePerSqm(cleared, null);
     expect(cleared.get('defaultRatePerSqm')).toBe('');
 
     const zero = new FormData();
-    appendPropertyField(zero, 'defaultRatePerSqm', 0);
+    appendDefaultRatePerSqm(zero, 0);
     expect(zero.get('defaultRatePerSqm')).toBe('0');
 
     const rate = new FormData();
-    appendPropertyField(rate, 'defaultRatePerSqm', 650);
+    appendDefaultRatePerSqm(rate, 650);
     expect(rate.get('defaultRatePerSqm')).toBe('650');
 
     const omitted = new FormData();
-    appendPropertyField(omitted, 'defaultRatePerSqm', undefined);
-    appendPropertyField(omitted, 'name', null);
-    appendPropertyField(omitted, 'city', 'Quezon City');
+    appendDefaultRatePerSqm(omitted, undefined);
+    appendPropertyValue(omitted, 'name', null);
+    appendPropertyValue(omitted, 'city', 'Quezon City');
     expect(omitted.has('defaultRatePerSqm')).toBe(false);
     expect(omitted.has('name')).toBe(false);
     expect(omitted.get('city')).toBe('Quezon City');

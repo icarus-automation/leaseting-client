@@ -47,6 +47,13 @@ export const PAYMENT_SOURCE_LABELS: Record<PaymentSource, string> = {
 
 export type UnitStatus = 'OCCUPIED' | 'VACANT';
 
+export type PricingBasis = 'FIXED' | 'PER_SQM';
+
+export const PRICING_BASIS_LABELS: Record<PricingBasis, string> = {
+  FIXED: 'Fixed',
+  PER_SQM: 'Per sqm',
+};
+
 export type ParkingBillingBasis = 'PER_MINUTE' | 'PER_HOUR' | 'PER_DAY';
 
 export const PARKING_BILLING_BASIS_LABELS: Record<ParkingBillingBasis, string> = {

@@ -29,21 +29,80 @@
     </div>
 
     <div class="flex flex-col gap-1.5">
-      <label class="text-[13px] font-medium text-heading" for="unit-rent">
-        Asking monthly rent <span class="font-normal text-muted">(optional, ₱)</span>
-      </label>
-      <p-inputnumber
-        inputId="unit-rent"
-        formControlName="monthlyRent"
-        mode="currency"
-        currency="PHP"
-        locale="en-PH"
-        [min]="0"
-        placeholder="e.g. ₱3,900.00"
-        styleClass="w-full"
+      <span class="text-[13px] font-medium text-heading" id="unit-pricing-label">Pricing</span>
+      <app-segmented-control
+        ariaLabel="Pricing"
+        [options]="pricingBasisOptions"
+        [value]="form.controls.pricingBasis.value"
+        (valueChange)="selectPricingBasis($event)"
       />
-      <p class="text-[12px] text-muted">Listing price for vacant units. The lease sets the contracted rent.</p>
     </div>
+
+    @if (form.controls.pricingBasis.value === 'FIXED') {
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="unit-rent">
+          Asking monthly rent <span class="font-normal text-muted">(optional, ₱)</span>
+        </label>
+        <p-inputnumber
+          inputId="unit-rent"
+          formControlName="monthlyRent"
+          mode="currency"
+          currency="PHP"
+          locale="en-PH"
+          [min]="0"
+          placeholder="e.g. ₱3,900.00"
+          styleClass="w-full"
+        />
+        <p class="text-[12px] text-muted">Listing price for vacant units. The lease sets the contracted rent.</p>
+        @if (errors.fieldError('monthlyRent'); as message) {
+          <p class="text-[12.5px] text-destructive" id="unit-rent-error">{{ message }}</p>
+        }
+      </div>
+    } @else {
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="unit-area">Floor area (sqm)</label>
+        <p-inputnumber
+          inputId="unit-area"
+          formControlName="floorAreaSqm"
+          [min]="0"
+          [maxFractionDigits]="4"
+          placeholder="e.g. 45.5"
+          styleClass="w-full"
+          [attr.aria-invalid]="!!errors.fieldError('floorAreaSqm', areaErrors)"
+          [attr.aria-describedby]="errors.fieldError('floorAreaSqm', areaErrors) ? 'unit-area-error' : null"
+        />
+        @if (errors.fieldError('floorAreaSqm', areaErrors); as message) {
+          <p class="text-[12.5px] text-destructive" id="unit-area-error">{{ message }}</p>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="unit-rate">
+          Rate per sqm <span class="font-normal text-muted">(optional, ₱)</span>
+        </label>
+        <p-inputnumber
+          inputId="unit-rate"
+          formControlName="ratePerSqmOverride"
+          mode="currency"
+          currency="PHP"
+          locale="en-PH"
+          [min]="0"
+          [showClear]="true"
+          placeholder="e.g. ₱650.00"
+          styleClass="w-full"
+          [attr.aria-invalid]="!!errors.fieldError('ratePerSqmOverride', rateErrors)"
+          [attr.aria-describedby]="errors.fieldError('ratePerSqmOverride', rateErrors) ? 'unit-rate-error' : null"
+        />
+        <p class="text-[12px] text-muted">Leave blank to use the property's default rate.</p>
+        @if (errors.fieldError('ratePerSqmOverride', rateErrors); as message) {
+          <p class="text-[12.5px] text-destructive" id="unit-rate-error">{{ message }}</p>
+        }
+      </div>
+
+      @if (perSqmSentence(); as sentence) {
+        <p class="text-[12.5px] text-body tabular-nums" aria-live="polite">{{ sentence }}</p>
+      }
+    }
 
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="unit-notes">

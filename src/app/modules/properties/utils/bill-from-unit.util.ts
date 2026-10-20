@@ -23,6 +23,10 @@ export function billFromUnit(unit: UnitDetail, bill: UnitOutstandingBill): BillL
     balance: bill.amount,
     lease: {
       id: lease.id,
+      monthlyRent: lease.monthlyRent,
+      rentPricingBasis: lease.rentPricingBasis,
+      rentFloorAreaSqm: lease.rentFloorAreaSqm,
+      rentRatePerSqm: lease.rentRatePerSqm,
       tenant: {
         id: lease.tenant.id,
         firstName: lease.tenant.firstName,

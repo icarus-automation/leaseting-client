@@ -52,10 +52,26 @@ function toFormData(
   removeImage = false,
 ): FormData {
   const form = new FormData();
-  for (const [key, value] of Object.entries(payload)) {
-    if (value !== undefined && value !== null) form.append(key, String(value));
+  const { defaultRatePerSqm, ...rest } = payload;
+  for (const [key, value] of Object.entries(rest)) {
+    appendPropertyValue(form, key, value);
   }
+  appendDefaultRatePerSqm(form, defaultRatePerSqm);
   if (image) form.append('image', image);
   else if (removeImage) form.append('removeImage', 'true');
   return form;
+}
+
+export function appendPropertyValue(
+  form: FormData,
+  key: string,
+  value: string | number | null | undefined,
+): void {
+  if (typeof value !== 'string' && typeof value !== 'number') return;
+  form.append(key, String(value));
+}
+
+export function appendDefaultRatePerSqm(form: FormData, rate: number | null | undefined): void {
+  if (rate === undefined) return;
+  form.append('defaultRatePerSqm', rate === null ? '' : String(rate));
 }

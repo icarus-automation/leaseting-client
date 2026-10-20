@@ -15,6 +15,7 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { PaymentWorkspace } from '../../components/payment-workspace/payment-workspace';
 import { paymentTargetFromRow, type PaymentTarget } from '../../components/payment-workspace/payment-target';
 import { BillsService } from '../../services/bills.service';
+import { formatStoredPerSqmRent } from '../../../../shared/utils/per-sqm-quote';
 import { billStatusBadge } from '../../utils/bill-status.util';
 
 @Component({
@@ -48,6 +49,12 @@ export class BillDetailPage {
   readonly target = computed<PaymentTarget | null>(() => {
     const bill = this.bill();
     return bill ? paymentTargetFromRow(bill) : null;
+  });
+
+  readonly rentBreakdown = computed(() => {
+    const bill = this.bill();
+    if (!bill || bill.type !== 'RENT') return null;
+    return formatStoredPerSqmRent(bill.lease);
   });
 
   constructor() {

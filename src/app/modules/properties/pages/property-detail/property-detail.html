@@ -265,6 +265,7 @@
     (visibleChange)="unitDrawerVisible.set($event)"
     [floorId]="floorId"
     [unit]="unitEditTarget()"
+    [propertyDefaultRatePerSqm]="property()?.defaultRatePerSqm ?? null"
     (saved)="onUnitSaved($event)"
   />
 }

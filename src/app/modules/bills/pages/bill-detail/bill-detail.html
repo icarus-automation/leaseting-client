@@ -112,6 +112,9 @@
             <dd class="m-0 mt-0.5 font-heading text-xl font-semibold text-heading tabular-nums">
               {{ bill.amount | phpCurrency }}
             </dd>
+            @if (rentBreakdown(); as breakdown) {
+              <p class="mt-1 text-[12.5px] text-muted">{{ breakdown }}</p>
+            }
           </div>
           <div>
             <dt class="text-[12px] text-muted">Paid</dt>

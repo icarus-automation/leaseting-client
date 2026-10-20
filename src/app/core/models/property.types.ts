@@ -1,6 +1,6 @@
 import type { ChargeLine } from './charge-item.types';
-import type { UnitStatus } from './enums';
-import type { BillType } from './enums';
+import type { BillType, PricingBasis, UnitStatus } from './enums';
+import type { LeaseRentSnapshot } from './lease.types';
 
 export interface UnitSummary {
   total: number;
@@ -21,6 +21,7 @@ export interface PropertyResponse {
   addressLine: string;
   city: string;
   imageUrl: string | null;
+  defaultRatePerSqm: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,6 +47,7 @@ export interface CreatePropertyPayload {
   propertyTypeId: string;
   addressLine: string;
   city: string;
+  defaultRatePerSqm?: number | null;
 }
 
 export interface FloorResponse {
@@ -84,10 +86,21 @@ export interface CreateFloorPayload {
   name?: string;
 }
 
-export interface UnitResponse {
+export interface UnitQuote {
+  pricingBasis: PricingBasis;
+  monthlyRent: string | null;
+  computedMonthlyRent: number | null;
+}
+
+export interface UnitPricingRead extends UnitQuote {
+  floorAreaSqm: number | null;
+  ratePerSqmOverride: number | null;
+  effectiveRatePerSqm: number | null;
+}
+
+export interface UnitResponse extends UnitPricingRead {
   id: string;
   unitNo: string;
-  monthlyRent: string | null;
   mapCoordinates: MapCoordinates | null;
   notes: string | null;
   floorId: string;
@@ -103,7 +116,7 @@ export interface UnitOutstandingBill {
   dueDate: string;
 }
 
-export interface UnitActiveLease {
+export interface UnitActiveLease extends LeaseRentSnapshot {
   id: string;
   startDate: string;
   endDate: string;
@@ -126,22 +139,40 @@ export interface UnitDetail extends UnitResponse {
   activeLease: UnitActiveLease | null;
 }
 
-export interface CreateUnitPayload {
+export type UnitFieldsWrite = {
   unitNo: string;
-  monthlyRent?: number;
-  mapCoordinates?: MapCoordinates;
   notes?: string;
+} & (
+  | {
+      pricingBasis: 'FIXED';
+      monthlyRent?: number;
+    }
+  | {
+      pricingBasis: 'PER_SQM';
+      floorAreaSqm: number;
+      ratePerSqmOverride: number | null;
+    }
+);
+
+export interface UnitMapWrite {
+  mapCoordinates: MapCoordinates | null;
 }
 
-export type UpdateUnitPayload = Partial<Omit<CreateUnitPayload, 'mapCoordinates'>> & {
-  mapCoordinates?: MapCoordinates | null;
-};
+export type CreateUnitPayload = UnitFieldsWrite;
+export type UpdateUnitPayload = UnitFieldsWrite | UnitMapWrite;
 
-export interface UnitPickerItem {
+interface UnitPickerBase {
   id: string;
   unitNo: string;
-  monthlyRent: string | null;
   status: UnitStatus;
   floor: { id: string; level: number };
   property: { id: string; name: string };
 }
+
+export type UnitPickerItem =
+  | (UnitPickerBase & UnitQuote)
+  | (UnitPickerBase & {
+      pricingBasis: null;
+      monthlyRent: null;
+      computedMonthlyRent: null;
+    });

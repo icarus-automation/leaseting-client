@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   effect,
   inject,
@@ -10,14 +11,16 @@ import {
   untracked,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 
 import type { ChargeLine } from '../../../../core/models/charge-item.types';
-import type { LeaseTermsStepData, OnboardingDetail } from '../../../../core/models/onboarding.types';
+import type { LeaseTermsStepData, OnboardingDetail, OverviewStepData } from '../../../../core/models/onboarding.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { ordinal } from '../../../../shared/utils/date.util';
+import { starterRentFill } from '../../../../shared/utils/per-sqm-quote';
+import { UnitsService } from '../../../properties/services/units.service';
 import { ChargeLines } from '../components/charge-lines/charge-lines';
 import {
   chargeLinesTotal,
@@ -36,6 +39,9 @@ const STARTER_CHARGE: Partial<ChargeLine> = { name: 'Monthly Rent', billType: 'R
 })
 export class StepLeaseTerms {
   private readonly fb = inject(FormBuilder);
+  private readonly units = inject(UnitsService);
+  private readonly destroyRef = inject(DestroyRef);
+  private starterRentUnitId: string | null = null;
 
   readonly detail = input.required<OnboardingDetail>();
   readonly busy = input(false);
@@ -90,7 +96,27 @@ export class StepLeaseTerms {
     if (saved?.charges?.length) {
       this.charges.clear();
       for (const group of createChargeLineArray(saved.charges).controls) this.charges.push(group);
+      if (saved.dueDay) this.form.controls.dueDay.setValue(saved.dueDay);
+      return;
     }
     if (saved?.dueDay) this.form.controls.dueDay.setValue(saved.dueDay);
+    this.fillStarterRent(detail);
+  }
+
+  private fillStarterRent(detail: OnboardingDetail): void {
+    const overview = detail.stepsState.overview?.data as Partial<OverviewStepData> | undefined;
+    const unitId = overview?.unitId || detail.unit?.id;
+    if (!unitId || this.starterRentUnitId === unitId) return;
+    this.starterRentUnitId = unitId;
+    this.units
+      .get(unitId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (unit) => {
+          const fill = starterRentFill(unit, this.charges.getRawValue());
+          if (!fill) return;
+          this.charges.at(fill.index)?.controls.amount.setValue(fill.amount);
+        },
+      });
   }
 }

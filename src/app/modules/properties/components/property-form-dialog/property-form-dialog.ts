@@ -15,6 +15,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -36,9 +37,13 @@ interface TypeOption {
 
 const MAX_CHIP_OPTIONS = 8;
 
+function defaultRateOnCreate(rate: number | null): number | undefined {
+  return rate === null ? undefined : rate;
+}
+
 @Component({
   selector: 'app-property-form-dialog',
-  imports: [ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog, ImageDropzone, MediaThumb],
+  imports: [ReactiveFormsModule, PIcon, InputNumber, Select, ErrorBanner, FormDialog, ImageDropzone, MediaThumb],
   templateUrl: './property-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -57,6 +62,7 @@ export class PropertyFormDialog {
     propertyTypeId: ['', [Validators.required]],
     addressLine: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
     city: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    defaultRatePerSqm: [null as number | null, [Validators.min(0)]],
   });
   readonly errors = createFormErrors(this.form);
 
@@ -105,6 +111,7 @@ export class PropertyFormDialog {
           propertyTypeId: property.type.id,
           addressLine: property.addressLine,
           city: property.city,
+          defaultRatePerSqm: property.defaultRatePerSqm,
         });
       } else {
         this.form.reset();
@@ -182,9 +189,12 @@ export class PropertyFormDialog {
       return;
     }
 
-    const payload = this.form.getRawValue();
-    const image = this.imageFile();
+    const raw = this.form.getRawValue();
     const target = this.property();
+    const payload = target
+      ? raw
+      : { ...raw, defaultRatePerSqm: defaultRateOnCreate(raw.defaultRatePerSqm) };
+    const image = this.imageFile();
     const removeImage = !!target?.imageUrl && this.imageTouched() && !image;
 
     this.saving.set(true);

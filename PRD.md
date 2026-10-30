@@ -6,7 +6,7 @@ Property management SaaS — systematized, all-in-one operating system for prope
 
 **Assistant:** Kit — named, illustrated proactive secretary (not a notification bell). Facts are templated + deterministic; AI writes only the commentary layer and can fail without taking the fact with it.
 
-**Doc roles.** This file = scope + build status. `PRODUCT.md` = product record (positioning, principles, evidence) — authoritative on product truth. `DESIGN.md` = visual system of record. Code is authoritative over all three on data shapes.
+**Doc roles.** This file = scope + build status. Code is authoritative on data shapes.
 
 Status key: **[built]** · **[partial]** · **[stub]** — route exists, `ComingSoon` placeholder w/ published scope · **[planned]** — no route.
 

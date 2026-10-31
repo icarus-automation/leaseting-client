@@ -228,7 +228,7 @@
                 (click)="openDocumentPicker()"
               >
                 @if (uploadingDocument()) {
-                  <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary)_40%,transparent)] border-t-[var(--primary)] animate-spinner" aria-hidden="true"></span>
+                  <p-progress-spinner class="h-3 w-3 m-0 text-primary" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
                 } @else {
                   <svg pIcon="upload" [size]="12" aria-hidden="true"></svg>
                 }

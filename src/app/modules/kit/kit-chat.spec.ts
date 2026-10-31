@@ -107,7 +107,7 @@ describe('KitChat streaming', () => {
     expect(status).not.toBeNull();
     expect(kitHeads()).toHaveLength(1);
     expect(status!.querySelectorAll('app-kit-head')).toHaveLength(1);
-    expect(status!.querySelector('.animate-spinner')).not.toBeNull();
+    expect(status!.querySelector('p-progress-spinner')).not.toBeNull();
     expect(status!.textContent).toMatch(/Thinking/);
     expect(status!.textContent).not.toMatch(/Kit is thinking/);
     expect(status!.querySelector('details, [aria-expanded]')).toBeNull();

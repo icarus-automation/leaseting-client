@@ -16,6 +16,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 import { Subscription, take, takeWhile, timer } from 'rxjs';
 import { finalize, switchMap } from 'rxjs/operators';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import type { KitMood } from '../../core/kit/kit.model';
 import { apiErrorMessage } from '../../core/models/api.types';
@@ -40,7 +41,7 @@ const MAX_POLLS = 110;
 
 @Component({
   selector: 'app-kit-chat',
-  imports: [DatePipe, RouterLink, PIcon, KitHead, KitDocumentCard, KitMarkdown],
+  imports: [ProgressSpinner, DatePipe, RouterLink, PIcon, KitHead, KitDocumentCard, KitMarkdown],
   templateUrl: './kit-chat.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

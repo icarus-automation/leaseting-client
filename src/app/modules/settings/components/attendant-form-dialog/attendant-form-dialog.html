@@ -103,10 +103,7 @@
       [attr.aria-busy]="saving() ? 'true' : null"
     >
       @if (saving()) {
-        <span
-          class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner"
-          aria-hidden="true"
-        ></span>
+        <p-progress-spinner class="h-3.5 w-3.5 m-0 text-primary-foreground" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
         <span>Adding…</span>
       } @else {
         <span>Add attendant</span>

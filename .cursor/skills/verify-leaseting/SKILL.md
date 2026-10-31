@@ -66,7 +66,7 @@ Lock the tab after navigate; unlock only when the whole drive (including screens
 ### Identity and chrome
 
 - Document title: `Leaseting`.
-- Sign-in shell (unauthenticated): heading `Sign in`, copy `Use your Leaseting workspace account.`, logo alt `Leaseting`, Kit attribution `Kit`.
+- Signed-out pages (`/login`, `/login/forgot-password`, `/accept-invite`): one split layout, a narrow decorative image panel on the left from 768px up (25% of the width, 280–360px) and the form centered on the right. Below 768px the panel and its image are left out. Sign-in heading `Leaseting`, tagline `Property operations, from digital to intelligent systems.`
 - App shell (authenticated): `navigation` named `Main navigation` (`aria-label` on `#app-nav`). Brand link `Leaseting dashboard`. Header search button `Search (Ctrl+K)`. Sign-out button `Sign out`.
 - Main landmark: `main#main-content`. Skip link `Skip to main content`.
 
@@ -74,7 +74,7 @@ Lock the tab after navigate; unlock only when the whole drive (including screens
 
 | Path | User-visible heading / landmark |
 | --- | --- |
-| `/login` | `Sign in` (guest only; signed-in users are sent to `/dashboard`) |
+| `/login` | `Leaseting` (guest only; signed-in users are sent to `/dashboard`) |
 | `/login/forgot-password` | `Reset your password` |
 | `/dashboard` | Kit greeting `Good morning/afternoon/evening, {firstName}` plus `Property management` |
 | `/calendar` | `Calendar` |
@@ -116,7 +116,7 @@ Sign-in `POST {api}/auth/sign-in/email` then org list + set-active, then `/users
 - Client errors: `Email is required.`, `Password is required.`, `Enter a valid email address.`
 - API down: alert `Can't reach the server. Check your connection and try again.`
 - Bad credentials: alert `Incorrect email or password.`
-- Show/hide: `Show password` / `Hide password`.
+- Show/hide: one toggle button named `Show password`; `aria-pressed="true"` while the password is visible.
 - `Forgot password?` → `/login/forgot-password` (honest stub: `Self-service reset isn't available yet.`, link `Back to sign in`).
 
 Successful sign-in navigates to `/dashboard`. Do not call auth endpoints with curl as a substitute for this form.

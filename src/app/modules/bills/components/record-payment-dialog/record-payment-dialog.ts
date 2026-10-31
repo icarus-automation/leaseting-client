@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, output, viewChild } from '@angular/core';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import type { BillListItem } from '../../../../core/models/bill.types';
@@ -9,7 +10,7 @@ import { PaymentWorkspace } from '../payment-workspace/payment-workspace';
 
 @Component({
   selector: 'app-record-payment-dialog',
-  imports: [FormDialog, PaymentWorkspace],
+  imports: [ProgressSpinner, FormDialog, PaymentWorkspace],
   templateUrl: './record-payment-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ProgressSpinner } from 'primeng/progressspinner';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { TenantResponse } from '../../../../core/models/tenant.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
@@ -23,7 +24,7 @@ import { TenantsService } from '../../services/tenants.service';
 
 @Component({
   selector: 'app-tenant-form-dialog',
-  imports: [ReactiveFormsModule, ErrorBanner, FormDialog, ImageDropzone],
+  imports: [ProgressSpinner, ReactiveFormsModule, ErrorBanner, FormDialog, ImageDropzone],
   templateUrl: './tenant-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

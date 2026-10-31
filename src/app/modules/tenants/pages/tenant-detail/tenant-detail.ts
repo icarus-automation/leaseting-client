@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -34,6 +35,7 @@ const ACCEPTED_DOCUMENT_TYPES = 'application/pdf,image/png,image/jpeg,image/webp
 @Component({
   selector: 'app-tenant-detail',
   imports: [
+    ProgressSpinner,
     DatePipe,
     DecimalPipe,
     RouterLink,

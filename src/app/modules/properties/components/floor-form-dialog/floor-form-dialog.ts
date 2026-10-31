@@ -15,6 +15,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { PropertyFloorItem } from '../../../../core/models/property.types';
@@ -31,7 +32,7 @@ const MAX_PLAN_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-floor-form-dialog',
-  imports: [ReactiveFormsModule, PIcon, ErrorBanner, FormDialog, ImageCropper, ImageDropzone, MediaThumb],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, ErrorBanner, FormDialog, ImageCropper, ImageDropzone, MediaThumb],
   templateUrl: './floor-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

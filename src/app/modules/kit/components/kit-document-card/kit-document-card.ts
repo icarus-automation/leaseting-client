@@ -16,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { KitChatMessage, KitDocument } from '../../kit-chat.types';
@@ -27,7 +28,7 @@ type CardState = 'pending' | 'ready' | 'expired' | 'failed';
 
 @Component({
   selector: 'app-kit-document-card',
-  imports: [DatePipe, PIcon],
+  imports: [ProgressSpinner, DatePipe, PIcon],
   templateUrl: './kit-document-card.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

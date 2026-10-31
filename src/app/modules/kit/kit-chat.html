@@ -180,10 +180,7 @@
             aria-label="Kit is thinking"
           >
             <app-kit-head variant="avatar" [mood]="kitThinkingMood" class="shrink-0" />
-            <span
-              class="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-[color-mix(in_oklab,var(--primary)_40%,transparent)] border-t-[var(--primary)] animate-spinner motion-reduce:[animation-duration:1300ms]"
-              aria-hidden="true"
-            ></span>
+            <p-progress-spinner class="h-3.5 w-3.5 shrink-0 m-0 text-primary" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
             <p class="text-[13px] text-muted">Thinking</p>
           </div>
         }

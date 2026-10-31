@@ -11,6 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -23,7 +24,7 @@ import { PropertyTypesService } from '../../services/property-types.service';
 
 @Component({
   selector: 'app-property-type-settings',
-  imports: [PIcon, Skeleton, StatusBadge],
+  imports: [ProgressSpinner, PIcon, Skeleton, StatusBadge],
   templateUrl: './property-type-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

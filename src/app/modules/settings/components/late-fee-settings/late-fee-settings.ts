@@ -7,6 +7,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { forkJoin } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -24,7 +25,7 @@ import { LateFeeRuleService } from '../../services/late-fee-rule.service';
 
 @Component({
   selector: 'app-late-fee-settings',
-  imports: [ReactiveFormsModule, RouterLink, PIcon, InputNumber, Select, SegmentedControl, Skeleton],
+  imports: [ProgressSpinner, ReactiveFormsModule, RouterLink, PIcon, InputNumber, Select, SegmentedControl, Skeleton],
   templateUrl: './late-fee-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

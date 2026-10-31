@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 /** Google's own sign-in look: white, the color "G", and the label beside it. */
 @Component({
   selector: 'app-google-button',
-  imports: [NgOptimizedImage],
+  imports: [ProgressSpinner, NgOptimizedImage],
   host: { class: 'block' },
   template: `
     <button
@@ -15,10 +16,7 @@ import { NgOptimizedImage } from '@angular/common';
       (click)="pressed.emit()"
     >
       @if (loading()) {
-        <span
-          class="h-[15px] w-[15px] rounded-full border-2 border-border border-t-primary animate-spinner motion-reduce:[animation-duration:1300ms]"
-          aria-hidden="true"
-        ></span>
+        <p-progress-spinner class="h-[15px] w-[15px] m-0 text-primary" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
         <span>Opening Google…</span>
       } @else {
         <img ngSrc="/brand/google-g.svg" width="18" height="18" alt="" aria-hidden="true" />

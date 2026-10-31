@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ContractStepData, OnboardingDetail } from '../../../../core/models/onboarding.types';
@@ -24,7 +25,7 @@ const DOC_LABEL = 'Onboarding · Signed contract';
 
 @Component({
   selector: 'app-step-contract',
-  imports: [PIcon],
+  imports: [ProgressSpinner, PIcon],
   templateUrl: './step-contract.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

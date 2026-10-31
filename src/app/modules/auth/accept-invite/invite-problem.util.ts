@@ -16,7 +16,7 @@ export interface InviteProblem {
   message: string;
   /** Worth trying again: the link may still be fine. */
   retryable: boolean;
-  /** Point to sign-in: the person may already be on the team. */
+  /** Point to sign-in: this link is done, and the person may already have an account. */
   offerSignIn: boolean;
 }
 
@@ -44,13 +44,8 @@ const BODIES: Record<InviteProblemKind, string> = {
 };
 
 function problem(kind: InviteProblemKind, title: string, message: string): InviteProblem {
-  return {
-    kind,
-    title,
-    message,
-    retryable: kind === 'offline' || kind === 'unknown',
-    offerSignIn: kind === 'accepted' || kind === 'invalid',
-  };
+  const retryable = kind === 'offline' || kind === 'unknown';
+  return { kind, title, message, retryable, offerSignIn: !retryable };
 }
 
 const normalized = (text: string) => text.toLowerCase().replace(/[.\s]+$/, '').trim();

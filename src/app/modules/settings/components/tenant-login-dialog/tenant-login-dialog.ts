@@ -18,6 +18,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 import { Select } from 'primeng/select';
 import { Observable, Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import type { Member } from '../../../../core/models/member.types';
 import type { PortalAccessResponse } from '../../../../core/models/portal-access.types';
@@ -54,7 +55,7 @@ export interface TenantLoginOutcome {
  */
 @Component({
   selector: 'app-tenant-login-dialog',
-  imports: [ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog],
   templateUrl: './tenant-login-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

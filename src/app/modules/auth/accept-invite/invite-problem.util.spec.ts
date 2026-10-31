@@ -15,6 +15,7 @@ describe('inviteProblemOf', () => {
       title: 'This invitation has expired',
       message: 'Ask the person who invited you to send it again.',
       retryable: false,
+      offerSignIn: true,
     });
   });
 
@@ -33,8 +34,8 @@ describe('inviteProblemOf', () => {
 
   it('tells revoked and declined apart on a 410', () => {
     expect(
-      inviteProblemOf(apiError(410, 'This invitation was revoked. Ask the person who invited you for a new one.')).kind,
-    ).toBe('revoked');
+      inviteProblemOf(apiError(410, 'This invitation was revoked. Ask the person who invited you for a new one.')),
+    ).toMatchObject({ kind: 'revoked', offerSignIn: true });
     expect(inviteProblemOf(apiError(410, 'This invitation was declined.'))).toMatchObject({
       kind: 'declined',
       title: 'This invitation was declined',
@@ -52,18 +53,23 @@ describe('inviteProblemOf', () => {
     });
   });
 
-  it('offers a retry when the server cannot be reached or fails', () => {
-    expect(inviteProblemOf(new HttpErrorResponse({ status: 0 }))).toMatchObject({ kind: 'offline', retryable: true });
+  it('offers a retry, not sign-in, when the server cannot be reached or fails', () => {
+    expect(inviteProblemOf(new HttpErrorResponse({ status: 0 }))).toMatchObject({
+      kind: 'offline',
+      retryable: true,
+      offerSignIn: false,
+    });
     expect(inviteProblemOf(new HttpErrorResponse({ status: 500, error: null }))).toMatchObject({
       kind: 'unknown',
       title: 'Something went wrong',
       message: 'Try again in a moment.',
       retryable: true,
+      offerSignIn: false,
     });
   });
 
-  it('treats a missing token as its own state', () => {
-    expect(missingTokenProblem().kind).toBe('missing');
+  it('treats a missing token as its own state, with sign-in offered', () => {
+    expect(missingTokenProblem()).toMatchObject({ kind: 'missing', retryable: false, offerSignIn: true });
   });
 });
 

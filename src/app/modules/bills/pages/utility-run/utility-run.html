@@ -27,7 +27,7 @@
         (click)="openScanPicker()"
       >
         @if (scanning()) {
-          <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary)_40%,transparent)] border-t-[var(--primary)] animate-spinner" aria-hidden="true"></span>
+          <p-progress-spinner class="h-3.5 w-3.5 m-0 text-primary" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
         } @else {
           <svg pIcon="camera" [size]="14" aria-hidden="true"></svg>
         }
@@ -338,7 +338,7 @@
           [disabled]="saving() || filledCount() === 0"
         >
           @if (saving()) {
-            <span class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+            <p-progress-spinner class="h-3.5 w-3.5 m-0 text-primary-foreground" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
           }
           <span>Create {{ filledCount() }} bill{{ filledCount() === 1 ? '' : 's' }}</span>
         </button>

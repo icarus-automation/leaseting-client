@@ -15,16 +15,17 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { WrongAppError } from '../../../core/auth/audience.util';
 import { googleSignInMessage } from '../../../core/auth/google-sign-in.util';
 import { GoogleButton } from '../../../shared/ui/google-button/google-button';
-import { AuthShell } from '../auth-shell/auth-shell';
+import { AuthLayout } from '../auth-layout/auth-layout';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, PIcon, AuthShell, GoogleButton],
+  imports: [ProgressSpinner, ReactiveFormsModule, RouterLink, PIcon, AuthLayout, GoogleButton],
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -41,7 +42,6 @@ export class Login {
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
-    rememberMe: [false],
   });
 
   readonly loading = signal(false);

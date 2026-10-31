@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
 import type { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -28,7 +29,7 @@ import {
 
 @Component({
   selector: 'app-roles-directory',
-  imports: [RouterLink, PIcon, Menu, EmptyState, ErrorBanner, SegmentedControl, Skeleton, StatusBadge],
+  imports: [ProgressSpinner, RouterLink, PIcon, Menu, EmptyState, ErrorBanner, SegmentedControl, Skeleton, StatusBadge],
   templateUrl: './roles-directory.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

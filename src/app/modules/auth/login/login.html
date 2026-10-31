@@ -1,7 +1,9 @@
-<app-auth-shell>
-  <header class="mb-6">
-    <h1 class="font-heading text-2xl font-semibold leading-[1.2] tracking-[-0.01em] text-heading">Sign in</h1>
-    <p class="mt-1.5 text-[13.5px] leading-[1.55] text-muted">Use your Leaseting workspace account.</p>
+<app-auth-layout image="/assets/auth/login-panel.webp">
+  <header class="mb-8">
+    <h1 class="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] text-heading">Leaseting</h1>
+    <p class="mt-2 text-balance text-sm leading-[1.55] text-muted">
+      Property operations, from digital to intelligent systems.
+    </p>
   </header>
 
   @if (errorMessage(); as message) {
@@ -18,39 +20,28 @@
 
   <div class="my-5 flex items-center gap-3" aria-hidden="true">
     <span class="h-px flex-1 bg-border"></span>
-    <span class="text-[12px] text-muted">or use your email</span>
+    <span class="text-xs text-muted">or</span>
     <span class="h-px flex-1 bg-border"></span>
   </div>
 
-  <form class="flex flex-col gap-[18px]" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+  <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="email">Email</label>
-      <div
-        class="auth-field group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong data-[invalid]:border-destructive data-[invalid]:hover:border-destructive data-[invalid]:focus-within:border-destructive motion-reduce:transition-none"
-        [attr.data-invalid]="emailError() ? '' : null"
-      >
-        <svg
-          pIcon="envelope"
-          class="shrink-0 text-muted transition-colors duration-150 ease-out group-focus-within:text-primary group-data-[invalid]:text-destructive motion-reduce:transition-none"
-          [size]="15"
-          aria-hidden="true"
-        ></svg>
-        <input
-          #emailInput
-          id="email"
-          type="email"
-          class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
-          formControlName="email"
-          autocomplete="email"
-          inputmode="email"
-          autocapitalize="none"
-          spellcheck="false"
-          placeholder="you@company.com"
-          aria-required="true"
-          [attr.aria-invalid]="!!emailError()"
-          [attr.aria-describedby]="emailError() ? 'email-error' : null"
-        />
-      </div>
+      <input
+        #emailInput
+        id="email"
+        type="email"
+        class="auth-input h-11 w-full rounded-base border border-border bg-background px-3 text-base text-body transition-[border-color] duration-150 ease-out placeholder:text-muted hover:border-border-strong aria-[invalid=true]:border-destructive aria-[invalid=true]:[--focus-outline-color:var(--destructive)] motion-reduce:transition-none md:text-sm"
+        formControlName="email"
+        autocomplete="email"
+        inputmode="email"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="you@company.com"
+        aria-required="true"
+        [attr.aria-invalid]="!!emailError()"
+        [attr.aria-describedby]="emailError() ? 'email-error' : null"
+      />
       @if (emailError(); as message) {
         <p class="text-[12.5px] leading-[1.4] text-destructive" id="email-error">{{ message }}</p>
       }
@@ -60,50 +51,36 @@
       <div class="flex items-baseline justify-between gap-3">
         <label class="text-[13px] font-medium text-heading" for="password">Password</label>
         <a
-          class="rounded-[2px] text-[12.5px] font-medium text-primary transition-colors duration-150 ease-out hover:text-primary-hover hover:underline hover:underline-offset-2 motion-reduce:transition-none"
+          class="rounded-[2px] text-[13px] font-medium text-primary transition-colors duration-150 ease-out hover:text-primary-hover hover:underline hover:underline-offset-2 motion-reduce:transition-none"
           routerLink="/login/forgot-password"
         >Forgot password?</a>
       </div>
-      <div
-        class="auth-field group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong data-[invalid]:border-destructive data-[invalid]:hover:border-destructive data-[invalid]:focus-within:border-destructive motion-reduce:transition-none"
-        [attr.data-invalid]="passwordError() ? '' : null"
-      >
-        <svg
-          pIcon="lock"
-          class="shrink-0 text-muted transition-colors duration-150 ease-out group-focus-within:text-primary group-data-[invalid]:text-destructive motion-reduce:transition-none"
-          [size]="15"
-          aria-hidden="true"
-        ></svg>
+      <div class="relative">
         <input
           id="password"
-          class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
+          class="auth-input h-11 w-full rounded-base border border-border bg-background pl-3 pr-12 text-base text-body transition-[border-color] duration-150 ease-out hover:border-border-strong aria-[invalid=true]:border-destructive aria-[invalid=true]:[--focus-outline-color:var(--destructive)] motion-reduce:transition-none md:text-sm"
           [type]="showPassword() ? 'text' : 'password'"
           formControlName="password"
           autocomplete="current-password"
-          placeholder="Enter your password"
           aria-required="true"
           [attr.aria-invalid]="!!passwordError()"
           [attr.aria-describedby]="passwordError() ? 'password-error' : null"
         />
         <button
           type="button"
-          class="-mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-base border-none bg-transparent p-0 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-          (click)="togglePassword()"
+          class="absolute right-1 top-1 flex h-9 w-9 items-center justify-center rounded-base border-none bg-transparent p-0 text-muted transition-colors duration-150 ease-out [--focus-outline-offset:0px] hover:bg-surface hover:text-body motion-reduce:transition-none"
+          aria-label="Show password"
+          aria-controls="password"
           [attr.aria-pressed]="showPassword()"
-          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          (click)="togglePassword()"
         >
-          <svg [pIcon]="showPassword() ? 'eye-slash' : 'eye'" [size]="15" aria-hidden="true"></svg>
+          <svg [pIcon]="showPassword() ? 'eye-slash' : 'eye'" [size]="16" aria-hidden="true"></svg>
         </button>
       </div>
       @if (passwordError(); as message) {
         <p class="text-[12.5px] leading-[1.4] text-destructive" id="password-error">{{ message }}</p>
       }
     </div>
-
-    <label class="-mt-1 inline-flex w-fit cursor-pointer select-none items-center gap-2">
-      <input type="checkbox" class="m-0 h-[15px] w-[15px] cursor-pointer accent-primary" formControlName="rememberMe" />
-      <span class="text-[13px] text-body">Keep me signed in</span>
-    </label>
 
     <button
       type="submit"
@@ -112,18 +89,11 @@
       [attr.aria-busy]="loading() ? 'true' : null"
     >
       @if (loading()) {
-        <span
-          class="h-[15px] w-[15px] rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner motion-reduce:[animation-duration:1300ms]"
-          aria-hidden="true"
-        ></span>
+        <p-progress-spinner class="h-[15px] w-[15px] m-0 text-primary-foreground" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
         <span>Signing in…</span>
       } @else {
         <span>Sign in</span>
       }
     </button>
   </form>
-
-  <p class="mt-6 border-t border-border pt-5 text-[12.5px] leading-[1.55] text-muted">
-    No account yet? Workspaces are invite-only, so ask your administrator to add you.
-  </p>
-</app-auth-shell>
+</app-auth-layout>

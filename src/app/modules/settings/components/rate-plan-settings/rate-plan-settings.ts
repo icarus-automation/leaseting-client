@@ -15,6 +15,7 @@ import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { forkJoin } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -52,6 +53,7 @@ interface PriceCell {
 @Component({
   selector: 'app-rate-plan-settings',
   imports: [
+    ProgressSpinner,
     ReactiveFormsModule,
     RouterLink,
     PIcon,

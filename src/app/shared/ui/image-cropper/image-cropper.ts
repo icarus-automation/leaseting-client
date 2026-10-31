@@ -13,6 +13,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 interface CropRect {
   x: number;
@@ -36,7 +37,7 @@ const NUDGE_PX = 12;
 
 @Component({
   selector: 'app-image-cropper',
-  imports: [PIcon],
+  imports: [ProgressSpinner, PIcon],
   templateUrl: './image-cropper.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

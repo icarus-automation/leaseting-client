@@ -12,6 +12,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -41,6 +42,7 @@ import { UnitsService } from '../../services/units.service';
 @Component({
   selector: 'app-property-detail',
   imports: [
+    ProgressSpinner,
     RouterLink,
     PIcon,
     EmptyState,

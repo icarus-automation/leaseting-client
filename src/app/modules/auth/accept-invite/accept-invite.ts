@@ -15,6 +15,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { catchError, map, of, switchMap } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { googleSignInMessage } from '../../../core/auth/google-sign-in.util';
@@ -22,7 +23,7 @@ import { apiErrorMessage } from '../../../core/models/api.types';
 import type { AcceptedInvitation, InvitationPreview } from '../../../core/models/invitation.types';
 import { createFormErrors } from '../../../shared/forms/form-errors';
 import { GoogleButton } from '../../../shared/ui/google-button/google-button';
-import { AuthShell } from '../auth-shell/auth-shell';
+import { AuthLayout } from '../auth-layout/auth-layout';
 import { InvitationAcceptService } from '../services/invitation-accept.service';
 import {
   type InviteProblem,
@@ -35,7 +36,7 @@ const MIN_PASSWORD_LENGTH = 8;
 
 @Component({
   selector: 'app-accept-invite',
-  imports: [ReactiveFormsModule, RouterLink, DatePipe, PIcon, AuthShell, GoogleButton],
+  imports: [ProgressSpinner, ReactiveFormsModule, RouterLink, DatePipe, PIcon, AuthLayout, GoogleButton],
   templateUrl: './accept-invite.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -83,6 +84,12 @@ export class AcceptInvite {
     minlength: `Use at least ${MIN_PASSWORD_LENGTH} characters.`,
     maxlength: 'Use 128 characters or fewer.',
   }));
+
+  /** Under the password: its error once shown, otherwise the length rule for a new password. */
+  readonly passwordDescribedBy = computed(() => {
+    if (this.errors.fieldError('password', this.passwordMessages())) return 'invite-password-error';
+    return this.preview()?.hasAccount === false ? 'invite-password-hint' : null;
+  });
 
   constructor() {
     if (this.googleError) this.clearGoogleErrorFromUrl();

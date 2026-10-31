@@ -17,6 +17,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { PropertyResponse } from '../../../../core/models/property.types';
@@ -43,7 +44,7 @@ function defaultRateOnCreate(rate: number | null): number | undefined {
 
 @Component({
   selector: 'app-property-form-dialog',
-  imports: [ReactiveFormsModule, PIcon, InputNumber, Select, ErrorBanner, FormDialog, ImageDropzone, MediaThumb],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, Select, ErrorBanner, FormDialog, ImageDropzone, MediaThumb],
   templateUrl: './property-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

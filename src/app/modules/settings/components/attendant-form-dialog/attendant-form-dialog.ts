@@ -12,6 +12,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -35,7 +36,7 @@ import { PropertyAccessPicker } from '../property-access-picker/property-access-
 
 @Component({
   selector: 'app-attendant-form-dialog',
-  imports: [ReactiveFormsModule, PIcon, ErrorBanner, FormDialog, PropertyAccessPicker],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, ErrorBanner, FormDialog, PropertyAccessPicker],
   templateUrl: './attendant-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

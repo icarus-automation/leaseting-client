@@ -18,6 +18,7 @@ import { MessageService } from 'primeng/api';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ReceiptScanResult, UtilityRunPreviewRow } from '../../../../core/models/bill.types';
@@ -60,6 +61,7 @@ function addMonths(date: Date, months: number): Date {
 @Component({
   selector: 'app-utility-run',
   imports: [
+    ProgressSpinner,
     ReactiveFormsModule,
     FormsModule,
     RouterLink,

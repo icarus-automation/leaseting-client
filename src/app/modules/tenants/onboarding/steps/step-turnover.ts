@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { PIcon } from '@primeicons/angular/p-icon';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import type {
   DepositStepData,
@@ -23,7 +24,7 @@ const CHECKLIST: { key: TurnoverKey; label: string; hint: string }[] = [
 
 @Component({
   selector: 'app-step-turnover',
-  imports: [DatePipe, PIcon, PhpCurrencyPipe],
+  imports: [ProgressSpinner, DatePipe, PIcon, PhpCurrencyPipe],
   templateUrl: './step-turnover.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -15,6 +15,7 @@ import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { Select } from 'primeng/select';
 import { forkJoin } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -28,7 +29,7 @@ import { ParkingTerminalsService } from '../../services/parking-terminals.servic
 
 @Component({
   selector: 'app-parking-terminal-settings',
-  imports: [ReactiveFormsModule, RouterLink, PIcon, Select, Skeleton, StatusBadge],
+  imports: [ProgressSpinner, ReactiveFormsModule, RouterLink, PIcon, Select, Skeleton, StatusBadge],
   templateUrl: './parking-terminal-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

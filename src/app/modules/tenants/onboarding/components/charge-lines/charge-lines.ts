@@ -16,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../../core/models/api.types';
@@ -33,7 +34,7 @@ interface ChargeOption {
 
 @Component({
   selector: 'app-charge-lines',
-  imports: [ReactiveFormsModule, PIcon, InputNumber, Select],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, Select],
   templateUrl: './charge-lines.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

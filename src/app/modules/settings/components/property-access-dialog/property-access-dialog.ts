@@ -14,6 +14,7 @@ import {
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, map } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { Member } from '../../../../core/models/member.types';
@@ -34,7 +35,7 @@ import { PropertyAccessPicker } from '../property-access-picker/property-access-
 /** Changes which properties a staff member or parking attendant works with. */
 @Component({
   selector: 'app-property-access-dialog',
-  imports: [ReactiveFormsModule, ErrorBanner, FormDialog, PropertyAccessPicker],
+  imports: [ProgressSpinner, ReactiveFormsModule, ErrorBanner, FormDialog, PropertyAccessPicker],
   templateUrl: './property-access-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

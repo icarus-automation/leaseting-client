@@ -25,6 +25,9 @@
   --vacant:           oklch(0.55 0.13 230);
   --muted-vacant:     oklch(0.94 0.03 230);
 
+  /* The blue field of the sign-in panel art (src/assets/auth), shown while it loads. */
+  --auth-panel:       oklch(0.446 0.119 248);
+
   --surface-hover: oklch(0.965 0.006 262);
   --border-strong: oklch(0.72 0.010 262);
 
@@ -91,6 +94,7 @@
   --color-border-strong:      var(--border-strong);
   --color-ring:               var(--ring);
   --color-ring-destructive:   var(--ring-destructive);
+  --color-auth-panel:         var(--auth-panel);
 
   --font-heading: 'DM Sans', sans-serif;
   --font-body:    'DM Sans', sans-serif;
@@ -102,9 +106,7 @@
   --shadow-lifted: var(--shadow-lifted);
   --shadow-modal:  var(--shadow-modal);
 
-  --animate-form-in:   form-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-error-in:  error-in 180ms ease-out both;
-  --animate-spinner:   spinner 650ms linear infinite;
   --animate-row-flash: row-flash 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pop-in:    pop-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
@@ -114,18 +116,9 @@
 }
 
 
-@keyframes form-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 @keyframes error-in {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes spinner {
-  to { transform: rotate(360deg); }
 }
 
 @keyframes row-flash {
@@ -404,7 +397,6 @@ p-confirmdialog > p-dialog:empty {
 
 
 .field-host:focus-within,
-.auth-field:focus-within,
 .ops-search:focus-within,
 .p-select:focus-within,
 .p-multiselect:focus-within,
@@ -416,7 +408,6 @@ p-confirmdialog > p-dialog:empty {
 }
 
 .field-host :focus-visible,
-.auth-field :focus-visible,
 .ops-search :focus-visible,
 .p-select :focus-visible,
 .p-multiselect :focus-visible,
@@ -426,19 +417,15 @@ p-confirmdialog > p-dialog:empty {
   box-shadow: none;
 }
 
-.auth-field[data-invalid]:focus-within {
-  outline-color: var(--destructive);
-}
-
 /*
  * Chromium paints its own pale-yellow ground on an autofilled input and
  * ignores background-color. The inset shadow is the only way to repaint it,
  * and the absurd transition delay stops the yellow flashing through on focus.
  */
-.auth-field input:-webkit-autofill,
-.auth-field input:-webkit-autofill:hover,
-.auth-field input:-webkit-autofill:focus,
-.auth-field input:-webkit-autofill:active {
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
   -webkit-text-fill-color: var(--text-body);
   -webkit-box-shadow: 0 0 0 100px var(--background) inset;
   caret-color: var(--text-body);

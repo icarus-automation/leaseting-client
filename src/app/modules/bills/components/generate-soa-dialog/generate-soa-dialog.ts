@@ -16,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 import { Select } from 'primeng/select';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -38,7 +39,7 @@ interface LeaseOption {
 
 @Component({
   selector: 'app-generate-soa-dialog',
-  imports: [DatePipe, FormsModule, PIcon, Select, PhpCurrencyPipe, ErrorBanner, FormDialog, SoaLines],
+  imports: [ProgressSpinner, DatePipe, FormsModule, PIcon, Select, PhpCurrencyPipe, ErrorBanner, FormDialog, SoaLines],
   templateUrl: './generate-soa-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

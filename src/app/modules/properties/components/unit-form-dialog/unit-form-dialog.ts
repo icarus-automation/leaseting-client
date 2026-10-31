@@ -14,6 +14,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators, type AbstractControl, type ValidatorFn } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { InputNumber } from 'primeng/inputnumber';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { PRICING_BASIS_LABELS, type PricingBasis } from '../../../../core/models/enums';
@@ -54,7 +55,7 @@ const BLANK_UNIT = {
 
 @Component({
   selector: 'app-unit-form-dialog',
-  imports: [ReactiveFormsModule, InputNumber, SegmentedControl, ErrorBanner, FormDialog],
+  imports: [ProgressSpinner, ReactiveFormsModule, InputNumber, SegmentedControl, ErrorBanner, FormDialog],
   templateUrl: './unit-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

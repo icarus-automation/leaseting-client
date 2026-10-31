@@ -18,6 +18,7 @@ import { MessageService } from 'primeng/api';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { API_BASE_URL } from '../../../../core/config/api';
@@ -47,6 +48,7 @@ const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 @Component({
   selector: 'app-payment-workspace',
   imports: [
+    ProgressSpinner,
     DatePipe,
     ReactiveFormsModule,
     PIcon,

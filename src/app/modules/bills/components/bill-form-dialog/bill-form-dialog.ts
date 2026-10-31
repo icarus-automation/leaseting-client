@@ -18,6 +18,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 
@@ -40,7 +41,7 @@ interface LeaseOption {
 
 @Component({
   selector: 'app-bill-form-dialog',
-  imports: [ReactiveFormsModule, RouterLink, DatePicker, InputNumber, Select, PhpCurrencyPipe, ErrorBanner, FormDialog],
+  imports: [ProgressSpinner, ReactiveFormsModule, RouterLink, DatePicker, InputNumber, Select, PhpCurrencyPipe, ErrorBanner, FormDialog],
   templateUrl: './bill-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

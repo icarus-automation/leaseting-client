@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { Member } from '../../../../core/models/member.types';
@@ -23,7 +24,7 @@ import { ATTENDANT_PASSWORD_MAX, ATTENDANT_PASSWORD_MIN } from '../../utils/park
 
 @Component({
   selector: 'app-attendant-password-dialog',
-  imports: [ReactiveFormsModule, ErrorBanner, FormDialog],
+  imports: [ProgressSpinner, ReactiveFormsModule, ErrorBanner, FormDialog],
   templateUrl: './attendant-password-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

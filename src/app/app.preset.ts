@@ -77,4 +77,26 @@ export const AppPreset = definePreset(Aura, {
       },
     },
   },
+  components: {
+    progressspinner: {
+      colorScheme: {
+        light: {
+          root: {
+            colorOne: 'currentColor',
+            colorTwo: 'currentColor',
+            colorThree: 'currentColor',
+            colorFour: 'currentColor',
+          },
+        },
+        dark: {
+          root: {
+            colorOne: 'currentColor',
+            colorTwo: 'currentColor',
+            colorThree: 'currentColor',
+            colorFour: 'currentColor',
+          },
+        },
+      },
+    },
+  },
 });

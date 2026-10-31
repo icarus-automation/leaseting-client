@@ -35,7 +35,7 @@
       (click)="attach()"
     >
       @if (uploading()) {
-        <span class="h-5 w-5 rounded-full border-2 border-border border-t-primary animate-spinner" aria-hidden="true"></span>
+        <p-progress-spinner class="h-5 w-5 m-0 text-primary" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
         <span class="text-[13px] text-muted">Uploading…</span>
       } @else {
         <svg pIcon="upload" class="text-primary" [size]="18" aria-hidden="true"></svg>

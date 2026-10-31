@@ -17,6 +17,7 @@ import { MessageService } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { Select } from 'primeng/select';
 import { Observable, Subject, debounceTime, map, switchMap } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -87,6 +88,7 @@ function withLoginStatus(member: Member, on: boolean): Member {
 @Component({
   selector: 'app-team-members',
   imports: [
+    ProgressSpinner,
     DatePipe,
     FormsModule,
     PIcon,

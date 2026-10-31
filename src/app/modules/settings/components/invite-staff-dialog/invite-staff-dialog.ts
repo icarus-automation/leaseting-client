@@ -13,6 +13,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Select } from 'primeng/select';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -36,7 +37,7 @@ const DEFAULT_ROLE = 'member';
 
 @Component({
   selector: 'app-invite-staff-dialog',
-  imports: [ReactiveFormsModule, Select, ErrorBanner, FormDialog, PropertyAccessPicker],
+  imports: [ProgressSpinner, ReactiveFormsModule, Select, ErrorBanner, FormDialog, PropertyAccessPicker],
   templateUrl: './invite-staff-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

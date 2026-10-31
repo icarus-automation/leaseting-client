@@ -76,6 +76,15 @@ describe('AcceptInvite', () => {
     harness.detectChanges();
   }
 
+  function buttonText(selector: string): string | undefined {
+    return harness.routeNativeElement?.querySelector(selector)?.textContent?.replace(/\s+/g, ' ').trim();
+  }
+
+  function signInLink(): HTMLAnchorElement | null {
+    const links = Array.from(harness.routeNativeElement?.querySelectorAll<HTMLAnchorElement>('a') ?? []);
+    return links.find((link) => link.textContent?.trim() === 'Go to sign in') ?? null;
+  }
+
   it('says the link is incomplete when it has no token, without calling the API', async () => {
     await open('/accept-invite');
 
@@ -83,15 +92,20 @@ describe('AcceptInvite', () => {
     expect(text()).toContain('This link is missing its code');
   });
 
-  it('shows the organization, the role and the invited email', async () => {
+  it('shows the organization, the role, the locked email and when the invitation expires', async () => {
     invitations.preview.mockReturnValue(of(preview()));
     await open(`/accept-invite?token=${TOKEN}`);
 
     expect(invitations.preview).toHaveBeenCalledWith(TOKEN);
-    expect(text()).toContain('Join Brickstone Realty');
-    expect(text()).toContain('As Member');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent?.trim()).toBe('Join Brickstone Realty on Leaseting');
+    expect(text()).toContain('You were invited as Member.');
     expect(input('invite-email').value).toBe('ben@example.com');
+    expect(input('invite-email').readOnly).toBe(true);
     expect(input('invite-name')).toBeTruthy();
+    expect(text()).toContain('Create password');
+    expect(buttonText('button[type="submit"]')).toBe('Set password and join');
+    expect(text()).toMatch(/Invitation expires Nov \d+ at \d+:\d\d [AP]M\./);
+    expect(text()).not.toContain('Sign in to accept');
   });
 
   it('creates the account, signs in to the organization it joined, and opens the dashboard', async () => {
@@ -119,6 +133,8 @@ describe('AcceptInvite', () => {
     await open(`/accept-invite?token=${TOKEN}`);
 
     expect(harness.routeNativeElement?.querySelector('#invite-name')).toBeNull();
+    expect(buttonText('button[type="submit"]')).toBe('Sign in and join');
+    expect(text()).toContain('You already have an account. Sign in to accept.');
     type('invite-password', 'wrong-password');
     submit();
 
@@ -140,6 +156,16 @@ describe('AcceptInvite', () => {
     expect(text()).toContain(advice);
     expect(text().split(title).length).toBe(2);
     expect(harness.routeNativeElement?.querySelector('form')).toBeNull();
+    expect(signInLink()?.getAttribute('href')).toBe('/login');
+  });
+
+  it('offers a retry instead of sign-in when the server cannot be reached', async () => {
+    invitations.preview.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
+    await open(`/accept-invite?token=${TOKEN}`);
+
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent?.trim()).toBe("Can't reach Leaseting");
+    expect(buttonText('button')).toBe('Try again');
+    expect(signInLink()).toBeNull();
   });
 
   it('says which Google account to use when Google signed in the wrong one', async () => {

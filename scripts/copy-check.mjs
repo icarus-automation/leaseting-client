@@ -60,7 +60,6 @@ const COPY_TS = new Set([
   'src/app/modules/work-orders/utils/maintenance-request.util.ts',
   'src/app/modules/work-orders/components/request-detail-dialog/request-detail-dialog.ts',
   'src/app/modules/kit/kit-chat.ts',
-  'src/app/modules/auth/auth-shell/auth-shell.ts',
   'src/app/modules/knowledge-base/knowledge-base.ts',
   'src/app/modules/reports/pages/parking-revenue/parking-revenue.ts',
   'src/app/modules/reports/pages/shift-cash-variance/shift-cash-variance.ts',
@@ -68,6 +67,7 @@ const COPY_TS = new Set([
 ]);
 
 const INLINE_TEMPLATE_TS = new Set([
+  'src/app/modules/auth/auth-layout/auth-layout.ts',
   'src/app/shared/ui/coming-soon/coming-soon.ts',
   'src/app/shared/ui/empty-state/empty-state.ts',
   'src/app/modules/reports/components/report-card/report-card.ts',

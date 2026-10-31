@@ -14,6 +14,7 @@ import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -28,7 +29,7 @@ import { ChargeItemsService } from '../../services/charge-items.service';
 
 @Component({
   selector: 'app-charge-item-settings',
-  imports: [ReactiveFormsModule, PIcon, InputNumber, Select, PhpCurrencyPipe, Skeleton, StatusBadge],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, Select, PhpCurrencyPipe, Skeleton, StatusBadge],
   templateUrl: './charge-item-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

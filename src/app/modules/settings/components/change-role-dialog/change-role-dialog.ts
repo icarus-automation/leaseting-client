@@ -14,6 +14,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { catchError, forkJoin, of } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import type { AccessCatalog } from '../../../../core/models/access-catalog.types';
@@ -48,7 +49,7 @@ function summarize(labels: readonly string[]): ChangeSummary {
 
 @Component({
   selector: 'app-change-role-dialog',
-  imports: [PIcon, ErrorBanner, FormDialog],
+  imports: [ProgressSpinner, PIcon, ErrorBanner, FormDialog],
   templateUrl: './change-role-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { combineLatest, map, of, switchMap } from 'rxjs';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -32,7 +33,7 @@ type WorkspaceState =
 
 @Component({
   selector: 'app-role-workspace',
-  imports: [ReactiveFormsModule, PIcon, ErrorBanner, Skeleton],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, ErrorBanner, Skeleton],
   templateUrl: './role-workspace.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

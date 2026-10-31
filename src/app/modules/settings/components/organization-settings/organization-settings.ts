@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
@@ -25,7 +26,7 @@ export type OrganizationSettingsState =
 
 @Component({
   selector: 'app-organization-settings',
-  imports: [ReactiveFormsModule, ErrorBanner, Skeleton],
+  imports: [ProgressSpinner, ReactiveFormsModule, ErrorBanner, Skeleton],
   templateUrl: './organization-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

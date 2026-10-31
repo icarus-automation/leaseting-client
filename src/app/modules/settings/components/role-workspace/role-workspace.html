@@ -1,0 +1,175 @@
+<section class="flex flex-col gap-5" aria-label="Role">
+  <div>
+    <button
+      type="button"
+      class="inline-flex items-center gap-1.5 rounded-[2px] text-[12.5px] font-medium text-muted transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none"
+      (click)="requestBack()"
+    >
+      <svg pIcon="arrow-left" [size]="11" aria-hidden="true"></svg>
+      All roles
+    </button>
+  </div>
+
+  @if (state(); as current) {
+    @switch (current.kind) {
+      @case ('loading') {
+        <app-skeleton variant="panel" />
+      }
+      @case ('error') {
+        <app-error-banner [message]="current.message" [retryable]="true" (retry)="load()" />
+      }
+      @case ('ready') {
+        @if (readOnlyNote(); as note) {
+          <p class="text-[13px] text-muted">{{ note }}</p>
+        }
+        <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <div class="flex flex-col gap-4 rounded-base border border-border bg-background px-4 py-4">
+            <label class="flex w-full flex-col gap-1.5">
+              <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Name</span>
+              <input
+                type="text"
+                formControlName="name"
+                maxlength="50"
+                [attr.aria-readonly]="!writable()"
+                aria-label="Role name"
+                class="h-10 w-full rounded-base border border-border bg-background px-2.5 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring disabled:cursor-not-allowed disabled:bg-surface motion-reduce:transition-none"
+              />
+            </label>
+
+            <label class="flex w-full flex-col gap-1.5">
+              <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
+                Description
+                <span class="font-medium normal-case tracking-normal">optional</span>
+              </span>
+              <textarea
+                formControlName="description"
+                maxlength="200"
+                rows="2"
+                [attr.aria-readonly]="!writable()"
+                aria-label="Role description"
+                class="min-h-16 w-full resize-y rounded-base border border-border bg-background px-2.5 py-2 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring disabled:cursor-not-allowed disabled:bg-surface motion-reduce:transition-none"
+              ></textarea>
+            </label>
+          </div>
+
+          @if (picker(); as view) {
+            <div class="flex flex-col gap-3">
+              <div class="flex flex-wrap items-end justify-between gap-3">
+                <div class="flex flex-col gap-0.5">
+                  <h2 class="font-heading text-[15px] font-semibold text-heading">Permissions</h2>
+                  <p class="text-[12.5px] tabular-nums text-muted">
+                    {{ view.totalSelected }} of {{ view.totalCodes }} selected
+                  </p>
+                </div>
+                <div class="relative min-w-[12rem] flex-1 sm:max-w-sm">
+                  <svg
+                    pIcon="search"
+                    class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+                    [size]="14"
+                    aria-hidden="true"
+                  ></svg>
+                  <input
+                    type="search"
+                    [value]="permissionQuery()"
+                    (input)="onPermissionSearch($event)"
+                    placeholder="Filter permissions"
+                    aria-label="Filter permissions"
+                    class="h-10 w-full rounded-base border border-border bg-background pl-9 pr-3 text-sm text-body transition-colors duration-150 ease-out placeholder:text-muted focus-visible:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring motion-reduce:transition-none"
+                  />
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-3">
+                @for (group of view.groups; track group.id) {
+                  <section class="overflow-hidden rounded-base border border-border" [attr.aria-labelledby]="'role-group-' + group.id">
+                    <div class="flex flex-wrap items-center gap-3 border-b border-border bg-surface px-4 py-2.5">
+                      <div class="min-w-0 flex-1">
+                        <h3 [id]="'role-group-' + group.id" class="font-heading text-[13.5px] font-semibold text-heading">
+                          {{ group.label }}
+                        </h3>
+                        <p class="text-[12px] tabular-nums text-muted">{{ group.selected }} selected</p>
+                      </div>
+                      <label
+                        class="inline-flex items-center gap-2 text-[12.5px] font-medium text-body"
+                        [class.cursor-not-allowed]="!group.selectAllEnabled"
+                        [class.opacity-60]="!group.selectAllEnabled"
+                      >
+                        <input
+                          type="checkbox"
+                          class="m-0 h-[15px] w-[15px] accent-primary"
+                          [class.cursor-pointer]="group.selectAllEnabled"
+                          [class.cursor-not-allowed]="!group.selectAllEnabled"
+                          [checked]="group.selectAll === 'all'"
+                          [indeterminate]="group.selectAll === 'some'"
+                          [disabled]="!group.selectAllEnabled"
+                          [attr.aria-label]="'Select all ' + group.label + ' permissions'"
+                          (change)="onToggleGroup(group.id)"
+                        />
+                        Select all
+                      </label>
+                    </div>
+
+                    <ul class="m-0 list-none p-0">
+                      @for (row of group.permissions; track row.code) {
+                        <li class="border-b border-border px-4 py-2.5 last:border-b-0">
+                          <label
+                            class="flex items-start gap-2.5 text-[13px]"
+                            [class.cursor-pointer]="!row.disabled"
+                            [class.cursor-not-allowed]="row.disabled"
+                            [class.opacity-60]="row.disabled"
+                          >
+                            <input
+                              type="checkbox"
+                              class="mt-0.5 h-[15px] w-[15px] shrink-0 accent-primary"
+                              [class.cursor-pointer]="!row.disabled"
+                              [class.cursor-not-allowed]="row.disabled"
+                              [checked]="row.checked"
+                              [disabled]="row.disabled"
+                              [attr.aria-label]="row.label"
+                              (change)="onTogglePermission(row.code)"
+                            />
+                            <span class="flex min-w-0 flex-col gap-0.5">
+                              <span class="font-medium text-heading">{{ row.label }}</span>
+                              <span class="text-[12px] text-muted">{{ row.code }}</span>
+                              @if (row.description) {
+                                <span class="text-[12.5px] leading-relaxed text-muted">{{ row.description }}</span>
+                              }
+                              @if (row.reason) {
+                                <span class="text-[12.5px] leading-relaxed text-muted">{{ row.reason }}</span>
+                              }
+                            </span>
+                          </label>
+                        </li>
+                      }
+                    </ul>
+                  </section>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="flex flex-wrap items-center gap-3">
+            @if (writable()) {
+              <button
+                type="submit"
+                class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                [disabled]="saving()"
+              >
+                @if (saving()) {
+                  <span
+                    class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner"
+                    aria-hidden="true"
+                  ></span>
+                }
+                <span>Save</span>
+              </button>
+              @if (saveError(); as message) {
+                <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+              }
+            }
+          </div>
+        </form>
+      }
+    }
+  }
+</section>

@@ -29,24 +29,26 @@
         <app-status-badge tone="vacant" label="Vacant" [count]="p.unitSummary.vacant" />
       </div>
 
-      <div class="relative z-10 flex shrink-0 items-center gap-1">
-        <button
-          type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-          [attr.aria-label]="'Edit ' + p.name"
-          (click)="edit.emit()"
-        >
-          <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
-        </button>
-        <button
-          type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
-          [attr.aria-label]="'Archive ' + p.name"
-          (click)="archive.emit()"
-        >
-          <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
-        </button>
-      </div>
+      @if (manageable()) {
+        <div class="relative z-10 flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+            [attr.aria-label]="'Edit ' + p.name"
+            (click)="edit.emit()"
+          >
+            <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+          </button>
+          <button
+            type="button"
+            class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+            [attr.aria-label]="'Archive ' + p.name"
+            (click)="archive.emit()"
+          >
+            <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+          </button>
+        </div>
+      }
     </div>
   </article>
 }

@@ -45,7 +45,7 @@ export class PaymentDestinationSettings {
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly canMutate = this.auth.isFinancialAdmin;
+  readonly canMutate = computed(() => this.auth.can('payment_destinations:manage'));
   readonly methodOptions = PAYMENT_METHOD_OPTIONS;
   readonly acceptedQrTypes = ACCEPTED_QR_TYPES;
 

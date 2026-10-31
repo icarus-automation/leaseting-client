@@ -21,7 +21,7 @@ export class RecordPaymentDialog {
   readonly changed = output<void>();
 
   readonly workspace = viewChild(PaymentWorkspace);
-  readonly canMutate = this.auth.isFinancialAdmin;
+  readonly canMutate = computed(() => this.auth.can('payments:record'));
 
   readonly heading = computed(() => {
     const bill = this.bill();

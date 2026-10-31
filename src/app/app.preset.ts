@@ -70,6 +70,10 @@ export const AppPreset = definePreset(Aura, {
           900: 'oklch(0.220 0.010 262)',
           950: 'oklch(0.140 0.008 262)',
         },
+        formField: {
+          // Aura's {surface.500} placeholder is under WCAG AA on white; match the app's muted text.
+          placeholderColor: 'var(--text-muted)',
+        },
       },
     },
   },

@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 
+import { AuthService } from '../../core/auth/auth.service';
 import { contentWidthFromSnapshot } from '../content-width';
 import { Sidebar } from '../sidebar/sidebar';
 import { Header } from '../header/header';
@@ -22,6 +23,7 @@ import { KitBadge } from '../../shared/ui/kit/kit-badge';
 })
 export class MainLayout {
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
   protected readonly drawer = inject(NavDrawerService);
 
   readonly drawerOpen = this.drawer.open;
@@ -36,7 +38,7 @@ export class MainLayout {
 
   readonly showKitBadge = computed(() => {
     const url = this.url();
-    return !url.startsWith('/dashboard') && !url.startsWith('/kit');
+    return this.auth.can('kit:use') && !url.startsWith('/dashboard') && !url.startsWith('/kit');
   });
 
   readonly contentWidth = computed(() => {

@@ -43,7 +43,7 @@
         @if (visibleItems().length === 0) {
           <p class="px-4 py-6 text-center text-[13px] text-muted">
             @if (list.length === 0) {
-              No terminals yet. Add the first one below.
+              No terminals yet.{{ canManage() ? ' Add the first one below.' : '' }}
             } @else {
               No terminals at this property.
             }
@@ -111,47 +111,49 @@
                     />
                     <span class="truncate text-[12.5px] text-muted">{{ item.propertyName }}</span>
                     <span class="flex-1"></span>
-                    <div class="flex shrink-0 items-center gap-2">
-                      <button
-                        type="button"
-                        class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                        [attr.aria-label]="'Edit ' + item.name"
-                        [attr.title]="'Edit ' + item.name"
-                        (click)="startEdit(item)"
-                      >
-                        <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
-                      </button>
-                      @if (item.isActive) {
+                    @if (canManage()) {
+                      <div class="flex shrink-0 items-center gap-2">
                         <button
                           type="button"
-                          class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                          [attr.aria-label]="'Disable ' + item.name"
-                          [disabled]="busyId() === item.id"
-                          (click)="setActive(item, false)"
+                          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                          [attr.aria-label]="'Edit ' + item.name"
+                          [attr.title]="'Edit ' + item.name"
+                          (click)="startEdit(item)"
                         >
-                          Disable
+                          <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
                         </button>
-                      } @else {
+                        @if (item.isActive) {
+                          <button
+                            type="button"
+                            class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                            [attr.aria-label]="'Disable ' + item.name"
+                            [disabled]="busyId() === item.id"
+                            (click)="setActive(item, false)"
+                          >
+                            Disable
+                          </button>
+                        } @else {
+                          <button
+                            type="button"
+                            class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                            [attr.aria-label]="'Enable ' + item.name"
+                            [disabled]="busyId() === item.id"
+                            (click)="setActive(item, true)"
+                          >
+                            Enable
+                          </button>
+                        }
                         <button
                           type="button"
-                          class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                          [attr.aria-label]="'Enable ' + item.name"
+                          class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                          [attr.aria-label]="'Delete ' + item.name"
                           [disabled]="busyId() === item.id"
-                          (click)="setActive(item, true)"
+                          (click)="confirmDelete(item)"
                         >
-                          Enable
+                          Delete
                         </button>
-                      }
-                      <button
-                        type="button"
-                        class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                        [attr.aria-label]="'Delete ' + item.name"
-                        [disabled]="busyId() === item.id"
-                        (click)="confirmDelete(item)"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                      </div>
+                    }
                   </div>
                 }
               </li>
@@ -159,42 +161,44 @@
           </ul>
         }
 
-        <div class="border-t border-border bg-surface px-4 py-3">
-          <form class="flex flex-wrap items-center gap-2" [formGroup]="createForm" (ngSubmit)="submitCreate()">
-            <svg pIcon="plus" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
-            <input
-              type="text"
-              formControlName="name"
-              class="h-10 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
-              placeholder="Add a terminal, e.g. Basement"
-              aria-label="New terminal name"
-              (input)="createError.set(null)"
-            />
-            <p-select
-              formControlName="propertyId"
-              [options]="propertyOptions()"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Property"
-              styleClass="w-48"
-              appendTo="body"
-              ariaLabel="Property for the new terminal"
-            />
-            <button
-              type="submit"
-              class="inline-flex h-10 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-              [disabled]="creating() || createForm.invalid"
-            >
-              @if (creating()) {
-                <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
-              }
-              <span>Add</span>
-            </button>
-          </form>
-          @if (createError(); as message) {
-            <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
-          }
-        </div>
+        @if (canManage()) {
+          <div class="border-t border-border bg-surface px-4 py-3">
+            <form class="flex flex-wrap items-center gap-2" [formGroup]="createForm" (ngSubmit)="submitCreate()">
+              <svg pIcon="plus" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+              <input
+                type="text"
+                formControlName="name"
+                class="h-10 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
+                placeholder="Add a terminal, e.g. Basement"
+                aria-label="New terminal name"
+                (input)="createError.set(null)"
+              />
+              <p-select
+                formControlName="propertyId"
+                [options]="propertyOptions()"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Property"
+                styleClass="w-48"
+                appendTo="body"
+                ariaLabel="Property for the new terminal"
+              />
+              <button
+                type="submit"
+                class="inline-flex h-10 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                [disabled]="creating() || createForm.invalid"
+              >
+                @if (creating()) {
+                  <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+                }
+                <span>Add</span>
+              </button>
+            </form>
+            @if (createError(); as message) {
+              <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+            }
+          </div>
+        }
       </div>
     }
   }

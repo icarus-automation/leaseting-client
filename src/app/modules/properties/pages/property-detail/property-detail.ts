@@ -13,6 +13,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type {
   FloorDetail,
@@ -66,7 +67,12 @@ export class PropertyDetailPage {
   private readonly units = inject(UnitsService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  /** Floors and their plans ride on the property code; units and their map spots on the unit one. */
+  readonly canManageProperty = computed(() => this.auth.can('properties:manage'));
+  readonly canManageUnits = computed(() => this.auth.can('units:manage'));
 
   private readonly propertyId = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,

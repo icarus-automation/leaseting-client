@@ -15,6 +15,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ChargeItemResponse } from '../../../../core/models/charge-item.types';
 import { BILL_TYPE_LABELS, BILL_TYPE_OPTIONS, type BillType } from '../../../../core/models/enums';
@@ -36,7 +37,10 @@ export class ChargeItemSettings {
   private readonly chargeItems = inject(ChargeItemsService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('settings:manage'));
 
   readonly items = signal<ChargeItemResponse[] | null>(null);
   readonly error = signal<string | null>(null);

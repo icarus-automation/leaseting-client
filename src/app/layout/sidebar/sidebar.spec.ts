@@ -2,6 +2,8 @@ import { Component, input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
+import { AuthService } from '../../core/auth/auth.service';
+import type { Permission } from '../../core/auth/permissions';
 import { PendingPaymentSubmissionsService } from '../../core/payment-submissions/pending-payment-submissions.service';
 import { OpenRequestsService } from '../../core/work-orders/open-requests.service';
 import { BrandLogo } from '../../shared/ui/brand-logo/brand-logo';
@@ -20,15 +22,23 @@ describe('Sidebar', () => {
   const paymentCount = signal<number | null>(2);
   const openRequests = { count: openCount, refresh: vi.fn() };
   const pendingPaymentSubmissions = { count: paymentCount, refresh: vi.fn() };
+  /** null holds every code, like an owner. */
+  const held = signal<Permission[] | null>(null);
+  const auth = {
+    can: (code: Permission) => held()?.includes(code) ?? true,
+    canAll: (codes: readonly Permission[]) => codes.every((code) => held()?.includes(code) ?? true),
+  };
   let fixture: ComponentFixture<Sidebar>;
 
   beforeEach(async () => {
     openCount.set(3);
     paymentCount.set(2);
+    held.set(null);
     await TestBed.configureTestingModule({
       imports: [Sidebar],
       providers: [
         provideRouter([{ path: '**', component: BlankPage }]),
+        { provide: AuthService, useValue: auth },
         { provide: OpenRequestsService, useValue: openRequests },
         {
           provide: PendingPaymentSubmissionsService,
@@ -109,5 +119,36 @@ describe('Sidebar', () => {
 
     expect(openRequests.refresh).toHaveBeenCalledTimes(2);
     expect(pendingPaymentSubmissions.refresh).toHaveBeenCalledTimes(2);
+  });
+
+  function navLabels(): string[] {
+    return [...fixture.nativeElement.querySelectorAll('a.nav-item .nav-label')].map(
+      (label: Element) => label.textContent?.trim() ?? '',
+    );
+  }
+
+  it('hides the links, sections and Settings a role cannot open', async () => {
+    held.set(['tenants:view']);
+    await fixture.whenStable();
+
+    expect(navLabels()).toEqual(['Dashboard', 'Tenants', 'Knowledge Base', 'Website CMS']);
+    expect(fixture.nativeElement.textContent).not.toContain('Money');
+  });
+
+  it('shows Settings once any settings page is open to the role', async () => {
+    held.set(['members:view']);
+    await fixture.whenStable();
+
+    expect(navLabels()).toContain('Settings');
+  });
+
+  it('skips the counts a role cannot read', async () => {
+    vi.clearAllMocks();
+    held.set(['bills:view']);
+    await TestBed.inject(Router).navigateByUrl('/bills');
+    await fixture.whenStable();
+
+    expect(openRequests.refresh).not.toHaveBeenCalled();
+    expect(pendingPaymentSubmissions.refresh).not.toHaveBeenCalled();
   });
 });

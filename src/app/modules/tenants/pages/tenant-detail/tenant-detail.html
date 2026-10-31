@@ -88,17 +88,17 @@
             <p class="whitespace-pre-line border-t border-border pt-3 text-[13px] leading-relaxed text-body">{{ notes }}</p>
           }
 
-          <button
-            type="button"
-            class="inline-flex h-9 items-center justify-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-            (click)="drawerVisible.set(true)"
-          >
-            <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
-            <span>Edit tenant</span>
-          </button>
+          @if (canManage()) {
+            <button
+              type="button"
+              class="inline-flex h-9 items-center justify-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+              (click)="drawerVisible.set(true)"
+            >
+              <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+              <span>Edit tenant</span>
+            </button>
+          }
         </aside>
-
-        <app-residence-care-access [tenantId]="t.id" [defaultEmail]="t.email" />
 
         <app-tenant-risk-panel [tenantId]="t.id" />
       </div>
@@ -140,7 +140,7 @@
               No bills yet. Charges appear here once this tenant's lease has been billed.
             </p>
           } @else {
-            <div class="overflow-x-auto rounded-base border border-border">
+            <div class="relative overflow-x-auto rounded-base border border-border">
               <table class="w-full border-collapse text-left">
                 <thead>
                   <tr class="border-b border-border bg-surface">
@@ -180,7 +180,7 @@
               No leases yet. Put this tenant into a vacant unit from a property's floor plan.
             </p>
           } @else {
-            <div class="overflow-x-auto rounded-base border border-border">
+            <div class="relative overflow-x-auto rounded-base border border-border">
               <table class="w-full border-collapse text-left">
                 <thead>
                   <tr class="border-b border-border bg-surface">
@@ -220,19 +220,21 @@
         <section class="flex flex-col gap-2" aria-label="Documents">
           <div class="flex items-baseline justify-between gap-2">
             <h2 class="font-heading text-base font-semibold text-heading">Documents</h2>
-            <button
-              type="button"
-              class="inline-flex h-8 items-center gap-2 rounded-base border border-border bg-background px-3 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-              [disabled]="uploadingDocument()"
-              (click)="openDocumentPicker()"
-            >
-              @if (uploadingDocument()) {
-                <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary)_40%,transparent)] border-t-[var(--primary)] animate-spinner" aria-hidden="true"></span>
-              } @else {
-                <svg pIcon="upload" [size]="12" aria-hidden="true"></svg>
-              }
-              <span>Upload</span>
-            </button>
+            @if (canManage()) {
+              <button
+                type="button"
+                class="inline-flex h-8 items-center gap-2 rounded-base border border-border bg-background px-3 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                [disabled]="uploadingDocument()"
+                (click)="openDocumentPicker()"
+              >
+                @if (uploadingDocument()) {
+                  <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary)_40%,transparent)] border-t-[var(--primary)] animate-spinner" aria-hidden="true"></span>
+                } @else {
+                  <svg pIcon="upload" [size]="12" aria-hidden="true"></svg>
+                }
+                <span>Upload</span>
+              </button>
+            }
             <input
               #documentInput
               type="file"
@@ -267,15 +269,17 @@
                   >
                     <svg pIcon="external-link" [size]="12" aria-hidden="true"></svg>
                   </a>
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                    [attr.aria-label]="'Delete ' + document.fileName"
-                    [disabled]="deletingDocumentId() === document.id"
-                    (click)="confirmDeleteDocument(document)"
-                  >
-                    <svg pIcon="trash" [size]="12" aria-hidden="true"></svg>
-                  </button>
+                  @if (canManage()) {
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                      [attr.aria-label]="'Delete ' + document.fileName"
+                      [disabled]="deletingDocumentId() === document.id"
+                      (click)="confirmDeleteDocument(document)"
+                    >
+                      <svg pIcon="trash" [size]="12" aria-hidden="true"></svg>
+                    </button>
+                  }
                 </li>
               }
             </ul>

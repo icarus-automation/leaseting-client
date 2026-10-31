@@ -1,0 +1,352 @@
+<div class="flex flex-col gap-4">
+  <div class="flex flex-wrap items-center gap-2">
+    <app-segmented-control
+      ariaLabel="Show people"
+      [options]="audienceOptions"
+      [value]="audience()"
+      (valueChange)="setAudience($event)"
+    />
+
+    <div class="relative min-w-[12rem] flex-1">
+      <svg
+        pIcon="search"
+        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+        [size]="14"
+        aria-hidden="true"
+      ></svg>
+      <input
+        type="search"
+        [value]="searchText()"
+        (input)="onSearch($event)"
+        placeholder="Search by name or email"
+        aria-label="Search people by name or email"
+        class="h-10 w-full rounded-base border border-border bg-background pl-9 pr-3 text-sm text-body transition-colors duration-150 ease-out placeholder:text-muted focus-visible:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring motion-reduce:transition-none"
+      />
+    </div>
+
+    <p-select
+      [options]="statusOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="status()"
+      (ngModelChange)="setStatus($event)"
+      ariaLabel="Filter by status"
+      styleClass="min-w-[150px]"
+      appendTo="body"
+    />
+
+    @if (primaryAction(); as action) {
+      <button
+        type="button"
+        class="inline-flex h-10 shrink-0 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+        (click)="action.run()"
+      >
+        <svg pIcon="user-plus" [size]="13" aria-hidden="true"></svg>
+        <span>{{ action.label }}</span>
+      </button>
+    }
+  </div>
+
+  @if (isTenants()) {
+    <p class="flex items-start gap-2 text-[12.5px] leading-relaxed text-muted">
+      <svg pIcon="info-circle" class="mt-0.5 shrink-0" [size]="13" aria-hidden="true"></svg>
+      <span>Residence Care logins. Turning one off leaves the tenant's lease and billing as they are.</span>
+    </p>
+  } @else if (isAttendants()) {
+    <p class="flex items-start gap-2 text-[12.5px] leading-relaxed text-muted">
+      <svg pIcon="info-circle" class="mt-0.5 shrink-0" [size]="13" aria-hidden="true"></svg>
+      <span>{{ handheldNote }}</span>
+    </p>
+  }
+
+  @if (showInvitations()) {
+    @if (status() === 'INVITED' || invitationsError() || visibleInvitations().length > 0) {
+      <section class="flex flex-col gap-2" aria-labelledby="pending-invitations-heading">
+        <h2 id="pending-invitations-heading" class="font-heading text-[15px] font-semibold text-heading">
+          Pending invitations
+          @if (invitations() !== null) {
+            <span class="ml-1 font-normal tabular-nums text-muted">{{ visibleInvitations().length }}</span>
+          }
+        </h2>
+
+        @if (invitationsError(); as message) {
+          <app-error-banner [message]="message" [retryable]="true" (retry)="loadInvitations()" />
+        } @else if (invitations() === null) {
+          <div class="overflow-hidden rounded-base border border-border">
+            <app-skeleton variant="row" />
+            <app-skeleton variant="row" />
+          </div>
+        } @else if (visibleInvitations().length === 0) {
+          <app-empty-state
+            icon="envelope"
+            heading="No pending invitations"
+            [description]="searchText() ? 'No invitation matches this search.' : 'Invitations show here until the person accepts or you revoke them.'"
+            [ctaLabel]="canInvite() && !searchText() ? 'Invite staff' : null"
+            (cta)="openInvite()"
+          />
+        } @else {
+          <ul class="m-0 list-none overflow-hidden rounded-base border border-border p-0">
+            @for (invitation of visibleInvitations(); track invitation.id) {
+              <li
+                class="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border px-4 py-2.5 last:border-b-0"
+                [class.animate-row-flash]="flashId() === invitation.id"
+                (animationend)="flashId.set(null)"
+              >
+                <span
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-dashed border-border-strong text-muted"
+                  aria-hidden="true"
+                >
+                  <svg pIcon="envelope" [size]="13"></svg>
+                </span>
+                <div class="flex min-w-0 flex-1 basis-48 flex-col">
+                  <span class="truncate text-[13.5px] font-medium text-heading">{{ invitation.email }}</span>
+                  <span class="truncate text-[12px] text-muted">
+                    {{ roleLabels[invitation.role] }} · Sent {{ invitation.createdAt | date: 'MMM d' }}@if (invitation.invitedBy; as by) {
+                      by {{ by.name }}}
+                  </span>
+                </div>
+                <span [title]="'Link expires ' + (invitation.expiresAt | date: 'MMM d, y, h:mm a')">
+                  <app-status-badge [tone]="expiry(invitation).tone" [label]="expiry(invitation).label" />
+                </span>
+                @if (canInvite()) {
+                  <div class="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                      [attr.aria-label]="'Resend the invitation to ' + invitation.email"
+                      [disabled]="busyId() === invitation.id"
+                      (click)="resend(invitation)"
+                    >
+                      <svg pIcon="send" [size]="11" aria-hidden="true"></svg>
+                      <span>Resend</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] enabled:hover:bg-muted-destructive enabled:hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                      [attr.aria-label]="'Revoke the invitation to ' + invitation.email"
+                      [disabled]="busyId() === invitation.id"
+                      (click)="confirmRevoke(invitation)"
+                    >
+                      Revoke
+                    </button>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+
+  @if (showMembers()) {
+    <section class="flex flex-col gap-3" [attr.aria-label]="isStaff() ? 'Team' : 'People'">
+      @if (isStaff() && showInvitations() && visibleInvitations().length > 0) {
+        <h2 class="font-heading text-[15px] font-semibold text-heading">Team</h2>
+      }
+
+      @if (membersLoading()) {
+        <div class="overflow-hidden rounded-base border border-border">
+          @for (s of skeletons; track $index) {
+            <app-skeleton variant="row" />
+          }
+        </div>
+      } @else if (membersError(); as message) {
+        <app-error-banner [message]="message" [retryable]="true" (retry)="loadMembers(meta()?.page ?? 1)" />
+      } @else if (members().length === 0) {
+        @if (isFiltered()) {
+          <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-10 text-center">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-muted">
+              <svg pIcon="search" [size]="18" aria-hidden="true"></svg>
+            </div>
+            <div class="flex flex-col gap-1">
+              <h3 class="font-heading text-[15px] font-semibold text-heading">No one matches</h3>
+              <p class="max-w-[42ch] text-[13px] leading-relaxed text-muted">
+                No {{ audienceNoun() }} match this search and status.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+              (click)="clearFilters()"
+            >
+              Clear filters
+            </button>
+          </div>
+        } @else {
+          <app-empty-state
+            [icon]="audience() === 'attendants' ? 'car' : 'users'"
+            [heading]="'No ' + audienceNoun() + ' yet'"
+            [description]="isTenants()
+              ? 'Tenants show here once they have a Residence Care login.'
+              : isAttendants()
+                ? 'Attendants show here once you add one.'
+                : 'Invite someone to give them a staff login.'"
+            [ctaLabel]="isStaff() ? null : (primaryAction()?.label ?? null)"
+            (cta)="primaryAction()?.run()"
+          />
+        }
+      } @else {
+        <div class="relative overflow-x-auto rounded-base border border-border">
+          <table class="w-full border-collapse text-left">
+            <caption class="sr-only">{{ isStaff() ? 'Staff' : audience() === 'tenants' ? 'Tenants' : 'Parking attendants' }}</caption>
+            <thead>
+              <tr class="border-b border-border bg-surface">
+                <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Person</th>
+                <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Role</th>
+                @if (showPropertyAccess()) {
+                  <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted @[44rem]:table-cell">
+                    Property access
+                  </th>
+                }
+                <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Status</th>
+                <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted @[36rem]:table-cell">
+                  Joined
+                </th>
+                @if (showActions()) {
+                  <th scope="col" class="w-12 px-2 py-2.5"><span class="sr-only">Actions</span></th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (member of members(); track member.id) {
+                <tr
+                  class="border-b border-border transition-colors duration-150 ease-out last:border-b-0 hover:bg-surface motion-reduce:transition-none"
+                  [class.animate-row-flash]="flashId() === member.id"
+                  (animationend)="flashId.set(null)"
+                >
+                  <td class="px-4 py-2.5">
+                    <div class="flex min-w-0 items-center gap-2.5">
+                      <span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11.5px] font-semibold"
+                        [class]="member.status === 'ACTIVE' ? 'bg-primary/10 text-primary' : 'bg-surface text-muted'"
+                        aria-hidden="true"
+                      >
+                        {{ initials(member.name) }}
+                      </span>
+                      <div class="flex min-w-0 flex-col">
+                        <span class="flex min-w-0 items-center gap-1.5">
+                          <span
+                            class="truncate text-[13.5px] font-medium"
+                            [class]="member.status === 'ACTIVE' ? 'text-heading' : 'text-muted'"
+                          >
+                            {{ member.name }}
+                          </span>
+                          @if (member.userId === currentUserId()) {
+                            <span class="shrink-0 rounded-full bg-surface px-1.5 py-px text-[10.5px] font-semibold uppercase tracking-wide text-muted">
+                              You
+                            </span>
+                          }
+                        </span>
+                        <span class="truncate text-[12px] text-muted">{{ member.email }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2.5 text-[13px] text-body">
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+                      @if (member.role === 'owner') {
+                        <svg pIcon="crown" class="text-warning" [size]="12" aria-hidden="true"></svg>
+                      }
+                      {{ member.roleName ?? 'Role removed' }}
+                    </span>
+                  </td>
+                  @if (showPropertyAccess()) {
+                    <td class="hidden px-4 py-2.5 text-[13px] text-body @[44rem]:table-cell">
+                      {{ propertyAccess(member) }}
+                    </td>
+                  }
+                  <td class="px-4 py-2.5">
+                    <app-status-badge [tone]="statusBadge(member).tone" [label]="statusBadge(member).label" />
+                    @if (member.status === 'DEACTIVATED' && member.deactivatedAt) {
+                      <span class="mt-1 block whitespace-nowrap text-[11.5px] text-muted">
+                        Since {{ member.deactivatedAt | date: 'MMM d, y' }}
+                      </span>
+                    }
+                  </td>
+                  <td class="hidden whitespace-nowrap px-4 py-2.5 text-[13px] text-muted @[36rem]:table-cell">
+                    {{ member.joinedAt | date: 'MMM d, y' }}
+                  </td>
+                  @if (showActions()) {
+                    <td class="px-2 py-2.5 text-right">
+                      @if (actionsFor(member).length > 0) {
+                        <button
+                          type="button"
+                          class="inline-flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out enabled:hover:bg-surface enabled:hover:text-body disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                          [attr.aria-label]="'Actions for ' + member.name"
+                          aria-haspopup="menu"
+                          [attr.aria-expanded]="overflowForId() === member.id"
+                          [disabled]="busyId() === member.id"
+                          (click)="openActions($event, member)"
+                        >
+                          @if (busyId() === member.id) {
+                            <span
+                              class="h-3 w-3 rounded-full border-2 border-border border-t-primary animate-spinner"
+                              aria-hidden="true"
+                            ></span>
+                          } @else {
+                            <svg pIcon="ellipsis-v" [size]="13" aria-hidden="true"></svg>
+                          }
+                        </button>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <app-pagination [meta]="meta()" (pageChange)="loadMembers($event)" />
+      }
+    </section>
+  }
+</div>
+
+<p-menu
+  #overflowMenu
+  [model]="overflowItems()"
+  [popup]="true"
+  appendTo="body"
+  ariaLabel="Person actions"
+  (onHide)="overflowForId.set(null)"
+/>
+
+@if (canInvite()) {
+  <app-invite-staff-dialog
+    [visible]="inviteOpen()"
+    (visibleChange)="inviteOpen.set($event)"
+    (invited)="onInvited($event)"
+  />
+}
+
+@if (canChangeRoles()) {
+  <app-change-role-dialog
+    [visible]="roleDialogOpen()"
+    (visibleChange)="roleDialogOpen.set($event)"
+    [member]="roleTarget()"
+    (changed)="onRoleChanged($event)"
+  />
+}
+
+@if (canManageAttendants()) {
+  <app-attendant-form-dialog
+    [visible]="attendantFormOpen()"
+    (visibleChange)="attendantFormOpen.set($event)"
+    (created)="onAttendantAdded($event)"
+  />
+  <app-attendant-password-dialog
+    [visible]="attendantPasswordOpen()"
+    (visibleChange)="attendantPasswordOpen.set($event)"
+    [member]="attendantTarget()"
+    (passwordReset)="onAttendantPasswordReset($event)"
+  />
+}
+
+@if (canManageTenantLogins()) {
+  <app-tenant-login-dialog
+    [visible]="tenantLoginOpen()"
+    (visibleChange)="tenantLoginOpen.set($event)"
+    [member]="tenantLoginTarget()"
+    (finished)="onTenantLoginFinished($event)"
+  />
+}

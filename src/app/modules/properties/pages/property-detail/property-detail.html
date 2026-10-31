@@ -30,14 +30,16 @@
         <div class="min-w-0">
           <div class="flex min-w-0 items-center gap-2">
             <h1 class="min-w-0 truncate font-heading text-2xl font-semibold text-heading">{{ p.name }}</h1>
-            <button
-              type="button"
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-              aria-label="Edit property details and photo"
-              (click)="propertyDrawerVisible.set(true)"
-            >
-              <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
-            </button>
+            @if (canManageProperty()) {
+              <button
+                type="button"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                aria-label="Edit property details and photo"
+                (click)="propertyDrawerVisible.set(true)"
+              >
+                <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+              </button>
+            }
           </div>
           <p class="mt-0.5 truncate text-sm text-muted">{{ p.type.name }} · {{ p.addressLine }}, {{ p.city }}</p>
         </div>
@@ -56,7 +58,7 @@
         icon="building"
         heading="No floors yet"
         description="Add the first floor, upload its plan, and map units."
-        ctaLabel="Add floor"
+        [ctaLabel]="canManageProperty() ? 'Add floor' : null"
         (cta)="openCreateFloor()"
       />
     } @else {
@@ -65,49 +67,54 @@
           class="min-w-0 flex-1"
           [floors]="p.floors"
           [selectedFloorId]="selectedFloorId()"
+          [canAddFloor]="canManageProperty()"
           (floorSelected)="selectFloor($event)"
           (addFloorRequested)="openCreateFloor()"
         />
 
         <div class="flex items-center gap-1.5">
-          <button
-            type="button"
-            class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-            (click)="openCreateUnit()"
-          >
-            <svg pIcon="plus" [size]="12" aria-hidden="true"></svg>
-            <span>Unit</span>
-          </button>
-          <button
-            type="button"
-            class="inline-flex h-8 items-center gap-1.5 rounded-base border px-2.5 text-[13px] font-medium transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
-            [class]="mapMode()
-              ? 'border-primary bg-primary text-primary-foreground'
-              : 'border-border bg-background text-body enabled:hover:bg-surface'"
-            [attr.aria-pressed]="mapMode()"
-            [disabled]="!mapMode() && !canMapUnits()"
-            [title]="canMapUnits() || mapMode() ? '' : 'Upload a plan image for this floor first'"
-            (click)="toggleMapMode()"
-          >
-            <svg pIcon="pencil" [size]="12" aria-hidden="true"></svg>
-            <span>{{ mapMode() ? 'Done mapping' : 'Map units' }}</span>
-          </button>
-          <button
-            type="button"
-            class="flex h-8 w-8 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-            aria-label="Edit this floor"
-            (click)="openEditFloor()"
-          >
-            <svg pIcon="cog" [size]="13" aria-hidden="true"></svg>
-          </button>
-          <button
-            type="button"
-            class="flex h-8 w-8 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
-            aria-label="Delete this floor"
-            (click)="confirmDeleteFloor()"
-          >
-            <svg pIcon="trash" [size]="13" aria-hidden="true"></svg>
-          </button>
+          @if (canManageUnits()) {
+            <button
+              type="button"
+              class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+              (click)="openCreateUnit()"
+            >
+              <svg pIcon="plus" [size]="12" aria-hidden="true"></svg>
+              <span>Unit</span>
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-8 items-center gap-1.5 rounded-base border px-2.5 text-[13px] font-medium transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+              [class]="mapMode()
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-background text-body enabled:hover:bg-surface'"
+              [attr.aria-pressed]="mapMode()"
+              [disabled]="!mapMode() && !canMapUnits()"
+              [title]="canMapUnits() || mapMode() ? '' : 'Upload a plan image for this floor first'"
+              (click)="toggleMapMode()"
+            >
+              <svg pIcon="pencil" [size]="12" aria-hidden="true"></svg>
+              <span>{{ mapMode() ? 'Done mapping' : 'Map units' }}</span>
+            </button>
+          }
+          @if (canManageProperty()) {
+            <button
+              type="button"
+              class="flex h-8 w-8 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+              aria-label="Edit this floor"
+              (click)="openEditFloor()"
+            >
+              <svg pIcon="cog" [size]="13" aria-hidden="true"></svg>
+            </button>
+            <button
+              type="button"
+              class="flex h-8 w-8 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+              aria-label="Delete this floor"
+              (click)="confirmDeleteFloor()"
+            >
+              <svg pIcon="trash" [size]="13" aria-hidden="true"></svg>
+            </button>
+          }
         </div>
       </div>
 
@@ -210,6 +217,8 @@
             <app-floor-plan-viewer
               [floor]="f"
               [selectedUnitId]="selectedUnitId()"
+              [canAddUnits]="canManageUnits()"
+              [canEditFloor]="canManageProperty()"
               (unitClicked)="onUnitClicked($event)"
               (uploadPlanRequested)="openEditFloor()"
               (addUnitRequested)="openCreateUnit()"

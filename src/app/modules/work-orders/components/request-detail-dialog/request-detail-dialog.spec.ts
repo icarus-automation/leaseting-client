@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import { Subject, of, throwError } from 'rxjs';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import type { StaffMaintenanceRequest } from '../../../../core/models/maintenance-request.types';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { MaintenanceRequestsService } from '../../services/maintenance-requests.service';
@@ -63,6 +64,8 @@ function conflict(message: string): HttpErrorResponse {
 
 describe('RequestDetailDialog', () => {
   const api = { get: vi.fn(), start: vi.fn(), resolve: vi.fn() };
+  let canHandle = true;
+  const auth = { can: (code: string) => code === 'maintenance_requests:manage' && canHandle };
   let fixture: ComponentFixture<RequestDetailDialog>;
   let component: RequestDetailDialog;
   let toast: MessageService;
@@ -71,7 +74,11 @@ describe('RequestDetailDialog', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RequestDetailDialog],
-      providers: [MessageService, { provide: MaintenanceRequestsService, useValue: api }],
+      providers: [
+        MessageService,
+        { provide: MaintenanceRequestsService, useValue: api },
+        { provide: AuthService, useValue: auth },
+      ],
     })
       .overrideComponent(RequestDetailDialog, {
         remove: { imports: [FormDialog, RequestPhotos] },
@@ -90,6 +97,7 @@ describe('RequestDetailDialog', () => {
   afterEach(() => {
     fixture.destroy();
     vi.clearAllMocks();
+    canHandle = true;
   });
 
   async function open(row: StaffMaintenanceRequest, fresh: StaffMaintenanceRequest = row): Promise<void> {
@@ -250,5 +258,14 @@ describe('RequestDetailDialog', () => {
 
     expect(changed).toBe(1);
     expect(button('Resolve')).toBeTruthy();
+  });
+
+  it('shows a viewer the request without Start or Resolve', async () => {
+    canHandle = false;
+    await open(maintenanceRequest({ status: 'OPEN' }));
+
+    expect(component.action()).toBeNull();
+    expect(button('Start')).toBeUndefined();
+    expect(button('Resolve')).toBeUndefined();
   });
 });

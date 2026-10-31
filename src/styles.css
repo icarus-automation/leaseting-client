@@ -189,6 +189,14 @@
   color: var(--destructive);
 }
 
+/* ConfirmDialog stamps role="alertdialog" on its p-dialog host, which stays in
+   the page, nameless and empty, while no confirm is open. AXE flags it on every
+   page; hiding the empty host takes it out of the accessibility tree until a
+   confirm actually renders inside it. */
+p-confirmdialog > p-dialog:empty {
+  display: none;
+}
+
 .p-select,
 .p-multiselect,
 .p-inputnumber,

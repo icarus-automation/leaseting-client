@@ -62,7 +62,12 @@ export class UnitPanel {
   readonly startingOnboarding = signal(false);
   readonly paymentDialogVisible = signal(false);
   readonly paymentTarget = signal<BillListItem | null>(null);
-  readonly canMutateFinance = this.auth.isFinancialAdmin;
+  readonly canRecordPayments = computed(() => this.auth.can('payments:record'));
+  readonly canViewPayments = computed(() => this.auth.can('payments:view'));
+  readonly canManageUnits = computed(() => this.auth.can('units:manage'));
+  readonly canManageLeases = computed(() => this.auth.can('leases:manage'));
+  /** The onboarding wizard writes the tenant as well as the lease. */
+  readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'tenants:manage']));
 
   readonly billTypeLabels = BILL_TYPE_LABELS;
 

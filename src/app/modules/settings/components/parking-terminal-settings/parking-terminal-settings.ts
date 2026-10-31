@@ -16,6 +16,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { Select } from 'primeng/select';
 import { forkJoin } from 'rxjs';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ParkingTerminalResponse } from '../../../../core/models/parking-terminal.types';
 import type { PropertyListItem } from '../../../../core/models/property.types';
@@ -37,7 +38,10 @@ export class ParkingTerminalSettings {
   private readonly propertiesApi = inject(PropertiesService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('parking_setup:manage'));
 
   readonly items = signal<ParkingTerminalResponse[] | null>(null);
   readonly properties = signal<PropertyListItem[]>([]);

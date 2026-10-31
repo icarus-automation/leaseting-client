@@ -8,6 +8,7 @@ import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { forkJoin } from 'rxjs';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ChargeItemResponse } from '../../../../core/models/charge-item.types';
 import {
@@ -32,7 +33,10 @@ export class LateFeeSettings {
   private readonly rulesApi = inject(LateFeeRuleService);
   private readonly chargeItemsApi = inject(ChargeItemsService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('settings:manage'));
 
   readonly basisOptions = LATE_FEE_BASIS_OPTIONS;
 
@@ -117,11 +121,13 @@ export class LateFeeSettings {
   }
 
   setEnabled(enabled: boolean): void {
+    if (!this.canManage()) return;
     this.form.controls.enabled.setValue(enabled);
     this.form.controls.enabled.markAsDirty();
   }
 
   setBasis(basis: LateFeeBasis): void {
+    if (!this.canManage()) return;
     this.form.controls.basis.setValue(basis);
     this.form.controls.basis.markAsDirty();
   }
@@ -134,6 +140,7 @@ export class LateFeeSettings {
   }
 
   submit(): void {
+    if (!this.canManage()) return;
     const payload = this.payload();
     if (!payload) {
       this.saveError.set('Pick the charge item late fees post as.');

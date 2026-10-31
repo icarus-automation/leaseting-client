@@ -37,7 +37,7 @@ export class OrganizationSettings {
   private readonly destroyRef = inject(DestroyRef);
   private requestGeneration = 0;
 
-  readonly canEdit = this.auth.isFinancialAdmin;
+  readonly canEdit = computed(() => this.auth.can('organization:update'));
   readonly state = signal<OrganizationSettingsState>({ kind: 'loading' });
 
   readonly form = this.fb.nonNullable.group({

@@ -34,6 +34,8 @@ export class FloorTabs {
 
   readonly floors = input.required<PropertyFloorItem[]>();
   readonly selectedFloorId = input<string | null>(null);
+  /** The viewer holds `properties:manage`. */
+  readonly canAddFloor = input(true);
   readonly floorSelected = output<string>();
   readonly addFloorRequested = output<void>();
 

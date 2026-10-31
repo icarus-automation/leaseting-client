@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -90,7 +90,9 @@ export class Bills {
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly canMutateFinance = this.auth.isFinancialAdmin;
+  readonly canManageBills = computed(() => this.auth.can('bills:manage'));
+  readonly canRecordPayments = computed(() => this.auth.can('payments:record'));
+  readonly canViewPayments = computed(() => this.auth.can('payments:view'));
 
   readonly quickFilters = QUICK_FILTERS;
   readonly typeOptions = TYPE_OPTIONS;
@@ -133,7 +135,9 @@ export class Bills {
     this.load(1);
     this.loadSummary();
 
-    watchCreateParam(() => this.drawerVisible.set(true));
+    watchCreateParam(() => {
+      if (this.canManageBills()) this.drawerVisible.set(true);
+    });
 
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -326,7 +330,7 @@ export class Bills {
   }
 
   canDelete(bill: BillListItem): boolean {
-    return this.canMutateFinance() && bill.status === 'UNPAID';
+    return this.canManageBills() && bill.status === 'UNPAID';
   }
 
   openOverflow(event: Event, bill: BillListItem): void {

@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 
+import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
 import { ONBOARDING_STEP_LABELS, ONBOARDING_STEP_ORDER } from '../../core/models/onboarding.types';
@@ -46,7 +47,12 @@ export class Tenants {
   private readonly router = inject(Router);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('tenants:manage'));
+  /** The onboarding wizard writes the tenant as well as the lease. */
+  readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'tenants:manage']));
 
   readonly items = signal<TenantListItem[]>([]);
   readonly meta = signal<PageMeta | null>(null);
@@ -68,8 +74,10 @@ export class Tenants {
   constructor() {
     this.load(1);
 
-    watchCreateParam(() => this.startOnboarding());
-    this.loadOnboardings();
+    watchCreateParam(() => {
+      if (this.canOnboard()) this.startOnboarding();
+    });
+    if (this.canOnboard()) this.loadOnboardings();
   }
 
   onboardingStepChip(item: OnboardingListItem): string {

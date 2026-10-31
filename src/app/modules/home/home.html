@@ -1,232 +1,258 @@
 <div class="flex flex-col gap-6">
   <header class="flex flex-col gap-4">
-    <app-kit-card [summary]="kitSummary()" />
-    <div class="flex flex-wrap items-center gap-1.5">
-      <a
-        routerLink="/properties"
-        [queryParams]="{ create: 1 }"
-        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-      >
-        <svg pIcon="building" [size]="13" aria-hidden="true"></svg>
-        <span>New property</span>
-      </a>
-      <a
-        routerLink="/tenants"
-        [queryParams]="{ create: 1 }"
-        class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-      >
-        <svg pIcon="user-plus" [size]="13" aria-hidden="true"></svg>
-        <span>Onboard tenant</span>
-      </a>
-      <a
-        routerLink="/bills"
-        [queryParams]="{ create: 1 }"
-        class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
-      >
-        <svg pIcon="plus" [size]="13" aria-hidden="true"></svg>
-        <span>New bill</span>
-      </a>
-    </div>
+    @if (canUseKit()) {
+      <app-kit-card [summary]="kitSummary()" />
+    } @else {
+      <div class="flex flex-col gap-1">
+        <h1 class="font-heading text-xl font-semibold text-heading sm:text-2xl">{{ welcome() }}</h1>
+        @if (!canSeeOverview() && !canViewParking()) {
+          <p class="max-w-[62ch] text-[13.5px] leading-relaxed text-muted">
+            The dashboard's figures aren't part of your role. Open your pages from the menu, or ask an owner or an
+            admin if you need more access.
+          </p>
+        }
+      </div>
+    }
+    @if (canCreateProperty() || canOnboard() || canCreateBill()) {
+      <div class="flex flex-wrap items-center gap-1.5">
+        @if (canCreateProperty()) {
+          <a
+            routerLink="/properties"
+            [queryParams]="{ create: 1 }"
+            class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          >
+            <svg pIcon="building" [size]="13" aria-hidden="true"></svg>
+            <span>New property</span>
+          </a>
+        }
+        @if (canOnboard()) {
+          <a
+            routerLink="/tenants"
+            [queryParams]="{ create: 1 }"
+            class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          >
+            <svg pIcon="user-plus" [size]="13" aria-hidden="true"></svg>
+            <span>Onboard tenant</span>
+          </a>
+        }
+        @if (canCreateBill()) {
+          <a
+            routerLink="/bills"
+            [queryParams]="{ create: 1 }"
+            class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+          >
+            <svg pIcon="plus" [size]="13" aria-hidden="true"></svg>
+            <span>New bill</span>
+          </a>
+        }
+      </div>
+    }
   </header>
 
-  <section class="flex flex-col gap-4" aria-labelledby="property-management-overview">
-    <div>
-      <h2 id="property-management-overview" class="font-heading text-[15px] font-semibold text-heading">
-        Property management
-      </h2>
-      <p class="mt-0.5 text-[12.5px] text-muted">Occupancy, unpaid bills, and overdue amounts.</p>
-    </div>
+  @if (canSeeOverview()) {
+    <section class="flex flex-col gap-4" aria-labelledby="property-management-overview">
+      <div>
+        <h2 id="property-management-overview" class="font-heading text-[15px] font-semibold text-heading">
+          Property management
+        </h2>
+        <p class="mt-0.5 text-[12.5px] text-muted">Occupancy, unpaid bills, and overdue amounts.</p>
+      </div>
 
-  @if (loading()) {
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    @if (loading()) {
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <app-skeleton variant="panel" />
+        <app-skeleton variant="panel" />
+        <app-skeleton variant="panel" />
+        <app-skeleton variant="panel" />
+      </div>
       <app-skeleton variant="panel" />
-      <app-skeleton variant="panel" />
-      <app-skeleton variant="panel" />
-      <app-skeleton variant="panel" />
-    </div>
-    <app-skeleton variant="panel" />
-  } @else if (loadFailed()) {
-    <div
-      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
-      role="alert"
-    >
-      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
-      <span>Could not reach the server.</span>
-      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
-        Retry
-      </button>
-    </div>
-  } @else if (isFirstRun()) {
-    <section class="rounded-base border border-border bg-background p-6" aria-label="Getting started">
-      <h2 class="font-heading text-lg font-semibold text-heading">Set up your portfolio</h2>
-      <p class="mt-1 max-w-[60ch] text-sm text-muted">
-        Add a property, map the units, then move a tenant in.
-      </p>
-      <ol class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <li class="flex flex-col gap-1.5 rounded-base border border-border p-4">
-          <span class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[13px] font-semibold text-primary-foreground">1</span>
-          <h3 class="text-[14px] font-semibold text-heading">Add a property</h3>
-          <p class="text-[12.5px] leading-relaxed text-muted">Name, address, type, and a photo.</p>
-        </li>
-        <li class="flex flex-col gap-1.5 rounded-base border border-border p-4">
-          <span class="flex h-7 w-7 items-center justify-center rounded-full bg-surface text-[13px] font-semibold text-heading">2</span>
-          <h3 class="text-[14px] font-semibold text-heading">Add floors &amp; the plan</h3>
-          <p class="text-[12.5px] leading-relaxed text-muted">Upload the floor-plan image for each level.</p>
-        </li>
-        <li class="flex flex-col gap-1.5 rounded-base border border-border p-4">
-          <span class="flex h-7 w-7 items-center justify-center rounded-full bg-surface text-[13px] font-semibold text-heading">3</span>
-          <h3 class="text-[14px] font-semibold text-heading">Map the units</h3>
-          <p class="text-[12.5px] leading-relaxed text-muted">Outline each unit on the plan. Occupied and vacant show in color.</p>
-        </li>
-        <li class="flex flex-col gap-1.5 rounded-base border border-border p-4">
-          <span class="flex h-7 w-7 items-center justify-center rounded-full bg-surface text-[13px] font-semibold text-heading">4</span>
-          <h3 class="text-[14px] font-semibold text-heading">Move tenants in</h3>
-          <p class="text-[12.5px] leading-relaxed text-muted">Click a vacant unit, add the tenant, bill the rent.</p>
-        </li>
-      </ol>
-      <a
-        routerLink="/properties"
-        [queryParams]="{ create: 1 }"
-        class="mt-5 inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+    } @else if (loadFailed()) {
+      <div
+        class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+        role="alert"
       >
-        <svg pIcon="plus" [size]="14" aria-hidden="true"></svg>
-        <span>Add your first property</span>
-      </a>
-    </section>
-  } @else {
-    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <a
-        routerLink="/properties"
-        class="group flex flex-col gap-1 rounded-base border border-border bg-background p-4 transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] motion-reduce:transition-none"
-      >
-        <span class="text-[12.5px] font-medium text-muted">Properties</span>
-        <span class="font-heading text-xl font-semibold text-heading tabular-nums">{{ propertiesTotal() }}</span>
-        <span class="text-[12px] text-muted">{{ occupancy().total }} units across the portfolio</span>
-      </a>
-      <a
-        routerLink="/properties"
-        class="group flex flex-col gap-1 rounded-base border border-border bg-background p-4 transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] motion-reduce:transition-none"
-      >
-        <span class="text-[12.5px] font-medium text-muted">Occupancy</span>
-        <span class="font-heading text-xl font-semibold text-heading tabular-nums">
-          {{ occupancy().pct }}<span class="text-sm font-medium text-muted">%</span>
-        </span>
-        <span class="mt-1 flex h-1.5 overflow-hidden rounded-full bg-surface" aria-hidden="true">
-          <span class="h-full bg-success" [style.width.%]="occupancy().total ? (occupancy().settled / occupancy().total) * 100 : 0"></span>
-          <span class="h-full bg-destructive" [style.width.%]="occupancy().total ? (occupancy().overdue / occupancy().total) * 100 : 0"></span>
-        </span>
-        <span class="text-[12px] text-muted">{{ occupancy().occupied }} occupied · {{ occupancy().vacant }} vacant</span>
-      </a>
-      <a
-        routerLink="/bills"
-        [queryParams]="{ status: 'UNPAID' }"
-        class="group flex flex-col gap-1 rounded-base border border-border bg-background p-4 transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] motion-reduce:transition-none"
-      >
-        <span class="text-[12.5px] font-medium text-muted">Unpaid bills</span>
-        <span class="font-heading text-xl font-semibold text-heading tabular-nums">{{ unpaidBillsTotal() }}</span>
-        <span class="text-[12px] text-muted">{{ unpaidTotal() | phpCurrency }} outstanding</span>
-      </a>
-      <a
-        routerLink="/bills"
-        [queryParams]="{ status: 'UNPAID' }"
-        class="group flex flex-col gap-1 rounded-base p-4 transition-colors duration-150 ease-out motion-reduce:transition-none"
-        [class]="overdueBills().length > 0
-          ? 'border border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] bg-muted-destructive hover:border-destructive'
-          : 'border border-border bg-background hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))]'"
-      >
-        <span class="flex items-center gap-1.5 text-[12.5px] font-medium" [class]="overdueBills().length > 0 ? 'text-destructive' : 'text-muted'">
-          <svg pIcon="exclamation-circle" [size]="12" aria-hidden="true"></svg>
-          Overdue
-        </span>
-        <span class="font-heading text-xl font-semibold text-heading tabular-nums">{{ overdueBills().length }}</span>
-        <span class="text-[12px]" [class]="overdueBills().length > 0 ? 'text-body' : 'text-muted'">
-          {{ overdueBills().length > 0 ? (overdueTotal() | phpCurrency) + ' past due' : 'Nothing past due' }}
-        </span>
-      </a>
-    </div>
-
-
-    <section class="flex flex-col overflow-hidden rounded-base border border-border" aria-label="Portfolio">
-      <header class="flex items-center justify-between gap-2 border-b border-border bg-surface px-4 py-2.5">
-        <h2 class="text-[13px] font-semibold text-heading">Portfolio</h2>
-        <a routerLink="/properties" class="text-[12.5px] font-medium text-primary hover:underline">All properties</a>
-      </header>
-      <ul class="flex flex-col">
-        @for (property of propertyItems(); track property.id) {
-          <li class="border-b border-border last:border-b-0">
-            <a
-              [routerLink]="['/properties', property.id]"
-              class="flex items-center gap-4 px-4 py-3 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-            >
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-[13.5px] font-medium text-heading">{{ property.name }}</p>
-                <p class="truncate text-[12px] text-muted">{{ property.addressLine }}, {{ property.city }}</p>
-              </div>
-              <div class="hidden w-40 sm:block">
-                <span class="flex h-1.5 overflow-hidden rounded-full bg-surface" aria-hidden="true">
-                  <span class="h-full bg-success" [style.width.%]="segment(property, 'settled')"></span>
-                  <span class="h-full bg-destructive" [style.width.%]="segment(property, 'overdue')"></span>
-                </span>
-                <span class="mt-1 block text-right text-[11.5px] text-muted tabular-nums">
-                  {{ property.unitSummary.settled + property.unitSummary.overdue }}/{{ property.unitSummary.total }} occupied
-                </span>
-              </div>
-              @if (property.unitSummary.overdue > 0) {
-                <span class="shrink-0 rounded-full border border-[color-mix(in_oklab,var(--destructive)_30%,transparent)] bg-muted-destructive px-2 py-[3px] text-[11.5px] font-medium text-body">
-                  {{ property.unitSummary.overdue }} overdue
-                </span>
-              }
-              <svg pIcon="chevron-right" class="shrink-0 text-muted" [size]="12" aria-hidden="true"></svg>
-            </a>
+        <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+        <span>Could not reach the server.</span>
+        <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+          Retry
+        </button>
+      </div>
+    } @else if (isFirstRun()) {
+      <section class="rounded-base border border-border bg-background p-6" aria-label="Getting started">
+        <h2 class="font-heading text-lg font-semibold text-heading">Set up your portfolio</h2>
+        <p class="mt-1 max-w-[60ch] text-sm text-muted">
+          Add a property, map the units, then move a tenant in.
+        </p>
+        <ol class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <li class="flex flex-col gap-1.5 rounded-base border border-border p-4">
+            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[13px] font-semibold text-primary-foreground">1</span>
+            <h3 class="text-[14px] font-semibold text-heading">Add a property</h3>
+            <p class="text-[12.5px] leading-relaxed text-muted">Name, address, type, and a photo.</p>
           </li>
+          <li class="flex flex-col gap-1.5 rounded-base border border-border p-4">
+            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-surface text-[13px] font-semibold text-heading">2</span>
+            <h3 class="text-[14px] font-semibold text-heading">Add floors &amp; the plan</h3>
+            <p class="text-[12.5px] leading-relaxed text-muted">Upload the floor-plan image for each level.</p>
+          </li>
+          <li class="flex flex-col gap-1.5 rounded-base border border-border p-4">
+            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-surface text-[13px] font-semibold text-heading">3</span>
+            <h3 class="text-[14px] font-semibold text-heading">Map the units</h3>
+            <p class="text-[12.5px] leading-relaxed text-muted">Outline each unit on the plan. Occupied and vacant show in color.</p>
+          </li>
+          <li class="flex flex-col gap-1.5 rounded-base border border-border p-4">
+            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-surface text-[13px] font-semibold text-heading">4</span>
+            <h3 class="text-[14px] font-semibold text-heading">Move tenants in</h3>
+            <p class="text-[12.5px] leading-relaxed text-muted">Click a vacant unit, add the tenant, bill the rent.</p>
+          </li>
+        </ol>
+        @if (canCreateProperty()) {
+          <a
+            routerLink="/properties"
+            [queryParams]="{ create: 1 }"
+            class="mt-5 inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+          >
+            <svg pIcon="plus" [size]="14" aria-hidden="true"></svg>
+            <span>Add your first property</span>
+          </a>
         }
-      </ul>
+      </section>
+    } @else {
+      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <a
+          routerLink="/properties"
+          class="group flex flex-col gap-1 rounded-base border border-border bg-background p-4 transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] motion-reduce:transition-none"
+        >
+          <span class="text-[12.5px] font-medium text-muted">Properties</span>
+          <span class="font-heading text-xl font-semibold text-heading tabular-nums">{{ propertiesTotal() }}</span>
+          <span class="text-[12px] text-muted">{{ occupancy().total }} units across the portfolio</span>
+        </a>
+        <a
+          routerLink="/properties"
+          class="group flex flex-col gap-1 rounded-base border border-border bg-background p-4 transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] motion-reduce:transition-none"
+        >
+          <span class="text-[12.5px] font-medium text-muted">Occupancy</span>
+          <span class="font-heading text-xl font-semibold text-heading tabular-nums">
+            {{ occupancy().pct }}<span class="text-sm font-medium text-muted">%</span>
+          </span>
+          <span class="mt-1 flex h-1.5 overflow-hidden rounded-full bg-surface" aria-hidden="true">
+            <span class="h-full bg-success" [style.width.%]="occupancy().total ? (occupancy().settled / occupancy().total) * 100 : 0"></span>
+            <span class="h-full bg-destructive" [style.width.%]="occupancy().total ? (occupancy().overdue / occupancy().total) * 100 : 0"></span>
+          </span>
+          <span class="text-[12px] text-muted">{{ occupancy().occupied }} occupied · {{ occupancy().vacant }} vacant</span>
+        </a>
+        <a
+          routerLink="/bills"
+          [queryParams]="{ status: 'UNPAID' }"
+          class="group flex flex-col gap-1 rounded-base border border-border bg-background p-4 transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] motion-reduce:transition-none"
+        >
+          <span class="text-[12.5px] font-medium text-muted">Unpaid bills</span>
+          <span class="font-heading text-xl font-semibold text-heading tabular-nums">{{ unpaidBillsTotal() }}</span>
+          <span class="text-[12px] text-muted">{{ unpaidTotal() | phpCurrency }} outstanding</span>
+        </a>
+        <a
+          routerLink="/bills"
+          [queryParams]="{ status: 'UNPAID' }"
+          class="group flex flex-col gap-1 rounded-base p-4 transition-colors duration-150 ease-out motion-reduce:transition-none"
+          [class]="overdueBills().length > 0
+            ? 'border border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] bg-muted-destructive hover:border-destructive'
+            : 'border border-border bg-background hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))]'"
+        >
+          <span class="flex items-center gap-1.5 text-[12.5px] font-medium" [class]="overdueBills().length > 0 ? 'text-destructive' : 'text-muted'">
+            <svg pIcon="exclamation-circle" [size]="12" aria-hidden="true"></svg>
+            Overdue
+          </span>
+          <span class="font-heading text-xl font-semibold text-heading tabular-nums">{{ overdueBills().length }}</span>
+          <span class="text-[12px]" [class]="overdueBills().length > 0 ? 'text-body' : 'text-muted'">
+            {{ overdueBills().length > 0 ? (overdueTotal() | phpCurrency) + ' past due' : 'Nothing past due' }}
+          </span>
+        </a>
+      </div>
+
+
+      <section class="flex flex-col overflow-hidden rounded-base border border-border" aria-label="Portfolio">
+        <header class="flex items-center justify-between gap-2 border-b border-border bg-surface px-4 py-2.5">
+          <h2 class="text-[13px] font-semibold text-heading">Portfolio</h2>
+          <a routerLink="/properties" class="text-[12.5px] font-medium text-primary hover:underline">All properties</a>
+        </header>
+        <ul class="flex flex-col">
+          @for (property of propertyItems(); track property.id) {
+            <li class="border-b border-border last:border-b-0">
+              <a
+                [routerLink]="['/properties', property.id]"
+                class="flex items-center gap-4 px-4 py-3 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+              >
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-[13.5px] font-medium text-heading">{{ property.name }}</p>
+                  <p class="truncate text-[12px] text-muted">{{ property.addressLine }}, {{ property.city }}</p>
+                </div>
+                <div class="hidden w-40 sm:block">
+                  <span class="flex h-1.5 overflow-hidden rounded-full bg-surface" aria-hidden="true">
+                    <span class="h-full bg-success" [style.width.%]="segment(property, 'settled')"></span>
+                    <span class="h-full bg-destructive" [style.width.%]="segment(property, 'overdue')"></span>
+                  </span>
+                  <span class="mt-1 block text-right text-[11.5px] text-muted tabular-nums">
+                    {{ property.unitSummary.settled + property.unitSummary.overdue }}/{{ property.unitSummary.total }} occupied
+                  </span>
+                </div>
+                @if (property.unitSummary.overdue > 0) {
+                  <span class="shrink-0 rounded-full border border-[color-mix(in_oklab,var(--destructive)_30%,transparent)] bg-muted-destructive px-2 py-[3px] text-[11.5px] font-medium text-body">
+                    {{ property.unitSummary.overdue }} overdue
+                  </span>
+                }
+                <svg pIcon="chevron-right" class="shrink-0 text-muted" [size]="12" aria-hidden="true"></svg>
+              </a>
+            </li>
+          }
+        </ul>
+      </section>
+    }
     </section>
   }
-  </section>
 
-  <section class="flex flex-col gap-3" aria-labelledby="parking-overview">
-    <header>
-      <div class="flex flex-wrap items-center gap-2">
-        <h2 id="parking-overview" class="font-heading text-[15px] font-semibold text-heading">
-          Parking overview
-        </h2>
-        <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2 py-[3px] text-[12.5px] font-medium text-muted">
-          <svg pIcon="clock" [size]="11" aria-hidden="true"></svg>
-          Soon
-        </span>
+  @if (canViewParking()) {
+    <section class="flex flex-col gap-3" aria-labelledby="parking-overview">
+      <header>
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 id="parking-overview" class="font-heading text-[15px] font-semibold text-heading">
+            Parking overview
+          </h2>
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2 py-[3px] text-[12.5px] font-medium text-muted">
+            <svg pIcon="clock" [size]="11" aria-hidden="true"></svg>
+            Soon
+          </span>
+        </div>
+        <p class="mt-0.5 max-w-[70ch] text-[12.5px] text-muted">
+          Revenue and peak-hour charts will show here when they ship. Live activity is on Parking Overview.
+        </p>
+      </header>
+
+      <div class="grid overflow-hidden rounded-base border border-dashed border-border bg-background md:grid-cols-2">
+        <article class="flex min-h-40 flex-col border-b border-border p-5 md:border-b-0 md:border-r">
+          <div class="flex items-center gap-2">
+            <svg pIcon="chart-line" class="text-muted" [size]="15" aria-hidden="true"></svg>
+            <h3 class="font-heading text-[14px] font-semibold text-heading">Revenue trends</h3>
+          </div>
+          <div class="flex flex-1 items-center justify-center py-10 text-center">
+            <div>
+              <p class="text-[13px] font-medium text-body">No chart yet.</p>
+              <p class="mt-1 text-[12.5px] text-muted">Daily, weekly, and monthly parking income.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="flex min-h-40 flex-col p-5">
+          <div class="flex items-center gap-2">
+            <svg pIcon="clock" class="text-muted" [size]="15" aria-hidden="true"></svg>
+            <h3 class="font-heading text-[14px] font-semibold text-heading">Peak hours</h3>
+          </div>
+          <div class="flex flex-1 items-center justify-center py-10 text-center">
+            <div>
+              <p class="text-[13px] font-medium text-body">No chart yet.</p>
+              <p class="mt-1 text-[12.5px] text-muted">Busiest arrival and exit hours.</p>
+            </div>
+          </div>
+        </article>
       </div>
-      <p class="mt-0.5 max-w-[70ch] text-[12.5px] text-muted">
-        Revenue and peak-hour charts will show here when they ship. Live activity is on Parking Overview.
-      </p>
-    </header>
-
-    <div class="grid overflow-hidden rounded-base border border-dashed border-border bg-background md:grid-cols-2">
-      <article class="flex min-h-40 flex-col border-b border-border p-5 md:border-b-0 md:border-r">
-        <div class="flex items-center gap-2">
-          <svg pIcon="chart-line" class="text-muted" [size]="15" aria-hidden="true"></svg>
-          <h3 class="font-heading text-[14px] font-semibold text-heading">Revenue trends</h3>
-        </div>
-        <div class="flex flex-1 items-center justify-center py-10 text-center">
-          <div>
-            <p class="text-[13px] font-medium text-body">No chart yet.</p>
-            <p class="mt-1 text-[12.5px] text-muted">Daily, weekly, and monthly parking income.</p>
-          </div>
-        </div>
-      </article>
-
-      <article class="flex min-h-40 flex-col p-5">
-        <div class="flex items-center gap-2">
-          <svg pIcon="clock" class="text-muted" [size]="15" aria-hidden="true"></svg>
-          <h3 class="font-heading text-[14px] font-semibold text-heading">Peak hours</h3>
-        </div>
-        <div class="flex flex-1 items-center justify-center py-10 text-center">
-          <div>
-            <p class="text-[13px] font-medium text-body">No chart yet.</p>
-            <p class="mt-1 text-[12.5px] text-muted">Busiest arrival and exit hours.</p>
-          </div>
-        </div>
-      </article>
-    </div>
-  </section>
+    </section>
+  }
 </div>

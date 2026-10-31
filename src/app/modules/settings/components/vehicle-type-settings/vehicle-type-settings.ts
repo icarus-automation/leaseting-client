@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { VehicleTypeResponse } from '../../../../core/models/vehicle-type.types';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
@@ -30,7 +31,10 @@ export class VehicleTypeSettings {
   private readonly vehicleTypes = inject(VehicleTypesService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('parking_setup:manage'));
 
   readonly items = signal<VehicleTypeResponse[] | null>(null);
   readonly error = signal<string | null>(null);

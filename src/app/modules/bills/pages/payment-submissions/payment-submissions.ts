@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -52,7 +52,7 @@ export class PaymentSubmissions {
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly canMutate = this.auth.isFinancialAdmin;
+  readonly canMutate = computed(() => this.auth.can('payment_submissions:review'));
   readonly billTypeLabels = BILL_TYPE_LABELS;
   readonly items = signal<PaymentSubmissionResponse[]>([]);
   readonly meta = signal<PageMeta | null>(null);

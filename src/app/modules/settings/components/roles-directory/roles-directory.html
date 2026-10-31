@@ -1,0 +1,187 @@
+<div class="flex flex-col gap-4">
+  <div class="flex flex-wrap items-center gap-2">
+    <app-segmented-control
+      ariaLabel="Filter by kind"
+      [options]="kindOptions"
+      [value]="query().kind"
+      (valueChange)="setQuery({ kind: $event })"
+    />
+    <app-segmented-control
+      ariaLabel="Filter by activity"
+      [options]="activityOptions"
+      [value]="query().activity"
+      (valueChange)="setQuery({ activity: $event })"
+    />
+
+    <div class="relative min-w-[12rem] flex-1">
+      <svg
+        pIcon="search"
+        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+        [size]="14"
+        aria-hidden="true"
+      ></svg>
+      <input
+        type="search"
+        [value]="searchText()"
+        (input)="onSearch($event)"
+        placeholder="Search roles"
+        aria-label="Search roles"
+        class="h-10 w-full rounded-base border border-border bg-background pl-9 pr-3 text-sm text-body transition-colors duration-150 ease-out placeholder:text-muted focus-visible:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring motion-reduce:transition-none"
+      />
+    </div>
+
+    @if (canManage()) {
+      <button
+        type="button"
+        class="inline-flex h-10 shrink-0 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+        (click)="create()"
+      >
+        <svg pIcon="plus" [size]="13" aria-hidden="true"></svg>
+        <span>Create role</span>
+      </button>
+    }
+  </div>
+
+  @if (notice(); as current) {
+    <div
+      class="flex flex-wrap items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body animate-error-in motion-reduce:animate-none"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span class="flex-1">{{ current.message }}</span>
+      @if (current.usersHref; as href) {
+        <a [routerLink]="href" class="shrink-0 rounded-[2px] font-medium text-primary hover:underline">Open Users</a>
+      }
+    </div>
+  }
+
+  @if (rows() === null && !error()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (s of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <app-error-banner [message]="message" [retryable]="true" (retry)="load()" />
+  } @else if (visible().length === 0) {
+    @if (isFiltered()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-10 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-muted">
+          <svg pIcon="search" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h3 class="font-heading text-[15px] font-semibold text-heading">No roles match</h3>
+          <p class="max-w-[42ch] text-[13px] leading-relaxed text-muted">
+            Nothing matches this search and these filters.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          (click)="clearFilters()"
+        >
+          Clear filters
+        </button>
+      </div>
+    } @else {
+      <app-empty-state
+        icon="shield"
+        heading="No roles yet"
+        description="System roles always show here. Create a custom role to give someone a narrower set of permissions."
+        [ctaLabel]="canManage() ? 'Create role' : null"
+        (cta)="create()"
+      />
+    }
+  } @else {
+    <div class="@container relative overflow-x-auto rounded-base border border-border">
+      <table class="w-full border-collapse text-left">
+        <caption class="sr-only">Roles</caption>
+        <thead>
+          <tr class="border-b border-border bg-surface">
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Name</th>
+            <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted @[40rem]:table-cell">
+              Description
+            </th>
+            <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">People</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Type</th>
+            <th scope="col" class="w-12 px-2 py-2.5"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of visible(); track row.role.id) {
+            <tr
+              class="cursor-pointer border-b border-border transition-colors duration-150 ease-out last:border-b-0 hover:bg-surface motion-reduce:transition-none"
+              (click)="onRowClick($event, row.role)"
+            >
+              <td class="whitespace-nowrap px-4 py-2.5">
+                <span class="inline-flex items-center gap-2">
+                  <a
+                    [routerLink]="['/settings/roles', row.role.id]"
+                    class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                  >
+                    {{ row.role.name }}
+                  </a>
+                  @if (!row.role.isActive) {
+                    <app-status-badge tone="neutral" label="Inactive" />
+                  }
+                </span>
+              </td>
+              <td class="hidden px-4 py-2.5 @[40rem]:table-cell">
+                @if (row.role.description; as description) {
+                  <p
+                    class="line-clamp-2 max-w-[34rem] text-[13px] leading-snug text-body"
+                    (mouseenter)="syncDescriptionTitle($event, description)"
+                  >
+                    {{ description }}
+                  </p>
+                } @else {
+                  <span class="text-[13px] text-muted">—</span>
+                }
+              </td>
+              <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-body">
+                {{ row.peopleLabel }}
+              </td>
+              <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-muted">
+                <span class="inline-flex items-center gap-1.5">
+                  @if (row.role.kind === 'system') {
+                    <svg pIcon="lock" [size]="11" aria-hidden="true"></svg>
+                  }
+                  {{ row.typeLabel }}
+                </span>
+              </td>
+              <td class="px-2 py-2.5 text-right">
+                <button
+                  type="button"
+                  class="inline-flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out enabled:hover:bg-surface enabled:hover:text-body disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                  [attr.aria-label]="'Actions for ' + row.role.name"
+                  aria-haspopup="menu"
+                  [attr.aria-expanded]="overflowForId() === row.role.id"
+                  [disabled]="busyId() === row.role.id"
+                  (click)="openMenu($event, row)"
+                >
+                  @if (busyId() === row.role.id) {
+                    <span
+                      class="h-3 w-3 rounded-full border-2 border-border border-t-primary animate-spinner"
+                      aria-hidden="true"
+                    ></span>
+                  } @else {
+                    <svg pIcon="ellipsis-v" [size]="13" aria-hidden="true"></svg>
+                  }
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<p-menu
+  #overflowMenu
+  [model]="overflowItems()"
+  [popup]="true"
+  appendTo="body"
+  ariaLabel="Role actions"
+  (onHide)="overflowForId.set(null)"
+/>

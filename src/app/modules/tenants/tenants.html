@@ -4,18 +4,20 @@
       <h1 class="font-heading text-2xl font-semibold text-heading">Tenants</h1>
       <p class="mt-0.5 text-sm text-muted">Contact details, balances, and lease history.</p>
     </div>
-    <button
-      type="button"
-      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
-      [disabled]="startingOnboarding()"
-      (click)="startOnboarding()"
-    >
-      <svg pIcon="user-plus" [size]="13" aria-hidden="true"></svg>
-      <span>{{ startingOnboarding() ? 'Starting…' : 'Start onboarding' }}</span>
-    </button>
+    @if (canOnboard()) {
+      <button
+        type="button"
+        class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+        [disabled]="startingOnboarding()"
+        (click)="startOnboarding()"
+      >
+        <svg pIcon="user-plus" [size]="13" aria-hidden="true"></svg>
+        <span>{{ startingOnboarding() ? 'Starting…' : 'Start onboarding' }}</span>
+      </button>
+    }
   </header>
 
-  @if (inProgressOnboardings().length > 0) {
+  @if (canOnboard() && inProgressOnboardings().length > 0) {
     <section class="flex flex-col gap-2" aria-label="Onboardings in progress">
       <h2 class="text-[12.5px] font-medium uppercase tracking-wide text-muted">Onboardings in progress</h2>
       <div class="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -85,7 +87,7 @@
         icon="search"
         heading="No tenants match"
         description="Clear a filter chip, or clear all, to see every tenant."
-        ctaLabel="Start onboarding"
+        [ctaLabel]="canOnboard() ? 'Start onboarding' : null"
         (cta)="startOnboarding()"
       />
     } @else {
@@ -93,12 +95,12 @@
         icon="users"
         heading="No tenants yet"
         description="Start onboarding to add a tenant and move them into a vacant unit."
-        ctaLabel="Start onboarding"
+        [ctaLabel]="canOnboard() ? 'Start onboarding' : null"
         (cta)="startOnboarding()"
       />
     }
   } @else {
-    <div class="overflow-x-auto rounded-base border border-border">
+    <div class="relative overflow-x-auto rounded-base border border-border">
       <table class="w-full border-collapse text-left">
         <thead>
           <tr class="border-b border-border bg-surface">
@@ -144,24 +146,26 @@
               </td>
               <td class="hidden px-4 py-3 text-[13px] text-muted lg:table-cell">{{ tenant.createdAt | date: 'MMM d, y' }}</td>
               <td class="px-4 py-3">
-                <div class="flex items-center justify-end gap-1">
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                    [attr.aria-label]="'Edit ' + tenant.firstName + ' ' + tenant.lastName"
-                    (click)="openEdit(tenant)"
-                  >
-                    <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
-                  </button>
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
-                    [attr.aria-label]="'Archive ' + tenant.firstName + ' ' + tenant.lastName"
-                    (click)="confirmArchive(tenant)"
-                  >
-                    <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
-                  </button>
-                </div>
+                @if (canManage()) {
+                  <div class="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                      [attr.aria-label]="'Edit ' + tenant.firstName + ' ' + tenant.lastName"
+                      (click)="openEdit(tenant)"
+                    >
+                      <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
+                      [attr.aria-label]="'Archive ' + tenant.firstName + ' ' + tenant.lastName"
+                      (click)="confirmArchive(tenant)"
+                    >
+                      <svg pIcon="inbox" [size]="13" aria-hidden="true"></svg>
+                    </button>
+                  </div>
+                }
               </td>
             </tr>
           }

@@ -6,14 +6,16 @@
         Buildings, floors, and unit occupancy.
       </p>
     </div>
-    <button
-      type="button"
-      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
-      (click)="openCreate()"
-    >
-      <svg pIcon="plus" [size]="14" aria-hidden="true"></svg>
-      <span>New property</span>
-    </button>
+    @if (canManage()) {
+      <button
+        type="button"
+        class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+        (click)="openCreate()"
+      >
+        <svg pIcon="plus" [size]="14" aria-hidden="true"></svg>
+        <span>New property</span>
+      </button>
+    }
   </header>
 
   @if (loading()) {
@@ -38,7 +40,7 @@
       icon="building"
       heading="No properties yet"
       description="Add a property, then map floors and units."
-      ctaLabel="New property"
+      [ctaLabel]="canManage() ? 'New property' : null"
       (cta)="openCreate()"
     />
   } @else {
@@ -46,6 +48,7 @@
       @for (property of items(); track property.id) {
         <app-property-card
           [property]="property"
+          [manageable]="canManage()"
           (edit)="openEdit(property)"
           (archive)="confirmArchive(property)"
         />

@@ -1,18 +1,6 @@
-import type { ParkingAttendantResponse, ParkingAttendantStatus } from '../../../core/models/parking-attendant.types';
-import type { BadgeTone } from '../../../shared/ui/status-badge/status-badge';
+export const ATTENDANT_PASSWORD_MIN = 8;
+export const ATTENDANT_PASSWORD_MAX = 128;
 
-export function parkingAttendantBadge(status: ParkingAttendantStatus): {
-  label: string;
-  tone: BadgeTone;
-} {
-  return status === 'DISABLED'
-    ? { label: 'Disabled', tone: 'destructive' }
-    : { label: 'Active', tone: 'success' };
-}
-
-export function sortAttendants(attendants: ParkingAttendantResponse[]): ParkingAttendantResponse[] {
-  return [...attendants].sort((a, b) => {
-    if (a.status !== b.status) return a.status === 'ACTIVE' ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
-}
+/** Said wherever an attendant login is set up: they never get a web session. */
+export const ATTENDANT_HANDHELD_NOTE =
+  'Attendants sign in on the handheld app only. This web app refuses their login.';

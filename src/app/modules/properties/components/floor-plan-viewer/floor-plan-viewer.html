@@ -12,22 +12,26 @@
         </p>
       </div>
       <div class="flex flex-wrap items-center justify-center gap-2">
-        <button
-          type="button"
-          class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
-          (click)="addUnitRequested.emit()"
-        >
-          <svg pIcon="plus" [size]="12" aria-hidden="true"></svg>
-          <span>Add unit</span>
-        </button>
-        <button
-          type="button"
-          class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
-          (click)="uploadPlanRequested.emit()"
-        >
-          <svg pIcon="image" [size]="12" aria-hidden="true"></svg>
-          <span>Upload floor plan</span>
-        </button>
+        @if (canAddUnits()) {
+          <button
+            type="button"
+            class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+            (click)="addUnitRequested.emit()"
+          >
+            <svg pIcon="plus" [size]="12" aria-hidden="true"></svg>
+            <span>Add unit</span>
+          </button>
+        }
+        @if (canEditFloor()) {
+          <button
+            type="button"
+            class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+            (click)="uploadPlanRequested.emit()"
+          >
+            <svg pIcon="image" [size]="12" aria-hidden="true"></svg>
+            <span>Upload floor plan</span>
+          </button>
+        }
       </div>
     </div>
   } @else if (floor().planImageUrl; as planUrl) {
@@ -71,7 +75,7 @@
       icon="image"
       heading="No floor plan yet"
       description="Upload a plan image for this floor. You can still manage units from the list below."
-      ctaLabel="Upload floor plan"
+      [ctaLabel]="canEditFloor() ? 'Upload floor plan' : null"
       (cta)="uploadPlanRequested.emit()"
     />
   }
@@ -81,7 +85,7 @@
       icon="table"
       heading="No units on this floor"
       description="Add the units on this floor. You can map them onto the plan afterwards."
-      ctaLabel="Add unit"
+      [ctaLabel]="canAddUnits() ? 'Add unit' : null"
       (cta)="addUnitRequested.emit()"
     />
   } @else if (chipUnits().length > 0) {

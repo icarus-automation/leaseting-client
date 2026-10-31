@@ -45,6 +45,7 @@
           [class]="enabled() ? 'bg-primary' : 'bg-border'"
           [attr.aria-checked]="enabled()"
           aria-label="Charge late fees"
+          [disabled]="!canManage()"
           (click)="setEnabled(!enabled())"
         >
           <span
@@ -55,10 +56,12 @@
       </div>
 
       @if (enabled()) {
-        <label class="flex w-full flex-col gap-1.5">
+        <label for="late-fee-grace" class="flex w-full flex-col gap-1.5">
           <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Grace</span>
           <p-inputnumber
+            inputId="late-fee-grace"
             formControlName="graceDays"
+            [readonly]="!canManage()"
             [min]="0"
             [max]="60"
             suffix=" days"
@@ -77,11 +80,13 @@
             [options]="basisOptions"
             [value]="basis()"
             ariaLabel="Fee basis"
+            [disabled]="!canManage()"
             (valueChange)="setBasis($event)"
           />
           @if (basis() === 'FIXED') {
             <p-inputnumber
               formControlName="amount"
+              [readonly]="!canManage()"
               mode="currency"
               currency="PHP"
               locale="en-PH"
@@ -93,6 +98,7 @@
           } @else {
             <p-inputnumber
               formControlName="percent"
+              [readonly]="!canManage()"
               [min]="0"
               [max]="100"
               [minFractionDigits]="2"
@@ -108,10 +114,12 @@
           }
         </fieldset>
 
-        <label class="flex w-full flex-col gap-1.5">
+        <label for="late-fee-charge-item" class="flex w-full flex-col gap-1.5">
           <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Post as</span>
           <p-select
+            inputId="late-fee-charge-item"
             formControlName="chargeItemId"
+            [readonly]="!canManage()"
             [options]="chargeItemOptions()"
             optionLabel="label"
             optionValue="value"
@@ -125,24 +133,28 @@
         </label>
       }
 
-      <div class="flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-          [disabled]="saving() || payload() === null"
-        >
-          @if (saving()) {
-            <span
-              class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner"
-              aria-hidden="true"
-            ></span>
+      @if (canManage()) {
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+            [disabled]="saving() || payload() === null"
+          >
+            @if (saving()) {
+              <span
+                class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner"
+                aria-hidden="true"
+              ></span>
+            }
+            <span>Save</span>
+          </button>
+          @if (saveError(); as message) {
+            <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
           }
-          <span>Save</span>
-        </button>
-        @if (saveError(); as message) {
-          <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
-        }
-      </div>
+        </div>
+      } @else {
+        <p class="text-[12.5px] text-muted">Your role can view late fees but not change them.</p>
+      }
     </form>
   }
 </section>

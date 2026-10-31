@@ -15,7 +15,7 @@
   } @else if (items(); as list) {
     <div class="overflow-hidden rounded-base border border-border">
       @if (list.length === 0) {
-        <p class="px-4 py-6 text-center text-[13px] text-muted">No property types yet. Add the first one below.</p>
+        <p class="px-4 py-6 text-center text-[13px] text-muted">No property types yet.{{ canManage() ? ' Add the first one below.' : '' }}</p>
       } @else {
         <ul class="m-0 list-none p-0">
           @for (item of list; track item.id) {
@@ -71,7 +71,7 @@
 
               <span class="flex-1"></span>
 
-              @if (editingId() !== item.id) {
+              @if (canManage() && editingId() !== item.id) {
                 <button
                   type="button"
                   class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
@@ -109,34 +109,36 @@
         </ul>
       }
 
-      <div class="border-t border-border bg-surface px-4 py-2.5">
-        <div class="flex items-center gap-2">
-          <svg pIcon="plus" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
-          <input
-            type="text"
-            class="h-8 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
-            placeholder="Add a type, e.g. Dormitory"
-            aria-label="New property type name"
-            [value]="newName()"
-            (input)="newName.set($any($event.target).value); createError.set(null)"
-            (keydown.enter)="submitCreate()"
-          />
-          <button
-            type="button"
-            class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-            [disabled]="creating() || newName().trim().length === 0"
-            (click)="submitCreate()"
-          >
-            @if (creating()) {
-              <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
-            }
-            <span>Add</span>
-          </button>
+      @if (canManage()) {
+        <div class="border-t border-border bg-surface px-4 py-2.5">
+          <div class="flex items-center gap-2">
+            <svg pIcon="plus" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+            <input
+              type="text"
+              class="h-8 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
+              placeholder="Add a type, e.g. Dormitory"
+              aria-label="New property type name"
+              [value]="newName()"
+              (input)="newName.set($any($event.target).value); createError.set(null)"
+              (keydown.enter)="submitCreate()"
+            />
+            <button
+              type="button"
+              class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+              [disabled]="creating() || newName().trim().length === 0"
+              (click)="submitCreate()"
+            >
+              @if (creating()) {
+                <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+              }
+              <span>Add</span>
+            </button>
+          </div>
+          @if (createError(); as message) {
+            <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+          }
         </div>
-        @if (createError(); as message) {
-          <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
-        }
-      </div>
+      }
     </div>
   }
 </section>

@@ -17,6 +17,9 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import Fuse from 'fuse.js';
 import hotkeys from 'hotkeys-js';
 
+import { AuthService } from '../../../core/auth/auth.service';
+import type { Permission } from '../../../core/auth/permissions';
+import { visibleSettingsGroups } from '../../../modules/settings/settings-nav';
 import { TenantsService } from '../../../modules/tenants/services/tenants.service';
 import { CommandPaletteService } from './command-palette.service';
 
@@ -29,6 +32,8 @@ interface Command {
   keywords: string;
   route: string;
   queryParams?: Record<string, string>;
+  /** Every code the destination asks for. Without them the command isn't offered. */
+  permissions?: Permission[];
 }
 
 interface PaletteItem {
@@ -42,27 +47,29 @@ interface PaletteItem {
 
 const COMMANDS: Command[] = [
   { id: 'nav-dashboard', label: 'Dashboard', icon: 'home', group: 'Go to', keywords: 'home overview start', route: '/dashboard' },
-  { id: 'nav-calendar', label: 'Calendar', icon: 'calendar', group: 'Go to', keywords: 'schedule agenda dates lease expiry bills due onboarding move in', route: '/calendar' },
-  { id: 'nav-properties', label: 'Properties', icon: 'building', group: 'Go to', keywords: 'buildings portfolio floors units', route: '/properties' },
-  { id: 'nav-tenants', label: 'Tenants', icon: 'users', group: 'Go to', keywords: 'people renters residents', route: '/tenants' },
-  { id: 'nav-leases', label: 'Leases', icon: 'file-edit', group: 'Go to', keywords: 'contracts agreements rent', route: '/leases' },
-  { id: 'nav-kit', label: 'Ask Kit', icon: 'comments', group: 'Go to', keywords: 'kit chat ask', route: '/kit' },
-  { id: 'nav-bills', label: 'Bills', icon: 'wallet', group: 'Go to', keywords: 'payments charges rent utilities invoices', route: '/bills' },
-  { id: 'nav-submissions', label: 'Payment submissions', icon: 'inbox', group: 'Go to', keywords: 'payment reviews residence care proof', route: '/bills/submissions' },
-  { id: 'nav-work-orders', label: 'Work Orders', icon: 'wrench', group: 'Go to', keywords: 'maintenance repairs tickets', route: '/work-orders' },
-  { id: 'nav-parking', label: 'Parking Overview', icon: 'car', group: 'Go to', keywords: 'parking monitoring occupancy spaces vehicles attendants activity void shift cash', route: '/parking' },
-  { id: 'nav-reports', label: 'Reports', icon: 'chart-bar', group: 'Go to', keywords: 'analytics occupancy export catalog', route: '/reports' },
-  { id: 'nav-revenue-by-tenant', label: 'Revenue by Tenant', hint: 'Report', icon: 'users', group: 'Go to', keywords: 'revenue by tenant sales by customer details billed collected ledger money in', route: '/reports/revenue-by-tenant' },
-  { id: 'nav-portfolio-overview', label: 'Portfolio Overview', hint: 'Report', icon: 'chart-bar', group: 'Go to', keywords: 'collections aging occupancy dashboard', route: '/reports/portfolio-overview' },
-  { id: 'nav-ar-aging-summary', label: 'AR Aging', hint: 'Report', icon: 'chart-pie', group: 'Go to', keywords: 'ar aging who owes you receivables arrears overdue buckets by tenant', route: '/reports/ar-aging-summary' },
-  { id: 'nav-ar-aging-detail', label: 'Unpaid Bills', hint: 'Report', icon: 'exclamation-circle', group: 'Go to', keywords: 'ar aging detail who owes you unpaid bills overdue days late worklist', route: '/reports/ar-aging-detail' },
-  { id: 'nav-delinquency', label: 'Delinquency', hint: 'Report', icon: 'bell', group: 'Go to', keywords: 'delinquency late payers chronic sms reminders chase collections', route: '/reports/delinquency' },
+  { id: 'nav-calendar', label: 'Calendar', icon: 'calendar', group: 'Go to', keywords: 'schedule agenda dates lease expiry bills due onboarding move in', route: '/calendar', permissions: ['leases:view', 'bills:view'] },
+  { id: 'nav-properties', label: 'Properties', icon: 'building', group: 'Go to', keywords: 'buildings portfolio floors units', route: '/properties', permissions: ['properties:view'] },
+  { id: 'nav-tenants', label: 'Tenants', icon: 'users', group: 'Go to', keywords: 'people renters residents', route: '/tenants', permissions: ['tenants:view'] },
+  { id: 'nav-leases', label: 'Leases', icon: 'file-edit', group: 'Go to', keywords: 'contracts agreements rent', route: '/leases', permissions: ['leases:view'] },
+  { id: 'nav-kit', label: 'Ask Kit', icon: 'comments', group: 'Go to', keywords: 'kit chat ask', route: '/kit', permissions: ['kit:use'] },
+  { id: 'nav-bills', label: 'Bills', icon: 'wallet', group: 'Go to', keywords: 'payments charges rent utilities invoices', route: '/bills', permissions: ['bills:view'] },
+  { id: 'nav-submissions', label: 'Payment submissions', icon: 'inbox', group: 'Go to', keywords: 'payment reviews residence care proof', route: '/bills/submissions', permissions: ['payment_submissions:view'] },
+  { id: 'nav-work-orders', label: 'Work Orders', icon: 'wrench', group: 'Go to', keywords: 'maintenance repairs tickets', route: '/work-orders', permissions: ['maintenance_requests:view'] },
+  { id: 'nav-parking', label: 'Parking Overview', icon: 'car', group: 'Go to', keywords: 'parking monitoring occupancy spaces vehicles attendants activity void shift cash', route: '/parking', permissions: ['parking:view'] },
+  { id: 'nav-reports', label: 'Reports', icon: 'chart-bar', group: 'Go to', keywords: 'analytics occupancy export catalog', route: '/reports', permissions: ['reports:view'] },
+  { id: 'nav-revenue-by-tenant', label: 'Revenue by Tenant', hint: 'Report', icon: 'users', group: 'Go to', keywords: 'revenue by tenant sales by customer details billed collected ledger money in', route: '/reports/revenue-by-tenant', permissions: ['reports:view'] },
+  { id: 'nav-portfolio-overview', label: 'Portfolio Overview', hint: 'Report', icon: 'chart-bar', group: 'Go to', keywords: 'collections aging occupancy dashboard', route: '/reports/portfolio-overview', permissions: ['reports:view'] },
+  { id: 'nav-ar-aging-summary', label: 'AR Aging', hint: 'Report', icon: 'chart-pie', group: 'Go to', keywords: 'ar aging who owes you receivables arrears overdue buckets by tenant', route: '/reports/ar-aging-summary', permissions: ['reports:view'] },
+  { id: 'nav-ar-aging-detail', label: 'Unpaid Bills', hint: 'Report', icon: 'exclamation-circle', group: 'Go to', keywords: 'ar aging detail who owes you unpaid bills overdue days late worklist', route: '/reports/ar-aging-detail', permissions: ['reports:view'] },
+  { id: 'nav-delinquency', label: 'Delinquency', hint: 'Report', icon: 'bell', group: 'Go to', keywords: 'delinquency late payers chronic sms reminders chase collections', route: '/reports/delinquency', permissions: ['reports:view'] },
   { id: 'nav-kb', label: 'Knowledge Base', icon: 'book', group: 'Go to', keywords: 'articles help docs', route: '/knowledge-base' },
   { id: 'nav-settings', label: 'Settings', icon: 'cog', group: 'Go to', keywords: 'organization team preferences', route: '/settings' },
-  { id: 'act-new-property', label: 'New property', hint: 'Create', icon: 'plus', group: 'Actions', keywords: 'add create building register', route: '/properties', queryParams: { create: '1' } },
-  { id: 'act-new-tenant', label: 'Onboard tenant', hint: 'Create', icon: 'user-plus', group: 'Actions', keywords: 'add create renter person new tenant onboarding move in', route: '/tenants', queryParams: { create: '1' } },
-  { id: 'act-new-bill', label: 'New bill', hint: 'Create', icon: 'plus-circle', group: 'Actions', keywords: 'add create charge rent utility invoice', route: '/bills', queryParams: { create: '1' } },
-  { id: 'act-unpaid-bills', label: 'View unpaid bills', hint: 'Filter', icon: 'exclamation-circle', group: 'Actions', keywords: 'overdue outstanding due money', route: '/bills', queryParams: { status: 'UNPAID' } },
+  { id: 'nav-users', label: 'Users', hint: 'Settings', icon: 'users', group: 'Go to', keywords: 'team staff people members invite roles access deactivate', route: '/settings/users', permissions: ['members:view'] },
+  { id: 'nav-audit-log', label: 'Audit log', hint: 'Settings', icon: 'history', group: 'Go to', keywords: 'audit history changes who changed roles invitations', route: '/settings/users', queryParams: { tab: 'audit' }, permissions: ['members:update'] },
+  { id: 'act-new-property', label: 'New property', hint: 'Create', icon: 'plus', group: 'Actions', keywords: 'add create building register', route: '/properties', queryParams: { create: '1' }, permissions: ['properties:manage'] },
+  { id: 'act-new-tenant', label: 'Onboard tenant', hint: 'Create', icon: 'user-plus', group: 'Actions', keywords: 'add create renter person new tenant onboarding move in', route: '/tenants', queryParams: { create: '1' }, permissions: ['leases:manage', 'tenants:manage'] },
+  { id: 'act-new-bill', label: 'New bill', hint: 'Create', icon: 'plus-circle', group: 'Actions', keywords: 'add create charge rent utility invoice', route: '/bills', queryParams: { create: '1' }, permissions: ['bills:manage'] },
+  { id: 'act-unpaid-bills', label: 'View unpaid bills', hint: 'Filter', icon: 'exclamation-circle', group: 'Actions', keywords: 'overdue outstanding due money', route: '/bills', queryParams: { status: 'UNPAID' }, permissions: ['bills:view'] },
 ];
 
 @Component({
@@ -74,17 +81,32 @@ const COMMANDS: Command[] = [
 export class CommandPalette {
   private readonly palette = inject(CommandPaletteService);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
   private readonly tenants = inject(TenantsService);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly fuse = new Fuse(COMMANDS, {
-    keys: [
-      { name: 'label', weight: 0.7 },
-      { name: 'keywords', weight: 0.3 },
-    ],
-    threshold: 0.4,
-    ignoreLocation: true,
+  /** The commands the session's permissions open; Settings only while one of its pages is open. */
+  private readonly commands = computed(() => {
+    const showSettings = visibleSettingsGroups((code) => this.auth.can(code)).length > 0;
+    return COMMANDS.filter(
+      (command) =>
+        this.auth.canAll(command.permissions ?? []) && (command.id !== 'nav-settings' || showSettings),
+    );
   });
+
+  private readonly fuse = computed(
+    () =>
+      new Fuse(this.commands(), {
+        keys: [
+          { name: 'label', weight: 0.7 },
+          { name: 'keywords', weight: 0.3 },
+        ],
+        threshold: 0.4,
+        ignoreLocation: true,
+      }),
+  );
+
+  private readonly canSearchTenants = computed(() => this.auth.can('tenants:view'));
 
   readonly isOpen = this.palette.isOpen;
   readonly query = signal('');
@@ -98,7 +120,7 @@ export class CommandPalette {
       distinctUntilChanged(),
       switchMap((q) => {
         const trimmed = q.trim();
-        if (trimmed.length < 2) return of([]);
+        if (trimmed.length < 2 || !this.canSearchTenants()) return of([]);
         return this.tenants.list({ q: trimmed, limit: 5 }).pipe(
           map((result) => result.data),
         );
@@ -109,7 +131,7 @@ export class CommandPalette {
 
   readonly items = computed<PaletteItem[]>(() => {
     const q = this.query().trim();
-    const commands = q ? this.fuse.search(q).map((hit) => hit.item) : COMMANDS;
+    const commands = q ? this.fuse().search(q).map((hit) => hit.item) : this.commands();
 
     const commandItems: PaletteItem[] = commands.map((command) => ({
       id: command.id,

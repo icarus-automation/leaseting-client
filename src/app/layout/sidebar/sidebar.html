@@ -4,7 +4,7 @@
   </a>
 
   <nav class="sidebar-nav">
-    @for (section of sections; track section.label) {
+    @for (section of sections(); track section.label) {
       <div class="nav-section" [class.nav-section--apps]="section.type === 'apps'">
         <span class="nav-section-label" aria-hidden="true">{{ section.label }}</span>
         <ul class="nav-list" role="list">
@@ -52,15 +52,17 @@
     }
   </nav>
 
-  <div class="sidebar-bottom">
-    <a
-      class="nav-item"
-      [class.nav-item--active]="isActive(settingsNav.route)"
-      [routerLink]="settingsNav.route"
-      [attr.aria-current]="isActive(settingsNav.route) ? 'page' : null"
-    >
-      <svg [pIcon]="settingsNav.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
-      <span class="nav-label">{{ settingsNav.label }}</span>
-    </a>
-  </div>
+  @if (showSettings()) {
+    <div class="sidebar-bottom">
+      <a
+        class="nav-item"
+        [class.nav-item--active]="isActive(settingsNav.route)"
+        [routerLink]="settingsNav.route"
+        [attr.aria-current]="isActive(settingsNav.route) ? 'page' : null"
+      >
+        <svg [pIcon]="settingsNav.icon" class="nav-icon" [size]="16" aria-hidden="true"></svg>
+        <span class="nav-label">{{ settingsNav.label }}</span>
+      </a>
+    </div>
+  }
 </aside>

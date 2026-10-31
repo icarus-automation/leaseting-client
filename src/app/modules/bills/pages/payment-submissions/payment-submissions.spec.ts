@@ -1,4 +1,4 @@
-import { Component, input, model, output, signal } from '@angular/core';
+import { Component, input, model, output } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
@@ -63,7 +63,7 @@ describe('PaymentSubmissions', () => {
     await TestBed.configureTestingModule({
       imports: [PaymentSubmissions],
       providers: [
-        { provide: AuthService, useValue: { isFinancialAdmin: signal(true) } },
+        { provide: AuthService, useValue: { can: () => true } },
         provideRouter([]),
         { provide: PaymentSubmissionsService, useValue: api },
         { provide: PendingPaymentSubmissionsService, useValue: pendingSubmissions },

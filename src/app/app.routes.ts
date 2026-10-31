@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard, guestGuard } from './core/auth/auth.guard';
+import { permissionGuard } from './core/auth/permission.guard';
 
 export const routes: Routes = [
   {
@@ -8,6 +9,11 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     loadChildren: () =>
       import('./modules/auth/auth.routes').then(m => m.AUTH_ROUTES),
+  },
+  {
+    path: 'accept-invite',
+    loadChildren: () =>
+      import('./modules/auth/invite.routes').then(m => m.INVITE_ROUTES),
   },
   {
     path: '',
@@ -23,14 +29,17 @@ export const routes: Routes = [
       },
       {
         path: 'calendar',
+        canActivate: [permissionGuard('leases:view', 'bills:view')],
         loadComponent: () => import('./modules/calendar/calendar').then(m => m.OpsCalendar),
       },
       {
         path: 'kit',
+        canActivate: [permissionGuard('kit:use')],
         loadChildren: () => import('./modules/kit/kit.routes').then(m => m.KIT_ROUTES),
       },
       {
         path: 'properties',
+        canActivate: [permissionGuard('properties:view')],
         loadChildren: () =>
           import('./modules/properties/properties.routes').then(m => m.PROPERTIES_ROUTES),
       },
@@ -41,6 +50,7 @@ export const routes: Routes = [
       },
       {
         path: 'leases',
+        canActivate: [permissionGuard('leases:view')],
         loadChildren: () =>
           import('./modules/leases/leases.routes').then(m => m.LEASES_ROUTES),
       },
@@ -51,12 +61,14 @@ export const routes: Routes = [
       },
       {
         path: 'work-orders',
+        canActivate: [permissionGuard('maintenance_requests:view')],
         loadChildren: () =>
           import('./modules/work-orders/work-orders.routes').then(m => m.WORK_ORDERS_ROUTES),
       },
       { path: 'maintenance', redirectTo: 'work-orders' },
       {
         path: 'parking',
+        canActivate: [permissionGuard('parking:view')],
         loadChildren: () =>
           import('./modules/parking/parking.routes').then(m => m.PARKING_ROUTES),
       },
@@ -68,6 +80,7 @@ export const routes: Routes = [
       },
       {
         path: 'reports',
+        canActivate: [permissionGuard('reports:view')],
         loadChildren: () =>
           import('./modules/reports/reports.routes').then(m => m.REPORTS_ROUTES),
       },
@@ -76,6 +89,10 @@ export const routes: Routes = [
         data: { contentWidth: 'standard' },
         loadChildren: () =>
           import('./modules/settings/settings.routes').then(m => m.SETTINGS_ROUTES),
+      },
+      {
+        path: 'no-access',
+        loadComponent: () => import('./modules/no-access/no-access').then(m => m.NoAccess),
       },
     ],
   },

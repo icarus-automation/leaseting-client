@@ -46,7 +46,7 @@ export class SubmissionReviewDialog {
   readonly submissionId = input<string | null>(null);
   readonly reviewed = output<void>();
 
-  readonly canMutate = this.auth.isFinancialAdmin;
+  readonly canMutate = computed(() => this.auth.can('payment_submissions:review'));
   readonly billTypeLabels = BILL_TYPE_LABELS;
   readonly submission = signal<PaymentSubmissionResponse | null>(null);
   readonly loading = signal(false);

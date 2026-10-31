@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { map, tap } from 'rxjs';
 
-import { API_BASE_URL, AUTH_ENDPOINTS, ME_ENDPOINT } from '../config/api';
+import { API_BASE_URL, AUTH_ENDPOINTS, INVITATION_ENDPOINTS, ME_ENDPOINT } from '../config/api';
 
 /**
  * Auth is a server-side session cookie (Better Auth) — every API request must
@@ -34,14 +34,18 @@ export const envelopeInterceptor: HttpInterceptorFn = (req, next) => {
 
 /**
  * A 401 from an in-app API call means the session expired or was revoked —
- * reset to the login screen. Excluded: the sign-in call itself and the
- * `/users/me` session probe (the route guards own that redirect — navigating
- * from here while a guard is resolving cancels the guard's navigation and
- * re-triggers it, an infinite loop).
+ * reset to the login screen. Excluded: the sign-in calls themselves, the
+ * public invitation routes (a 401 there is a wrong password on the accept
+ * page, not a lost session), and the `/users/me` session probe (the route
+ * guards own that redirect — navigating from here while a guard is resolving
+ * cancels the guard's navigation and re-triggers it, an infinite loop).
  */
 export const sessionExpiredInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const isSignIn = req.url.endsWith(AUTH_ENDPOINTS.signInEmail);
+  const isSignIn =
+    req.url.endsWith(AUTH_ENDPOINTS.signInEmail) ||
+    req.url.endsWith(AUTH_ENDPOINTS.signInSocial) ||
+    Object.values(INVITATION_ENDPOINTS).some((path) => req.url.endsWith(path));
   const isSessionProbe = req.url.endsWith(ME_ENDPOINT);
 
   return next(req).pipe(

@@ -13,7 +13,6 @@ import type {
   TenantResponse,
   UpdateTenantPayload,
 } from '../../../core/models/tenant.types';
-import type { PortalAccessResponse } from '../../../core/models/portal-access.types';
 import type { TenantRiskProfile } from '../../../core/models/risk.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
 
@@ -61,28 +60,6 @@ export class TenantsService {
 
   deleteDocument(documentId: string): Observable<TenantDocumentItem> {
     return this.http.delete<TenantDocumentItem>(`${API_BASE_URL}/tenant-documents/${documentId}`);
-  }
-
-  getPortalAccess(tenantId: string): Observable<PortalAccessResponse> {
-    return this.http.get<PortalAccessResponse>(`${this.base}/${tenantId}/portal-access`);
-  }
-
-  activatePortalAccess(tenantId: string, email: string): Observable<PortalAccessResponse> {
-    return this.http.post<PortalAccessResponse>(`${this.base}/${tenantId}/portal-access/activate`, {
-      email,
-    });
-  }
-
-  resetPortalAccess(tenantId: string): Observable<PortalAccessResponse> {
-    return this.http.post<PortalAccessResponse>(`${this.base}/${tenantId}/portal-access/reset`, {});
-  }
-
-  disablePortalAccess(tenantId: string): Observable<PortalAccessResponse> {
-    return this.http.post<PortalAccessResponse>(`${this.base}/${tenantId}/portal-access/disable`, {});
-  }
-
-  reactivatePortalAccess(tenantId: string): Observable<PortalAccessResponse> {
-    return this.http.post<PortalAccessResponse>(`${this.base}/${tenantId}/portal-access/reactivate`, {});
   }
 }
 

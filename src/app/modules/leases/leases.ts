@@ -7,6 +7,7 @@ import { MessageService } from 'primeng/api';
 import type { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 
+import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
 import type { GridFilters } from '../../core/models/grid-query.types';
@@ -44,7 +45,10 @@ export class Leases {
   private readonly leases = inject(LeasesService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('leases:manage'));
 
   readonly items = signal<LeaseListItem[]>([]);
   readonly meta = signal<PageMeta | null>(null);
@@ -112,7 +116,7 @@ export class Leases {
   }
 
   canTerminate(lease: LeaseListItem): boolean {
-    return !lease.terminatedAt && !isPastDue(lease.endDate);
+    return this.canManage() && !lease.terminatedAt && !isPastDue(lease.endDate);
   }
 
   openOverflow(event: Event, lease: LeaseListItem): void {

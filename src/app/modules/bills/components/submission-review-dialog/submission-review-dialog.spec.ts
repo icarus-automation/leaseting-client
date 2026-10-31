@@ -100,7 +100,7 @@ describe('SubmissionReviewDialog', () => {
       imports: [SubmissionReviewDialog],
       providers: [
         MessageService,
-        { provide: AuthService, useValue: { isFinancialAdmin: signal(true) } },
+        { provide: AuthService, useValue: { can: () => true } },
         { provide: PaymentSubmissionsService, useValue: api },
       ],
     })

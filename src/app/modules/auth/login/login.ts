@@ -9,19 +9,22 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PIcon } from '@primeicons/angular/p-icon';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { WrongAppError } from '../../../core/auth/audience.util';
+import { googleSignInMessage } from '../../../core/auth/google-sign-in.util';
+import { GoogleButton } from '../../../shared/ui/google-button/google-button';
 import { AuthShell } from '../auth-shell/auth-shell';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, PIcon, AuthShell],
+  imports: [ReactiveFormsModule, RouterLink, PIcon, AuthShell, GoogleButton],
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -29,6 +32,8 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly emailInput = viewChild<ElementRef<HTMLInputElement>>('emailInput');
@@ -40,6 +45,7 @@ export class Login {
   });
 
   readonly loading = signal(false);
+  readonly googleLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly showPassword = signal(false);
   private readonly submitted = signal(false);
@@ -58,10 +64,45 @@ export class Login {
 
   constructor() {
     afterNextRender(() => this.emailInput()?.nativeElement.focus());
+    this.showGoogleRefusal();
   }
 
   togglePassword(): void {
     this.showPassword.update((shown) => !shown);
+  }
+
+  continueWithGoogle(): void {
+    if (this.googleLoading()) return;
+    const origin = this.document.location.origin;
+    this.googleLoading.set(true);
+    this.errorMessage.set(null);
+    this.auth
+      .startGoogleSignIn({ callbackURL: `${origin}/dashboard`, errorCallbackURL: `${origin}/login` })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (url) => this.document.location.assign(url),
+        error: (error: unknown) => {
+          this.googleLoading.set(false);
+          this.errorMessage.set(
+            error instanceof HttpErrorResponse && error.status === 404
+              ? "Google sign-in isn't turned on for Leaseting. Use your email and password."
+              : "Couldn't open Google sign-in. Try again, or use your email and password.",
+          );
+        },
+      });
+  }
+
+  /** Google sends a refused sign-in back here with `error`; say why once, then drop it from the URL. */
+  private showGoogleRefusal(): void {
+    const message = googleSignInMessage(this.route.snapshot.queryParamMap.get('error'));
+    if (!message) return;
+    this.errorMessage.set(message);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { error: null, error_description: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   onSubmit(): void {

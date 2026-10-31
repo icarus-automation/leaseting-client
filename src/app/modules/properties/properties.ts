@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 
+import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
 import type { PropertyListItem, PropertyResponse } from '../../core/models/property.types';
@@ -28,7 +29,10 @@ export class Properties {
   private readonly router = inject(Router);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('properties:manage'));
 
   readonly items = signal<PropertyListItem[]>([]);
   readonly meta = signal<PageMeta | null>(null);
@@ -43,7 +47,9 @@ export class Properties {
   constructor() {
     this.load(1);
 
-    watchCreateParam(() => this.openCreate());
+    watchCreateParam(() => {
+      if (this.canManage()) this.openCreate();
+    });
   }
 
   load(page: number): void {

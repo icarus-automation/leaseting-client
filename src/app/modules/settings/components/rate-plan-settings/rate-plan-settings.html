@@ -30,7 +30,7 @@
     } @else {
       <div class="overflow-hidden rounded-base border border-border">
         @if (list.length === 0) {
-          <p class="px-4 py-6 text-center text-[13px] text-muted">No rate plans yet. Add the first one below.</p>
+          <p class="px-4 py-6 text-center text-[13px] text-muted">No rate plans yet.{{ canManage() ? ' Add the first one below.' : '' }}</p>
         } @else {
           <ul class="m-0 list-none p-0">
             @for (item of list; track item.id) {
@@ -56,9 +56,10 @@
                         ariaLabel="Billing unit"
                         (valueChange)="setBasis(editForm, $event)"
                       />
-                      <label class="flex items-center gap-1.5 text-[12.5px] text-muted">
+                      <label for="rate-plan-edit-increment" class="flex items-center gap-1.5 text-[12.5px] text-muted">
                         <span class="sr-only">Increment</span>
                         <p-inputnumber
+                          inputId="rate-plan-edit-increment"
                           formControlName="increment"
                           [min]="1"
                           [max]="365"
@@ -96,11 +97,12 @@
                         formGroupName="amounts"
                       >
                         @for (cell of priceCells(item); track cell.id) {
-                          <label class="flex min-w-0 flex-col gap-1">
+                          <label [for]="'rate-plan-edit-amount-' + cell.id" class="flex min-w-0 flex-col gap-1">
                             <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                               {{ cell.name }}
                             </span>
                             <p-inputnumber
+                              [inputId]="'rate-plan-edit-amount-' + cell.id"
                               [formControlName]="cell.id"
                               mode="currency"
                               currency="PHP"
@@ -181,11 +183,12 @@
                                 formGroupName="amounts"
                               >
                                 @for (cell of priceCells(item); track cell.id) {
-                                  <label class="flex min-w-0 flex-col gap-1">
+                                  <label [for]="'rate-plan-edit-band-' + i + '-' + cell.id" class="flex min-w-0 flex-col gap-1">
                                     <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                                       {{ cell.name }}
                                     </span>
                                     <p-inputnumber
+                                      [inputId]="'rate-plan-edit-band-' + i + '-' + cell.id"
                                       [formControlName]="cell.id"
                                       mode="currency"
                                       currency="PHP"
@@ -256,11 +259,12 @@
                             formGroupName="overtimeAmounts"
                           >
                             @for (cell of priceCells(item); track cell.id) {
-                              <label class="flex min-w-0 flex-col gap-1">
+                              <label [for]="'rate-plan-edit-overtime-' + cell.id" class="flex min-w-0 flex-col gap-1">
                                 <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                                   {{ cell.name }}
                                 </span>
                                 <p-inputnumber
+                                  [inputId]="'rate-plan-edit-overtime-' + cell.id"
                                   [formControlName]="cell.id"
                                   mode="currency"
                                   currency="PHP"
@@ -340,39 +344,41 @@
                       </div>
                     </div>
 
-                    <div class="flex shrink-0 items-center gap-2">
-                      <button
-                        type="button"
-                        class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                        [attr.aria-label]="'Edit ' + item.name"
-                        [attr.title]="'Edit ' + item.name"
-                        (click)="startEdit(item)"
-                      >
-                        <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
-                      </button>
-                      @if (item.isArchived) {
+                    @if (canManage()) {
+                      <div class="flex shrink-0 items-center gap-2">
                         <button
                           type="button"
-                          class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                          [attr.aria-label]="'Restore ' + item.name"
-                          [disabled]="busyId() === item.id"
-                          (click)="restore(item)"
+                          class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                          [attr.aria-label]="'Edit ' + item.name"
+                          [attr.title]="'Edit ' + item.name"
+                          (click)="startEdit(item)"
                         >
-                          <svg pIcon="undo" [size]="12" aria-hidden="true"></svg>
-                          <span>Restore</span>
+                          <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
                         </button>
-                      } @else {
-                        <button
-                          type="button"
-                          class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                          [attr.aria-label]="'Archive ' + item.name"
-                          [disabled]="busyId() === item.id"
-                          (click)="confirmArchive(item)"
-                        >
-                          Archive
-                        </button>
-                      }
-                    </div>
+                        @if (item.isArchived) {
+                          <button
+                            type="button"
+                            class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                            [attr.aria-label]="'Restore ' + item.name"
+                            [disabled]="busyId() === item.id"
+                            (click)="restore(item)"
+                          >
+                            <svg pIcon="undo" [size]="12" aria-hidden="true"></svg>
+                            <span>Restore</span>
+                          </button>
+                        } @else {
+                          <button
+                            type="button"
+                            class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                            [attr.aria-label]="'Archive ' + item.name"
+                            [disabled]="busyId() === item.id"
+                            (click)="confirmArchive(item)"
+                          >
+                            Archive
+                          </button>
+                        }
+                      </div>
+                    }
                   </div>
                 }
               </li>
@@ -380,7 +386,7 @@
           </ul>
         }
 
-        @if (activeTypes().length > 0) {
+        @if (canManage() && activeTypes().length > 0) {
           <div class="border-t border-border bg-surface px-4 py-3">
             <form class="flex flex-col gap-3" [formGroup]="createForm" (ngSubmit)="submitCreate()">
               <div class="flex flex-wrap items-center gap-2">
@@ -399,9 +405,10 @@
                   ariaLabel="Billing unit for the new rate plan"
                   (valueChange)="setBasis(createForm, $event)"
                 />
-                <label class="flex items-center gap-1.5 text-[12.5px] text-muted">
+                <label for="rate-plan-new-increment" class="flex items-center gap-1.5 text-[12.5px] text-muted">
                   <span class="sr-only">Increment</span>
                   <p-inputnumber
+                    inputId="rate-plan-new-increment"
                     formControlName="increment"
                     [min]="1"
                     [max]="365"
@@ -428,11 +435,12 @@
                   formGroupName="amounts"
                 >
                   @for (type of activeTypes(); track type.id) {
-                    <label class="flex min-w-0 flex-col gap-1">
+                    <label [for]="'rate-plan-new-amount-' + type.id" class="flex min-w-0 flex-col gap-1">
                       <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                         {{ type.name }}
                       </span>
                       <p-inputnumber
+                        [inputId]="'rate-plan-new-amount-' + type.id"
                         [formControlName]="type.id"
                         mode="currency"
                         currency="PHP"
@@ -503,11 +511,12 @@
                           formGroupName="amounts"
                         >
                           @for (type of activeTypes(); track type.id) {
-                            <label class="flex min-w-0 flex-col gap-1">
+                            <label [for]="'rate-plan-new-band-' + i + '-' + type.id" class="flex min-w-0 flex-col gap-1">
                               <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                                 {{ type.name }}
                               </span>
                               <p-inputnumber
+                                [inputId]="'rate-plan-new-band-' + i + '-' + type.id"
                                 [formControlName]="type.id"
                                 mode="currency"
                                 currency="PHP"
@@ -578,11 +587,12 @@
                       formGroupName="overtimeAmounts"
                     >
                       @for (type of activeTypes(); track type.id) {
-                        <label class="flex min-w-0 flex-col gap-1">
+                        <label [for]="'rate-plan-new-overtime-' + type.id" class="flex min-w-0 flex-col gap-1">
                           <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                             {{ type.name }}
                           </span>
                           <p-inputnumber
+                            [inputId]="'rate-plan-new-overtime-' + type.id"
                             [formControlName]="type.id"
                             mode="currency"
                             currency="PHP"
@@ -604,7 +614,7 @@
               <p class="mt-1 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
             }
           </div>
-        } @else {
+        } @else if (canManage()) {
           <div class="border-t border-border bg-surface px-4 py-3 text-[13px] text-muted">
             Restore or
             <a routerLink="/settings/vehicle-types" class="font-medium text-primary hover:underline">add a vehicle type</a>

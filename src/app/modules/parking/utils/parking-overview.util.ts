@@ -63,10 +63,12 @@ export function varianceLabel(variance: string | null): string {
   return state === 'short' ? `Short ${magnitude}` : `Over ${magnitude}`;
 }
 
-export function canVoid(session: ParkingOverviewSession, isFinancialAdmin: boolean): boolean {
-  return session.status === 'OPEN' && isFinancialAdmin;
+/** `allowed`: the session holds `parking:void`. */
+export function canVoid(session: ParkingOverviewSession, allowed: boolean): boolean {
+  return session.status === 'OPEN' && allowed;
 }
 
-export function canConfirm(shift: ParkingOverviewShift, isFinancialAdmin: boolean): boolean {
-  return shift.status === 'DECLARED' && isFinancialAdmin;
+/** `allowed`: the session holds `parking:confirm_shift`. */
+export function canConfirm(shift: ParkingOverviewShift, allowed: boolean): boolean {
+  return shift.status === 'DECLARED' && allowed;
 }

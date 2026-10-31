@@ -19,6 +19,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import type { Subscription } from 'rxjs';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { StaffMaintenanceRequest } from '../../../../core/models/maintenance-request.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
@@ -43,6 +44,7 @@ import { RequestPhotos } from '../request-photos/request-photos';
 })
 export class RequestDetailDialog {
   private readonly requests = inject(MaintenanceRequestsService);
+  private readonly auth = inject(AuthService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
@@ -73,7 +75,7 @@ export class RequestDetailDialog {
   });
   readonly action = computed(() => {
     const request = this.current();
-    return request ? nextRequestAction(request.status) : null;
+    return request && this.auth.can('maintenance_requests:manage') ? nextRequestAction(request.status) : null;
   });
   readonly tenantName = computed(() => {
     const request = this.current();

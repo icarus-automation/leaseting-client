@@ -118,7 +118,7 @@
           [sessions]="visibleInPark()"
           [now]="now()"
           [showProperty]="propertyId() === 'all'"
-          [canVoid]="canCorrect()"
+          [canVoid]="canVoid()"
           [busyId]="busyId()"
           [filtered]="plateQuery().trim().length > 0"
           [capped]="inParkCapped()"
@@ -136,17 +136,17 @@
         <app-shift-cash-list
           [shifts]="shifts()"
           [showProperty]="propertyId() === 'all'"
-          [canConfirm]="canCorrect()"
+          [canConfirm]="canConfirm()"
           [busyId]="busyId()"
           (confirmRequested)="askConfirmShift($event)"
         />
       }
     }
 
-    @if (!canCorrect()) {
+    @if (!canVoid() && !canConfirm()) {
       <p class="text-[12.5px] text-muted">
-        Voiding a stay and confirming a shift's cash are owner and admin actions. You have read
-        access to everything on this page.
+        Your role can't void a stay or confirm a shift's cash. You have read access to everything on
+        this page.
       </p>
     }
   }

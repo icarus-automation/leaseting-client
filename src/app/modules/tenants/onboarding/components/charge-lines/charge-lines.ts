@@ -17,6 +17,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 
+import { AuthService } from '../../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../../core/models/api.types';
 import type { ChargeItemResponse } from '../../../../../core/models/charge-item.types';
 import { BILL_TYPE_OPTIONS, type BillType } from '../../../../../core/models/enums';
@@ -39,7 +40,11 @@ interface ChargeOption {
 export class ChargeLines {
   private readonly fb = inject(FormBuilder);
   private readonly chargeItems = inject(ChargeItemsService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  /** A new charge item joins the organization's catalog, which is settings:manage. */
+  readonly canCreateItems = computed(() => this.auth.can('settings:manage'));
 
   readonly lines = input.required<ChargeLineArray>();
   readonly busy = input(false);

@@ -8,6 +8,7 @@ import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { forkJoin } from 'rxjs';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import {
   PARKING_ROUNDING_MODE_OPTIONS,
@@ -32,7 +33,10 @@ export class ParkingRulesSettings {
   private readonly rulesApi = inject(ParkingRulesService);
   private readonly ratePlansApi = inject(RatePlansService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('parking_setup:manage'));
 
   readonly roundingOptions = PARKING_ROUNDING_MODE_OPTIONS;
 
@@ -97,6 +101,7 @@ export class ParkingRulesSettings {
   }
 
   submit(): void {
+    if (!this.canManage()) return;
     if (this.livePlans().length === 0) {
       this.saveError.set('Add a live rate plan first.');
       return;

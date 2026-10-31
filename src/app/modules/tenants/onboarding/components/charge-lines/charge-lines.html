@@ -137,7 +137,7 @@
       <svg pIcon="plus" [size]="11" aria-hidden="true"></svg>
       <span>{{ addLabel() }}</span>
     </button>
-    @if (!newItemMode()) {
+    @if (!newItemMode() && canCreateItems()) {
       <button
         type="button"
         class="inline-flex items-center gap-1.5 rounded-[2px] text-[13px] font-medium text-muted transition-colors duration-150 ease-out hover:text-body hover:underline motion-reduce:transition-none"

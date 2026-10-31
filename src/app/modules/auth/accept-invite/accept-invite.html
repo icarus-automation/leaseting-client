@@ -1,0 +1,217 @@
+<app-auth-shell>
+  @if (joined(); as done) {
+    <div class="flex flex-col gap-4" role="status">
+      <span class="flex h-10 w-10 items-center justify-center rounded-full bg-muted-success text-success">
+        <svg pIcon="check" [size]="18" aria-hidden="true"></svg>
+      </span>
+      <header>
+        <h1 class="font-heading text-2xl font-semibold leading-[1.2] tracking-[-0.01em] text-heading">
+          You joined {{ done.organizationName }}
+        </h1>
+        <p class="mt-1.5 text-[13.5px] leading-[1.55] text-muted">
+          Sign in with {{ done.email }} and the password you just used.
+        </p>
+      </header>
+      <a
+        routerLink="/login"
+        class="inline-flex h-11 w-full items-center justify-center rounded-base bg-primary text-sm font-semibold text-primary-foreground no-underline transition-colors duration-150 ease-out hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring motion-reduce:transition-none"
+      >
+        Sign in
+      </a>
+    </div>
+  } @else if (problem(); as issue) {
+    <div class="flex flex-col gap-4">
+      <span
+        class="flex h-10 w-10 items-center justify-center rounded-full"
+        [class]="issue.retryable || issue.kind === 'accepted' ? 'bg-surface text-muted' : 'bg-muted-destructive text-destructive'"
+      >
+        <svg [pIcon]="issue.kind === 'offline' ? 'wifi' : issue.kind === 'accepted' ? 'check-circle' : 'envelope'" [size]="18" aria-hidden="true"></svg>
+      </span>
+      <div role="alert">
+        <h1 class="font-heading text-2xl font-semibold leading-[1.2] tracking-[-0.01em] text-heading">{{ issue.title }}</h1>
+        <p class="mt-1.5 text-[13.5px] leading-[1.55] text-muted">{{ issue.message }}</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        @if (issue.retryable) {
+          <button
+            type="button"
+            class="inline-flex h-11 w-full items-center justify-center rounded-base border-none bg-primary text-sm font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+            (click)="loadPreview()"
+          >
+            Try again
+          </button>
+        }
+        @if (issue.offerSignIn) {
+          <a
+            routerLink="/login"
+            class="inline-flex h-11 w-full items-center justify-center rounded-base border border-border bg-background text-sm font-medium text-heading no-underline transition-colors duration-150 ease-out hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring motion-reduce:transition-none"
+          >
+            Go to sign in
+          </a>
+        }
+      </div>
+    </div>
+  } @else if (preview(); as invite) {
+    <header class="mb-6">
+      <p class="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-primary">You're invited</p>
+      <h1 class="mt-1 font-heading text-2xl font-semibold leading-[1.2] tracking-[-0.01em] text-heading">
+        Join {{ invite.organizationName }}
+      </h1>
+      <p class="mt-1.5 text-[13.5px] leading-[1.55] text-muted">
+        As {{ roleLabel() }} · The link works until {{ invite.expiresAt | date: 'MMM d, h:mm a' }}
+      </p>
+    </header>
+
+    @if (googleNotice(); as notice) {
+      <div
+        class="mb-5 flex items-start gap-2.5 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] leading-[1.5] text-body animate-error-in motion-reduce:animate-none"
+        role="alert"
+      >
+        <svg pIcon="exclamation-circle" class="mt-[3px] shrink-0 text-destructive" [size]="15" aria-hidden="true"></svg>
+        <span>{{ notice }}</span>
+      </div>
+    }
+
+    <app-google-button
+      [loading]="googleLoading()"
+      [disabled]="submitting()"
+      (pressed)="continueWithGoogle()"
+    />
+    <p class="mt-2 text-center text-[12px] leading-[1.5] text-muted">
+      Pick the Google account for <span class="font-medium text-body">{{ invite.email }}</span>.
+    </p>
+
+    <div class="my-5 flex items-center gap-3" aria-hidden="true">
+      <span class="h-px flex-1 bg-border"></span>
+      <span class="text-[12px] text-muted">or use a password</span>
+      <span class="h-px flex-1 bg-border"></span>
+    </div>
+
+    <form class="flex flex-col gap-[18px]" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="invite-email">Email</label>
+        <input
+          id="invite-email"
+          type="email"
+          class="h-11 rounded-base border border-border bg-surface px-3 text-sm text-body outline-none"
+          [value]="invite.email"
+          autocomplete="username"
+          readonly
+          aria-readonly="true"
+        />
+      </div>
+
+      @if (!invite.hasAccount) {
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-medium text-heading" for="invite-name">Your name</label>
+          <input
+            #nameInput
+            id="invite-name"
+            type="text"
+            formControlName="name"
+            autocomplete="name"
+            placeholder="First and last name"
+            class="h-11 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted hover:border-border-strong focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+            aria-required="true"
+            [attr.aria-invalid]="!!errors.fieldError('name', nameMessages)"
+            [attr.aria-describedby]="errors.fieldError('name', nameMessages) ? 'invite-name-error' : null"
+          />
+          @if (errors.fieldError('name', nameMessages); as message) {
+            <p class="text-[12.5px] leading-[1.4] text-destructive" id="invite-name-error">{{ message }}</p>
+          }
+        </div>
+      }
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="invite-password">
+          {{ invite.hasAccount ? 'Your Leaseting password' : 'Create a password' }}
+        </label>
+        <div
+          class="group flex h-11 items-center gap-2.5 rounded-base border border-border bg-background px-3 transition-[border-color,box-shadow] duration-150 ease-out hover:border-border-strong focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring data-[invalid]:border-destructive motion-reduce:transition-none"
+          [attr.data-invalid]="errors.fieldError('password', passwordMessages()) ? '' : null"
+        >
+          <svg
+            pIcon="lock"
+            class="shrink-0 text-muted transition-colors duration-150 ease-out group-focus-within:text-primary group-data-[invalid]:text-destructive motion-reduce:transition-none"
+            [size]="15"
+            aria-hidden="true"
+          ></svg>
+          <input
+            #passwordInput
+            id="invite-password"
+            class="h-full min-w-0 flex-1 border-none bg-transparent text-sm text-body outline-none placeholder:text-muted"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            [attr.autocomplete]="invite.hasAccount ? 'current-password' : 'new-password'"
+            [placeholder]="invite.hasAccount ? 'Enter your password' : minPasswordLength + ' or more characters'"
+            aria-required="true"
+            [attr.aria-invalid]="!!errors.fieldError('password', passwordMessages())"
+            [attr.aria-describedby]="
+              (errors.fieldError('password', passwordMessages()) ? 'invite-password-error ' : '') + 'invite-password-hint'
+            "
+          />
+          <button
+            type="button"
+            class="-mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-base border-none bg-transparent p-0 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+            (click)="togglePassword()"
+            [attr.aria-pressed]="showPassword()"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            <svg [pIcon]="showPassword() ? 'eye-slash' : 'eye'" [size]="15" aria-hidden="true"></svg>
+          </button>
+        </div>
+        @if (errors.fieldError('password', passwordMessages()); as message) {
+          <p class="text-[12.5px] leading-[1.4] text-destructive" id="invite-password-error">{{ message }}</p>
+        }
+        <p class="text-[12px] leading-[1.5] text-muted" id="invite-password-hint">
+          @if (invite.hasAccount) {
+            This email already signs in to Leaseting. Enter that password, or use Google if that's how you sign in.
+          } @else {
+            You'll sign in with {{ invite.email }} and this password.
+          }
+        </p>
+      </div>
+
+      @if (submitError(); as message) {
+        <div
+          class="flex items-start gap-2.5 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] leading-[1.5] text-body animate-error-in motion-reduce:animate-none"
+          role="alert"
+        >
+          <svg pIcon="exclamation-circle" class="mt-[3px] shrink-0 text-destructive" [size]="15" aria-hidden="true"></svg>
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <button
+        type="submit"
+        class="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-base border-none bg-primary text-sm font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:bg-primary-active motion-reduce:transition-none"
+        [disabled]="submitting() || googleLoading()"
+        [attr.aria-busy]="submitting() ? 'true' : null"
+      >
+        @if (submitting()) {
+          <span
+            class="h-[15px] w-[15px] rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner motion-reduce:[animation-duration:1300ms]"
+            aria-hidden="true"
+          ></span>
+          <span>Joining…</span>
+        } @else {
+          <span>Join {{ invite.organizationName }}</span>
+        }
+      </button>
+    </form>
+
+    <p class="mt-6 border-t border-border pt-5 text-[12.5px] leading-[1.55] text-muted">
+      Already joined?
+      <a routerLink="/login" class="font-medium text-primary hover:text-primary-hover hover:underline hover:underline-offset-2">Sign in</a>
+    </p>
+  } @else {
+    <div class="flex flex-col gap-4" aria-hidden="true">
+      <div class="h-3 w-24 animate-pulse rounded-[2px] bg-surface motion-reduce:animate-none"></div>
+      <div class="h-7 w-3/4 animate-pulse rounded-[2px] bg-surface motion-reduce:animate-none"></div>
+      <div class="h-3.5 w-1/2 animate-pulse rounded-[2px] bg-surface motion-reduce:animate-none"></div>
+      <div class="mt-3 h-11 animate-pulse rounded-base bg-surface motion-reduce:animate-none"></div>
+      <div class="h-11 animate-pulse rounded-base bg-surface motion-reduce:animate-none"></div>
+    </div>
+    <p class="sr-only" role="status">Checking your invitation…</p>
+  }
+</app-auth-shell>

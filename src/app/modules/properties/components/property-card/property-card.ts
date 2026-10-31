@@ -14,6 +14,8 @@ import { MediaThumb } from '../media-thumb/media-thumb';
 })
 export class PropertyCard {
   readonly property = input.required<PropertyListItem>();
+  /** Show Edit and Archive: the viewer holds `properties:manage`. */
+  readonly manageable = input(true);
   readonly edit = output<void>();
   readonly archive = output<void>();
 }

@@ -29,6 +29,10 @@ export class FloorPlanViewer {
 
   readonly floor = input.required<FloorDetail>();
   readonly selectedUnitId = input<string | null>(null);
+  /** The viewer holds `units:manage`. */
+  readonly canAddUnits = input(true);
+  /** The viewer holds `properties:manage`, which covers floor plans. */
+  readonly canEditFloor = input(true);
 
   readonly unitClicked = output<FloorUnitItem>();
   readonly uploadPlanRequested = output<void>();

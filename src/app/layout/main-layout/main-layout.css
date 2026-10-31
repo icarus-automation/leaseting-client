@@ -36,8 +36,12 @@
 }
 
 @media (max-width: 1023px) {
+  /* The sidebar's host keeps its own (empty) row once the drawer goes fixed.
+     Without a 1fr content row, a short page splits the spare height between
+     the two auto rows and the header drops down the screen. */
   .app-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
 
   .content-area {

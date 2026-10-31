@@ -5,6 +5,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { PIcon } from '@primeicons/angular/p-icon';
 
+import { AuthService } from '../../core/auth/auth.service';
 import type { BillListItem } from '../../core/models/bill.types';
 import type { LeaseListItem } from '../../core/models/lease.types';
 import type { PropertyListItem } from '../../core/models/property.types';
@@ -28,7 +29,22 @@ export class Home {
   private readonly properties = inject(PropertiesService);
   private readonly leases = inject(LeasesService);
   private readonly bills = inject(BillsService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canUseKit = computed(() => this.auth.can('kit:use'));
+  readonly canCreateProperty = computed(() => this.auth.can('properties:manage'));
+  /** The onboarding wizard writes the tenant as well as the lease. */
+  readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'tenants:manage']));
+  readonly canCreateBill = computed(() => this.auth.can('bills:manage'));
+  readonly canViewParking = computed(() => this.auth.can('parking:view'));
+  /** The overview reads properties, leases and bills together. */
+  readonly canSeeOverview = computed(() => this.auth.canAll(['properties:view', 'leases:view', 'bills:view']));
+  /** The page heading when Kit's card, which carries the greeting, is not part of the role. */
+  readonly welcome = computed(() => {
+    const firstName = this.auth.currentUser()?.name?.trim().split(/\s+/)[0];
+    return firstName ? `Welcome, ${firstName}` : 'Welcome';
+  });
 
   readonly loading = signal(true);
   readonly propertyItems = signal<PropertyListItem[]>([]);
@@ -98,6 +114,10 @@ export class Home {
   }
 
   load(): void {
+    if (!this.canSeeOverview()) {
+      this.loading.set(false);
+      return;
+    }
     this.loading.set(true);
     this.loadFailed.set(false);
     forkJoin({

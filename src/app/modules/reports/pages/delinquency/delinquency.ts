@@ -6,6 +6,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 import { Select } from 'primeng/select';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type {
   DelinquencyReport,
@@ -53,6 +54,7 @@ export class Delinquency {
   private readonly filters = inject(ReportFiltersService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly windowOptions = WINDOW_OPTIONS;
@@ -201,7 +203,7 @@ export class Delinquency {
   }
 
   canSend(tenant: DelinquencyTenant): boolean {
-    return Boolean(this.report()?.smsEnabled) && tenant.chaseBillId !== null;
+    return Boolean(this.report()?.smsEnabled) && tenant.chaseBillId !== null && this.auth.can('bills:manage');
   }
 
   confirmSend(tenant: DelinquencyTenant): void {

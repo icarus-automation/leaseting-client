@@ -5,6 +5,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
 import type {
@@ -21,7 +22,6 @@ import { isPastDue, ordinal } from '../../../../shared/utils/date.util';
 import { isLeaseActive, leaseStatus } from '../../../../shared/utils/lease-status.util';
 import { TenantFormDialog } from '../../components/tenant-form-dialog/tenant-form-dialog';
 import { TenantRiskPanel } from '../../components/tenant-risk-panel/tenant-risk-panel';
-import { ResidenceCareAccess } from '../../components/residence-care-access/residence-care-access';
 import { TenantsService } from '../../services/tenants.service';
 
 interface BillingHistoryRow extends TenantLeaseBillItem {
@@ -43,7 +43,6 @@ const ACCEPTED_DOCUMENT_TYPES = 'application/pdf,image/png,image/jpeg,image/webp
     StatusBadge,
     TenantFormDialog,
     TenantRiskPanel,
-    ResidenceCareAccess,
   ],
   templateUrl: './tenant-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,7 +52,11 @@ export class TenantDetailPage {
   private readonly tenants = inject(TenantsService);
   private readonly toast = inject(MessageService);
   private readonly confirm = inject(ConfirmService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  /** Editing the profile and its documents. */
+  readonly canManage = computed(() => this.auth.can('tenants:manage'));
 
   private readonly params = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,

@@ -29,7 +29,7 @@ describe('OrganizationSettings', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         MessageService,
-        { provide: AuthService, useValue: { isFinancialAdmin: canEdit } },
+        { provide: AuthService, useValue: { can: () => canEdit() } },
       ],
     }).compileComponents();
 

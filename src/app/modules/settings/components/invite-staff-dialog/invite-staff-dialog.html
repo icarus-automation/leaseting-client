@@ -1,0 +1,114 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="Invite staff"
+  subheading="They get an email with a link to join. The link works for 7 days."
+  [dirty]="errors.dirty()"
+  width="32rem"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="invite-staff-form" class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="invite-email">Email</label>
+      <input
+        id="invite-email"
+        type="email"
+        formControlName="email"
+        autocomplete="off"
+        inputmode="email"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="name@company.com"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+        aria-required="true"
+        [attr.aria-invalid]="!!errors.fieldError('email', emailMessages)"
+        [attr.aria-describedby]="errors.fieldError('email', emailMessages) ? 'invite-email-error' : null"
+      />
+      @if (errors.fieldError('email', emailMessages); as message) {
+        <p class="text-[12.5px] text-destructive" id="invite-email-error">{{ message }}</p>
+      }
+    </div>
+
+    <fieldset class="m-0 flex flex-col gap-2 border-none p-0">
+      <legend class="mb-1.5 p-0 text-[13px] font-medium text-heading">Role</legend>
+      @for (choice of roleChoices(); track choice.value) {
+        <label
+          class="flex cursor-pointer items-start gap-3 rounded-base border px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-out has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring motion-reduce:transition-none"
+          [class]="form.controls.role.value === choice.value
+            ? 'border-primary bg-[color-mix(in_oklab,var(--primary)_6%,var(--background))]'
+            : 'border-border bg-background hover:bg-surface'"
+        >
+          <input
+            type="radio"
+            name="role"
+            class="mt-[3px] h-[15px] w-[15px] shrink-0 cursor-pointer accent-primary"
+            [value]="choice.value"
+            formControlName="role"
+            [attr.aria-describedby]="'invite-role-' + choice.value + '-description'"
+          />
+          <span class="flex min-w-0 flex-col gap-0.5">
+            <span class="text-[13.5px] font-medium text-heading">{{ choice.label }}</span>
+            <span class="text-[12.5px] leading-relaxed text-muted" [id]="'invite-role-' + choice.value + '-description'">
+              {{ choice.description }}
+            </span>
+          </span>
+        </label>
+      }
+      <p class="text-[12px] leading-relaxed text-muted">
+        To give someone a custom role, invite them as a Member, then change their role once they join.
+      </p>
+    </fieldset>
+
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[13px] font-medium text-heading" id="invite-property-access">Property access</span>
+      <div
+        class="flex items-start gap-2.5 rounded-base border border-border bg-surface px-3 py-2.5"
+        aria-labelledby="invite-property-access"
+        role="group"
+      >
+        <svg pIcon="building" class="mt-0.5 shrink-0 text-muted" [size]="14" aria-hidden="true"></svg>
+        <span class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-[13px] font-medium text-body">All properties</span>
+          <span class="text-[12px] leading-relaxed text-muted">
+            @if (isAdmin()) {
+              Owners and admins always see every property.
+            } @else {
+              Limiting someone to certain properties isn't available yet, so members see every property.
+            }
+          </span>
+        </span>
+      </div>
+    </div>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="invite-staff-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+      [attr.aria-busy]="saving() ? 'true' : null"
+    >
+      @if (saving()) {
+        <span
+          class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner"
+          aria-hidden="true"
+        ></span>
+        <span>Sending…</span>
+      } @else {
+        <span>Send invitation</span>
+      }
+    </button>
+  </ng-container>
+</app-form-dialog>

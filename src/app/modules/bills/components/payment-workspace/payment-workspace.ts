@@ -78,7 +78,8 @@ export class PaymentWorkspace {
   readonly methodLabels = PAYMENT_METHOD_LABELS;
   readonly sourceLabels = PAYMENT_SOURCE_LABELS;
   readonly acceptedReceiptTypes = ACCEPTED_RECEIPT_TYPES;
-  readonly canMutate = this.auth.isFinancialAdmin;
+  readonly canMutate = computed(() => this.auth.can('payments:record'));
+  readonly canVoid = computed(() => this.auth.can('payments:void'));
 
   readonly form = this.fb.nonNullable.group({
     amount: [null as number | null, [Validators.required, Validators.min(0.01)]],
@@ -258,7 +259,7 @@ export class PaymentWorkspace {
   }
 
   openVoid(payment: PaymentResponse): void {
-    if (!this.canMutate() || payment.isVoided) return;
+    if (!this.canVoid() || payment.isVoided) return;
     this.voidTarget.set(payment);
     this.voidDialogVisible.set(true);
   }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -51,6 +51,7 @@ export class SoaList {
   readonly skeletons = Array.from({ length: 6 });
 
   readonly smsAvailable = this.auth.features;
+  readonly canManage = computed(() => this.auth.can('soa:manage'));
 
   constructor() {
     this.load(1);

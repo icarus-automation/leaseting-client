@@ -32,10 +32,12 @@
         [formGroup]="form"
         (ngSubmit)="submit()"
       >
-        <label class="flex w-full flex-col gap-1.5">
+        <label for="parking-rules-grace" class="flex w-full flex-col gap-1.5">
           <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Grace minutes</span>
           <p-inputnumber
+            inputId="parking-rules-grace"
             formControlName="graceMinutes"
+            [readonly]="!canManage()"
             [min]="0"
             [max]="1440"
             suffix=" min"
@@ -48,12 +50,14 @@
           </span>
         </label>
 
-        <label class="flex w-full flex-col gap-1.5">
+        <label for="parking-rules-default-plan" class="flex w-full flex-col gap-1.5">
           <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
             Default transient plan
           </span>
           <p-select
+            inputId="parking-rules-default-plan"
             formControlName="defaultTransientRatePlanId"
+            [readonly]="!canManage()"
             [options]="planOptions()"
             optionLabel="label"
             optionValue="value"
@@ -74,6 +78,7 @@
             [options]="roundingOptions"
             [value]="form.controls.roundingMode.value"
             ariaLabel="Rounding mode"
+            [disabled]="!canManage()"
             (valueChange)="setRounding($event)"
           />
           <span class="text-[12.5px] leading-relaxed text-muted">
@@ -81,21 +86,25 @@
           </span>
         </fieldset>
 
-        <div class="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-            [disabled]="saving() || form.invalid"
-          >
-            @if (saving()) {
-              <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+        @if (canManage()) {
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              type="submit"
+              class="inline-flex h-8 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+              [disabled]="saving() || form.invalid"
+            >
+              @if (saving()) {
+                <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+              }
+              <span>Save rules</span>
+            </button>
+            @if (saveError(); as message) {
+              <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
             }
-            <span>Save rules</span>
-          </button>
-          @if (saveError(); as message) {
-            <p class="text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
-          }
-        </div>
+          </div>
+        } @else {
+          <p class="text-[12.5px] text-muted">Your role can view parking rules but not change them.</p>
+        }
       </form>
     }
   }

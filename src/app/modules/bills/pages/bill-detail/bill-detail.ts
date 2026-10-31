@@ -29,7 +29,8 @@ export class BillDetailPage {
   private readonly bills = inject(BillsService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
-  readonly canMutateFinance = inject(AuthService).isFinancialAdmin;
+  private readonly auth = inject(AuthService);
+  readonly canRecordPayments = computed(() => this.auth.can('payments:record'));
 
   private readonly params = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,

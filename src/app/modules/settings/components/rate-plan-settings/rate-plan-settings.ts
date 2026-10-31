@@ -16,6 +16,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { forkJoin } from 'rxjs';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import {
   PARKING_BILLING_BASIS_OPTIONS,
@@ -69,7 +70,10 @@ export class RatePlanSettings {
   private readonly vehicleTypesApi = inject(VehicleTypesService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('parking_setup:manage'));
 
   readonly items = signal<RatePlanResponse[] | null>(null);
   readonly vehicleTypes = signal<VehicleTypeResponse[] | null>(null);

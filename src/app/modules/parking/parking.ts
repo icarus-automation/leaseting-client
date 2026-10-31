@@ -75,7 +75,8 @@ export class Parking {
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly canCorrect = this.auth.isFinancialAdmin;
+  readonly canVoid = computed(() => this.auth.can('parking:void'));
+  readonly canConfirm = computed(() => this.auth.can('parking:confirm_shift'));
 
   readonly properties = signal<PropertyListItem[]>([]);
   readonly terminals = signal<ParkingTerminalResponse[]>([]);

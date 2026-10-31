@@ -15,7 +15,7 @@
   } @else if (items(); as list) {
     <div class="overflow-hidden rounded-base border border-border">
       @if (list.length === 0) {
-        <p class="px-4 py-6 text-center text-[13px] text-muted">No charge items yet. Add the first one below.</p>
+        <p class="px-4 py-6 text-center text-[13px] text-muted">No charge items yet.{{ canManage() ? ' Add the first one below.' : '' }}</p>
       } @else {
         <ul class="m-0 list-none p-0">
           @for (item of list; track item.id) {
@@ -96,38 +96,40 @@
                     <span class="text-[12.5px] text-muted">{{ item.defaultAmount | phpCurrency }} default</span>
                   }
 
-                  <span class="flex-1"></span>
+                  @if (canManage()) {
+                    <span class="flex-1"></span>
 
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                    [attr.aria-label]="'Edit ' + item.name"
-                    [attr.title]="'Edit ' + item.name"
-                    (click)="startEdit(item)"
-                  >
-                    <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
-                  </button>
-                  @if (item.isArchived) {
                     <button
                       type="button"
-                      class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                      [attr.aria-label]="'Restore ' + item.name"
-                      [disabled]="busyId() === item.id"
-                      (click)="restore(item)"
+                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                      [attr.aria-label]="'Edit ' + item.name"
+                      [attr.title]="'Edit ' + item.name"
+                      (click)="startEdit(item)"
                     >
-                      <svg pIcon="undo" [size]="12" aria-hidden="true"></svg>
-                      <span>Restore</span>
+                      <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
                     </button>
-                  } @else {
-                    <button
-                      type="button"
-                      class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-                      [attr.aria-label]="'Archive ' + item.name"
-                      [disabled]="busyId() === item.id"
-                      (click)="confirmArchive(item)"
-                    >
-                      Archive
-                    </button>
+                    @if (item.isArchived) {
+                      <button
+                        type="button"
+                        class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                        [attr.aria-label]="'Restore ' + item.name"
+                        [disabled]="busyId() === item.id"
+                        (click)="restore(item)"
+                      >
+                        <svg pIcon="undo" [size]="12" aria-hidden="true"></svg>
+                        <span>Restore</span>
+                      </button>
+                    } @else {
+                      <button
+                        type="button"
+                        class="inline-flex h-7 items-center rounded-base border border-border bg-background px-2 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                        [attr.aria-label]="'Archive ' + item.name"
+                        [disabled]="busyId() === item.id"
+                        (click)="confirmArchive(item)"
+                      >
+                        Archive
+                      </button>
+                    }
                   }
                 </div>
               }
@@ -136,52 +138,54 @@
         </ul>
       }
 
-      <div class="border-t border-border bg-surface px-4 py-2.5">
-        <form class="flex flex-wrap items-center gap-2" [formGroup]="createForm" (ngSubmit)="submitCreate()">
-          <svg pIcon="plus" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
-          <input
-            type="text"
-            formControlName="name"
-            class="h-10 w-44 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
-            placeholder="Add a charge, e.g. Laundry"
-            aria-label="New charge item name"
-            (input)="createError.set(null)"
-          />
-          <p-select
-            formControlName="billType"
-            [options]="billTypeOptions"
-            optionLabel="label"
-            optionValue="value"
-            styleClass="w-40"
-            appendTo="body"
-            ariaLabel="Bill type for the new charge item"
-          />
-          <p-inputnumber
-            formControlName="defaultAmount"
-            mode="currency"
-            currency="PHP"
-            locale="en-PH"
-            [min]="0"
-            placeholder="No default"
-            styleClass="w-36"
-            inputStyleClass="w-full"
-            ariaLabel="Default amount for the new charge item"
-          />
-          <button
-            type="submit"
-            class="inline-flex h-10 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-            [disabled]="creating() || createForm.controls.name.invalid"
-          >
-            @if (creating()) {
-              <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
-            }
-            <span>Add</span>
-          </button>
-        </form>
-        @if (createError(); as message) {
-          <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
-        }
-      </div>
+      @if (canManage()) {
+        <div class="border-t border-border bg-surface px-4 py-2.5">
+          <form class="flex flex-wrap items-center gap-2" [formGroup]="createForm" (ngSubmit)="submitCreate()">
+            <svg pIcon="plus" class="shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+            <input
+              type="text"
+              formControlName="name"
+              class="h-10 w-44 min-w-0 flex-1 rounded-base border-none bg-transparent text-[13px] text-body outline-none placeholder:text-muted"
+              placeholder="Add a charge, e.g. Laundry"
+              aria-label="New charge item name"
+              (input)="createError.set(null)"
+            />
+            <p-select
+              formControlName="billType"
+              [options]="billTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-40"
+              appendTo="body"
+              ariaLabel="Bill type for the new charge item"
+            />
+            <p-inputnumber
+              formControlName="defaultAmount"
+              mode="currency"
+              currency="PHP"
+              locale="en-PH"
+              [min]="0"
+              placeholder="No default"
+              styleClass="w-36"
+              inputStyleClass="w-full"
+              ariaLabel="Default amount for the new charge item"
+            />
+            <button
+              type="submit"
+              class="inline-flex h-10 items-center gap-2 rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+              [disabled]="creating() || createForm.controls.name.invalid"
+            >
+              @if (creating()) {
+                <span class="h-3 w-3 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner" aria-hidden="true"></span>
+              }
+              <span>Add</span>
+            </button>
+          </form>
+          @if (createError(); as message) {
+            <p class="mt-1 pl-6 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+          }
+        </div>
+      }
     </div>
   }
 </section>

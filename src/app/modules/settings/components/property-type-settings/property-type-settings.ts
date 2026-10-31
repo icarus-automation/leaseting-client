@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { PropertyTypeResponse } from '../../../../core/models/property-type.types';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
@@ -30,7 +31,10 @@ export class PropertyTypeSettings {
   private readonly propertyTypes = inject(PropertyTypesService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(MessageService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canManage = computed(() => this.auth.can('settings:manage'));
 
   readonly items = signal<PropertyTypeResponse[] | null>(null);
   readonly error = signal<string | null>(null);

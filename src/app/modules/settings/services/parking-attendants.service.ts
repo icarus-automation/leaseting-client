@@ -10,10 +10,6 @@ export class ParkingAttendantsService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/parking-attendants`;
 
-  list(): Observable<ParkingAttendantResponse[]> {
-    return this.http.get<ParkingAttendantResponse[]>(this.base);
-  }
-
   create(name: string, email: string, password: string): Observable<ParkingAttendantResponse> {
     return this.http.post<ParkingAttendantResponse>(this.base, { name, email, password });
   }

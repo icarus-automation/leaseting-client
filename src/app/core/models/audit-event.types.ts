@@ -13,7 +13,8 @@ export type AuditAction =
   | 'ROLE_DUPLICATED'
   | 'ROLE_ACTIVATED'
   | 'ROLE_DEACTIVATED'
-  | 'ROLE_DELETED';
+  | 'ROLE_DELETED'
+  | 'MEMBER_PROPERTY_ACCESS_CHANGED';
 
 export type AuditTargetType = 'MEMBER' | 'INVITATION' | 'ROLE';
 

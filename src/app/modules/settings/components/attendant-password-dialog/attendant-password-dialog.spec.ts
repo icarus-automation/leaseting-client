@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
 import type { Member } from '../../../../core/models/member.types';
+import { EVERY_PROPERTY } from '../../../../core/models/property-access.types';
 import type { ParkingAttendantResponse } from '../../../../core/models/parking-attendant.types';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { ParkingAttendantsService } from '../../services/parking-attendants.service';
@@ -37,6 +38,8 @@ const ATTENDANT: Member = {
   status: 'ACTIVE',
   deactivatedAt: null,
   joinedAt: '2026-10-30T02:15:00.000Z',
+  propertyAccess: EVERY_PROPERTY,
+  lastActiveAt: null,
 };
 
 describe('AttendantPasswordDialog', () => {

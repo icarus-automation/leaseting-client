@@ -41,7 +41,8 @@ export type Permission =
   | 'members:update'
   | 'members:deactivate'
   | 'roles:view'
-  | 'roles:manage';
+  | 'roles:manage'
+  | 'audit_log:view';
 
 export function holdsAll(held: ReadonlySet<string>, codes: readonly Permission[]): boolean {
   return codes.every((code) => held.has(code));

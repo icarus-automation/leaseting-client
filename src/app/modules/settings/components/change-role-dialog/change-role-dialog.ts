@@ -74,6 +74,7 @@ export class ChangeRoleDialog {
     userId: this.auth.currentUser()?.id ?? '',
     role: this.auth.currentUser()?.organizationRole ?? null,
     can: (code) => this.auth.can(code),
+    propertyAccess: this.auth.propertyAccess(),
   }));
 
   readonly options = computed(() => {

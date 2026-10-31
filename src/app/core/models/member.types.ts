@@ -1,4 +1,5 @@
 import type { Audience } from '../auth/auth.types';
+import type { PropertyAccess } from './property-access.types';
 
 export type MemberStatus = 'ACTIVE' | 'DEACTIVATED';
 
@@ -24,6 +25,10 @@ export interface Member {
   status: MemberStatus;
   deactivatedAt: string | null;
   joinedAt: string;
+  /** Staff and parking attendants. Owners and tenants are never limited. */
+  propertyAccess: PropertyAccess;
+  /** Their latest activity in this organization; null if they never signed in. */
+  lastActiveAt: string | null;
 }
 
 export interface MemberListFilters {

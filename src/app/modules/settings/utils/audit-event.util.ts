@@ -17,6 +17,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   ROLE_ACTIVATED: 'Role turned on',
   ROLE_DEACTIVATED: 'Role turned off',
   ROLE_DELETED: 'Role deleted',
+  MEMBER_PROPERTY_ACCESS_CHANGED: 'Property access changed',
 };
 
 /** The action filter's options, grouped the way the log reads. */
@@ -33,6 +34,7 @@ export const AUDIT_ACTION_GROUPS: { label: string; actions: AuditAction[] }[] = 
       'MEMBER_REACTIVATED',
       'OWNERSHIP_TRANSFERRED',
       'GOOGLE_ACCOUNT_LINKED',
+      'MEMBER_PROPERTY_ACCESS_CHANGED',
     ],
   },
   {
@@ -63,6 +65,21 @@ function roleLabel(role: string | null): string {
   return systemRoleLabel(role) ?? 'a custom role';
 }
 
+/** The role an event names, by the name it had then when the event kept one. */
+function eventRole(record: Record<string, unknown> | null): string {
+  return text(record, 'roleName') ?? roleLabel(text(record, 'role'));
+}
+
+/** `{ propertyIds, propertyNames }` as a phrase: null for every property. */
+function propertiesPhrase(record: Record<string, unknown> | null): string | null {
+  const ids = Array.isArray(record?.['propertyIds']) ? (record['propertyIds'] as unknown[]) : [];
+  if (ids.length === 0) return null;
+  const names = Array.isArray(record?.['propertyNames']) ? (record['propertyNames'] as unknown[]) : [];
+  const known = names.filter((name): name is string => typeof name === 'string' && name.length > 0);
+  if (known.length === ids.length) return known.join(', ');
+  return `${ids.length} ${ids.length === 1 ? 'property' : 'properties'}`;
+}
+
 const ROLE_FIELD_LABELS: Record<string, string> = {
   name: 'name',
   description: 'description',
@@ -75,14 +92,16 @@ export function describeAuditEvent(event: AuditEvent): string {
   const { before, after } = event;
 
   switch (event.action as AuditAction) {
-    case 'INVITATION_CREATED':
-      return `Invited ${target} as ${roleLabel(text(after, 'role'))}`;
+    case 'INVITATION_CREATED': {
+      const limitedTo = propertiesPhrase(after);
+      return `Invited ${target} as ${eventRole(after)}${limitedTo ? `, limited to ${limitedTo}` : ''}`;
+    }
     case 'INVITATION_RESENT':
       return `Resent the invitation to ${target}`;
     case 'INVITATION_REVOKED':
       return `Revoked the invitation to ${target}`;
     case 'INVITATION_ACCEPTED':
-      return `Joined as ${roleLabel(text(after, 'role'))}`;
+      return `Joined as ${eventRole(after)}`;
     case 'MEMBER_ROLE_CHANGED': {
       const from = text(before, 'roleName') ?? roleLabel(text(before, 'role'));
       const to = text(after, 'roleName') ?? roleLabel(text(after, 'role'));
@@ -116,6 +135,10 @@ export function describeAuditEvent(event: AuditEvent): string {
       return `Turned off the role ${target}`;
     case 'ROLE_DELETED':
       return `Deleted the role ${target}`;
+    case 'MEMBER_PROPERTY_ACCESS_CHANGED': {
+      const limitedTo = propertiesPhrase(after);
+      return limitedTo ? `Limited ${target} to ${limitedTo}` : `Gave ${target} access to every property`;
+    }
     default:
       return `${auditActionLabel(event.action)}: ${target}`;
   }

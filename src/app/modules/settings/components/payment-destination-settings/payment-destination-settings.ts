@@ -46,6 +46,11 @@ export class PaymentDestinationSettings {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly canMutate = computed(() => this.auth.can('payment_destinations:manage'));
+  /**
+   * An organization fallback reaches every property's tenants, so changing
+   * one takes every property; someone limited changes their properties' only.
+   */
+  readonly canMutateFallback = computed(() => this.canMutate() && this.auth.hasEveryProperty());
   readonly methodOptions = PAYMENT_METHOD_OPTIONS;
   readonly acceptedQrTypes = ACCEPTED_QR_TYPES;
 
@@ -70,18 +75,28 @@ export class PaymentDestinationSettings {
   readonly busyId = signal<string | null>(null);
 
   readonly propertyOptions = computed(() => [
-    { label: 'Organization fallback', value: '' },
+    ...(this.auth.hasEveryProperty() ? [{ label: 'Organization fallback', value: '' }] : []),
     ...this.properties().map((property) => ({ label: property.name, value: property.id })),
   ]);
 
   constructor() {
     this.load();
     this.propertiesApi
-      .list(1, 50)
+      .listAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (page) => this.properties.set(page.data),
+        next: (properties) => {
+          this.properties.set(properties);
+          // Without the fallback on offer, start a new destination on their first property.
+          if (!this.auth.hasEveryProperty() && !this.createForm.controls.propertyId.value && properties[0]) {
+            this.createForm.controls.propertyId.setValue(properties[0].id);
+          }
+        },
       });
+  }
+
+  canMutateAt(propertyId: string | null): boolean {
+    return propertyId === null ? this.canMutateFallback() : this.canMutate();
   }
 
   propertyName(propertyId: string | null): string {
@@ -130,6 +145,10 @@ export class PaymentDestinationSettings {
       this.createError.set('Upload a QR image.');
       return;
     }
+    if (!this.canMutateFallback() && !this.createForm.controls.propertyId.value) {
+      this.createError.set('Pick the property this destination is for.');
+      return;
+    }
     this.creating.set(true);
     this.createError.set(null);
     this.destinationsApi
@@ -144,7 +163,7 @@ export class PaymentDestinationSettings {
             accountName: '',
             accountNumber: '',
             instructions: '',
-            propertyId: '',
+            propertyId: this.canMutateFallback() ? '' : (this.properties()[0]?.id ?? ''),
           });
           this.qrFile.set(null);
           this.replace(created);
@@ -201,7 +220,7 @@ export class PaymentDestinationSettings {
   }
 
   toggleEnabled(destination: PaymentDestinationResponse): void {
-    if (!this.canMutate()) return;
+    if (!this.canMutateAt(destination.propertyId)) return;
     this.busyId.set(destination.id);
     this.destinationsApi
       .update(destination.id, {
@@ -230,7 +249,7 @@ export class PaymentDestinationSettings {
     const siblings = list.filter((item) => item.propertyId === destination.propertyId);
     const index = siblings.findIndex((item) => item.id === destination.id);
     const swap = siblings[index + direction];
-    if (!swap || !this.canMutate()) return;
+    if (!swap || !this.canMutateAt(destination.propertyId)) return;
     const items = [
       { id: destination.id, displayOrder: swap.displayOrder },
       { id: swap.id, displayOrder: destination.displayOrder },

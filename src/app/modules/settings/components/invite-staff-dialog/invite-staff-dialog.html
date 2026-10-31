@@ -33,56 +33,36 @@
       }
     </div>
 
-    <fieldset class="m-0 flex flex-col gap-2 border-none p-0">
-      <legend class="mb-1.5 p-0 text-[13px] font-medium text-heading">Role</legend>
-      @for (choice of roleChoices(); track choice.value) {
-        <label
-          class="flex cursor-pointer items-start gap-3 rounded-base border px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-out has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring motion-reduce:transition-none"
-          [class]="form.controls.role.value === choice.value
-            ? 'border-primary bg-[color-mix(in_oklab,var(--primary)_6%,var(--background))]'
-            : 'border-border bg-background hover:bg-surface'"
-        >
-          <input
-            type="radio"
-            name="role"
-            class="mt-[3px] h-[15px] w-[15px] shrink-0 cursor-pointer accent-primary"
-            [value]="choice.value"
-            formControlName="role"
-            [attr.aria-describedby]="'invite-role-' + choice.value + '-description'"
-          />
-          <span class="flex min-w-0 flex-col gap-0.5">
-            <span class="text-[13.5px] font-medium text-heading">{{ choice.label }}</span>
-            <span class="text-[12.5px] leading-relaxed text-muted" [id]="'invite-role-' + choice.value + '-description'">
-              {{ choice.description }}
-            </span>
-          </span>
-        </label>
-      }
-      <p class="text-[12px] leading-relaxed text-muted">
-        To give someone a custom role, invite them as a Member, then change their role once they join.
-      </p>
-    </fieldset>
-
     <div class="flex flex-col gap-1.5">
-      <span class="text-[13px] font-medium text-heading" id="invite-property-access">Property access</span>
-      <div
-        class="flex items-start gap-2.5 rounded-base border border-border bg-surface px-3 py-2.5"
-        aria-labelledby="invite-property-access"
-        role="group"
-      >
-        <svg pIcon="building" class="mt-0.5 shrink-0 text-muted" [size]="14" aria-hidden="true"></svg>
-        <span class="flex min-w-0 flex-col gap-0.5">
-          <span class="text-[13px] font-medium text-body">All properties</span>
-          <span class="text-[12px] leading-relaxed text-muted">
-            @if (isAdmin()) {
-              Owners and admins always see every property.
-            } @else {
-              Limiting someone to certain properties isn't available yet, so members see every property.
-            }
-          </span>
-        </span>
-      </div>
+      <label class="text-[13px] font-medium text-heading" for="invite-role">Role</label>
+      <p-select
+        inputId="invite-role"
+        formControlName="role"
+        [options]="roleGroups()"
+        [group]="true"
+        optionGroupLabel="label"
+        optionGroupChildren="items"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+        appendTo="body"
+      />
+      <p class="text-[12.5px] leading-relaxed text-muted" id="invite-role-description">
+        {{ selectedRole()?.description ?? 'Pick the role they get when they join.' }}
+      </p>
+      @if (rolesError(); as message) {
+        <p class="text-[12px] text-muted">
+          {{ message }} Only Member and Admin are listed.
+          <button type="button" class="font-medium text-primary hover:underline" (click)="loadRoles()">Try again</button>
+        </p>
+      }
     </div>
+
+    <app-property-access-picker
+      formControlName="propertyAccess"
+      idPrefix="invite"
+      [error]="errors.fieldError('propertyAccess', propertyMessages)"
+    />
   </form>
 
   <ng-container dialog-footer>

@@ -12,45 +12,39 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { PIcon } from '@primeicons/angular/p-icon';
-import { catchError, map, of } from 'rxjs';
+import { Select } from 'primeng/select';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
-import {
-  INVITATION_ROLE_LABELS,
-  type Invitation,
-  type InvitationRole,
-} from '../../../../core/models/invitation.types';
+import type { Invitation } from '../../../../core/models/invitation.types';
+import type { Role } from '../../../../core/models/role.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
-import { AccessCatalogService } from '../../services/access-catalog.service';
 import { InvitationsService } from '../../services/invitations.service';
+import { RolesService } from '../../services/roles.service';
+import { type InviteRoleGroup, invitableRoleGroups } from '../../utils/invite-roles.util';
+import {
+  EVERY_PROPERTY_VALUE,
+  type PropertyAccessValue,
+  propertyAccessValidator,
+  toPropertyIds,
+} from '../../utils/property-access.util';
+import { PropertyAccessPicker } from '../property-access-picker/property-access-picker';
 
-interface RoleChoice {
-  value: InvitationRole;
-  label: string;
-  description: string;
-}
-
-/** Shown until the catalog answers, or if it can't. The catalog's own words win. */
-const FALLBACK_DESCRIPTIONS: Record<InvitationRole, string> = {
-  member: 'Day-to-day work. Payments, app logins, the team, and the organization profile stay with owners and admins.',
-  admin: 'Every permission.',
-};
-
-const INVITE_ROLES: readonly InvitationRole[] = ['member', 'admin'];
+const DEFAULT_ROLE = 'member';
 
 @Component({
   selector: 'app-invite-staff-dialog',
-  imports: [ReactiveFormsModule, PIcon, ErrorBanner, FormDialog],
+  imports: [ReactiveFormsModule, Select, ErrorBanner, FormDialog, PropertyAccessPicker],
   templateUrl: './invite-staff-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InviteStaffDialog {
   private readonly fb = inject(FormBuilder);
   private readonly invitations = inject(InvitationsService);
-  private readonly catalog = inject(AccessCatalogService);
+  private readonly roles = inject(RolesService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly visible = model.required<boolean>();
@@ -58,50 +52,61 @@ export class InviteStaffDialog {
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
-    role: ['member' as InvitationRole, [Validators.required]],
+    role: [DEFAULT_ROLE, [Validators.required]],
+    propertyAccess: this.fb.nonNullable.control<PropertyAccessValue>(EVERY_PROPERTY_VALUE, [propertyAccessValidator]),
   });
   readonly errors = createFormErrors(this.form);
   readonly emailMessages = { required: 'Enter the email to send the invitation to.' };
+  readonly propertyMessages = { propertiesRequired: 'Pick at least one property, or give every property.' };
 
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly roleList = signal<Role[] | null>(null);
+  readonly rolesError = signal<string | null>(null);
 
-  private readonly selectedRole = toSignal(this.form.controls.role.valueChanges, {
-    initialValue: this.form.controls.role.value,
-  });
-  readonly isAdmin = computed(() => this.selectedRole() === 'admin');
-
-  private readonly catalogDescriptions = toSignal(
-    this.catalog.catalog().pipe(
-      map((catalog) => new Map(catalog.roles.map((role) => [role.id as string, role.description]))),
-      catchError(() => of(new Map<string, string>())),
-    ),
-    { initialValue: new Map<string, string>() },
+  readonly roleGroups = computed<InviteRoleGroup[]>(() =>
+    invitableRoleGroups(this.roleList() ?? [], (code) => this.auth.can(code)),
   );
 
-  readonly roleChoices = computed<RoleChoice[]>(() =>
-    INVITE_ROLES.map((value) => ({
-      value,
-      label: INVITATION_ROLE_LABELS[value],
-      description: this.catalogDescriptions().get(value) ?? FALLBACK_DESCRIPTIONS[value],
-    })),
+  private readonly selectedRoleId = toSignal(this.form.controls.role.valueChanges, {
+    initialValue: this.form.controls.role.value,
+  });
+  readonly selectedRole = computed(
+    () =>
+      this.roleGroups()
+        .flatMap((group) => group.items)
+        .find((choice) => choice.value === this.selectedRoleId()) ?? null,
   );
 
   constructor() {
     effect(() => {
       if (!this.visible()) return;
       untracked(() => {
-        this.form.reset({ email: '', role: 'member' });
+        this.form.reset({
+          email: '',
+          role: DEFAULT_ROLE,
+          // Someone limited can only give their own properties, so they pick.
+          propertyAccess: this.auth.hasEveryProperty()
+            ? EVERY_PROPERTY_VALUE
+            : { everyProperty: false, propertyIds: [] },
+        });
         this.errors.reset();
         this.errorMessage.set(null);
         this.saving.set(false);
+        this.loadRoles();
       });
     });
   }
 
-  selectRole(role: InvitationRole): void {
-    this.form.controls.role.setValue(role);
-    this.form.controls.role.markAsDirty();
+  loadRoles(): void {
+    this.rolesError.set(null);
+    this.roles
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (roles) => this.roleList.set(roles),
+        error: (error: unknown) => this.rolesError.set(apiErrorMessage(error, 'Could not load the roles.')),
+      });
   }
 
   submit(): void {
@@ -112,10 +117,11 @@ export class InviteStaffDialog {
       return;
     }
 
-    const { email, role } = this.form.getRawValue();
+    const { email, role, propertyAccess } = this.form.getRawValue();
+    const propertyIds = toPropertyIds(propertyAccess);
     this.saving.set(true);
     this.invitations
-      .create({ email: email.trim(), role })
+      .create({ email: email.trim(), role, ...(propertyIds.length > 0 && { propertyIds }) })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (invitation) => {

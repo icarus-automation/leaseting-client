@@ -38,6 +38,38 @@ describe('describeAuditEvent', () => {
     ).toBe('Invited ben@example.com as Admin');
   });
 
+  it('adds the property limits an invitation carries, by name', () => {
+    expect(
+      describeAuditEvent(
+        event({
+          action: 'INVITATION_CREATED',
+          target: { type: 'INVITATION', id: 'i-1', label: 'ben@example.com' },
+          after: {
+            email: 'ben@example.com',
+            role: '6f1c2a9e-4b7d-4c1e-9a3f-2d8b5e7c1a40',
+            roleName: 'Leasing agent',
+            propertyIds: ['p-1'],
+            propertyNames: ['Brickstone'],
+          },
+        }),
+      ),
+    ).toBe('Invited ben@example.com as Leasing agent, limited to Brickstone');
+  });
+
+  it('reads a property access change as a limit, or as every property', () => {
+    const change = (after: Record<string, unknown>) =>
+      describeAuditEvent(event({ action: 'MEMBER_PROPERTY_ACCESS_CHANGED', before: { propertyIds: [] }, after }));
+
+    expect(change({ propertyIds: ['p-1', 'p-2'], propertyNames: ['Brickstone', 'Harbor View'] })).toBe(
+      'Limited Ana Cruz to Brickstone, Harbor View',
+    );
+    expect(change({ propertyIds: ['p-1', 'p-2'], propertyNames: ['Brickstone', null] })).toBe(
+      'Limited Ana Cruz to 2 properties',
+    );
+    expect(change({ propertyIds: [], propertyNames: [] })).toBe('Gave Ana Cruz access to every property');
+    expect(auditActionLabel('MEMBER_PROPERTY_ACCESS_CHANGED')).toBe('Property access changed');
+  });
+
   it('writes accepted invitations from the joiner’s side', () => {
     expect(describeAuditEvent(event({ action: 'INVITATION_ACCEPTED', after: { role: 'member' } }))).toBe(
       'Joined as Member',

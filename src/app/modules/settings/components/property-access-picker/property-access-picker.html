@@ -1,0 +1,117 @@
+<fieldset
+  class="m-0 flex flex-col gap-2 border-none p-0"
+  [disabled]="disabled()"
+  [attr.aria-describedby]="error() ? idPrefix() + '-property-error' : null"
+>
+  <legend class="mb-1.5 p-0 text-[13px] font-medium text-heading">Property access</legend>
+
+  <label
+    class="flex items-start gap-3 rounded-base border px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-out has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring motion-reduce:transition-none"
+    [class]="value().everyProperty
+      ? 'border-primary bg-[color-mix(in_oklab,var(--primary)_6%,var(--background))]'
+      : canGiveEveryProperty()
+        ? 'cursor-pointer border-border bg-background hover:bg-surface'
+        : 'cursor-not-allowed border-border bg-surface'"
+  >
+    <input
+      type="radio"
+      class="mt-[3px] h-[15px] w-[15px] shrink-0 cursor-pointer accent-primary disabled:cursor-not-allowed"
+      [name]="idPrefix() + '-property-access'"
+      [checked]="value().everyProperty"
+      [disabled]="!canGiveEveryProperty()"
+      [attr.aria-describedby]="idPrefix() + '-every-property-hint'"
+      (change)="chooseEveryProperty(true)"
+      (blur)="markTouched()"
+    />
+    <span class="flex min-w-0 flex-col gap-0.5">
+      <span class="text-[13.5px] font-medium" [class]="canGiveEveryProperty() ? 'text-heading' : 'text-muted'">
+        All properties
+      </span>
+      <span class="text-[12.5px] leading-relaxed text-muted" [id]="idPrefix() + '-every-property-hint'">
+        @if (canGiveEveryProperty()) {
+          {{ everyPropertyHint() }}
+        } @else {
+          Only someone with access to every property can give this.
+        }
+      </span>
+    </span>
+  </label>
+
+  <label
+    class="flex cursor-pointer items-start gap-3 rounded-base border px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-out has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring motion-reduce:transition-none"
+    [class]="!value().everyProperty
+      ? 'border-primary bg-[color-mix(in_oklab,var(--primary)_6%,var(--background))]'
+      : 'border-border bg-background hover:bg-surface'"
+  >
+    <input
+      type="radio"
+      class="mt-[3px] h-[15px] w-[15px] shrink-0 cursor-pointer accent-primary"
+      [name]="idPrefix() + '-property-access'"
+      [checked]="!value().everyProperty"
+      [attr.aria-describedby]="idPrefix() + '-specific-hint'"
+      (change)="chooseEveryProperty(false)"
+      (blur)="markTouched()"
+    />
+    <span class="flex min-w-0 flex-col gap-0.5">
+      <span class="text-[13.5px] font-medium text-heading">Specific properties</span>
+      <span class="text-[12.5px] leading-relaxed text-muted" [id]="idPrefix() + '-specific-hint'">
+        {{ specificHint() }}
+      </span>
+    </span>
+  </label>
+
+  @if (!value().everyProperty) {
+    <div class="flex flex-col gap-2 rounded-base border border-border bg-background p-2.5">
+      @if (loadError(); as message) {
+        <app-error-banner [message]="message" [retryable]="true" (retry)="load()" />
+      } @else if (properties() === null) {
+        @for (s of skeletons; track $index) {
+          <app-skeleton variant="row" />
+        }
+      } @else if (properties()!.length === 0) {
+        <p class="px-1 py-2 text-[12.5px] text-muted">There are no properties to pick yet.</p>
+      } @else {
+        @if (showSearch()) {
+          <input
+            type="search"
+            [value]="search()"
+            (input)="onSearch($event)"
+            placeholder="Search properties"
+            aria-label="Search properties"
+            class="h-9 rounded-base border border-border bg-background px-3 text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+          />
+        }
+        <ul class="m-0 flex max-h-56 list-none flex-col overflow-y-auto p-0" aria-label="Properties">
+          @for (property of visibleProperties(); track property.id) {
+            <li>
+              <label
+                class="flex cursor-pointer items-center gap-2.5 rounded-base px-2 py-1.5 transition-colors duration-150 ease-out hover:bg-surface has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring motion-reduce:transition-none"
+              >
+                <input
+                  type="checkbox"
+                  class="h-[15px] w-[15px] shrink-0 cursor-pointer accent-primary"
+                  [checked]="isSelected(property.id)"
+                  (change)="toggle(property.id, $event)"
+                  (blur)="markTouched()"
+                />
+                <span class="flex min-w-0 flex-col">
+                  <span class="truncate text-[13px] font-medium text-body">{{ property.name }}</span>
+                  <span class="truncate text-[11.5px] text-muted">{{ property.city }}</span>
+                </span>
+              </label>
+            </li>
+          } @empty {
+            <li class="px-2 py-2 text-[12.5px] text-muted">No property matches this search.</li>
+          }
+        </ul>
+        <p class="px-1 text-[12px] text-muted" aria-live="polite">
+          {{ selectedCount() }} {{ selectedCount() === 1 ? 'property' : 'properties' }} picked
+        </p>
+      }
+    </div>
+  }
+
+  @if (error(); as message) {
+    <p class="text-[12.5px] text-destructive" [id]="idPrefix() + '-property-error'">{{ message }}</p>
+  }
+</fieldset>

@@ -34,6 +34,8 @@ interface Command {
   queryParams?: Record<string, string>;
   /** Every code the destination asks for. Without them the command isn't offered. */
   permissions?: Permission[];
+  /** It reaches every property (adding one), so it isn't offered to someone limited to some. */
+  needsEveryProperty?: boolean;
 }
 
 interface PaletteItem {
@@ -65,8 +67,8 @@ const COMMANDS: Command[] = [
   { id: 'nav-kb', label: 'Knowledge Base', icon: 'book', group: 'Go to', keywords: 'articles help docs', route: '/knowledge-base' },
   { id: 'nav-settings', label: 'Settings', icon: 'cog', group: 'Go to', keywords: 'organization team preferences', route: '/settings' },
   { id: 'nav-users', label: 'Users', hint: 'Settings', icon: 'users', group: 'Go to', keywords: 'team staff people members invite roles access deactivate', route: '/settings/users', permissions: ['members:view'] },
-  { id: 'nav-audit-log', label: 'Audit log', hint: 'Settings', icon: 'history', group: 'Go to', keywords: 'audit history changes who changed roles invitations', route: '/settings/users', queryParams: { tab: 'audit' }, permissions: ['members:update'] },
-  { id: 'act-new-property', label: 'New property', hint: 'Create', icon: 'plus', group: 'Actions', keywords: 'add create building register', route: '/properties', queryParams: { create: '1' }, permissions: ['properties:manage'] },
+  { id: 'nav-audit-log', label: 'Audit log', hint: 'Settings', icon: 'history', group: 'Go to', keywords: 'audit history changes who changed roles invitations property access', route: '/settings/users', queryParams: { tab: 'audit' }, permissions: ['members:view', 'audit_log:view'] },
+  { id: 'act-new-property', label: 'New property', hint: 'Create', icon: 'plus', group: 'Actions', keywords: 'add create building register', route: '/properties', queryParams: { create: '1' }, permissions: ['properties:manage'], needsEveryProperty: true },
   { id: 'act-new-tenant', label: 'Onboard tenant', hint: 'Create', icon: 'user-plus', group: 'Actions', keywords: 'add create renter person new tenant onboarding move in', route: '/tenants', queryParams: { create: '1' }, permissions: ['leases:manage', 'tenants:manage'] },
   { id: 'act-new-bill', label: 'New bill', hint: 'Create', icon: 'plus-circle', group: 'Actions', keywords: 'add create charge rent utility invoice', route: '/bills', queryParams: { create: '1' }, permissions: ['bills:manage'] },
   { id: 'act-unpaid-bills', label: 'View unpaid bills', hint: 'Filter', icon: 'exclamation-circle', group: 'Actions', keywords: 'overdue outstanding due money', route: '/bills', queryParams: { status: 'UNPAID' }, permissions: ['bills:view'] },
@@ -90,7 +92,9 @@ export class CommandPalette {
     const showSettings = visibleSettingsGroups((code) => this.auth.can(code)).length > 0;
     return COMMANDS.filter(
       (command) =>
-        this.auth.canAll(command.permissions ?? []) && (command.id !== 'nav-settings' || showSettings),
+        this.auth.canAll(command.permissions ?? []) &&
+        (!command.needsEveryProperty || this.auth.hasEveryProperty()) &&
+        (command.id !== 'nav-settings' || showSettings),
     );
   });
 

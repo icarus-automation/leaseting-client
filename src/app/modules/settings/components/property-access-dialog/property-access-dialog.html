@@ -1,0 +1,56 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  [subheading]="subheading()"
+  [dirty]="errors.dirty()"
+  width="32rem"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="property-access-form" class="flex flex-col gap-3" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <app-property-access-picker
+      formControlName="propertyAccess"
+      idPrefix="member-access"
+      [subject]="isAttendant() ? 'attendant' : 'staff'"
+      [error]="errors.fieldError('propertyAccess', propertyMessages)"
+    />
+
+    @if (archivedNames().length > 0) {
+      <p class="text-[12px] leading-relaxed text-muted">
+        Archived and dropped when you save: {{ archivedNames().join(', ') }}.
+      </p>
+    }
+    <p class="text-[12px] leading-relaxed text-muted">The change applies on their next click; nobody is signed out.</p>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="property-access-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+      [attr.aria-busy]="saving() ? 'true' : null"
+    >
+      @if (saving()) {
+        <span
+          class="h-3.5 w-3.5 rounded-full border-2 border-[color-mix(in_oklab,var(--primary-foreground)_40%,transparent)] border-t-[var(--primary-foreground)] animate-spinner"
+          aria-hidden="true"
+        ></span>
+        <span>Saving…</span>
+      } @else {
+        <span>Save access</span>
+      }
+    </button>
+  </ng-container>
+</app-form-dialog>

@@ -78,6 +78,13 @@
         <p class="text-[12.5px] text-destructive" id="attendant-add-password-error">{{ message }}</p>
       }
     </div>
+
+    <app-property-access-picker
+      formControlName="propertyAccess"
+      idPrefix="attendant-add"
+      subject="attendant"
+      [error]="errors.fieldError('propertyAccess', propertyMessages)"
+    />
   </form>
 
   <ng-container dialog-footer>

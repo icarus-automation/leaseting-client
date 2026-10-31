@@ -101,7 +101,9 @@
                 <div class="flex min-w-0 flex-1 basis-48 flex-col">
                   <span class="truncate text-[13.5px] font-medium text-heading">{{ invitation.email }}</span>
                   <span class="truncate text-[12px] text-muted">
-                    {{ roleLabels[invitation.role] }} · Sent {{ invitation.createdAt | date: 'MMM d' }}@if (invitation.invitedBy; as by) {
+                    {{ invitation.roleName ?? 'Role removed' }} ·
+                    <span [attr.title]="invitationAccess(invitation).names">{{ invitationAccess(invitation).label }}</span>
+                    · Sent {{ invitation.createdAt | date: 'MMM d' }}@if (invitation.invitedBy; as by) {
                       by {{ by.name }}}
                   </span>
                 </div>
@@ -201,7 +203,7 @@
                 }
                 <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Status</th>
                 <th scope="col" class="hidden px-4 py-2.5 text-[12.5px] font-medium text-muted @[36rem]:table-cell">
-                  Joined
+                  {{ showLastActive() ? 'Last active' : 'Joined' }}
                 </th>
                 @if (showActions()) {
                   <th scope="col" class="w-12 px-2 py-2.5"><span class="sr-only">Actions</span></th>
@@ -252,7 +254,20 @@
                   </td>
                   @if (showPropertyAccess()) {
                     <td class="hidden px-4 py-2.5 text-[13px] text-body @[44rem]:table-cell">
-                      {{ propertyAccess(member) }}
+                      @if (propertyAccess(member); as access) {
+                        @if (access.names; as names) {
+                          <span
+                            class="inline-flex cursor-default items-center gap-1.5 whitespace-nowrap underline decoration-dotted decoration-border-strong underline-offset-4"
+                            [title]="names"
+                          >
+                            <svg pIcon="building" class="text-muted" [size]="12" aria-hidden="true"></svg>
+                            {{ access.label }}
+                          </span>
+                          <span class="sr-only">: {{ names }}</span>
+                        } @else {
+                          <span class="whitespace-nowrap">{{ access.label }}</span>
+                        }
+                      }
                     </td>
                   }
                   <td class="px-4 py-2.5">
@@ -264,7 +279,16 @@
                     }
                   </td>
                   <td class="hidden whitespace-nowrap px-4 py-2.5 text-[13px] text-muted @[36rem]:table-cell">
-                    {{ member.joinedAt | date: 'MMM d, y' }}
+                    @if (showLastActive()) {
+                      @if (lastActive(member); as active) {
+                        <span [attr.title]="active.exact">{{ active.label }}</span>
+                        @if (active.exact; as exact) {
+                          <span class="sr-only">, {{ exact }}</span>
+                        }
+                      }
+                    } @else {
+                      {{ member.joinedAt | date: 'MMM d, y' }}
+                    }
                   </td>
                   @if (showActions()) {
                     <td class="px-2 py-2.5 text-right">
@@ -316,6 +340,15 @@
     [visible]="inviteOpen()"
     (visibleChange)="inviteOpen.set($event)"
     (invited)="onInvited($event)"
+  />
+}
+
+@if (canChangeRoles() || canManageAttendants()) {
+  <app-property-access-dialog
+    [visible]="propertyAccessOpen()"
+    (visibleChange)="propertyAccessOpen.set($event)"
+    [member]="propertyAccessTarget()"
+    (changed)="onPropertyAccessChanged($event)"
   />
 }
 

@@ -14,6 +14,7 @@ import type {
   SignInResponse,
   SocialSignInResponse,
 } from './auth.types';
+import { EVERY_PROPERTY, type PropertyAccess } from '../models/property-access.types';
 import { WrongAppError, dedicatedAppRejection } from './audience.util';
 import { holdsAll, type Permission } from './permissions';
 
@@ -40,6 +41,13 @@ export class AuthService {
   private readonly permissions = computed<ReadonlySet<string>>(
     () => new Set(this.user()?.permissions ?? []),
   );
+  /** The properties the session works with. The API already filters every list to them. */
+  readonly propertyAccess = computed<PropertyAccess>(() => this.user()?.propertyAccess ?? EVERY_PROPERTY);
+  /**
+   * False for someone limited to specific properties. Changes that reach every
+   * property (adding one, an organization-wide payment destination) need it.
+   */
+  readonly hasEveryProperty = computed(() => !this.propertyAccess().isLimited);
 
   /**
    * True when `/users/me` lists `code` for the active organization. Hiding a

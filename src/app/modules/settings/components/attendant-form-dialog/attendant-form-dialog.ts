@@ -13,6 +13,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ParkingAttendantResponse } from '../../../../core/models/parking-attendant.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
@@ -24,16 +25,24 @@ import {
   ATTENDANT_PASSWORD_MAX,
   ATTENDANT_PASSWORD_MIN,
 } from '../../utils/parking-attendant.util';
+import {
+  EVERY_PROPERTY_VALUE,
+  type PropertyAccessValue,
+  propertyAccessValidator,
+  toPropertyIds,
+} from '../../utils/property-access.util';
+import { PropertyAccessPicker } from '../property-access-picker/property-access-picker';
 
 @Component({
   selector: 'app-attendant-form-dialog',
-  imports: [ReactiveFormsModule, PIcon, ErrorBanner, FormDialog],
+  imports: [ReactiveFormsModule, PIcon, ErrorBanner, FormDialog, PropertyAccessPicker],
   templateUrl: './attendant-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AttendantFormDialog {
   private readonly fb = inject(FormBuilder);
   private readonly attendants = inject(ParkingAttendantsService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly visible = model.required<boolean>();
@@ -49,6 +58,7 @@ export class AttendantFormDialog {
       '',
       [Validators.required, Validators.minLength(ATTENDANT_PASSWORD_MIN), Validators.maxLength(ATTENDANT_PASSWORD_MAX)],
     ],
+    propertyAccess: this.fb.nonNullable.control<PropertyAccessValue>(EVERY_PROPERTY_VALUE, [propertyAccessValidator]),
   });
   readonly errors = createFormErrors(this.form);
 
@@ -58,6 +68,7 @@ export class AttendantFormDialog {
     required: 'Enter a password.',
     minlength: `Use at least ${ATTENDANT_PASSWORD_MIN} characters.`,
   };
+  readonly propertyMessages = { propertiesRequired: 'Pick at least one property, or give every property.' };
 
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -66,7 +77,15 @@ export class AttendantFormDialog {
     effect(() => {
       if (!this.visible()) return;
       untracked(() => {
-        this.form.reset({ name: '', email: '', password: '' });
+        this.form.reset({
+          name: '',
+          email: '',
+          password: '',
+          // Someone limited can only give their own properties, so they pick.
+          propertyAccess: this.auth.hasEveryProperty()
+            ? EVERY_PROPERTY_VALUE
+            : { everyProperty: false, propertyIds: [] },
+        });
         this.errors.reset();
         this.errorMessage.set(null);
         this.saving.set(false);
@@ -82,10 +101,11 @@ export class AttendantFormDialog {
       return;
     }
 
-    const { name, email, password } = this.form.getRawValue();
+    const { name, email, password, propertyAccess } = this.form.getRawValue();
+    const propertyIds = toPropertyIds(propertyAccess);
     this.saving.set(true);
     this.attendants
-      .create(name.trim(), email.trim(), password)
+      .create({ name: name.trim(), email: email.trim(), password, ...(propertyIds.length > 0 && { propertyIds }) })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (attendant) => {

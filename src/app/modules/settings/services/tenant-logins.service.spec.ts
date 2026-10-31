@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
 import type { Member } from '../../../core/models/member.types';
+import { EVERY_PROPERTY } from '../../../core/models/property-access.types';
 import type { PortalAccessResponse, PortalAccessStatus } from '../../../core/models/portal-access.types';
 import type { TenantListItem } from '../../../core/models/tenant.types';
 import { TenantsService } from '../../tenants/services/tenants.service';
@@ -44,6 +45,8 @@ const LOGIN: Member = {
   status: 'ACTIVE',
   deactivatedAt: null,
   joinedAt: '2026-10-30T02:15:00.000Z',
+  propertyAccess: EVERY_PROPERTY,
+  lastActiveAt: null,
 };
 
 describe('TenantLoginsService', () => {

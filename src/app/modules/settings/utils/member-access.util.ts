@@ -1,13 +1,16 @@
-import { differenceInCalendarDays } from 'date-fns';
+import { differenceInCalendarDays, differenceInHours, differenceInMinutes, format } from 'date-fns';
 
 import type { Permission } from '../../../core/auth/permissions';
 import { INVITATION_ROLE_LABELS, type Invitation } from '../../../core/models/invitation.types';
 import type { Member } from '../../../core/models/member.types';
+import type { PropertyAccess } from '../../../core/models/property-access.types';
 import type { Role } from '../../../core/models/role.types';
 import type { BadgeTone } from '../../../shared/ui/status-badge/status-badge';
+import { type PropertyAccessSummary, coversProperties, propertyAccessSummary } from './property-access.util';
 
 export type MemberAction =
   | 'change-role'
+  | 'property-access'
   | 'transfer-ownership'
   | 'deactivate'
   | 'reactivate'
@@ -21,6 +24,8 @@ export interface MemberActor {
   /** Their role id here: 'owner', 'admin', 'member', or a custom role's UUID. */
   role: string | null;
   can: (code: Permission) => boolean;
+  /** Their own property limits: nobody gives access they don't have. */
+  propertyAccess: PropertyAccess;
 }
 
 const OWNER = 'owner';
@@ -54,6 +59,7 @@ export function memberActions(actor: MemberActor, member: Member): MemberAction[
   const actions: MemberAction[] = [];
   const isActive = member.status === 'ACTIVE';
   if (actor.can('members:update')) actions.push('change-role');
+  if (canSetPropertyAccess(actor, member)) actions.push('property-access');
   if (actor.can('members:update') && actor.role === OWNER && isActive && member.role !== OWNER) {
     actions.push('transfer-ownership');
   }
@@ -64,7 +70,25 @@ export function memberActions(actor: MemberActor, member: Member): MemberAction[
 function loginActions(actor: MemberActor, member: Member): MemberAction[] {
   const code: Permission = member.audience === 'tenant' ? 'tenants:manage_access' : 'parking_attendants:manage';
   if (!actor.can(code)) return [];
-  return member.status === 'ACTIVE' ? ['reset-password', 'disable-login'] : ['enable-login'];
+  const login: MemberAction[] = member.status === 'ACTIVE' ? ['reset-password', 'disable-login'] : ['enable-login'];
+  return canSetPropertyAccess(actor, member) ? ['property-access', ...login] : login;
+}
+
+/**
+ * Whether `actor` may change `member`'s property limits. Staff follow the
+ * role change: owners are never limited, and only the owner changes an admin.
+ * Attendants answer to whoever manages them. Either way the actor must cover
+ * the member's current access, so nobody drops properties they can't see.
+ */
+function canSetPropertyAccess(actor: MemberActor, member: Member): boolean {
+  if (member.audience === 'tenant') return false;
+  if (member.audience === 'staff') {
+    if (!actor.can('members:update') || member.userId === actor.userId || member.role === OWNER) return false;
+    if (member.role === ADMIN && actor.role !== OWNER) return false;
+  } else if (!actor.can('parking_attendants:manage')) {
+    return false;
+  }
+  return coversProperties(actor.propertyAccess, member.propertyAccess.propertyIds);
 }
 
 /**
@@ -83,13 +107,38 @@ export function assignableRoles(roles: readonly Role[], member: Member, actor: M
 }
 
 /**
- * What a member's property access reads as. The API has no property limits
- * yet (docs/fe-access-api.md: "There are no property limits yet"), so every
- * staff role sees every property, and so does every parking attendant; owners
- * and admins always will. A tenant's access is their own lease, so no label.
+ * What a member's property access reads as: "All properties", or "N
+ * properties" with their names for a tooltip. A tenant's access is their own
+ * lease, so no label.
  */
-export function propertyAccessLabel(member: Member): string | null {
-  return member.audience === 'tenant' ? null : 'All properties';
+export function propertyAccessLabel(member: Member): PropertyAccessSummary | null {
+  return member.audience === 'tenant' ? null : propertyAccessSummary(member.propertyAccess);
+}
+
+export interface LastActiveLabel {
+  /** "Just now", "12 min ago", "3 hours ago", "Yesterday", "4 days ago", "Oct 3", or "Never". */
+  label: string;
+  /** The exact time, for the tooltip. Null when they never signed in. */
+  exact: string | null;
+}
+
+/** How long ago someone was last active, relative to `now`. */
+export function lastActiveLabel(lastActiveAt: string | null, now: Date): LastActiveLabel {
+  if (!lastActiveAt) return { label: 'Never', exact: null };
+
+  const at = new Date(lastActiveAt);
+  const exact = format(at, 'MMM d, yyyy, h:mm a');
+  const minutes = differenceInMinutes(now, at);
+  if (minutes < 1) return { label: 'Just now', exact };
+  if (minutes < 60) return { label: `${minutes} min ago`, exact };
+
+  const hours = differenceInHours(now, at);
+  if (hours < 24) return { label: `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`, exact };
+
+  const days = differenceInCalendarDays(now, at);
+  if (days <= 1) return { label: 'Yesterday', exact };
+  if (days < 7) return { label: `${days} days ago`, exact };
+  return { label: format(at, at.getFullYear() === now.getFullYear() ? 'MMM d' : 'MMM d, yyyy'), exact };
 }
 
 export function memberStatusBadge(member: Member): { label: string; tone: BadgeTone } {

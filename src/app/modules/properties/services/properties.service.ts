@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
 import type { Paginated } from '../../../core/models/api.types';
@@ -11,6 +11,9 @@ import type {
   PropertyResponse,
 } from '../../../core/models/property.types';
 
+/** The API's largest page for `GET /properties`. */
+const MAX_PAGE_SIZE = 50;
+
 @Injectable({ providedIn: 'root' })
 export class PropertiesService {
   private readonly http = inject(HttpClient);
@@ -19,6 +22,20 @@ export class PropertiesService {
   list(page = 1, limit = 12): Observable<Paginated<PropertyListItem>> {
     const params = new HttpParams().set('page', page).set('limit', limit);
     return this.http.get<Paginated<PropertyListItem>>(this.base, { params });
+  }
+
+  /** Every unarchived property the session can see, by name: page one, then the rest together. */
+  listAll(): Observable<PropertyListItem[]> {
+    return this.list(1, MAX_PAGE_SIZE).pipe(
+      switchMap((first) => {
+        const rest = Array.from({ length: Math.max(first.meta.lastPage - 1, 0) }, (_, index) =>
+          this.list(index + 2, MAX_PAGE_SIZE),
+        );
+        return rest.length === 0
+          ? of(first.data)
+          : forkJoin(rest).pipe(map((pages) => [first, ...pages].flatMap((result) => result.data)));
+      }),
+    );
   }
 
   get(id: string): Observable<PropertyDetail> {

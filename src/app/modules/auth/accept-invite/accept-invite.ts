@@ -19,12 +19,7 @@ import { catchError, map, of, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { googleSignInMessage } from '../../../core/auth/google-sign-in.util';
 import { apiErrorMessage } from '../../../core/models/api.types';
-import {
-  INVITATION_ROLE_LABELS,
-  isInvitationRole,
-  type AcceptedInvitation,
-  type InvitationPreview,
-} from '../../../core/models/invitation.types';
+import type { AcceptedInvitation, InvitationPreview } from '../../../core/models/invitation.types';
 import { createFormErrors } from '../../../shared/forms/form-errors';
 import { GoogleButton } from '../../../shared/ui/google-button/google-button';
 import { AuthShell } from '../auth-shell/auth-shell';
@@ -79,10 +74,8 @@ export class AcceptInvite {
   readonly submitting = signal(false);
   readonly submitError = signal<string | null>(null);
 
-  readonly roleLabel = computed(() => {
-    const role = this.preview()?.role;
-    return isInvitationRole(role) ? INVITATION_ROLE_LABELS[role] : 'a team member';
-  });
+  /** 'Member', 'Admin', or the custom role's name. */
+  readonly roleLabel = computed(() => this.preview()?.roleName ?? 'a team member');
 
   readonly nameMessages = { required: 'Enter your name.', minlength: 'Use at least 2 characters.' };
   readonly passwordMessages = computed(() => ({

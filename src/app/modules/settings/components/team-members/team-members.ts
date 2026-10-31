@@ -21,7 +21,7 @@ import { Observable, Subject, debounceTime, map, switchMap } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { PageMeta } from '../../../../core/models/api.types';
-import { INVITATION_ROLE_LABELS, type Invitation } from '../../../../core/models/invitation.types';
+import type { Invitation } from '../../../../core/models/invitation.types';
 import type { Member, MemberAudienceFilter, MemberStatus } from '../../../../core/models/member.types';
 import type { ParkingAttendantResponse } from '../../../../core/models/parking-attendant.types';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
@@ -37,20 +37,24 @@ import { MembersService } from '../../services/members.service';
 import { ParkingAttendantsService } from '../../services/parking-attendants.service';
 import { TenantLoginsService } from '../../services/tenant-logins.service';
 import {
+  type LastActiveLabel,
   type MemberAction,
   type MemberActor,
   initialsOf,
   invitationExpiry,
+  lastActiveLabel,
   memberActions,
   memberStatusBadge,
   propertyAccessLabel,
 } from '../../utils/member-access.util';
+import { type PropertyAccessSummary, propertyAccessSummary } from '../../utils/property-access.util';
 import { ATTENDANT_HANDHELD_NOTE } from '../../utils/parking-attendant.util';
 import { TenantLoginLookupError, sameEmail } from '../../utils/tenant-login.util';
 import { AttendantFormDialog } from '../attendant-form-dialog/attendant-form-dialog';
 import { AttendantPasswordDialog } from '../attendant-password-dialog/attendant-password-dialog';
 import { ChangeRoleDialog } from '../change-role-dialog/change-role-dialog';
 import { InviteStaffDialog } from '../invite-staff-dialog/invite-staff-dialog';
+import { PropertyAccessDialog } from '../property-access-dialog/property-access-dialog';
 import { TenantLoginDialog, type TenantLoginOutcome } from '../tenant-login-dialog/tenant-login-dialog';
 
 type StatusFilter = 'ALL' | MemberStatus | 'INVITED';
@@ -99,6 +103,7 @@ function withLoginStatus(member: Member, on: boolean): Member {
     AttendantFormDialog,
     AttendantPasswordDialog,
     TenantLoginDialog,
+    PropertyAccessDialog,
   ],
   templateUrl: './team-members.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,7 +121,6 @@ export class TeamMembers {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly audienceOptions = AUDIENCE_OPTIONS;
-  readonly roleLabels = INVITATION_ROLE_LABELS;
   readonly skeletons = Array.from({ length: 4 });
   readonly handheldNote = ATTENDANT_HANDHELD_NOTE;
 
@@ -145,6 +149,8 @@ export class TeamMembers {
   readonly attendantFormOpen = signal(false);
   readonly attendantPasswordOpen = signal(false);
   readonly attendantTarget = signal<Member | null>(null);
+  readonly propertyAccessOpen = signal(false);
+  readonly propertyAccessTarget = signal<Member | null>(null);
   readonly tenantLoginOpen = signal(false);
   /** The tenant login whose password is being reset; none while setting one up. */
   readonly tenantLoginTarget = signal<Member | null>(null);
@@ -165,6 +171,7 @@ export class TeamMembers {
     userId: this.auth.currentUser()?.id ?? '',
     role: this.auth.currentUser()?.organizationRole ?? null,
     can: (code) => this.auth.can(code),
+    propertyAccess: this.auth.propertyAccess(),
   }));
   readonly currentUserId = computed(() => this.actor().userId);
 
@@ -188,6 +195,8 @@ export class TeamMembers {
   readonly isAttendants = computed(() => this.audience() === 'attendants');
   /** Tenants answer for their own lease, so the column is for staff and attendants. */
   readonly showPropertyAccess = computed(() => !this.isTenants());
+  /** Staff and attendants sign in to work; a tenant row shows when they joined instead. */
+  readonly showLastActive = computed(() => !this.isTenants());
   /** A tenant or attendant row has actions only for someone who can manage their logins. */
   readonly showActions = computed(
     () =>
@@ -288,6 +297,7 @@ export class TeamMembers {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
+          this.now.set(new Date());
           this.members.set(result.data);
           this.meta.set(result.meta);
           this.membersLoading.set(false);
@@ -324,8 +334,16 @@ export class TeamMembers {
     return memberStatusBadge(member);
   }
 
-  propertyAccess(member: Member): string | null {
+  propertyAccess(member: Member): PropertyAccessSummary | null {
     return propertyAccessLabel(member);
+  }
+
+  invitationAccess(invitation: Invitation): PropertyAccessSummary {
+    return propertyAccessSummary(invitation.propertyAccess);
+  }
+
+  lastActive(member: Member): LastActiveLabel {
+    return lastActiveLabel(member.lastActiveAt, this.now());
   }
 
   expiry(invitation: Invitation) {
@@ -387,6 +405,12 @@ export class TeamMembers {
     showPopupMenu(this.overflowMenu(), event, items);
   }
 
+  onPropertyAccessChanged(member: Member): void {
+    const { label } = propertyAccessSummary(member.propertyAccess);
+    this.toast.add({ severity: 'success', summary: 'Property access saved', detail: `${member.name}: ${label}.` });
+    this.replaceMember(member);
+  }
+
   onRoleChanged(member: Member): void {
     this.toast.add({
       severity: 'success',
@@ -414,6 +438,8 @@ export class TeamMembers {
     switch (action) {
       case 'change-role':
         return { label: 'Change role', command: () => this.openChangeRole(member) };
+      case 'property-access':
+        return { label: 'Property access', command: () => this.openPropertyAccess(member) };
       case 'transfer-ownership':
         return { label: 'Transfer ownership', command: () => this.confirmTransfer(member) };
       case 'deactivate':
@@ -518,6 +544,11 @@ export class TeamMembers {
     this.pendingFlashEmail = null;
     const added = rows.find((row) => sameEmail(row.email, email));
     if (added) this.flashId.set(added.id);
+  }
+
+  private openPropertyAccess(member: Member): void {
+    this.propertyAccessTarget.set(member);
+    this.propertyAccessOpen.set(true);
   }
 
   private openChangeRole(member: Member): void {

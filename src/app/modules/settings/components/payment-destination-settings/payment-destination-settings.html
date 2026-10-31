@@ -52,7 +52,7 @@
                   <button type="button" class="text-[12.5px] font-medium text-primary hover:underline" (click)="togglePreview(destination.id)">
                     {{ previewId() === destination.id ? 'Hide QR' : 'View QR' }}
                   </button>
-                  @if (canMutate()) {
+                  @if (canMutateAt(destination.propertyId)) {
                     <button type="button" class="text-[12.5px] font-medium text-body hover:underline" (click)="startEdit(destination)">Edit</button>
                     <button type="button" class="text-[12.5px] font-medium text-body hover:underline" [disabled]="busyId() === destination.id" (click)="toggleEnabled(destination)">
                       {{ destination.isEnabled ? 'Disable' : 'Enable' }}

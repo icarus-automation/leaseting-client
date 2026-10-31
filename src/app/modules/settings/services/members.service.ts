@@ -5,6 +5,7 @@ import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api';
 import type { Paginated } from '../../../core/models/api.types';
 import type { Member, MemberListFilters, OwnershipTransfer } from '../../../core/models/member.types';
+import type { PropertyAccess } from '../../../core/models/property-access.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
 
 /** The API's largest page for `GET /members`. */
@@ -43,6 +44,15 @@ export class MembersService {
 
   reactivate(memberId: string): Observable<Member> {
     return this.http.post<Member>(`${this.base}/${memberId}/reactivate`, {});
+  }
+
+  getPropertyAccess(memberId: string): Observable<PropertyAccess> {
+    return this.http.get<PropertyAccess>(`${this.base}/${memberId}/property-access`);
+  }
+
+  /** Staff only. `[]` gives every property back. */
+  setPropertyAccess(memberId: string, propertyIds: string[]): Observable<Member> {
+    return this.http.put<Member>(`${this.base}/${memberId}/property-access`, { propertyIds });
   }
 
   /** `memberId` becomes the owner; the caller becomes an admin. */

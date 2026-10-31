@@ -33,6 +33,8 @@ export class Properties {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly canManage = computed(() => this.auth.can('properties:manage'));
+  /** A new property would sit outside someone's property limits, so adding one takes every property. */
+  readonly canCreate = computed(() => this.canManage() && this.auth.hasEveryProperty());
 
   readonly items = signal<PropertyListItem[]>([]);
   readonly meta = signal<PageMeta | null>(null);
@@ -48,7 +50,7 @@ export class Properties {
     this.load(1);
 
     watchCreateParam(() => {
-      if (this.canManage()) this.openCreate();
+      if (this.canCreate()) this.openCreate();
     });
   }
 

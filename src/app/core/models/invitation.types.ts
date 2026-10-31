@@ -1,4 +1,6 @@
-/** Invitations add staff only. A custom role is given by a role change once they join. */
+import type { PropertyAccess } from './property-access.types';
+
+/** The system roles an invitation can give. It can also give an active custom role, by its id. */
 export type InvitationRole = 'admin' | 'member';
 
 export const INVITATION_ROLE_LABELS: Record<InvitationRole, string> = {
@@ -16,22 +18,33 @@ export type InvitationStatus = 'PENDING' | 'EXPIRED' | 'ACCEPTED' | 'REVOKED' | 
 export interface Invitation {
   id: string;
   email: string;
-  role: InvitationRole;
+  /** 'admin', 'member', or a custom role's UUID. */
+  role: string;
+  /** 'Member', or the custom role's name. Null if the custom role was deleted since. */
+  roleName: string | null;
   status: InvitationStatus;
   expiresAt: string;
   createdAt: string;
   invitedBy: { id: string; name: string } | null;
+  /** What the new member is limited to once they accept. */
+  propertyAccess: PropertyAccess;
 }
 
 export interface CreateInvitationPayload {
   email: string;
-  role: InvitationRole;
+  /** 'admin', 'member', or an active custom role's id. */
+  role: string;
+  /** The properties the new member is limited to; leave out for every property. */
+  propertyIds?: string[];
 }
 
 /** What the accept page shows before asking for a password. */
 export interface InvitationPreview {
+  organizationId: string;
   email: string;
   role: string;
+  /** 'Member', or the custom role's name. */
+  roleName: string | null;
   organizationName: string;
   expiresAt: string;
   /** True: ask for the existing account's password. False: a name and a new password. */
@@ -50,5 +63,6 @@ export interface AcceptedInvitation {
   organizationName: string;
   email: string;
   role: string;
+  roleName: string | null;
   isNewAccount: boolean;
 }

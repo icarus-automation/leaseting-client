@@ -15,6 +15,8 @@ function preview(overrides: Partial<InvitationPreview> = {}): InvitationPreview 
   return {
     email: 'ben@example.com',
     role: 'member',
+    roleName: 'Member',
+    organizationId: 'org-1',
     organizationName: 'Brickstone Realty',
     expiresAt: '2026-11-06T09:00:00.000Z',
     hasAccount: false,

@@ -1,3 +1,5 @@
+import type { PropertyAccess } from '../models/property-access.types';
+
 export interface SignInCredentials {
   email: string;
   password: string;
@@ -22,6 +24,8 @@ export interface SessionUser {
   audience?: Audience;
   /** Codes held in the active organization; empty for app-only accounts and the super admin. */
   permissions?: readonly string[];
+  /** The properties they work with in the active organization. */
+  propertyAccess?: PropertyAccess;
   features?: FeatureFlags;
 }
 

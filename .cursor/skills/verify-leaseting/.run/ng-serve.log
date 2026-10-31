@@ -34,3 +34,1206 @@ Application bundle generation complete. [22.134 seconds] - 2026-10-31T08:08:36.5
 Watch mode enabled. Watching for file changes...
 NOTE: Raw file sizes do not reflect development server per-request transformations.
   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m4210[22m/[39m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                     [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                      [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                         [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                         [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                     [2m | [22m [1mRaw size[22m
+[32mchunk-DZ4CPJ6S.js[39m  [2m | [22m[2mproperty-detail[22m           [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m         [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-WAGTMSRV.js[39m  [2m | [22m[2musers-settings[22m            [2m | [22m[36m265.01 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m                     [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m       [2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-JU5U77LA.js[39m  [2m | [22m[2mmain-layout[22m               [2m | [22m[36m105.67 kB[39m[2m | [22m
+[32mchunk-TOVPW4O3.js[39m  [2m | [22m[2mparking[22m                   [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m             [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-XE4W4JRD.js[39m  [2m | [22m[2mwork-orders[22m               [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-FLTXZJYR.js[39m  [2m | [22m[2mhome[22m                      [2m | [22m [36m73.94 kB[39m[2m | [22m
+[32mchunk-PFY2IJUC.js[39m  [2m | [22m[2mdelinquency[22m               [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-6T35N7SC.js[39m  [2m | [22m[2mpayment-submissions[22m       [2m | [22m [36m54.53 kB[39m[2m | [22m
+[32mchunk-N5H2IQM6.js[39m  [2m | [22m[2m-[22m                         [2m | [22m [36m52.97 kB[39m[2m | [22m
+[32mchunk-CEMV7362.js[39m  [2m | [22m[2mparking-terminals-settings[22m[2m | [22m [36m50.23 kB[39m[2m | [22m
+[32mchunk-SKYGI334.js[39m  [2m | [22m[2maccept-invite[22m             [2m | [22m [36m48.34 kB[39m[2m | [22m
+[2m...and 32 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [11.096 seconds] - 2026-10-31T09:47:23.765Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.119 seconds] - 2026-10-31T09:47:28.962Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.193 seconds] - 2026-10-31T09:47:34.649Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.500 seconds] - 2026-10-31T09:47:51.445Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 3.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/attendant-form-dialog/attendant-form-dialog.ts:88:27:
+[37m      88 │       .create(name.trim(), [32memail.trim(), password[37m)
+         ╵                            [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.868 seconds] - 2026-10-31T09:49:02.384Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 3.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/attendant-form-dialog/attendant-form-dialog.ts:88:27:
+[37m      88 │       .create(name.trim(), [32memail.trim(), password[37m)
+         ╵                            [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:164:55:
+[37m      164 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+          ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type 'PropertyAccessSummary | null' is not assignable to type 'string | null'.
+  Type 'PropertyAccessSummary' is not assignable to type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:328:4:
+[37m      328 │     [32mreturn[37m propertyAccessLabel(member);
+          ╵     [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2366: Function lacks ending return statement and return type does not include 'undefined'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:413:58:
+[37m      413 │   private menuItem(action: MemberAction, member: Member): [32mMenuItem[37m {
+          ╵                                                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [5.292 seconds] - 2026-10-31T09:50:36.855Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: Select is not used within the template of InviteStaffDialog[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.ts:39:33:
+[37m      39 │ ...ports: [ReactiveFormsModule, [32mSelect[37m, ErrorBanner, FormDialog, P...
+         ╵                                 [32m~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PropertyAccessPicker is not used within the template of InviteStaffDialog[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.ts:39:66:
+[37m      39 │ ...rmsModule, Select, ErrorBanner, FormDialog, [32mPropertyAccessPicker[37m],
+         ╵                                                [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 3.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/attendant-form-dialog/attendant-form-dialog.ts:88:27:
+[37m      88 │       .create(name.trim(), [32memail.trim(), password[37m)
+         ╵                            [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'roleChoices' does not exist on type 'InviteStaffDialog'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.html:38:22:
+[37m      38 │       @for (choice of [32mroleChoices[37m(); track choice.value) {
+         ╵                       [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component InviteStaffDialog.
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.ts:40:15:
+[37m      40 │   templateUrl: [32m'./invite-staff-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'size' since it isn't a known property of ':svg:svg'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.html:73:65:
+[37m      73 │ ..."mt-0.5 shrink-0 text-muted" [32m[size]="14"[37m aria-hidden="true"></svg>
+         ╵                                 [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component InviteStaffDialog.
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.ts:40:15:
+[37m      40 │   templateUrl: [32m'./invite-staff-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'isAdmin' does not exist on type 'InviteStaffDialog'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.html:77:17:
+[37m      77 │             @if ([32misAdmin[37m()) {
+         ╵                  [32m~~~~~~~[0m
+
+  Error occurs in the template of component InviteStaffDialog.
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.ts:40:15:
+[37m      40 │   templateUrl: [32m'./invite-staff-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../../utils/invite-roles.util' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.ts:26:58:
+[37m      26 │ ...Group, invitableRoleGroups } from [32m'../../utils/invite-roles.util'[37m;
+         ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'code' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.ts:68:48:
+[37m      68 │ ...eRoleGroups(this.roleList() ?? [], ([32mcode[37m) => this.auth.can(code)),
+         ╵                                        [32m~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:164:55:
+[37m      164 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+          ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type 'PropertyAccessSummary | null' is not assignable to type 'string | null'.
+  Type 'PropertyAccessSummary' is not assignable to type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:328:4:
+[37m      328 │     [32mreturn[37m propertyAccessLabel(member);
+          ╵     [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2366: Function lacks ending return statement and return type does not include 'undefined'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:413:58:
+[37m      413 │   private menuItem(action: MemberAction, member: Member): [32mMenuItem[37m {
+          ╵                                                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../../utils/invite-roles.util"[0m
+
+    src/app/modules/settings/components/invite-staff-dialog/invite-staff-dialog.ts:12:36:
+[37m      12 │ import { invitableRoleGroups } from [32m'../../utils/invite-roles.util'[37m;
+         ╵                                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [5.564 seconds] - 2026-10-31T09:51:03.649Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 3.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/attendant-form-dialog/attendant-form-dialog.ts:88:27:
+[37m      88 │       .create(name.trim(), [32memail.trim(), password[37m)
+         ╵                            [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:164:55:
+[37m      164 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+          ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type 'PropertyAccessSummary | null' is not assignable to type 'string | null'.
+  Type 'PropertyAccessSummary' is not assignable to type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:328:4:
+[37m      328 │     [32mreturn[37m propertyAccessLabel(member);
+          ╵     [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2366: Function lacks ending return statement and return type does not include 'undefined'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:413:58:
+[37m      413 │   private menuItem(action: MemberAction, member: Member): [32mMenuItem[37m {
+          ╵                                                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.954 seconds] - 2026-10-31T09:51:26.061Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 3.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/attendant-form-dialog/attendant-form-dialog.ts:88:27:
+[37m      88 │       .create(name.trim(), [32memail.trim(), password[37m)
+         ╵                            [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:164:55:
+[37m      164 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+          ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type 'PropertyAccessSummary | null' is not assignable to type 'string | null'.
+  Type 'PropertyAccessSummary' is not assignable to type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:328:4:
+[37m      328 │     [32mreturn[37m propertyAccessLabel(member);
+          ╵     [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2366: Function lacks ending return statement and return type does not include 'undefined'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:413:58:
+[37m      413 │   private menuItem(action: MemberAction, member: Member): [32mMenuItem[37m {
+          ╵                                                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [3.822 seconds] - 2026-10-31T09:51:47.129Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:164:55:
+[37m      164 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+          ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type 'PropertyAccessSummary | null' is not assignable to type 'string | null'.
+  Type 'PropertyAccessSummary' is not assignable to type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:328:4:
+[37m      328 │     [32mreturn[37m propertyAccessLabel(member);
+          ╵     [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2366: Function lacks ending return statement and return type does not include 'undefined'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:413:58:
+[37m      413 │   private menuItem(action: MemberAction, member: Member): [32mMenuItem[37m {
+          ╵                                                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [3.685 seconds] - 2026-10-31T09:52:08.959Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PropertyAccessDialog is not used within the template of TeamMembers[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.ts:106:4:
+[37m      106 │     [32mPropertyAccessDialog[37m,
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'roleLabels' does not exist on type 'TeamMembers'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/team-members/team-members.html:104:23:
+[37m      104 │                     {{ [32mroleLabels[37m[invitation.role] }} · Sent {{ ...
+          ╵                        [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TeamMembers.
+
+    src/app/modules/settings/components/team-members/team-members.ts:108:15:
+[37m      108 │   templateUrl: [32m'./team-members.html'[37m,
+          ╵                [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [3.314 seconds] - 2026-10-31T09:52:29.219Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [4.123 seconds] - 2026-10-31T09:52:52.645Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.158 seconds] - 2026-10-31T09:53:00.694Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [3.256 seconds] - 2026-10-31T09:53:28.821Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [3.097 seconds] - 2026-10-31T09:53:40.454Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'MEMBER_PROPERTY_ACCESS_CHANGED' is missing in type '{ INVITATION_CREATED: string; INVITATION_RESENT: string; INVITATION_REVOKED: string; INVITATION_ACCEPTED: string; MEMBER_ROLE_CHANGED: string; MEMBER_DEACTIVATED: string; MEMBER_REACTIVATED: string; ... 7 more ...; ROLE_DELETED: string; }' but required in type 'Record<AuditAction, string>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/audit-event.util.ts:4:13:
+[37m      4 │ export const [32mAUDIT_ACTION_LABELS[37m: Record<AuditAction, string> = {
+        ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.735 seconds] - 2026-10-31T09:54:02.830Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.887 seconds] - 2026-10-31T09:54:53.020Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'propertyAccess' is missing in type '{ userId: string; role: string | null; can: (code: Permission) => boolean; }' but required in type 'MemberActor'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/change-role-dialog/change-role-dialog.ts:73:55:
+[37m      73 │   private readonly actor = computed<MemberActor>(() => [32m({[37m
+         ╵                                                        [32m~~[0m
+
+  'propertyAccess' is declared here.
+
+    src/app/modules/settings/utils/member-access.util.ts:28:2:
+[37m      28 │   [32mpropertyAccess[37m: PropertyAccess;
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+  The expected type comes from the return type of this signature.
+
+    node_modules/@angular/core/types/core.d.ts:2237:42:
+[37m      2237 │ ...n computed<T>(computation: [32m() => T[37m, options?: CreateComputedO...
+           ╵                               [32m~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m124.51 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-GOMI4DH3.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.37 kB[39m[2m | [22m
+[32mchunk-M3Q5OB35.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.31 kB[39m[2m | [22m
+[32mchunk-ZL2MNSTS.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m728 bytes[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m[1m147.99 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-MM2DWD4T.js[39m  [2m | [22m[2mproperty-detail[22m    [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-E23NUHB5.js[39m  [2m | [22m[2musers-settings[22m     [2m | [22m[36m319.61 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m  [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m              [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m[2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-EB2QN7DW.js[39m  [2m | [22m[2mmain-layout[22m        [2m | [22m[36m105.79 kB[39m[2m | [22m
+[32mchunk-OVIJ64GB.js[39m  [2m | [22m[2mkit-chat[22m           [2m | [22m [36m97.72 kB[39m[2m | [22m
+[32mchunk-KR5EEMCS.js[39m  [2m | [22m[2mparking[22m            [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m      [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-MN7RVLA7.js[39m  [2m | [22m[2mcalendar[22m           [2m | [22m [36m78.99 kB[39m[2m | [22m
+[32mchunk-BRKHDXTJ.js[39m  [2m | [22m[2mwork-orders[22m        [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-66PRY5I3.js[39m  [2m | [22m[2mhome[22m               [2m | [22m [36m74.07 kB[39m[2m | [22m
+[32mchunk-ZPQ27EHM.js[39m  [2m | [22m[2mutility-run[22m        [2m | [22m [36m72.46 kB[39m[2m | [22m
+[32mchunk-66NLGLG2.js[39m  [2m | [22m[2mdelinquency[22m        [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-M7AE3CXR.js[39m  [2m | [22m[2mrevenue-by-tenant[22m  [2m | [22m [36m58.05 kB[39m[2m | [22m
+[2m...and 107 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [1.017 seconds] - 2026-10-31T09:55:24.679Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m124.51 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-GOMI4DH3.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.37 kB[39m[2m | [22m
+[32mchunk-M3Q5OB35.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.31 kB[39m[2m | [22m
+[32mchunk-ZL2MNSTS.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m728 bytes[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m[1m147.99 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-MM2DWD4T.js[39m  [2m | [22m[2mproperty-detail[22m    [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-E23NUHB5.js[39m  [2m | [22m[2musers-settings[22m     [2m | [22m[36m319.61 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m  [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m              [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m[2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-EB2QN7DW.js[39m  [2m | [22m[2mmain-layout[22m        [2m | [22m[36m105.79 kB[39m[2m | [22m
+[32mchunk-OVIJ64GB.js[39m  [2m | [22m[2mkit-chat[22m           [2m | [22m [36m97.72 kB[39m[2m | [22m
+[32mchunk-KR5EEMCS.js[39m  [2m | [22m[2mparking[22m            [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m      [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-MN7RVLA7.js[39m  [2m | [22m[2mcalendar[22m           [2m | [22m [36m78.99 kB[39m[2m | [22m
+[32mchunk-BRKHDXTJ.js[39m  [2m | [22m[2mwork-orders[22m        [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-66PRY5I3.js[39m  [2m | [22m[2mhome[22m               [2m | [22m [36m74.07 kB[39m[2m | [22m
+[32mchunk-ZPQ27EHM.js[39m  [2m | [22m[2mutility-run[22m        [2m | [22m [36m72.46 kB[39m[2m | [22m
+[32mchunk-66NLGLG2.js[39m  [2m | [22m[2mdelinquency[22m        [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-M7AE3CXR.js[39m  [2m | [22m[2mrevenue-by-tenant[22m  [2m | [22m [36m58.05 kB[39m[2m | [22m
+[2m...and 107 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [0.974 seconds] - 2026-10-31T13:32:43.183Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m124.51 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-GOMI4DH3.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.37 kB[39m[2m | [22m
+[32mchunk-M3Q5OB35.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.31 kB[39m[2m | [22m
+[32mchunk-ZL2MNSTS.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m728 bytes[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m[1m147.99 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-MM2DWD4T.js[39m  [2m | [22m[2mproperty-detail[22m    [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-E23NUHB5.js[39m  [2m | [22m[2musers-settings[22m     [2m | [22m[36m319.61 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m  [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m              [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m[2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-EB2QN7DW.js[39m  [2m | [22m[2mmain-layout[22m        [2m | [22m[36m105.79 kB[39m[2m | [22m
+[32mchunk-OVIJ64GB.js[39m  [2m | [22m[2mkit-chat[22m           [2m | [22m [36m97.72 kB[39m[2m | [22m
+[32mchunk-KR5EEMCS.js[39m  [2m | [22m[2mparking[22m            [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m      [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-MN7RVLA7.js[39m  [2m | [22m[2mcalendar[22m           [2m | [22m [36m78.99 kB[39m[2m | [22m
+[32mchunk-BRKHDXTJ.js[39m  [2m | [22m[2mwork-orders[22m        [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-66PRY5I3.js[39m  [2m | [22m[2mhome[22m               [2m | [22m [36m74.07 kB[39m[2m | [22m
+[32mchunk-ZPQ27EHM.js[39m  [2m | [22m[2mutility-run[22m        [2m | [22m [36m72.46 kB[39m[2m | [22m
+[32mchunk-66NLGLG2.js[39m  [2m | [22m[2mdelinquency[22m        [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-M7AE3CXR.js[39m  [2m | [22m[2mrevenue-by-tenant[22m  [2m | [22m [36m58.05 kB[39m[2m | [22m
+[2m...and 107 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [0.317 seconds] - 2026-10-31T13:33:27.112Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m124.51 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-GOMI4DH3.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.37 kB[39m[2m | [22m
+[32mchunk-M3Q5OB35.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.31 kB[39m[2m | [22m
+[32mchunk-ZL2MNSTS.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m728 bytes[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m[1m147.99 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-MM2DWD4T.js[39m  [2m | [22m[2mproperty-detail[22m    [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-E23NUHB5.js[39m  [2m | [22m[2musers-settings[22m     [2m | [22m[36m319.61 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m  [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m              [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m[2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-EB2QN7DW.js[39m  [2m | [22m[2mmain-layout[22m        [2m | [22m[36m105.79 kB[39m[2m | [22m
+[32mchunk-OVIJ64GB.js[39m  [2m | [22m[2mkit-chat[22m           [2m | [22m [36m97.72 kB[39m[2m | [22m
+[32mchunk-KR5EEMCS.js[39m  [2m | [22m[2mparking[22m            [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m      [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-MN7RVLA7.js[39m  [2m | [22m[2mcalendar[22m           [2m | [22m [36m78.99 kB[39m[2m | [22m
+[32mchunk-BRKHDXTJ.js[39m  [2m | [22m[2mwork-orders[22m        [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-66PRY5I3.js[39m  [2m | [22m[2mhome[22m               [2m | [22m [36m74.07 kB[39m[2m | [22m
+[32mchunk-ZPQ27EHM.js[39m  [2m | [22m[2mutility-run[22m        [2m | [22m [36m72.46 kB[39m[2m | [22m
+[32mchunk-66NLGLG2.js[39m  [2m | [22m[2mdelinquency[22m        [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-M7AE3CXR.js[39m  [2m | [22m[2mrevenue-by-tenant[22m  [2m | [22m [36m58.05 kB[39m[2m | [22m
+[2m...and 107 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [0.354 seconds] - 2026-10-31T13:35:30.700Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: PIcon is not used within the template of PropertyAccessPicker[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/components/property-access-picker/property-access-picker.ts:34:12:
+[37m      34 │   imports: [[32mPIcon[37m, ErrorBanner, Skeleton],
+         ╵             [32m~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m          [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m           [2m | [22m [36m11.52 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m          [2m | [22m [1mRaw size[22m
+[32mchunk-Q4JUX24Z.js[39m  [2m | [22m[2musers-settings[22m [2m | [22m[36m319.45 kB[39m[2m | [22m
+[32mchunk-3VS3BYDE.js[39m  [2m | [22m[2msettings-routes[22m[2m | [22m  [36m2.97 kB[39m[2m | [22m
+
+Application bundle generation complete. [2.717 seconds] - 2026-10-31T13:36:27.426Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m124.51 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-GOMI4DH3.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.37 kB[39m[2m | [22m
+[32mchunk-M3Q5OB35.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.31 kB[39m[2m | [22m
+[32mchunk-ZL2MNSTS.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m728 bytes[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m[1m147.99 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-MM2DWD4T.js[39m  [2m | [22m[2mproperty-detail[22m    [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-Q4JUX24Z.js[39m  [2m | [22m[2musers-settings[22m     [2m | [22m[36m319.45 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m  [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m              [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m[2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-EB2QN7DW.js[39m  [2m | [22m[2mmain-layout[22m        [2m | [22m[36m105.79 kB[39m[2m | [22m
+[32mchunk-OVIJ64GB.js[39m  [2m | [22m[2mkit-chat[22m           [2m | [22m [36m97.72 kB[39m[2m | [22m
+[32mchunk-KR5EEMCS.js[39m  [2m | [22m[2mparking[22m            [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m      [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-MN7RVLA7.js[39m  [2m | [22m[2mcalendar[22m           [2m | [22m [36m78.99 kB[39m[2m | [22m
+[32mchunk-BRKHDXTJ.js[39m  [2m | [22m[2mwork-orders[22m        [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-66PRY5I3.js[39m  [2m | [22m[2mhome[22m               [2m | [22m [36m74.07 kB[39m[2m | [22m
+[32mchunk-ZPQ27EHM.js[39m  [2m | [22m[2mutility-run[22m        [2m | [22m [36m72.46 kB[39m[2m | [22m
+[32mchunk-66NLGLG2.js[39m  [2m | [22m[2mdelinquency[22m        [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-M7AE3CXR.js[39m  [2m | [22m[2mrevenue-by-tenant[22m  [2m | [22m [36m58.05 kB[39m[2m | [22m
+[2m...and 107 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [0.260 seconds] - 2026-10-31T13:38:10.846Z
+
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m124.51 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-GOMI4DH3.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.37 kB[39m[2m | [22m
+[32mchunk-M3Q5OB35.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.31 kB[39m[2m | [22m
+[32mchunk-ZL2MNSTS.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m728 bytes[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m[1m147.99 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-MM2DWD4T.js[39m  [2m | [22m[2mproperty-detail[22m    [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-Q4JUX24Z.js[39m  [2m | [22m[2musers-settings[22m     [2m | [22m[36m319.45 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m  [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m              [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m[2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-EB2QN7DW.js[39m  [2m | [22m[2mmain-layout[22m        [2m | [22m[36m105.79 kB[39m[2m | [22m
+[32mchunk-OVIJ64GB.js[39m  [2m | [22m[2mkit-chat[22m           [2m | [22m [36m97.72 kB[39m[2m | [22m
+[32mchunk-KR5EEMCS.js[39m  [2m | [22m[2mparking[22m            [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m      [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-MN7RVLA7.js[39m  [2m | [22m[2mcalendar[22m           [2m | [22m [36m78.99 kB[39m[2m | [22m
+[32mchunk-BRKHDXTJ.js[39m  [2m | [22m[2mwork-orders[22m        [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-66PRY5I3.js[39m  [2m | [22m[2mhome[22m               [2m | [22m [36m74.07 kB[39m[2m | [22m
+[32mchunk-ZPQ27EHM.js[39m  [2m | [22m[2mutility-run[22m        [2m | [22m [36m72.46 kB[39m[2m | [22m
+[32mchunk-66NLGLG2.js[39m  [2m | [22m[2mdelinquency[22m        [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-M7AE3CXR.js[39m  [2m | [22m[2mrevenue-by-tenant[22m  [2m | [22m [36m58.05 kB[39m[2m | [22m
+[2m...and 107 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [0.342 seconds] - 2026-10-31T13:38:21.102Z
+
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.473 seconds] - 2026-10-31T13:39:18.571Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2769: No overload matches this call.
+  Overload 1 of 5, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 5, '(vd: VarDate): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'VarDate'.
+      Type 'null' is not assignable to type 'VarDate'.
+  Overload 3 of 5, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/member-access.util.ts:129:22:
+[37m      129 │   const at = new Date([32mlastActiveAt[37m);
+          ╵                       [32m~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m124.51 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-GOMI4DH3.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.37 kB[39m[2m | [22m
+[32mchunk-M3Q5OB35.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.31 kB[39m[2m | [22m
+[32mchunk-ZL2MNSTS.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m728 bytes[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m[1m147.99 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-MM2DWD4T.js[39m  [2m | [22m[2mproperty-detail[22m    [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-Q4JUX24Z.js[39m  [2m | [22m[2musers-settings[22m     [2m | [22m[36m319.45 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m  [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m              [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m[2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-EB2QN7DW.js[39m  [2m | [22m[2mmain-layout[22m        [2m | [22m[36m105.79 kB[39m[2m | [22m
+[32mchunk-OVIJ64GB.js[39m  [2m | [22m[2mkit-chat[22m           [2m | [22m [36m97.72 kB[39m[2m | [22m
+[32mchunk-KR5EEMCS.js[39m  [2m | [22m[2mparking[22m            [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m      [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-MN7RVLA7.js[39m  [2m | [22m[2mcalendar[22m           [2m | [22m [36m78.99 kB[39m[2m | [22m
+[32mchunk-BRKHDXTJ.js[39m  [2m | [22m[2mwork-orders[22m        [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-66PRY5I3.js[39m  [2m | [22m[2mhome[22m               [2m | [22m [36m74.07 kB[39m[2m | [22m
+[32mchunk-ZPQ27EHM.js[39m  [2m | [22m[2mutility-run[22m        [2m | [22m [36m72.46 kB[39m[2m | [22m
+[32mchunk-66NLGLG2.js[39m  [2m | [22m[2mdelinquency[22m        [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-M7AE3CXR.js[39m  [2m | [22m[2mrevenue-by-tenant[22m  [2m | [22m [36m58.05 kB[39m[2m | [22m
+[2m...and 107 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [1.128 seconds] - 2026-10-31T13:39:26.813Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.058 seconds] - 2026-10-31T13:39:54.801Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2769: No overload matches this call.
+  Overload 1 of 5, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 5, '(vd: VarDate): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'VarDate'.
+      Type 'null' is not assignable to type 'VarDate'.
+  Overload 3 of 5, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/settings/utils/member-access.util.ts:129:22:
+[37m      129 │   const at = new Date([32mlastActiveAt[37m);
+          ╵                       [32m~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m             [2m | [22m[36m124.51 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m               [2m | [22m [36m11.52 kB[39m[2m | [22m
+[32mchunk-43R4C3MV.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m7.89 kB[39m[2m | [22m
+[32mchunk-GOMI4DH3.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.37 kB[39m[2m | [22m
+[32mchunk-M3Q5OB35.js[39m  [2m | [22m[2m-[22m                  [2m | [22m  [36m1.31 kB[39m[2m | [22m
+[32mchunk-ZL2MNSTS.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m728 bytes[39m[2m | [22m
+[32mchunk-WCMJF7M2.js[39m  [2m | [22m[2m-[22m                  [2m | [22m[36m659 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m      [2m | [22m[1m147.99 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m
+[32mchunk-MM2DWD4T.js[39m  [2m | [22m[2mproperty-detail[22m    [2m | [22m[36m334.12 kB[39m[2m | [22m
+[32mchunk-Q4JUX24Z.js[39m  [2m | [22m[2musers-settings[22m     [2m | [22m[36m319.45 kB[39m[2m | [22m
+[32mchunk-BGAEWYHX.js[39m  [2m | [22m[2monboarding-wizard[22m  [2m | [22m[36m288.10 kB[39m[2m | [22m
+[32mchunk-352SJVIS.js[39m  [2m | [22m[2mbills[22m              [2m | [22m[36m119.13 kB[39m[2m | [22m
+[32mchunk-BTDBO5PO.js[39m  [2m | [22m[2mrate-plans-settings[22m[2m | [22m[36m118.37 kB[39m[2m | [22m
+[32mchunk-EB2QN7DW.js[39m  [2m | [22m[2mmain-layout[22m        [2m | [22m[36m105.79 kB[39m[2m | [22m
+[32mchunk-OVIJ64GB.js[39m  [2m | [22m[2mkit-chat[22m           [2m | [22m [36m97.72 kB[39m[2m | [22m
+[32mchunk-KR5EEMCS.js[39m  [2m | [22m[2mparking[22m            [2m | [22m [36m89.00 kB[39m[2m | [22m
+[32mchunk-K5WN7ML5.js[39m  [2m | [22m[2mtenant-detail[22m      [2m | [22m [36m88.91 kB[39m[2m | [22m
+[32mchunk-MN7RVLA7.js[39m  [2m | [22m[2mcalendar[22m           [2m | [22m [36m78.99 kB[39m[2m | [22m
+[32mchunk-BRKHDXTJ.js[39m  [2m | [22m[2mwork-orders[22m        [2m | [22m [36m76.39 kB[39m[2m | [22m
+[32mchunk-66PRY5I3.js[39m  [2m | [22m[2mhome[22m               [2m | [22m [36m74.07 kB[39m[2m | [22m
+[32mchunk-ZPQ27EHM.js[39m  [2m | [22m[2mutility-run[22m        [2m | [22m [36m72.46 kB[39m[2m | [22m
+[32mchunk-66NLGLG2.js[39m  [2m | [22m[2mdelinquency[22m        [2m | [22m [36m60.56 kB[39m[2m | [22m
+[32mchunk-M7AE3CXR.js[39m  [2m | [22m[2mrevenue-by-tenant[22m  [2m | [22m [36m58.05 kB[39m[2m | [22m
+[2m...and 107 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [0.828 seconds] - 2026-10-31T13:40:01.269Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m          [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m           [2m | [22m [36m11.52 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m          [2m | [22m [1mRaw size[22m
+[32mchunk-MTJXQ3MY.js[39m  [2m | [22m[2musers-settings[22m [2m | [22m[36m319.16 kB[39m[2m | [22m
+[32mchunk-O2TSOTEF.js[39m  [2m | [22m[2msettings-routes[22m[2m | [22m  [36m2.97 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.993 seconds] - 2026-10-31T13:40:16.485Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m          [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m           [2m | [22m [36m11.52 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m          [2m | [22m [1mRaw size[22m
+[32mchunk-Q4JUX24Z.js[39m  [2m | [22m[2musers-settings[22m [2m | [22m[36m319.45 kB[39m[2m | [22m
+[32mchunk-3VS3BYDE.js[39m  [2m | [22m[2msettings-routes[22m[2m | [22m  [36m2.97 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.827 seconds] - 2026-10-31T13:40:35.578Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m          [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m           [2m | [22m [36m11.52 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m          [2m | [22m [1mRaw size[22m
+[32mchunk-Q2DCITQ5.js[39m  [2m | [22m[2musers-settings[22m [2m | [22m[36m319.72 kB[39m[2m | [22m
+[32mchunk-WETDMP64.js[39m  [2m | [22m[2msettings-routes[22m[2m | [22m  [36m2.97 kB[39m[2m | [22m
+
+Application bundle generation complete. [3.644 seconds] - 2026-10-31T13:50:35.323Z
+
+Page reload sent to client(s).

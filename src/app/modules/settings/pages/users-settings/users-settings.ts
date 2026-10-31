@@ -67,8 +67,8 @@ export class UsersSettingsPage {
 
   readonly tabs = TABS;
 
-  /** The audit log answers to `members:update`: owners and admins. */
-  readonly canViewAudit = computed(() => this.auth.can('members:update'));
+  /** The audit log answers to its own code: owners and admins hold it, and a custom role may. */
+  readonly canViewAudit = computed(() => this.auth.can('audit_log:view'));
 
   private readonly requestedTab = toSignal(
     this.route.queryParamMap.pipe(map((params) => (params.get('tab') === 'audit' ? 'audit' : 'members'))),

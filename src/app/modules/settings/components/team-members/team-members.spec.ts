@@ -12,6 +12,7 @@ import type { Permission } from '../../../../core/auth/permissions';
 import type { Invitation } from '../../../../core/models/invitation.types';
 import type { Member } from '../../../../core/models/member.types';
 import type { ParkingAttendantResponse } from '../../../../core/models/parking-attendant.types';
+import { EVERY_PROPERTY, type PropertyAccess } from '../../../../core/models/property-access.types';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { InvitationsService } from '../../services/invitations.service';
 import { MembersService } from '../../services/members.service';
@@ -22,6 +23,7 @@ import { AttendantFormDialog } from '../attendant-form-dialog/attendant-form-dia
 import { AttendantPasswordDialog } from '../attendant-password-dialog/attendant-password-dialog';
 import { ChangeRoleDialog } from '../change-role-dialog/change-role-dialog';
 import { InviteStaffDialog } from '../invite-staff-dialog/invite-staff-dialog';
+import { PropertyAccessDialog } from '../property-access-dialog/property-access-dialog';
 import { TenantLoginDialog, type TenantLoginOutcome } from '../tenant-login-dialog/tenant-login-dialog';
 import { TeamMembers } from './team-members';
 
@@ -58,6 +60,19 @@ class TenantLoginDialogStub {
   readonly finished = output<TenantLoginOutcome>();
 }
 
+@Component({ selector: 'app-property-access-dialog', template: '' })
+class PropertyAccessDialogStub {
+  readonly visible = model(false);
+  readonly member = input<Member | null>(null);
+  readonly changed = output<Member>();
+}
+
+const BRICKSTONE_ONLY: PropertyAccess = {
+  isLimited: true,
+  propertyIds: ['p-brickstone'],
+  properties: [{ id: 'p-brickstone', name: 'Brickstone', isArchived: false }],
+};
+
 function member(overrides: Partial<Member>): Member {
   return {
     id: 'm-x',
@@ -71,13 +86,22 @@ function member(overrides: Partial<Member>): Member {
     status: 'ACTIVE',
     deactivatedAt: null,
     joinedAt: '2026-10-30T02:15:00.000Z',
+    propertyAccess: EVERY_PROPERTY,
+    lastActiveAt: null,
     ...overrides,
   };
 }
 
 const STAFF: Member[] = [
   member({ id: 'm-owner', userId: 'u-owner', name: 'Olive Reyes', role: 'owner', roleName: 'Owner' }),
-  member({ id: 'm-admin', userId: 'u-admin', name: 'Ana Cruz', role: 'admin', roleName: 'Admin' }),
+  member({
+    id: 'm-admin',
+    userId: 'u-admin',
+    name: 'Ana Cruz',
+    role: 'admin',
+    roleName: 'Admin',
+    lastActiveAt: new Date(Date.now() - 12 * 60_000).toISOString(),
+  }),
   member({ id: 'm-member', userId: 'u-member', name: 'Ben Santos', status: 'DEACTIVATED', deactivatedAt: '2026-10-31T01:00:00.000Z' }),
 ];
 
@@ -85,6 +109,8 @@ const PENDING: Invitation = {
   id: 'i-1',
   email: 'carla@example.com',
   role: 'member',
+  roleName: 'Member',
+  propertyAccess: BRICKSTONE_ONLY,
   status: 'PENDING',
   expiresAt: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000 + 60_000).toISOString(),
   createdAt: '2026-10-31T01:00:00.000Z',
@@ -100,7 +126,7 @@ const TENANTS: Member[] = [
 ];
 
 const ATTENDANTS: Member[] = [
-  member({ id: 'm-a1', userId: 'u-a1', name: 'Basement attendant', email: 'basement@example.com', role: 'parking_attendant', roleName: 'Parking attendant', audience: 'parking' }),
+  member({ id: 'm-a1', userId: 'u-a1', name: 'Basement attendant', email: 'basement@example.com', role: 'parking_attendant', roleName: 'Parking attendant', audience: 'parking', propertyAccess: BRICKSTONE_ONLY }),
   member({ id: 'm-a2', userId: 'u-a2', name: 'Gate attendant', email: 'gate@example.com', role: 'parking_attendant', roleName: 'Parking attendant', audience: 'parking', status: 'DEACTIVATED' }),
 ];
 
@@ -120,6 +146,7 @@ describe('TeamMembers', () => {
     currentUser: user,
     activeOrganization: signal({ id: 'org-1', name: 'Brickstone Realty', slug: 'brickstone' }),
     can: (code: Permission) => held().includes(code),
+    propertyAccess: signal<PropertyAccess>(EVERY_PROPERTY),
   };
   let fixture: ComponentFixture<TeamMembers>;
 
@@ -132,6 +159,7 @@ describe('TeamMembers', () => {
   beforeEach(async () => {
     user.set({ id: 'u-owner', name: 'Olive Reyes', email: 'olive@example.com', organizationRole: 'owner' });
     held.set(EVERY_TEAM_CODE);
+    auth.propertyAccess.set(EVERY_PROPERTY);
     members.list.mockReturnValue(of({ data: STAFF, meta: { total: 3, page: 1, limit: 10, lastPage: 1 } }));
     invitations.list.mockReturnValue(of([PENDING]));
 
@@ -150,7 +178,14 @@ describe('TeamMembers', () => {
     })
       .overrideComponent(TeamMembers, {
         remove: {
-          imports: [InviteStaffDialog, ChangeRoleDialog, AttendantFormDialog, AttendantPasswordDialog, TenantLoginDialog],
+          imports: [
+            InviteStaffDialog,
+            ChangeRoleDialog,
+            AttendantFormDialog,
+            AttendantPasswordDialog,
+            TenantLoginDialog,
+            PropertyAccessDialog,
+          ],
         },
         add: {
           imports: [
@@ -159,6 +194,7 @@ describe('TeamMembers', () => {
             AttendantFormDialogStub,
             AttendantPasswordDialogStub,
             TenantLoginDialogStub,
+            PropertyAccessDialogStub,
           ],
         },
       })
@@ -195,6 +231,48 @@ describe('TeamMembers', () => {
     expect(ben).toContain('All properties');
     expect(ben).toContain('Deactivated');
     expect(rowFor('Olive Reyes').textContent).toContain('You');
+  });
+
+  it('shows when each person was last active, and Never for someone who never signed in', async () => {
+    await render();
+
+    expect(fixture.nativeElement.querySelector('thead').textContent).toContain('Last active');
+    expect(rowFor('Ana Cruz').textContent).toContain('12 min ago');
+    expect(rowFor('Ana Cruz').querySelector('[title]')?.getAttribute('title')).toMatch(/\d{1,2}:\d{2} [AP]M$/);
+    expect(rowFor('Ben Santos').textContent).toContain('Never');
+  });
+
+  it('shows a pending invitation with its role and property limits', async () => {
+    await render();
+
+    const invitation = fixture.nativeElement.querySelector('#pending-invitations-heading').closest('section');
+    expect(invitation.textContent).toContain('Member');
+    expect(invitation.textContent).toContain('1 property');
+    expect(invitation.querySelector('[title="Brickstone"]')).toBeTruthy();
+  });
+
+  it('opens Property access for a staff member, and swaps the row once it is saved', async () => {
+    await render();
+
+    menuItem('Ben Santos', 'Property access').command?.({});
+    fixture.detectChanges();
+    const dialog = stub(PropertyAccessDialogStub);
+    expect(dialog.visible()).toBe(true);
+    expect(dialog.member()?.id).toBe('m-member');
+
+    dialog.changed.emit({ ...STAFF[2], propertyAccess: BRICKSTONE_ONLY });
+    fixture.detectChanges();
+
+    const cell = rowFor('Ben Santos');
+    expect(cell.textContent).toContain('1 property');
+    expect(cell.querySelector('[title="Brickstone"]')).toBeTruthy();
+  });
+
+  it('keeps Property access from someone limited to fewer properties than the person has', async () => {
+    auth.propertyAccess.set(BRICKSTONE_ONLY);
+    await render();
+
+    expect(menuOf('Ben Santos').map((item) => item.label)).not.toContain('Property access');
   });
 
   it('offers the owner actions on everyone but themselves', async () => {
@@ -354,7 +432,8 @@ describe('TeamMembers', () => {
 
       expect(members.list).toHaveBeenLastCalledWith(expect.objectContaining({ audience: 'attendants' }));
       expect(fixture.nativeElement.textContent).toContain('Property access');
-      expect(rowFor('Basement attendant').textContent).toContain('All properties');
+      expect(rowFor('Basement attendant').textContent).toContain('1 property');
+      expect(rowFor('Gate attendant').textContent).toContain('All properties');
       expect(rowFor('Basement attendant').textContent).toContain('Parking attendant');
       expect(fixture.nativeElement.textContent).toContain('Attendants sign in on the handheld app only.');
       expect(buttonLabelled('Add attendant')).toBeTruthy();
@@ -382,8 +461,12 @@ describe('TeamMembers', () => {
     it('offers Reset password and Disable on an active attendant, and only Enable on a disabled one', async () => {
       await openAudience('attendants', ATTENDANTS);
 
-      expect(menuOf('Basement attendant').map((item) => item.label)).toEqual(['Reset password', 'Disable']);
-      expect(menuOf('Gate attendant').map((item) => item.label)).toEqual(['Enable']);
+      expect(menuOf('Basement attendant').map((item) => item.label)).toEqual([
+        'Property access',
+        'Reset password',
+        'Disable',
+      ]);
+      expect(menuOf('Gate attendant').map((item) => item.label)).toEqual(['Property access', 'Enable']);
     });
 
     it('opens the reset dialog for that attendant', async () => {
@@ -404,6 +487,7 @@ describe('TeamMembers', () => {
         email: 'basement@example.com',
         status: 'DISABLED',
         createdAt: '2026-10-01T00:00:00.000Z',
+        propertyAccess: BRICKSTONE_ONLY,
       };
       attendants.disable.mockReturnValue(of(response));
       await openAudience('attendants', ATTENDANTS);
@@ -443,6 +527,7 @@ describe('TeamMembers', () => {
         email: 'roof@example.com',
         status: 'ACTIVE',
         createdAt: '2026-10-31T00:00:00.000Z',
+        propertyAccess: EVERY_PROPERTY,
       });
       fixture.detectChanges();
 

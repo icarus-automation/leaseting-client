@@ -5,6 +5,7 @@ import { MessageService } from 'primeng/api';
 import { of, throwError } from 'rxjs';
 
 import type { Member } from '../../../../core/models/member.types';
+import { EVERY_PROPERTY } from '../../../../core/models/property-access.types';
 import type { PortalAccessResponse } from '../../../../core/models/portal-access.types';
 import type { TenantListItem } from '../../../../core/models/tenant.types';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
@@ -42,6 +43,8 @@ const LOGIN: Member = {
   status: 'ACTIVE',
   deactivatedAt: null,
   joinedAt: '2026-10-30T02:15:00.000Z',
+  propertyAccess: EVERY_PROPERTY,
+  lastActiveAt: null,
 };
 
 const TENANT: TenantListItem = {

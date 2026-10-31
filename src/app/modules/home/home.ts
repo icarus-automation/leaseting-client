@@ -33,7 +33,8 @@ export class Home {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly canUseKit = computed(() => this.auth.can('kit:use'));
-  readonly canCreateProperty = computed(() => this.auth.can('properties:manage'));
+  /** A new property would sit outside someone's property limits, so adding one takes every property. */
+  readonly canCreateProperty = computed(() => this.auth.can('properties:manage') && this.auth.hasEveryProperty());
   /** The onboarding wizard writes the tenant as well as the lease. */
   readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'tenants:manage']));
   readonly canCreateBill = computed(() => this.auth.can('bills:manage'));

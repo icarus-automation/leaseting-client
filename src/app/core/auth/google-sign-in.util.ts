@@ -15,6 +15,7 @@ export type GoogleSignInError =
   | 'invite_declined'
   | 'invite_already_accepted'
   | 'invite_ambiguous'
+  | 'invite_role_unavailable'
   | 'access_denied';
 
 const MESSAGES: Record<GoogleSignInError, string> = {
@@ -32,6 +33,8 @@ const MESSAGES: Record<GoogleSignInError, string> = {
   invite_already_accepted: 'This invitation was already accepted. Sign in instead.',
   invite_ambiguous:
     'This email has more than one invitation waiting. Open the link in the invitation email you want to accept.',
+  invite_role_unavailable:
+    'The role on this invitation was turned off or removed. Ask the person who invited you for a new invitation.',
   access_denied: 'Google sign-in was canceled.',
 };
 

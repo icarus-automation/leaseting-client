@@ -6,7 +6,7 @@
         Buildings, floors, and unit occupancy.
       </p>
     </div>
-    @if (canManage()) {
+    @if (canCreate()) {
       <button
         type="button"
         class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
@@ -39,8 +39,8 @@
     <app-empty-state
       icon="building"
       heading="No properties yet"
-      description="Add a property, then map floors and units."
-      [ctaLabel]="canManage() ? 'New property' : null"
+      [description]="canCreate() ? 'Add a property, then map floors and units.' : 'No property is shared with you yet. Ask an owner or admin for access.'"
+      [ctaLabel]="canCreate() ? 'New property' : null"
       (cta)="openCreate()"
     />
   } @else {

@@ -77,10 +77,10 @@
             <tr class="border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
               <td class="px-4 py-3">
                 <a
-                  [routerLink]="['/tenants', lease.tenant.id]"
+                  [routerLink]="['/residents', lease.resident.id]"
                   class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
                 >
-                  {{ lease.tenant.firstName }} {{ lease.tenant.lastName }}
+                  {{ lease.resident.firstName }} {{ lease.resident.lastName }}
                 </a>
               </td>
               <td class="px-4 py-3 text-[13px] text-body">
@@ -122,7 +122,7 @@
                     <button
                       type="button"
                       class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                      [attr.aria-label]="'More actions for ' + lease.tenant.firstName + ' ' + lease.tenant.lastName + ', unit ' + lease.unit.unitNo"
+                      [attr.aria-label]="'More actions for ' + lease.resident.firstName + ' ' + lease.resident.lastName + ', unit ' + lease.unit.unitNo"
                       aria-haspopup="menu"
                       [attr.aria-expanded]="overflowForId() === lease.id"
                       (click)="openOverflow($event, lease)"

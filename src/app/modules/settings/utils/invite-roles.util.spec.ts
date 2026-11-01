@@ -24,7 +24,7 @@ const ROLES: Role[] = [
   role({ id: 'owner', name: 'Owner', isAssignable: false, permissions: ['properties:view', 'members:invite'] }),
   role({ id: 'admin', name: 'Admin', description: 'Every permission.', permissions: ['properties:view', 'members:invite'] }),
   role(),
-  role({ id: 'tenant', name: 'Tenant', audience: 'tenant', isAssignable: false, permissions: [] }),
+  role({ id: 'resident', name: 'Resident', audience: 'resident', isAssignable: false, permissions: [] }),
   role({ id: 'parking_attendant', name: 'Parking attendant', audience: 'parking', isAssignable: false, permissions: [] }),
   role({ id: 'r-agent', name: 'Leasing agent', description: null, kind: 'custom', isLocked: false, permissions: ['properties:view', 'leases:view'] }),
   role({ id: 'r-auditor', name: 'Auditor', description: 'Reads the audit log.', kind: 'custom', isLocked: false, permissions: ['audit_log:view'] }),
@@ -47,7 +47,7 @@ describe('invitableRoleGroups', () => {
     const values = invitableRoleGroups(ROLES, everyCode).flatMap((group) => group.items.map((item) => item.value));
 
     expect(values).not.toContain('owner');
-    expect(values).not.toContain('tenant');
+    expect(values).not.toContain('resident');
     expect(values).not.toContain('parking_attendant');
     expect(values).not.toContain('r-off');
   });

@@ -15,7 +15,7 @@ const ROLE: Role = {
   isActive: true,
   isAssignable: true,
   audience: 'staff',
-  permissions: ['tenants:view', 'leases:view'],
+  permissions: ['residents:view', 'leases:view'],
   memberCount: 0,
   createdAt: '2026-10-30T02:15:00.000Z',
   updatedAt: '2026-10-30T02:15:00.000Z',
@@ -64,7 +64,7 @@ describe('RolesService', () => {
   });
 
   it('POSTs /roles with the write body', () => {
-    const payload = { name: 'Leasing agent', description: 'Front desk', permissions: ['tenants:view'] };
+    const payload = { name: 'Leasing agent', description: 'Front desk', permissions: ['residents:view'] };
     let row: Role | undefined;
     service.create(payload).subscribe((value) => {
       row = value;

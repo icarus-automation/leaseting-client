@@ -74,7 +74,7 @@ export class ArAgingDetailPage {
 
   readonly allCollapsed = computed(() => {
     const groups = this.report()?.groups ?? [];
-    return groups.length > 0 && groups.every((group) => this.collapsed().has(group.tenantId));
+    return groups.length > 0 && groups.every((group) => this.collapsed().has(group.residentId));
   });
 
   constructor() {
@@ -145,16 +145,16 @@ export class ArAgingDetailPage {
     this.reload();
   }
 
-  toggleGroup(tenantId: string): void {
+  toggleGroup(residentId: string): void {
     this.collapsed.update((current) => {
       const next = new Set(current);
-      if (!next.delete(tenantId)) next.add(tenantId);
+      if (!next.delete(residentId)) next.add(residentId);
       return next;
     });
   }
 
-  isCollapsed(tenantId: string): boolean {
-    return this.collapsed().has(tenantId);
+  isCollapsed(residentId: string): boolean {
+    return this.collapsed().has(residentId);
   }
 
   expandAll(): void {
@@ -162,7 +162,7 @@ export class ArAgingDetailPage {
   }
 
   collapseAll(): void {
-    this.collapsed.set(new Set(this.report()?.groups.map((group) => group.tenantId) ?? []));
+    this.collapsed.set(new Set(this.report()?.groups.map((group) => group.residentId) ?? []));
   }
 
   ageLabel(row: AgingBillRow): string {
@@ -195,7 +195,7 @@ export class ArAgingDetailPage {
     for (const group of report.groups) {
       for (const row of group.rows) {
         rows.push([
-          group.tenantName,
+          group.residentName,
           row.unitLabel,
           row.typeLabel,
           row.memo,
@@ -207,7 +207,7 @@ export class ArAgingDetailPage {
           row.balance,
         ]);
       }
-      rows.push([`Total for ${group.tenantName}`, '', '', '', '', '', '', '', '', group.total]);
+      rows.push([`Total for ${group.residentName}`, '', '', '', '', '', '', '', '', group.total]);
     }
     rows.push([`Total (${report.billCount} bills)`, '', '', '', '', '', '', '', '', report.total]);
 
@@ -216,6 +216,6 @@ export class ArAgingDetailPage {
   }
 
   billsLink(group: AgingDetailGroup): { path: string[]; params: Record<string, string> } {
-    return { path: ['/bills'], params: { tenantId: group.tenantId, status: 'UNPAID' } };
+    return { path: ['/bills'], params: { residentId: group.residentId, status: 'UNPAID' } };
   }
 }

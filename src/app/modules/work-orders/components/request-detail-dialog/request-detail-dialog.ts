@@ -30,7 +30,7 @@ import { MaintenanceRequestsService } from '../../services/maintenance-requests.
 import {
   nextRequestAction,
   requestStatusBadge,
-  requestTenantName,
+  requestResidentName,
   requestUnitLabel,
   RESOLVE_NOTE_MAX,
 } from '../../utils/maintenance-request.util';
@@ -77,9 +77,9 @@ export class RequestDetailDialog {
     const request = this.current();
     return request && this.auth.can('maintenance_requests:manage') ? nextRequestAction(request.status) : null;
   });
-  readonly tenantName = computed(() => {
+  readonly residentName = computed(() => {
     const request = this.current();
-    return request ? requestTenantName(request) : '';
+    return request ? requestResidentName(request) : '';
   });
   readonly unitLabel = computed(() => {
     const request = this.current();

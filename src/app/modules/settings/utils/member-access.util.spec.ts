@@ -119,17 +119,17 @@ describe('memberActions', () => {
   });
 
   it('offers nothing on tenants and parking attendants to a team manager without their login codes', () => {
-    expect(memberActions(actor('owner'), member({ role: 'tenant', audience: 'tenant' }))).toEqual([]);
+    expect(memberActions(actor('owner'), member({ role: 'resident', audience: 'resident' }))).toEqual([]);
     expect(memberActions(actor('owner'), member({ role: 'parking_attendant', audience: 'parking' }))).toEqual([]);
   });
 
   describe('logins', () => {
-    const tenant = member({ role: 'tenant', roleName: 'Tenant', audience: 'tenant' });
+    const resident = member({ role: 'resident', roleName: 'Resident', audience: 'resident' });
     const attendant = member({ role: 'parking_attendant', roleName: 'Parking attendant', audience: 'parking' });
-    const loginCodes = ['members:view', 'tenants:manage_access', 'parking_attendants:manage'];
+    const loginCodes = ['members:view', 'residents:manage_access', 'parking_attendants:manage'];
 
     it('lets the right code reset a password or turn a tenant login off', () => {
-      expect(memberActions(actor('admin', loginCodes), tenant)).toEqual(['reset-password', 'disable-login']);
+      expect(memberActions(actor('admin', loginCodes), resident)).toEqual(['reset-password', 'disable-login']);
     });
 
     it('lets the right code limit an attendant to properties, reset a password, or turn the login off', () => {
@@ -141,7 +141,7 @@ describe('memberActions', () => {
     });
 
     it('offers only enable on a login that is off, since a reset would not turn it back on', () => {
-      expect(memberActions(actor('admin', loginCodes), { ...tenant, status: 'DEACTIVATED' })).toEqual([
+      expect(memberActions(actor('admin', loginCodes), { ...resident, status: 'DEACTIVATED' })).toEqual([
         'enable-login',
       ]);
       expect(memberActions(actor('admin', loginCodes), { ...attendant, status: 'DEACTIVATED' })).toEqual([
@@ -151,19 +151,19 @@ describe('memberActions', () => {
     });
 
     it('keeps each code to its own audience', () => {
-      const tenantsOnly = actor('member', ['members:view', 'tenants:manage_access']);
+      const residentsOnly = actor('member', ['members:view', 'residents:manage_access']);
       const attendantsOnly = actor('member', ['members:view', 'parking_attendants:manage']);
 
-      expect(memberActions(tenantsOnly, attendant)).toEqual([]);
-      expect(memberActions(attendantsOnly, tenant)).toEqual([]);
-      expect(memberActions(tenantsOnly, tenant)).toEqual(['reset-password', 'disable-login']);
+      expect(memberActions(residentsOnly, attendant)).toEqual([]);
+      expect(memberActions(attendantsOnly, resident)).toEqual([]);
+      expect(memberActions(residentsOnly, resident)).toEqual(['reset-password', 'disable-login']);
       expect(memberActions(attendantsOnly, attendant)).toEqual(['property-access', 'reset-password', 'disable-login']);
     });
 
     it('gives a viewer nothing on either', () => {
       const viewer = actor('member', ['members:view']);
 
-      expect(memberActions(viewer, tenant)).toEqual([]);
+      expect(memberActions(viewer, resident)).toEqual([]);
       expect(memberActions(viewer, attendant)).toEqual([]);
     });
   });
@@ -185,7 +185,7 @@ describe('assignableRoles', () => {
     role({ id: 'owner', name: 'Owner', isAssignable: false }),
     role({ id: 'admin', name: 'Admin' }),
     role({ id: 'member', name: 'Member' }),
-    role({ id: 'tenant', name: 'Tenant', isAssignable: false, audience: 'tenant' }),
+    role({ id: 'resident', name: 'Resident', isAssignable: false, audience: 'resident' }),
     role({ id: 'custom-on', name: 'Leasing agent', kind: 'custom', isLocked: false }),
     role({ id: 'custom-off', name: 'Old role', kind: 'custom', isLocked: false, isActive: false, isAssignable: false }),
     role({ id: 'custom-big', name: 'Cashier', kind: 'custom', isLocked: false, permissions: ['payments:void'] }),
@@ -236,7 +236,7 @@ describe('member labels', () => {
   it('reads someone without limits as all properties, and gives a tenant no label', () => {
     expect(propertyAccessLabel(member({ role: 'owner' }))).toEqual({ label: 'All properties', names: null });
     expect(propertyAccessLabel(member())).toEqual({ label: 'All properties', names: null });
-    expect(propertyAccessLabel(member({ role: 'tenant', audience: 'tenant' }))).toBeNull();
+    expect(propertyAccessLabel(member({ role: 'resident', audience: 'resident' }))).toBeNull();
   });
 
   it('counts a limited person or attendant, naming the properties for the tooltip', () => {
@@ -275,7 +275,7 @@ describe('member labels', () => {
 
   it('says a tenant login is off rather than deactivated', () => {
     expect(memberStatusBadge(member({ status: 'DEACTIVATED' })).label).toBe('Deactivated');
-    expect(memberStatusBadge(member({ status: 'DEACTIVATED', audience: 'tenant' })).label).toBe('Login off');
+    expect(memberStatusBadge(member({ status: 'DEACTIVATED', audience: 'resident' })).label).toBe('Login off');
   });
 
   it('takes the first and last initials', () => {

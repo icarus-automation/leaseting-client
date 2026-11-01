@@ -56,8 +56,8 @@ export interface KitEventLink {
 
 export function kitEventLink(event: KitEvent): KitEventLink {
   switch (event.entityType) {
-    case 'Tenant':
-      return { commands: ['/tenants', event.entityId] };
+    case 'Resident':
+      return { commands: ['/residents', event.entityId] };
     case 'Property':
       return { commands: ['/properties', event.entityId] };
     default:

@@ -30,7 +30,7 @@ describe('MaintenanceRequestsService', () => {
     expect(req.request.params.get('page')).toBe('2');
     expect(req.request.params.get('limit')).toBe('20');
     expect(req.request.params.has('unitId')).toBe(false);
-    expect(req.request.params.has('tenantId')).toBe(false);
+    expect(req.request.params.has('residentId')).toBe(false);
     req.flush({ data: [], meta: { total: 0, page: 2, limit: 20, lastPage: 1 } });
   });
 

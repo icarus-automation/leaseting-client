@@ -18,7 +18,7 @@
   },
   "reports": {
     "receivablesGroup": "Receivables",
-    "revenue-by-tenant": "Revenue by Tenant",
+    "revenue-by-resident": "Revenue by Tenant",
     "ar-aging-summary": "AR Aging",
     "ar-aging-detail": "Unpaid Bills",
     "delinquency": "Delinquency",

@@ -26,7 +26,7 @@ import {
   photoCountLabel,
   requestEmptyState,
   requestStatusBadge,
-  requestTenantName,
+  requestResidentName,
   viewStatus,
 } from './utils/maintenance-request.util';
 import type { RequestView } from './utils/maintenance-request.util';
@@ -89,7 +89,7 @@ export class WorkOrders {
     this.items().map((request) => ({
       request,
       badge: requestStatusBadge(request.status),
-      tenantName: requestTenantName(request),
+      residentName: requestResidentName(request),
       photoCount: request.photoUrls.length,
       photoLabel: photoCountLabel(request.photoUrls.length),
     })),

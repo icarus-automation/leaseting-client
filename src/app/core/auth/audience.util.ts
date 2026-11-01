@@ -1,12 +1,12 @@
 import type { Audience, SessionUser } from './auth.types';
 
 const DEDICATED_APP_MESSAGE: Record<Exclude<Audience, 'staff'>, string> = {
-  tenant: 'Use the Residence Care mobile app.',
+  resident: 'Use the Residence Care mobile app.',
   parking: 'Use the Leaseting Parking Terminal.',
 };
 
 const ROLE_AUDIENCE: Record<string, Audience> = {
-  tenant: 'tenant',
+  resident: 'resident',
   parking_attendant: 'parking',
 };
 

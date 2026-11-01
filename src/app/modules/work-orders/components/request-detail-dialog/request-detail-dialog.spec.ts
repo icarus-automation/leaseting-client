@@ -47,7 +47,7 @@ function maintenanceRequest(overrides: Partial<StaffMaintenanceRequest> = {}): S
     createdAt: '2026-09-15T07:16:19.832Z',
     updatedAt: '2026-09-15T07:16:19.832Z',
     leaseId: 'lease-1',
-    tenant: { id: 'tenant-1', firstName: 'Ace Gabriel', lastName: 'Pasiliao' },
+    resident: { id: 'resident-1', firstName: 'Ace Gabriel', lastName: 'Pasiliao' },
     unit: { id: 'unit-1', unitNo: '106', property: { id: 'prop-1', name: 'Brickstone Boarding House' } },
     startedBy: null,
     resolvedBy: null,

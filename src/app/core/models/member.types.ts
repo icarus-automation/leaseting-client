@@ -4,7 +4,7 @@ import type { PropertyAccess } from './property-access.types';
 export type MemberStatus = 'ACTIVE' | 'DEACTIVATED';
 
 /** The `audience` filter on `GET /members`. Staff includes custom role holders. */
-export type MemberAudienceFilter = 'staff' | 'tenants' | 'attendants';
+export type MemberAudienceFilter = 'staff' | 'residents' | 'attendants';
 
 export interface Member {
   /** Membership id: the one the member routes take. */
@@ -19,13 +19,13 @@ export interface Member {
   roleName: string | null;
   audience: Audience;
   /**
-   * Staff: deactivated in this organization. Tenants and parking attendants:
+   * Staff: deactivated in this organization. Residents and parking attendants:
    * their Residence Care or terminal login is off on their own page.
    */
   status: MemberStatus;
   deactivatedAt: string | null;
   joinedAt: string;
-  /** Staff and parking attendants. Owners and tenants are never limited. */
+  /** Staff and parking attendants. Owners and residents are never limited. */
   propertyAccess: PropertyAccess;
   /** Their latest activity in this organization; null if they never signed in. */
   lastActiveAt: string | null;

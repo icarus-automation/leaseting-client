@@ -33,8 +33,8 @@ export class RecordPaymentDialog {
   readonly subheading = computed(() => {
     const bill = this.bill();
     if (!bill) return null;
-    const tenant = bill.lease.tenant;
-    return `${tenant.firstName} ${tenant.lastName} · Unit ${bill.lease.unit.unitNo}`;
+    const resident = bill.lease.resident;
+    return `${resident.firstName} ${resident.lastName} · Unit ${bill.lease.unit.unitNo}`;
   });
   readonly target = computed<PaymentTarget | null>(() => {
     const bill = this.bill();

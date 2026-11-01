@@ -128,7 +128,7 @@ describe('Sidebar', () => {
   }
 
   it('hides the links, sections and Settings a role cannot open', async () => {
-    held.set(['tenants:view']);
+    held.set(['residents:view']);
     await fixture.whenStable();
 
     expect(navLabels()).toEqual(['Dashboard', 'Tenants', 'Knowledge Base', 'Website CMS']);

@@ -5,7 +5,7 @@ export type OnboardingStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export type OnboardingStepKey =
   | 'overview'
-  | 'tenant'
+  | 'resident'
   | 'requirements'
   | 'lease-terms'
   | 'deposit'
@@ -15,7 +15,7 @@ export type OnboardingStepKey =
 
 export const ONBOARDING_STEP_ORDER: OnboardingStepKey[] = [
   'overview',
-  'tenant',
+  'resident',
   'requirements',
   'lease-terms',
   'deposit',
@@ -26,7 +26,7 @@ export const ONBOARDING_STEP_ORDER: OnboardingStepKey[] = [
 
 export const ONBOARDING_STEP_LABELS: Record<OnboardingStepKey, string> = {
   overview: 'Overview',
-  tenant: 'Tenant',
+  resident: 'Tenant',
   requirements: 'Requirements',
   'lease-terms': 'Lease terms',
   deposit: 'Deposit',
@@ -41,8 +41,8 @@ export interface OverviewStepData {
   endDate: string;
 }
 
-export interface TenantStepData {
-  tenantId: string;
+export interface ResidentStepData {
+  residentId: string;
 }
 
 export interface RequirementsStepData {
@@ -85,7 +85,7 @@ export interface TurnoverStepData {
 
 export type OnboardingStepData =
   | OverviewStepData
-  | TenantStepData
+  | ResidentStepData
   | RequirementsStepData
   | LeaseTermsStepData
   | DepositStepData
@@ -104,7 +104,7 @@ export interface OnboardingListItem {
   currentStepKey: OnboardingStepKey;
   completedSteps: OnboardingStepKey[];
   totalSteps: number;
-  tenant: { id: string; firstName: string; lastName: string } | null;
+  resident: { id: string; firstName: string; lastName: string } | null;
   unit: { id: string; unitNo: string; property: { id: string; name: string } } | null;
   leaseId: string | null;
   createdAt: string;

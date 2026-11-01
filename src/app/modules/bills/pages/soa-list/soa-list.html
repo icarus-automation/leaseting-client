@@ -73,10 +73,10 @@
               <td class="px-4 py-3 text-[13.5px] font-medium text-heading">{{ statement.soaNo }}</td>
               <td class="px-4 py-3">
                 <a
-                  [routerLink]="['/tenants', statement.lease.tenant.id]"
+                  [routerLink]="['/residents', statement.lease.resident.id]"
                   class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
                 >
-                  {{ statement.lease.tenant.firstName }} {{ statement.lease.tenant.lastName }}
+                  {{ statement.lease.resident.firstName }} {{ statement.lease.resident.lastName }}
                 </a>
                 <p class="text-[12px] text-muted">
                   Unit {{ statement.lease.unit.unitNo }} · {{ statement.lease.unit.property.name }}

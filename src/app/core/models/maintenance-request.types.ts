@@ -17,7 +17,7 @@ export interface MaintenanceRequest {
   createdAt: string;
   updatedAt: string;
   leaseId: string;
-  tenant: { id: string; firstName: string; lastName: string };
+  resident: { id: string; firstName: string; lastName: string };
   unit: { id: string; unitNo: string; property: { id: string; name: string } };
 }
 
@@ -32,5 +32,5 @@ export interface MaintenanceRequestFilters {
   status?: MaintenanceRequestStatus;
   propertyId?: string;
   unitId?: string;
-  tenantId?: string;
+  residentId?: string;
 }

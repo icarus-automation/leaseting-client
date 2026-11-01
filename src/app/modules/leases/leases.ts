@@ -135,7 +135,7 @@ export class Leases {
   confirmTerminate(lease: LeaseListItem): void {
     this.confirm.danger({
       header: 'End lease',
-      message: `End the lease for ${lease.tenant.firstName} ${lease.tenant.lastName} on Unit ${lease.unit.unitNo}? The unit becomes vacant immediately.`,
+      message: `End the lease for ${lease.resident.firstName} ${lease.resident.lastName} on Unit ${lease.unit.unitNo}? The unit becomes vacant immediately.`,
       acceptLabel: 'End lease',
       onAccept: () => {
         this.leases

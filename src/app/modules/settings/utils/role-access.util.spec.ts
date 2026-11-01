@@ -128,11 +128,11 @@ describe('indexCatalog', () => {
 
 describe('filterRoles', () => {
   const owner = role({ id: 'owner', name: 'Owner', description: 'Owns the organization.' });
-  const tenant = role({
-    id: 'tenant',
-    name: 'Tenant',
+  const resident = role({
+    id: 'resident',
+    name: 'Resident',
     description: 'Residence Care only.',
-    audience: 'tenant',
+    audience: 'resident',
     permissions: [],
   });
   const agent = role({
@@ -156,7 +156,7 @@ describe('filterRoles', () => {
     permissions: [],
     memberCount: 0,
   });
-  const rows = [owner, tenant, agent, archived];
+  const rows = [owner, resident, agent, archived];
 
   it('lists the kind and activity chips', () => {
     expect(KIND_FILTERS.map((option) => option.value)).toEqual(['all', 'system', 'custom']);
@@ -187,11 +187,11 @@ describe('presentRole', () => {
     role({ kind: 'custom', isLocked: false, id: 'r-1', memberCount: 0, ...overrides });
 
   it('labels every system role just System, and a custom role Custom', () => {
-    const tenant = presentRole(
-      role({ id: 'tenant', name: 'Tenant', audience: 'tenant', memberCount: 4 }),
+    const resident = presentRole(
+      role({ id: 'resident', name: 'Resident', audience: 'resident', memberCount: 4 }),
       true,
     );
-    expect(tenant.typeLabel).toBe('System');
+    expect(resident.typeLabel).toBe('System');
     expect(presentRole(role(), true).typeLabel).toBe('System');
     expect(presentRole(custom(), true).typeLabel).toBe('Custom');
   });
@@ -208,7 +208,7 @@ describe('presentRole', () => {
     });
 
     it('gives Tenant and Parking attendant View only, since their roles cannot be copied', () => {
-      expect(presentRole(role({ id: 'tenant', audience: 'tenant' }), true).menu).toEqual(['view']);
+      expect(presentRole(role({ id: 'resident', audience: 'resident' }), true).menu).toEqual(['view']);
       expect(presentRole(role({ id: 'parking_attendant', audience: 'parking' }), true).menu).toEqual(['view']);
     });
 

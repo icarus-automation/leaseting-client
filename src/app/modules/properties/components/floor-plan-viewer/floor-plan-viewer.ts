@@ -116,8 +116,8 @@ export class FloorPlanViewer {
   }
 
   unitTitle(unit: FloorUnitItem): string {
-    const tenant = unit.activeLease ? `, ${unit.activeLease.tenantName}` : '';
-    return `Unit ${unit.unitNo} · ${this.statusLabel(unit)}${tenant}`;
+    const resident = unit.activeLease ? `, ${unit.activeLease.residentName}` : '';
+    return `Unit ${unit.unitNo} · ${this.statusLabel(unit)}${resident}`;
   }
 
   onPolygonKeydown(event: KeyboardEvent, unit: FloorUnitItem): void {

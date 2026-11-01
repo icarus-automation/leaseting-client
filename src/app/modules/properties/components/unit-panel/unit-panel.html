@@ -103,12 +103,12 @@
       <section class="flex flex-col gap-2 border-t border-border pt-3" aria-label="Tenant">
         <h3 class="text-[12px] font-semibold uppercase tracking-wide text-muted">Tenant</h3>
         <div class="flex flex-col gap-1 text-[13px]">
-          <p class="font-medium text-heading">{{ lease.tenant.firstName }} {{ lease.tenant.lastName }}</p>
+          <p class="font-medium text-heading">{{ lease.resident.firstName }} {{ lease.resident.lastName }}</p>
           <p class="flex items-center gap-1.5 text-body">
             <svg pIcon="phone" class="text-muted" [size]="12" aria-hidden="true"></svg>
-            {{ lease.tenant.contactNo }}
+            {{ lease.resident.contactNo }}
           </p>
-          @if (lease.tenant.email; as email) {
+          @if (lease.resident.email; as email) {
             <p class="flex items-center gap-1.5 break-all text-body">
               <svg pIcon="envelope" class="text-muted" [size]="12" aria-hidden="true"></svg>
               {{ email }}

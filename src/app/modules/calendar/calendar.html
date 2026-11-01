@@ -65,7 +65,7 @@
       </div>
       <div class="ops-detail-body">
         <dl class="ops-detail-facts">
-          <div><dt>Tenant</dt><dd>{{ entry.tenant?.name ?? 'Not selected yet' }}</dd></div>
+          <div><dt>Tenant</dt><dd>{{ entry.resident?.name ?? 'Not selected yet' }}</dd></div>
           <div><dt>Location</dt><dd>Unit {{ entry.unit.unitNo }} · {{ entry.property.name }}</dd></div>
           <div><dt>{{ entry.type === 'BILL_DUE' ? 'Payment status' : 'Status' }}</dt><dd><app-status-badge [tone]="tone(entry)" [label]="entry.statusLabel" /></dd></div>
           @if (entry.amount !== null) {
@@ -159,7 +159,7 @@
                 <svg class="shrink-0" [pIcon]="entryIcon(entry.type)" [size]="12" aria-hidden="true"></svg>
                 <span>{{ entry.title }} · {{ entry.unit.unitNo }}</span>
               </div>
-              <div class="ops-event-meta">{{ entry.tenant?.name ?? entry.property.name }}</div>
+              <div class="ops-event-meta">{{ entry.resident?.name ?? entry.property.name }}</div>
               <app-status-badge class="ops-event-status" [tone]="tone(entry)" [label]="entry.statusLabel" />
               <div class="ops-event-extra">
                 <div class="mt-1 text-[12.5px] text-muted">{{ entry.property.name }}</div>

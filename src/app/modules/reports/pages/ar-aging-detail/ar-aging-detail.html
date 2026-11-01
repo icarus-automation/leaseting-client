@@ -116,8 +116,8 @@
           <span class="text-[12.5px] font-medium text-muted">Outstanding</span>
           <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.total | phpCurrency }}</span>
           <span class="text-[12px] tabular-nums text-muted">
-            {{ data.billCount }} bill{{ data.billCount === 1 ? '' : 's' }} · {{ data.tenantCount }}
-            tenant{{ data.tenantCount === 1 ? '' : 's' }}
+            {{ data.billCount }} bill{{ data.billCount === 1 ? '' : 's' }} · {{ data.residentCount }}
+            tenant{{ data.residentCount === 1 ? '' : 's' }}
           </span>
         </div>
         <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
@@ -168,7 +168,7 @@
             </tr>
           </thead>
 
-          @for (group of data.groups; track group.tenantId) {
+          @for (group of data.groups; track group.residentId) {
             <tbody class="border-b border-border last:border-b-0">
               <tr class="bg-surface">
                 <th colspan="6" scope="colgroup" class="px-2 py-2 text-left">
@@ -176,17 +176,17 @@
                     <button
                       type="button"
                       class="inline-flex items-center gap-1.5 rounded-base px-2 py-1 text-[13.5px] font-semibold text-heading transition-colors duration-150 ease-out hover:bg-background motion-reduce:transition-none"
-                      [attr.aria-expanded]="!isCollapsed(group.tenantId)"
-                      (click)="toggleGroup(group.tenantId)"
+                      [attr.aria-expanded]="!isCollapsed(group.residentId)"
+                      (click)="toggleGroup(group.residentId)"
                     >
                       <svg
                         pIcon="chevron-down"
                         class="shrink-0 text-muted transition-transform duration-150 ease-out motion-reduce:transition-none"
-                        [class.-rotate-90]="isCollapsed(group.tenantId)"
+                        [class.-rotate-90]="isCollapsed(group.residentId)"
                         [size]="12"
                         aria-hidden="true"
                       ></svg>
-                      <span>{{ group.tenantName }}</span>
+                      <span>{{ group.residentName }}</span>
                     </button>
 
                     <span class="text-[12px] tabular-nums text-muted">
@@ -198,7 +198,7 @@
 
                     <span class="flex items-center gap-2 text-[12px] font-normal print:hidden">
                       <a
-                        [routerLink]="['/tenants', group.tenantId]"
+                        [routerLink]="['/residents', group.residentId]"
                         class="rounded-[2px] text-muted transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none"
                       >
                         Tenant
@@ -218,7 +218,7 @@
                 </td>
               </tr>
 
-              @if (!isCollapsed(group.tenantId)) {
+              @if (!isCollapsed(group.residentId)) {
                 @for (row of group.rows; track row.billId) {
                   <tr class="border-t border-border transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
                     <td class="whitespace-nowrap px-4 py-2.5 text-[13px] tabular-nums text-body">{{ row.dueDate }}</td>

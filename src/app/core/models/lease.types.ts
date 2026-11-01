@@ -17,13 +17,13 @@ export interface LeaseResponse extends LeaseRentSnapshot {
   terminatedAt: string | null;
   notes: string | null;
   unitId: string;
-  tenantId: string;
+  residentId: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface LeaseListItem extends LeaseResponse {
-  tenant: { id: string; firstName: string; lastName: string };
+  resident: { id: string; firstName: string; lastName: string };
   unit: {
     id: string;
     unitNo: string;
@@ -48,7 +48,7 @@ export interface LeaseListFilters {
   page?: number;
   limit?: number;
   unitId?: string;
-  tenantId?: string;
+  residentId?: string;
   propertyId?: string;
   q?: string;
   active?: boolean;

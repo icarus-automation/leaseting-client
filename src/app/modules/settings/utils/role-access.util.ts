@@ -149,7 +149,7 @@ export function presentRole(role: Role, canManage: boolean): RoleRow {
 
 /**
  * A custom role can be edited, copied, switched and deleted. A system role is
- * locked: look at it, and copy it if it's a staff role. The tenant and parking
+ * locked: look at it, and copy it if it's a staff role. The resident and parking
  * attendant roles belong to their own apps and can't even be copied.
  */
 function roleMenu(role: Role, canManage: boolean): RoleMenuAction[] {

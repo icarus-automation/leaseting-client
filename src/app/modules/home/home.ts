@@ -35,8 +35,8 @@ export class Home {
   readonly canUseKit = computed(() => this.auth.can('kit:use'));
   /** A new property would sit outside someone's property limits, so adding one takes every property. */
   readonly canCreateProperty = computed(() => this.auth.can('properties:manage') && this.auth.hasEveryProperty());
-  /** The onboarding wizard writes the tenant as well as the lease. */
-  readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'tenants:manage']));
+  /** The onboarding wizard writes the resident as well as the lease. */
+  readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'residents:manage']));
   readonly canCreateBill = computed(() => this.auth.can('bills:manage'));
   readonly canViewParking = computed(() => this.auth.can('parking:view'));
   /** The overview reads properties, leases and bills together. */

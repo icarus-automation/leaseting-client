@@ -63,7 +63,7 @@ export function calendarQueryParams(state: CalendarState) {
 export function matchesCalendarFilters(entry: CalendarEntry, state: CalendarState, includeTypes = true): boolean {
   if (includeTypes && !state.types.includes(entry.type)) return false;
   if (state.scope === 'outstanding' && (entry.type !== 'BILL_DUE' || Number(entry.balance) <= 0)) return false;
-  const haystack = `${entry.title} ${entry.tenant?.name ?? ''} ${entry.unit.unitNo} ${entry.property.name}`.toLocaleLowerCase();
+  const haystack = `${entry.title} ${entry.resident?.name ?? ''} ${entry.unit.unitNo} ${entry.property.name}`.toLocaleLowerCase();
   return state.q.toLocaleLowerCase().split(/\s+/).every((word) => haystack.includes(word));
 }
 
@@ -80,7 +80,7 @@ export function entrySource(entry: CalendarEntry): { route: string[]; queryParam
     return { route: ['/bills'], queryParams: { billId: entry.sourceId }, label: 'Open bill' };
   }
   if (entry.type === 'MOVE_IN') {
-    return { route: ['/tenants', 'onboarding', entry.sourceId], queryParams: {}, label: 'Open onboarding' };
+    return { route: ['/residents', 'onboarding', entry.sourceId], queryParams: {}, label: 'Open onboarding' };
   }
   return { route: ['/leases', entry.sourceId], queryParams: {}, label: 'Open lease' };
 }

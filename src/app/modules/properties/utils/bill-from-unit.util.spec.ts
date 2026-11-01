@@ -28,7 +28,7 @@ const unit = {
     rentRatePerSqm: null,
     rentCharges: null,
     dueDay: 5,
-    tenant: {
+    resident: {
       id: 't1',
       firstName: 'Ada',
       lastName: 'Lovelace',
@@ -50,7 +50,7 @@ describe('billFromUnit', () => {
   it('opens Record Payment with the unit tenant and bill id, not a mark-paid shortcut', () => {
     const row = billFromUnit(unit, bill);
     expect(row?.id).toBe('bill-1');
-    expect(row?.lease.tenant.firstName).toBe('Ada');
+    expect(row?.lease.resident.firstName).toBe('Ada');
     expect(row?.status).toBe('UNPAID');
   });
 

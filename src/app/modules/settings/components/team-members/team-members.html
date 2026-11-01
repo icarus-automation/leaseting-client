@@ -47,7 +47,7 @@
     }
   </div>
 
-  @if (isTenants()) {
+  @if (isResidents()) {
     <p class="flex items-start gap-2 text-[12.5px] leading-relaxed text-muted">
       <svg pIcon="info-circle" class="mt-0.5 shrink-0" [size]="13" aria-hidden="true"></svg>
       <span>Residence Care logins. Turning one off leaves the tenant's lease and billing as they are.</span>
@@ -179,7 +179,7 @@
           <app-empty-state
             [icon]="audience() === 'attendants' ? 'car' : 'users'"
             [heading]="'No ' + audienceNoun() + ' yet'"
-            [description]="isTenants()
+            [description]="isResidents()
               ? 'Tenants show here once they have a Residence Care login.'
               : isAttendants()
                 ? 'Attendants show here once you add one.'
@@ -191,7 +191,7 @@
       } @else {
         <div class="relative overflow-x-auto rounded-base border border-border">
           <table class="w-full border-collapse text-left">
-            <caption class="sr-only">{{ isStaff() ? 'Staff' : audience() === 'tenants' ? 'Tenants' : 'Parking attendants' }}</caption>
+            <caption class="sr-only">{{ isStaff() ? 'Staff' : audience() === 'residents' ? 'Tenants' : 'Parking attendants' }}</caption>
             <thead>
               <tr class="border-b border-border bg-surface">
                 <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Person</th>
@@ -372,11 +372,11 @@
   />
 }
 
-@if (canManageTenantLogins()) {
-  <app-tenant-login-dialog
-    [visible]="tenantLoginOpen()"
-    (visibleChange)="tenantLoginOpen.set($event)"
-    [member]="tenantLoginTarget()"
-    (finished)="onTenantLoginFinished($event)"
+@if (canManageResidentLogins()) {
+  <app-resident-login-dialog
+    [visible]="residentLoginOpen()"
+    (visibleChange)="residentLoginOpen.set($event)"
+    [member]="residentLoginTarget()"
+    (finished)="onResidentLoginFinished($event)"
   />
 }

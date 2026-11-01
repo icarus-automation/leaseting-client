@@ -33,7 +33,7 @@ const LONG_DESCRIPTION =
 
 const ROLES: Role[] = [
   role({ id: 'owner', name: 'Owner', description: 'Owns the organization.', memberCount: 1 }),
-  role({ id: 'tenant', name: 'Tenant', description: 'Residence Care only.', audience: 'tenant', memberCount: 4 }),
+  role({ id: 'resident', name: 'Resident', description: 'Residence Care only.', audience: 'resident', memberCount: 4 }),
   role({
     id: 'parking_attendant',
     name: 'Parking attendant',
@@ -299,7 +299,7 @@ describe('RolesDirectory', () => {
     it('gives Tenant and Parking attendant View only', async () => {
       await render();
 
-      expect(menuFor('Tenant')).toEqual(['View']);
+      expect(menuFor('Resident')).toEqual(['View']);
       expect(menuFor('Parking attendant')).toEqual(['View']);
     });
 
@@ -370,8 +370,8 @@ describe('RolesDirectory', () => {
       expect(navigate).toHaveBeenLastCalledWith(['/settings/roles', 'r-agent']);
       cell('Owner', 2).click();
       expect(navigate).toHaveBeenLastCalledWith(['/settings/roles', 'owner']);
-      cell('Tenant', 3).click();
-      expect(navigate).toHaveBeenLastCalledWith(['/settings/roles', 'tenant']);
+      cell('Resident', 3).click();
+      expect(navigate).toHaveBeenLastCalledWith(['/settings/roles', 'resident']);
     });
 
     it('does not open the role when the actions button is pressed', async () => {

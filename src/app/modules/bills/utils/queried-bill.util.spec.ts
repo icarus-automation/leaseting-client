@@ -26,7 +26,7 @@ function bill(id: string): BillListItem {
       rentPricingBasis: 'FIXED',
       rentFloorAreaSqm: null,
       rentRatePerSqm: null,
-      tenant: { id: 't-1', firstName: 'Ana', lastName: 'Cruz' },
+      resident: { id: 't-1', firstName: 'Ana', lastName: 'Cruz' },
       unit: {
         id: 'u-1',
         unitNo: '4A',

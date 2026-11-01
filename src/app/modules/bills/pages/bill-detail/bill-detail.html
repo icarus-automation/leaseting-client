@@ -42,9 +42,9 @@
       </div>
       <p class="mt-0.5 text-sm text-muted">
         <a
-          [routerLink]="['/tenants', bill.lease.tenant.id]"
+          [routerLink]="['/residents', bill.lease.resident.id]"
           class="rounded-[2px] font-medium text-heading hover:text-primary hover:underline"
-        >{{ bill.lease.tenant.firstName }} {{ bill.lease.tenant.lastName }}</a>
+        >{{ bill.lease.resident.firstName }} {{ bill.lease.resident.lastName }}</a>
         · {{ bill.lease.unit.property.name }} · Unit {{ bill.lease.unit.unitNo }}
         · due {{ bill.dueDate | date: 'MMM d, y' }}
       </p>
@@ -58,9 +58,9 @@
               <dt class="text-[12px] text-muted">Tenant</dt>
               <dd class="m-0 mt-0.5">
                 <a
-                  [routerLink]="['/tenants', bill.lease.tenant.id]"
+                  [routerLink]="['/residents', bill.lease.resident.id]"
                   class="rounded-[2px] font-medium text-heading hover:text-primary hover:underline"
-                >{{ bill.lease.tenant.firstName }} {{ bill.lease.tenant.lastName }}</a>
+                >{{ bill.lease.resident.firstName }} {{ bill.lease.resident.lastName }}</a>
               </dd>
             </div>
             <div>

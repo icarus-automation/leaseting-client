@@ -110,8 +110,8 @@ export class Bills {
   readonly leaseIdFilter = signal<string | null>(
     this.route.snapshot.queryParamMap.get('leaseId'),
   );
-  readonly tenantIdFilter = signal<string | null>(
-    this.route.snapshot.queryParamMap.get('tenantId'),
+  readonly residentIdFilter = signal<string | null>(
+    this.route.snapshot.queryParamMap.get('residentId'),
   );
 
   readonly nlFilters = signal<GridFilters>({});
@@ -159,9 +159,9 @@ export class Bills {
           this.leaseIdFilter.set(leaseId);
           this.load(1);
         }
-        const tenantId = params.get('tenantId');
-        if (tenantId && tenantId !== this.tenantIdFilter()) {
-          this.tenantIdFilter.set(tenantId);
+        const residentId = params.get('residentId');
+        if (residentId && residentId !== this.residentIdFilter()) {
+          this.residentIdFilter.set(residentId);
           this.load(1);
         }
       });
@@ -179,7 +179,7 @@ export class Bills {
         type: this.typeFilter ?? undefined,
         ...(this.nlFilters() as BillListFilters),
         leaseId: this.leaseIdFilter() ?? undefined,
-        tenantId: this.tenantIdFilter() ?? undefined,
+        residentId: this.residentIdFilter() ?? undefined,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -253,11 +253,11 @@ export class Bills {
     this.openBill(match.id);
   }
 
-  clearTenantFilter(): void {
-    this.tenantIdFilter.set(null);
+  clearResidentFilter(): void {
+    this.residentIdFilter.set(null);
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tenantId: null },
+      queryParams: { residentId: null },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });

@@ -316,7 +316,7 @@ export class BillFormDialog {
 function toLeaseOption(lease: LeaseListItem): LeaseOption {
   return {
     id: lease.id,
-    label: `Unit ${lease.unit.unitNo} · ${lease.unit.property.name} · ${lease.tenant.firstName} ${lease.tenant.lastName}`,
+    label: `Unit ${lease.unit.unitNo} · ${lease.unit.property.name} · ${lease.resident.firstName} ${lease.resident.lastName}`,
     monthlyRent: lease.monthlyRent,
     dueDay: lease.dueDay,
   };

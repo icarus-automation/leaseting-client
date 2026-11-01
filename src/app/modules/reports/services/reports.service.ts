@@ -15,8 +15,8 @@ import type {
   ParkingRevenueReport,
   ParkingVoidReport,
   PropertyOccupancy,
-  RevenueByTenantQuery,
-  RevenueByTenantReport,
+  RevenueByResidentQuery,
+  RevenueByResidentReport,
   ShiftCashVarianceReport,
 } from '../../../core/models/report.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
@@ -39,13 +39,13 @@ export class ReportsService {
     return this.http.get<PropertyOccupancy[]>(`${this.base}/occupancy`);
   }
 
-  revenueByTenant(query: RevenueByTenantQuery): Observable<RevenueByTenantReport> {
+  revenueByResident(query: RevenueByResidentQuery): Observable<RevenueByResidentReport> {
     let params = new HttpParams()
       .set('from', query.from)
       .set('to', query.to)
       .set('basis', query.basis);
     if (query.propertyId) params = params.set('propertyId', query.propertyId);
-    return this.http.get<RevenueByTenantReport>(`${this.base}/revenue-by-tenant`, { params });
+    return this.http.get<RevenueByResidentReport>(`${this.base}/revenue-by-resident`, { params });
   }
 
   arAgingSummary(query: ArAgingQuery): Observable<ArAgingSummary> {

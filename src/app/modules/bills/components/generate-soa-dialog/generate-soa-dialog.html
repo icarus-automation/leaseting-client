@@ -18,7 +18,7 @@
       <div>
         <p class="text-[15px] font-semibold text-heading">{{ statement.soaNo }}</p>
         <p class="text-[13px] text-muted">
-          {{ statement.lease.tenant.firstName }} {{ statement.lease.tenant.lastName }} · Unit
+          {{ statement.lease.resident.firstName }} {{ statement.lease.resident.lastName }} · Unit
           {{ statement.lease.unit.unitNo }} · total due {{ statement.totalDue | phpCurrency }}
         </p>
         @if (statement.smsStatus === 'SENT') {

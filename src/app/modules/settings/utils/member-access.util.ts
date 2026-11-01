@@ -34,7 +34,7 @@ const ADMIN = 'admin';
 export const SYSTEM_ROLE_LABELS: Record<string, string> = {
   owner: 'Owner',
   ...INVITATION_ROLE_LABELS,
-  tenant: 'Tenant',
+  resident: 'Resident',
   parking_attendant: 'Parking attendant',
 };
 
@@ -47,8 +47,8 @@ export function systemRoleLabel(role: string | null | undefined): string | null 
  * The row actions to offer on `member`. Mirrors the API's rules so nobody is
  * shown a button that can only fail; the API still enforces them. Staff:
  * nobody acts on themselves, and only the owner acts on an admin or another
- * owner. Tenants and parking attendants are not staff: their one switch is
- * their login, held by `tenants:manage_access` and `parking_attendants:manage`.
+ * owner. Residents and parking attendants are not staff: their one switch is
+ * their login, held by `residents:manage_access` and `parking_attendants:manage`.
  */
 export function memberActions(actor: MemberActor, member: Member): MemberAction[] {
   if (member.audience !== 'staff') return loginActions(actor, member);
@@ -68,7 +68,7 @@ export function memberActions(actor: MemberActor, member: Member): MemberAction[
 }
 
 function loginActions(actor: MemberActor, member: Member): MemberAction[] {
-  const code: Permission = member.audience === 'tenant' ? 'tenants:manage_access' : 'parking_attendants:manage';
+  const code: Permission = member.audience === 'resident' ? 'residents:manage_access' : 'parking_attendants:manage';
   if (!actor.can(code)) return [];
   const login: MemberAction[] = member.status === 'ACTIVE' ? ['reset-password', 'disable-login'] : ['enable-login'];
   return canSetPropertyAccess(actor, member) ? ['property-access', ...login] : login;
@@ -81,7 +81,7 @@ function loginActions(actor: MemberActor, member: Member): MemberAction[] {
  * the member's current access, so nobody drops properties they can't see.
  */
 function canSetPropertyAccess(actor: MemberActor, member: Member): boolean {
-  if (member.audience === 'tenant') return false;
+  if (member.audience === 'resident') return false;
   if (member.audience === 'staff') {
     if (!actor.can('members:update') || member.userId === actor.userId || member.role === OWNER) return false;
     if (member.role === ADMIN && actor.role !== OWNER) return false;
@@ -108,11 +108,11 @@ export function assignableRoles(roles: readonly Role[], member: Member, actor: M
 
 /**
  * What a member's property access reads as: "All properties", or "N
- * properties" with their names for a tooltip. A tenant's access is their own
+ * properties" with their names for a tooltip. A resident's access is their own
  * lease, so no label.
  */
 export function propertyAccessLabel(member: Member): PropertyAccessSummary | null {
-  return member.audience === 'tenant' ? null : propertyAccessSummary(member.propertyAccess);
+  return member.audience === 'resident' ? null : propertyAccessSummary(member.propertyAccess);
 }
 
 export interface LastActiveLabel {

@@ -36,8 +36,8 @@ export function viewStatus(view: RequestView): MaintenanceRequestStatus | undefi
   return view === 'ALL' ? undefined : view;
 }
 
-export function requestTenantName(request: Pick<MaintenanceRequest, 'tenant'>): string {
-  return `${request.tenant.firstName} ${request.tenant.lastName}`.trim();
+export function requestResidentName(request: Pick<MaintenanceRequest, 'resident'>): string {
+  return `${request.resident.firstName} ${request.resident.lastName}`.trim();
 }
 
 export function requestUnitLabel(request: Pick<MaintenanceRequest, 'unit'>): string {

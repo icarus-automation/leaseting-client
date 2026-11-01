@@ -17,7 +17,7 @@ export interface CatalogGroup {
 }
 
 export interface CatalogRole {
-  id: 'owner' | 'admin' | 'member' | 'tenant' | 'parking_attendant';
+  id: 'owner' | 'admin' | 'member' | 'resident' | 'parking_attendant';
   label: string;
   description: string;
   audience: Audience;

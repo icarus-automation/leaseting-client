@@ -3,7 +3,7 @@ import {
   photoCountLabel,
   requestEmptyState,
   requestStatusBadge,
-  requestTenantName,
+  requestResidentName,
   requestUnitLabel,
   viewStatus,
 } from './maintenance-request.util';
@@ -40,12 +40,12 @@ describe('viewStatus', () => {
 
 describe('request labels', () => {
   const request = {
-    tenant: { id: 't-1', firstName: 'Ace Gabriel', lastName: 'Pasiliao' },
+    resident: { id: 't-1', firstName: 'Ace Gabriel', lastName: 'Pasiliao' },
     unit: { id: 'u-1', unitNo: '106', property: { id: 'p-1', name: 'Brickstone Boarding House' } },
   };
 
   it('names the tenant and the unit with its property', () => {
-    expect(requestTenantName(request)).toBe('Ace Gabriel Pasiliao');
+    expect(requestResidentName(request)).toBe('Ace Gabriel Pasiliao');
     expect(requestUnitLabel(request)).toBe('Unit 106 · Brickstone Boarding House');
   });
 

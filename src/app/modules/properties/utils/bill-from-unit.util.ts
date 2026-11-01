@@ -27,10 +27,10 @@ export function billFromUnit(unit: UnitDetail, bill: UnitOutstandingBill): BillL
       rentPricingBasis: lease.rentPricingBasis,
       rentFloorAreaSqm: lease.rentFloorAreaSqm,
       rentRatePerSqm: lease.rentRatePerSqm,
-      tenant: {
-        id: lease.tenant.id,
-        firstName: lease.tenant.firstName,
-        lastName: lease.tenant.lastName,
+      resident: {
+        id: lease.resident.id,
+        firstName: lease.resident.firstName,
+        lastName: lease.resident.lastName,
       },
       unit: {
         id: unit.id,

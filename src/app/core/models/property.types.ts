@@ -73,7 +73,7 @@ export interface FloorUnitItem {
   notes: string | null;
   status: UnitStatus;
   hasOverdueBills: boolean;
-  activeLease: { id: string; tenantName: string } | null;
+  activeLease: { id: string; residentName: string } | null;
 }
 
 export interface FloorDetail extends FloorResponse {
@@ -123,7 +123,7 @@ export interface UnitActiveLease extends LeaseRentSnapshot {
   monthlyRent: string;
   rentCharges: ChargeLine[] | null;
   dueDay: number;
-  tenant: {
+  resident: {
     id: string;
     firstName: string;
     lastName: string;

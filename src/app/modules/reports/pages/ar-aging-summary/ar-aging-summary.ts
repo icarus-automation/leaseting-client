@@ -82,7 +82,7 @@ export class ArAgingSummaryPage {
     const groups = [...(this.report()?.groups ?? [])];
     switch (this.sort()) {
       case 'name':
-        return groups.sort((a, b) => a.tenantName.localeCompare(b.tenantName));
+        return groups.sort((a, b) => a.residentName.localeCompare(b.residentName));
       case 'oldest':
         return groups.sort((a, b) => b.oldestDaysOverdue - a.oldestDaysOverdue);
       default:
@@ -156,7 +156,7 @@ export class ArAgingSummaryPage {
 
     for (const group of this.rows()) {
       rows.push([
-        group.tenantName,
+        group.residentName,
         group.contactNo,
         ...AGING_BUCKETS.map((bucket) => group.buckets[bucket.key]),
         group.overdue,
@@ -165,7 +165,7 @@ export class ArAgingSummaryPage {
     }
 
     rows.push([
-      `Total (${report.tenantCount} tenants, ${report.billCount} bills)`,
+      `Total (${report.residentCount} tenants, ${report.billCount} bills)`,
       '',
       ...AGING_BUCKETS.map((bucket) => report.buckets[bucket.key]),
       report.overdue,

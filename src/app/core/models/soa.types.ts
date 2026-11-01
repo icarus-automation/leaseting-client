@@ -40,7 +40,7 @@ export interface SoaResponse {
   lines: SoaLine[];
   lease: {
     id: string;
-    tenant: { id: string; firstName: string; lastName: string };
+    resident: { id: string; firstName: string; lastName: string };
     unit: { id: string; unitNo: string; property: { id: string; name: string } };
   };
 }
@@ -54,5 +54,5 @@ export interface SoaListFilters {
   page?: number;
   limit?: number;
   leaseId?: string;
-  tenantId?: string;
+  residentId?: string;
 }

@@ -110,7 +110,7 @@ export class OpsCalendar {
     eventClick: (info) => this.openEntry(this.eventEntry(info.event), info.el),
     eventDidMount: (info) => {
       const entry = this.eventEntry(info.event);
-      const label = `${entry.title}, ${entry.date}, Unit ${entry.unit.unitNo}, ${entry.property.name}, ${entry.tenant?.name ?? 'Tenant not selected'}, ${entry.statusLabel}`;
+      const label = `${entry.title}, ${entry.date}, Unit ${entry.unit.unitNo}, ${entry.property.name}, ${entry.resident?.name ?? 'Tenant not selected'}, ${entry.statusLabel}`;
       info.el.setAttribute('aria-label', label);
       info.el.title = label;
     },

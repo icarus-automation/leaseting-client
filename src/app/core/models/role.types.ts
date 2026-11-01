@@ -3,7 +3,7 @@ import type { Audience } from '../auth/auth.types';
 export type RoleKind = 'system' | 'custom';
 
 export interface Role {
-  /** 'owner' | 'admin' | 'member' | 'tenant' | 'parking_attendant', or a custom role's UUID. */
+  /** 'owner' | 'admin' | 'member' | 'resident' | 'parking_attendant', or a custom role's UUID. */
   id: string;
   name: string;
   description: string | null;

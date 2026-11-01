@@ -44,9 +44,9 @@ export const routes: Routes = [
           import('./modules/properties/properties.routes').then(m => m.PROPERTIES_ROUTES),
       },
       {
-        path: 'tenants',
+        path: 'residents',
         loadChildren: () =>
-          import('./modules/tenants/tenants.routes').then(m => m.TENANTS_ROUTES),
+          import('./modules/residents/residents.routes').then(m => m.RESIDENTS_ROUTES),
       },
       {
         path: 'leases',

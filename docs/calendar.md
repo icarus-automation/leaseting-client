@@ -66,7 +66,7 @@ Month displays at most two entries per day before a `+N more` popover. Compact g
 | --- | --- |
 | Open bill | `/bills?billId=<sourceId>`; the bills list is narrowed to that exact bill and provides a way to clear the filter. |
 | Open lease | `/leases/<sourceId>` |
-| Open onboarding | `/tenants/onboarding/<sourceId>` |
+| Open onboarding | `/residents/onboarding/<sourceId>` |
 
 Opening the preview moves focus into it and scrolls it into view. Its Close button and Escape handler return focus to the triggering entry when that element remains connected. Filter changes and feed requests clear the preview.
 

@@ -29,8 +29,8 @@ export interface ConsumptionSignals {
   quietPeriods: number;
 }
 
-export interface TenantRiskProfile {
-  tenantId: string;
+export interface ResidentRiskProfile {
+  residentId: string;
   leaseId: string | null;
   payment: BandedPayment;
   retention: BandedRetention | null;

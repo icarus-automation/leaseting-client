@@ -23,7 +23,7 @@ const bill = {
     rentPricingBasis: 'FIXED',
     rentFloorAreaSqm: null,
     rentRatePerSqm: null,
-    tenant: { id: 'tenant-1', firstName: 'Ada', lastName: 'Lovelace' },
+    resident: { id: 'resident-1', firstName: 'Ada', lastName: 'Lovelace' },
     unit: { id: 'unit-1', unitNo: '1A', property: { id: 'prop-1', name: 'Mabini' } },
   },
 } satisfies BillListItem;

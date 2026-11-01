@@ -35,7 +35,7 @@ function describe(role: Role): string {
  * The roles an invitation can give, for the role dropdown: Member and Admin,
  * then the custom roles that are turned on. A role with a code the inviter
  * lacks is left out, because the API refuses a role above your own. Owner,
- * tenant and parking attendant are never invitable (`isAssignable` false).
+ * resident and parking attendant are never invitable (`isAssignable` false).
  */
 export function invitableRoleGroups(roles: readonly Role[], can: (code: Permission) => boolean): InviteRoleGroup[] {
   const offered = roles.filter(

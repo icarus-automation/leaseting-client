@@ -36,7 +36,7 @@ export interface BillListItem extends BillResponse {
   lease: LeaseRentSnapshot & {
     id: string;
     monthlyRent: string;
-    tenant: { id: string; firstName: string; lastName: string };
+    resident: { id: string; firstName: string; lastName: string };
     unit: {
       id: string;
       unitNo: string;
@@ -99,7 +99,7 @@ export interface BillListFilters {
   page?: number;
   limit?: number;
   leaseId?: string;
-  tenantId?: string;
+  residentId?: string;
   status?: BillStatus;
   type?: BillType;
   dueToday?: boolean;
@@ -127,7 +127,7 @@ export interface BillsSummary {
 export interface UtilityRunPreviewRow {
   leaseId: string;
   unitNo: string;
-  tenantName: string;
+  residentName: string;
   dueDay: number;
   previousReading: string | null;
   lastPeriodTo: string | null;

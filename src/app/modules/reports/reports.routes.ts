@@ -8,9 +8,9 @@ export const REPORTS_ROUTES: Routes = [
       import('./pages/portfolio-overview/portfolio-overview').then(m => m.PortfolioOverview),
   },
   {
-    path: 'revenue-by-tenant',
+    path: 'revenue-by-resident',
     loadComponent: () =>
-      import('./pages/revenue-by-tenant/revenue-by-tenant').then(m => m.RevenueByTenant),
+      import('./pages/revenue-by-resident/revenue-by-resident').then(m => m.RevenueByResident),
   },
   {
     path: 'ar-aging-summary',

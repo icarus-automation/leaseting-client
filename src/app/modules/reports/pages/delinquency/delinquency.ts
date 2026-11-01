@@ -10,7 +10,7 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type {
   DelinquencyReport,
-  DelinquencyTenant,
+  DelinquencyResident,
   ReminderEntry,
 } from '../../../../core/models/report.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
@@ -83,7 +83,7 @@ export class Delinquency {
     return `As of ${this.asOfText()} · last ${report.months} months · ${this.filters.labelFor(this.propertyId())}`;
   });
 
-  readonly isEmpty = computed(() => (this.report()?.tenants.length ?? 0) === 0);
+  readonly isEmpty = computed(() => (this.report()?.residents.length ?? 0) === 0);
 
   readonly peakSent = computed(() =>
     Math.max(1, ...(this.report()?.effectiveness ?? []).map((stat) => stat.sent)),
@@ -128,24 +128,24 @@ export class Delinquency {
     this.load();
   }
 
-  toggle(tenantId: string): void {
+  toggle(residentId: string): void {
     this.expanded.update((current) => {
       const next = new Set(current);
-      if (!next.delete(tenantId)) next.add(tenantId);
+      if (!next.delete(residentId)) next.add(residentId);
       return next;
     });
   }
 
-  isExpanded(tenantId: string): boolean {
-    return this.expanded().has(tenantId);
+  isExpanded(residentId: string): boolean {
+    return this.expanded().has(residentId);
   }
 
-  tierOf(tenant: DelinquencyTenant) {
-    return TIER_META[tenant.tier];
+  tierOf(resident: DelinquencyResident) {
+    return TIER_META[resident.tier];
   }
 
-  tierChipClass(tenant: DelinquencyTenant): string {
-    switch (TIER_META[tenant.tier].tone) {
+  tierChipClass(resident: DelinquencyResident): string {
+    switch (TIER_META[resident.tier].tone) {
       case 'destructive':
         return 'border-[color-mix(in_oklab,var(--destructive)_30%,transparent)] bg-muted-destructive';
       case 'warning':
@@ -155,8 +155,8 @@ export class Delinquency {
     }
   }
 
-  tierDotClass(tenant: DelinquencyTenant): string {
-    switch (TIER_META[tenant.tier].tone) {
+  tierDotClass(resident: DelinquencyResident): string {
+    switch (TIER_META[resident.tier].tone) {
       case 'destructive':
         return 'bg-destructive';
       case 'warning':
@@ -166,14 +166,14 @@ export class Delinquency {
     }
   }
 
-  patternText(tenant: DelinquencyTenant): string {
-    if (tenant.billsConsidered === 0) return 'No bills due yet in this period';
-    return `Late on ${tenant.lateCount} of ${tenant.billsConsidered}`;
+  patternText(resident: DelinquencyResident): string {
+    if (resident.billsConsidered === 0) return 'No bills due yet in this period';
+    return `Late on ${resident.lateCount} of ${resident.billsConsidered}`;
   }
 
-  lastContactText(tenant: DelinquencyTenant): string {
-    if (!tenant.lastReminderAt) return 'Never contacted';
-    return `${asOfLabel(tenant.lastReminderAt)} · ${tenant.lastReminderStage}`;
+  lastContactText(resident: DelinquencyResident): string {
+    if (!resident.lastReminderAt) return 'Never contacted';
+    return `${asOfLabel(resident.lastReminderAt)} · ${resident.lastReminderStage}`;
   }
 
   asOfLabelFor(iso: string): string {
@@ -202,26 +202,26 @@ export class Delinquency {
     }
   }
 
-  canSend(tenant: DelinquencyTenant): boolean {
-    return Boolean(this.report()?.smsEnabled) && tenant.chaseBillId !== null && this.auth.can('bills:manage');
+  canSend(resident: DelinquencyResident): boolean {
+    return Boolean(this.report()?.smsEnabled) && resident.chaseBillId !== null && this.auth.can('bills:manage');
   }
 
-  confirmSend(tenant: DelinquencyTenant): void {
-    const billId = tenant.chaseBillId;
+  confirmSend(resident: DelinquencyResident): void {
+    const billId = resident.chaseBillId;
     if (!billId) return;
 
     this.confirm.proceed({
       header: 'Send payment reminder',
       message:
-        `Text ${tenant.tenantName} at ${tenant.contactNo} about their oldest unpaid bill ` +
-        `(${tenant.oldestDaysOverdue} days overdue)? This sends immediately and uses one SMS credit.`,
+        `Text ${resident.residentName} at ${resident.contactNo} about their oldest unpaid bill ` +
+        `(${resident.oldestDaysOverdue} days overdue)? This sends immediately and uses one SMS credit.`,
       acceptLabel: 'Send now',
-      onAccept: () => this.send(tenant, billId),
+      onAccept: () => this.send(resident, billId),
     });
   }
 
-  private send(tenant: DelinquencyTenant, billId: string): void {
-    this.sending.set(tenant.tenantId);
+  private send(resident: DelinquencyResident, billId: string): void {
+    this.sending.set(resident.residentId);
     this.bills
       .remind(billId)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -231,7 +231,7 @@ export class Delinquency {
           if (result.ok) {
             this.toast.add({
               severity: 'success',
-              summary: `Reminder sent to ${tenant.tenantName}`,
+              summary: `Reminder sent to ${resident.residentName}`,
               detail: result.recipient,
             });
             this.load();
@@ -280,21 +280,21 @@ export class Delinquency {
       ],
     ];
 
-    for (const tenant of report.tenants) {
+    for (const resident of report.residents) {
       rows.push([
-        tenant.tenantName,
-        tenant.contactNo,
-        tenant.units.join(' / '),
-        TIER_META[tenant.tier].label,
-        tenant.billsConsidered,
-        tenant.lateCount,
-        tenant.onTimeCount,
-        tenant.avgDaysLate,
-        tenant.maxDaysLate,
-        tenant.openOverdueAmount,
-        tenant.oldestDaysOverdue,
-        tenant.remindersSent,
-        tenant.lastReminderAt,
+        resident.residentName,
+        resident.contactNo,
+        resident.units.join(' / '),
+        TIER_META[resident.tier].label,
+        resident.billsConsidered,
+        resident.lateCount,
+        resident.onTimeCount,
+        resident.avgDaysLate,
+        resident.maxDaysLate,
+        resident.openOverdueAmount,
+        resident.oldestDaysOverdue,
+        resident.remindersSent,
+        resident.lastReminderAt,
       ]);
     }
 

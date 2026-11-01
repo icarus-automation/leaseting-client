@@ -12,7 +12,7 @@ describe('calendar state', () => {
   const bill: CalendarEntry = {
     id: 'bill-due:bill-1', sourceId: 'bill-1', type: 'BILL_DUE', title: 'Rent due', date: '2026-09-04',
     status: 'OVERDUE', statusLabel: 'Overdue', leaseId: 'lease-1', amount: '8000.00', balance: '6000.00',
-    tenant: { id: 'tenant-1', name: 'Mina Santos' }, unit: { id: 'unit-1', unitNo: '4B' },
+    resident: { id: 'resident-1', name: 'Mina Santos' }, unit: { id: 'unit-1', unitNo: '4B' },
     property: { id: 'property-1', name: 'Mabini Residences' },
   };
 
@@ -54,7 +54,7 @@ describe('calendar state', () => {
 
   it('opens the exact source record for all entry types', () => {
     expect(entrySource(bill)).toMatchObject({ route: ['/bills'], queryParams: { billId: 'bill-1' } });
-    expect(entrySource({ ...bill, type: 'MOVE_IN', sourceId: 'walk-1' }).route).toEqual(['/tenants', 'onboarding', 'walk-1']);
+    expect(entrySource({ ...bill, type: 'MOVE_IN', sourceId: 'walk-1' }).route).toEqual(['/residents', 'onboarding', 'walk-1']);
     for (const type of ['LEASE_START', 'LEASE_END'] as const) {
       expect(entrySource({ ...bill, type, sourceId: 'lease-1' }).route).toEqual(['/leases', 'lease-1']);
     }

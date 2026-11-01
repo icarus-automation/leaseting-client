@@ -95,7 +95,7 @@
         <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
           <span class="text-[12.5px] font-medium text-muted">Needs attention</span>
           <span class="font-heading text-xl font-semibold tabular-nums text-heading">
-            {{ data.totals.tenantCount }}
+            {{ data.totals.residentCount }}
           </span>
           <span class="text-[12px] tabular-nums text-muted">
             {{ data.totals.criticalCount }} critical · {{ data.totals.chronicCount }} chronic
@@ -190,34 +190,34 @@
             </tr>
           </thead>
 
-          @for (tenant of data.tenants; track tenant.tenantId) {
+          @for (resident of data.residents; track resident.residentId) {
             <tbody class="border-b border-border last:border-b-0">
               <tr class="transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
                 <th scope="row" class="px-4 py-3 text-left font-normal">
                   <span class="flex flex-wrap items-center gap-2">
                     <span
                       class="inline-flex items-center gap-1.5 rounded-full border px-2 py-[3px] text-xs font-medium leading-none"
-                      [class]="tierChipClass(tenant)"
-                      [attr.title]="tierOf(tenant).hint"
+                      [class]="tierChipClass(resident)"
+                      [attr.title]="tierOf(resident).hint"
                     >
-                      <span class="h-1.5 w-1.5 shrink-0 rounded-full" [class]="tierDotClass(tenant)" aria-hidden="true"></span>
-                      <span class="text-body">{{ tierOf(tenant).label }}</span>
+                      <span class="h-1.5 w-1.5 shrink-0 rounded-full" [class]="tierDotClass(resident)" aria-hidden="true"></span>
+                      <span class="text-body">{{ tierOf(resident).label }}</span>
                     </span>
                     <a
-                      [routerLink]="['/tenants', tenant.tenantId]"
+                      [routerLink]="['/residents', resident.residentId]"
                       class="rounded-[2px] text-[13.5px] font-medium text-body transition-colors duration-150 ease-out hover:text-primary hover:underline motion-reduce:transition-none"
                     >
-                      {{ tenant.tenantName }}
+                      {{ resident.residentName }}
                     </a>
                   </span>
-                  <span class="mt-0.5 block text-[12px] text-muted">{{ tenant.units.join(' · ') }}</span>
+                  <span class="mt-0.5 block text-[12px] text-muted">{{ resident.units.join(' · ') }}</span>
                 </th>
 
                 <td class="px-4 py-3">
-                  <span class="block text-[13px] text-body">{{ patternText(tenant) }}</span>
+                  <span class="block text-[13px] text-body">{{ patternText(resident) }}</span>
                   <span class="block text-[12px] tabular-nums text-muted">
-                    @if (tenant.avgDaysLate !== null) {
-                      Averages {{ tenant.avgDaysLate }} days late · worst {{ tenant.maxDaysLate }}
+                    @if (resident.avgDaysLate !== null) {
+                      Averages {{ resident.avgDaysLate }} days late · worst {{ resident.maxDaysLate }}
                     } @else {
                       Nothing late has settled yet
                     }
@@ -227,52 +227,52 @@
                 <td class="whitespace-nowrap px-4 py-3 text-right">
                   <span
                     class="block text-[13px] font-medium tabular-nums"
-                    [class]="+tenant.openOverdueAmount > 0 ? 'text-destructive' : 'text-muted'"
+                    [class]="+resident.openOverdueAmount > 0 ? 'text-destructive' : 'text-muted'"
                   >
-                    {{ +tenant.openOverdueAmount > 0 ? (tenant.openOverdueAmount | phpCurrency) : 'All settled' }}
+                    {{ +resident.openOverdueAmount > 0 ? (resident.openOverdueAmount | phpCurrency) : 'All settled' }}
                   </span>
-                  @if (tenant.oldestDaysOverdue > 0) {
+                  @if (resident.oldestDaysOverdue > 0) {
                     <span class="block text-[12px] tabular-nums text-muted">
-                      oldest {{ tenant.oldestDaysOverdue }} days
+                      oldest {{ resident.oldestDaysOverdue }} days
                     </span>
                   }
                 </td>
 
                 <td class="px-4 py-3">
-                  <span class="block text-[13px] text-body">{{ lastContactText(tenant) }}</span>
+                  <span class="block text-[13px] text-body">{{ lastContactText(resident) }}</span>
                   <span class="block text-[12px] tabular-nums text-muted">
-                    {{ tenant.remindersSent }} delivered
+                    {{ resident.remindersSent }} delivered
                   </span>
                 </td>
 
                 <td class="px-4 py-3 text-right">
                   <span class="inline-flex items-center gap-1.5">
-                    @if (canSend(tenant)) {
+                    @if (canSend(resident)) {
                       <button
                         type="button"
                         class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none print:hidden"
                         [disabled]="sending() !== null"
-                        [attr.aria-label]="'Send a payment reminder to ' + tenant.tenantName"
-                        (click)="confirmSend(tenant)"
+                        [attr.aria-label]="'Send a payment reminder to ' + resident.residentName"
+                        (click)="confirmSend(resident)"
                       >
-                        <svg [pIcon]="sending() === tenant.tenantId ? 'spinner' : 'send'" [size]="12" aria-hidden="true"></svg>
-                        <span>{{ sending() === tenant.tenantId ? 'Sending' : 'Remind' }}</span>
+                        <svg [pIcon]="sending() === resident.residentId ? 'spinner' : 'send'" [size]="12" aria-hidden="true"></svg>
+                        <span>{{ sending() === resident.residentId ? 'Sending' : 'Remind' }}</span>
                       </button>
                     }
                     <button
                       type="button"
                       class="inline-flex h-8 items-center gap-1.5 rounded-base px-2 text-[12.5px] font-medium text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none print:hidden"
-                      [attr.aria-expanded]="isExpanded(tenant.tenantId)"
+                      [attr.aria-expanded]="isExpanded(resident.residentId)"
                       [attr.aria-label]="
-                        (isExpanded(tenant.tenantId) ? 'Hide' : 'Show') + ' the chase history for ' + tenant.tenantName
+                        (isExpanded(resident.residentId) ? 'Hide' : 'Show') + ' the chase history for ' + resident.residentName
                       "
-                      (click)="toggle(tenant.tenantId)"
+                      (click)="toggle(resident.residentId)"
                     >
                       <span>History</span>
                       <svg
                         pIcon="chevron-down"
                         class="shrink-0 transition-transform duration-150 ease-out motion-reduce:transition-none"
-                        [class.-rotate-180]="isExpanded(tenant.tenantId)"
+                        [class.-rotate-180]="isExpanded(resident.residentId)"
                         [size]="11"
                         aria-hidden="true"
                       ></svg>
@@ -281,17 +281,17 @@
                 </td>
               </tr>
 
-              @if (isExpanded(tenant.tenantId)) {
+              @if (isExpanded(resident.residentId)) {
                 <tr class="bg-surface">
                   <td colspan="5" class="px-4 py-3">
-                    @if (tenant.reminders.length === 0) {
+                    @if (resident.reminders.length === 0) {
                       <p class="text-[12.5px] text-muted">
-                        Nothing has been sent to {{ tenant.tenantName }} yet. The nightly ladder starts three
+                        Nothing has been sent to {{ resident.residentName }} yet. The nightly ladder starts three
                         days before a bill falls due.
                       </p>
                     } @else {
                       <ol class="flex flex-col gap-1.5">
-                        @for (entry of tenant.reminders; track entry.id) {
+                        @for (entry of resident.reminders; track entry.id) {
                           <li class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12.5px]">
                             <span class="w-[5.5rem] shrink-0 tabular-nums text-muted">{{ entry.sentAt }}</span>
                             <span class="w-[8.5rem] shrink-0 font-medium text-body">{{ entry.stageLabel }}</span>

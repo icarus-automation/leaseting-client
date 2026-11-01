@@ -47,7 +47,7 @@ export class PaymentDestinationSettings {
 
   readonly canMutate = computed(() => this.auth.can('payment_destinations:manage'));
   /**
-   * An organization fallback reaches every property's tenants, so changing
+   * An organization fallback reaches every property's residents, so changing
    * one takes every property; someone limited changes their properties' only.
    */
   readonly canMutateFallback = computed(() => this.canMutate() && this.auth.hasEveryProperty());

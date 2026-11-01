@@ -29,7 +29,7 @@ import { isPastDue, leaseTermLabel, ordinal } from '../../../../shared/utils/dat
 import { unitTone, unitToneLabel } from '../../../../shared/utils/unit-tone.util';
 import { RecordPaymentDialog } from '../../../bills/components/record-payment-dialog/record-payment-dialog';
 import { LeasesService } from '../../../leases/services/leases.service';
-import { OnboardingsService } from '../../../tenants/services/onboardings.service';
+import { OnboardingsService } from '../../../residents/services/onboardings.service';
 import { UnitsService } from '../../services/units.service';
 import { billFromUnit } from '../../utils/bill-from-unit.util';
 
@@ -66,8 +66,8 @@ export class UnitPanel {
   readonly canViewPayments = computed(() => this.auth.can('payments:view'));
   readonly canManageUnits = computed(() => this.auth.can('units:manage'));
   readonly canManageLeases = computed(() => this.auth.can('leases:manage'));
-  /** The onboarding wizard writes the tenant as well as the lease. */
-  readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'tenants:manage']));
+  /** The onboarding wizard writes the resident as well as the lease. */
+  readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'residents:manage']));
 
   readonly billTypeLabels = BILL_TYPE_LABELS;
 
@@ -193,7 +193,7 @@ export class UnitPanel {
       .subscribe({
         next: (onboarding) => {
           this.startingOnboarding.set(false);
-          void this.router.navigate(['/tenants/onboarding', onboarding.id]);
+          void this.router.navigate(['/residents/onboarding', onboarding.id]);
         },
         error: (error: unknown) => {
           this.startingOnboarding.set(false);

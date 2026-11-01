@@ -81,8 +81,8 @@ Lock the tab after navigate; unlock only when the whole drive (including screens
 | `/kit` | `Ask Kit` |
 | `/properties` | `Properties` |
 | `/properties/:id` | property name; breadcrumb nav `Breadcrumb` |
-| `/tenants` | `Tenants` |
-| `/tenants/onboarding/:id` | move-in wizard |
+| `/residents` | `Tenants` |
+| `/residents/onboarding/:id` | move-in wizard |
 | `/leases` | `Leases` |
 | `/bills` | `Bills` |
 | `/bills/soa` | `Statements of Account` |
@@ -137,7 +137,7 @@ Property create: heading `New property`, `#property-name` / `#property-address` 
 
 Bill create: heading `New bill`, submit in the same dialog pattern. Header `New bill`; tools menu `Billing tools` → `SOA`, `Generate SOA`, `Utility run`, `Generate rent bills`.
 
-Tenant create from palette/dashboard `?create=1` starts **onboarding**, not the old tenant dialog. Button on `/tenants` is `Start onboarding`.
+Tenant create from palette/dashboard `?create=1` starts **onboarding**, not the old tenant dialog. Button on `/residents` is `Start onboarding`.
 
 Work Orders is a live queue. Start and Resolve are one-way mutations on the shared org; see [work-orders](features/work-orders.md).
 

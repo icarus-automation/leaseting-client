@@ -32,27 +32,27 @@ export interface RevenueRow {
   referenceNo: string | null;
 }
 
-export interface RevenueTenantGroup {
-  tenantId: string;
-  tenantName: string;
+export interface RevenueResidentGroup {
+  residentId: string;
+  residentName: string;
   rows: RevenueRow[];
   subtotal: string;
   subtotalPaid: string | null;
   subtotalBalance: string | null;
 }
 
-export interface RevenueByTenantReport {
+export interface RevenueByResidentReport {
   basis: RevenueBasis;
   from: string;
   to: string;
-  groups: RevenueTenantGroup[];
+  groups: RevenueResidentGroup[];
   total: string;
   totalPaid: string | null;
   totalBalance: string | null;
   rowCount: number;
 }
 
-export interface RevenueByTenantQuery {
+export interface RevenueByResidentQuery {
   from: string;
   to: string;
   basis: RevenueBasis;
@@ -80,8 +80,8 @@ export interface AgingBillRow {
 }
 
 interface AgingGroupBase {
-  tenantId: string;
-  tenantName: string;
+  residentId: string;
+  residentName: string;
   contactNo: string;
   buckets: AgingBucketTotals;
   total: string;
@@ -102,7 +102,7 @@ interface ArAgingBase {
   total: string;
   overdue: string;
   billCount: number;
-  tenantCount: number;
+  residentCount: number;
 }
 
 export interface ArAgingSummary extends ArAgingBase {
@@ -137,9 +137,9 @@ export interface ReminderEntry {
   billLabel: string;
 }
 
-export interface DelinquencyTenant {
-  tenantId: string;
-  tenantName: string;
+export interface DelinquencyResident {
+  residentId: string;
+  residentName: string;
   contactNo: string;
   units: string[];
   tier: DelinquencyTier;
@@ -173,11 +173,11 @@ export interface DelinquencyReport {
   asOf: string;
   windowFrom: string;
   months: number;
-  tenants: DelinquencyTenant[];
+  residents: DelinquencyResident[];
   effectiveness: ReminderStageStat[];
   effectivenessWindowDays: number;
   totals: {
-    tenantCount: number;
+    residentCount: number;
     chronicCount: number;
     criticalCount: number;
     openOverdue: string;

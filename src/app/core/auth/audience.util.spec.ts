@@ -16,13 +16,13 @@ describe('audienceOf', () => {
 
 describe('dedicatedAppRejection', () => {
   it('sends a tenant to Residence Care', () => {
-    expect(dedicatedAppRejection({ audience: 'tenant', organizationRole: null })).toBe(
+    expect(dedicatedAppRejection({ audience: 'resident', organizationRole: null })).toBe(
       'Use the Residence Care mobile app.',
     );
   });
 
   it('rejects the tenant organization role even when the audience says staff', () => {
-    expect(dedicatedAppRejection({ audience: 'staff', organizationRole: 'tenant' })).toBe(
+    expect(dedicatedAppRejection({ audience: 'staff', organizationRole: 'resident' })).toBe(
       'Use the Residence Care mobile app.',
     );
   });

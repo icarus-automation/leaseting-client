@@ -20,7 +20,7 @@ import hotkeys from 'hotkeys-js';
 import { AuthService } from '../../../core/auth/auth.service';
 import type { Permission } from '../../../core/auth/permissions';
 import { visibleSettingsGroups } from '../../../modules/settings/settings-nav';
-import { TenantsService } from '../../../modules/tenants/services/tenants.service';
+import { ResidentsService } from '../../../modules/residents/services/residents.service';
 import { CommandPaletteService } from './command-palette.service';
 
 interface Command {
@@ -51,7 +51,7 @@ const COMMANDS: Command[] = [
   { id: 'nav-dashboard', label: 'Dashboard', icon: 'home', group: 'Go to', keywords: 'home overview start', route: '/dashboard' },
   { id: 'nav-calendar', label: 'Calendar', icon: 'calendar', group: 'Go to', keywords: 'schedule agenda dates lease expiry bills due onboarding move in', route: '/calendar', permissions: ['leases:view', 'bills:view'] },
   { id: 'nav-properties', label: 'Properties', icon: 'building', group: 'Go to', keywords: 'buildings portfolio floors units', route: '/properties', permissions: ['properties:view'] },
-  { id: 'nav-tenants', label: 'Tenants', icon: 'users', group: 'Go to', keywords: 'people renters residents', route: '/tenants', permissions: ['tenants:view'] },
+  { id: 'nav-residents', label: 'Tenants', icon: 'users', group: 'Go to', keywords: 'people renters residents', route: '/residents', permissions: ['residents:view'] },
   { id: 'nav-leases', label: 'Leases', icon: 'file-edit', group: 'Go to', keywords: 'contracts agreements rent', route: '/leases', permissions: ['leases:view'] },
   { id: 'nav-kit', label: 'Ask Kit', icon: 'comments', group: 'Go to', keywords: 'kit chat ask', route: '/kit', permissions: ['kit:use'] },
   { id: 'nav-bills', label: 'Bills', icon: 'wallet', group: 'Go to', keywords: 'payments charges rent utilities invoices', route: '/bills', permissions: ['bills:view'] },
@@ -59,7 +59,7 @@ const COMMANDS: Command[] = [
   { id: 'nav-work-orders', label: 'Work Orders', icon: 'wrench', group: 'Go to', keywords: 'maintenance repairs tickets', route: '/work-orders', permissions: ['maintenance_requests:view'] },
   { id: 'nav-parking', label: 'Parking Overview', icon: 'car', group: 'Go to', keywords: 'parking monitoring occupancy spaces vehicles attendants activity void shift cash', route: '/parking', permissions: ['parking:view'] },
   { id: 'nav-reports', label: 'Reports', icon: 'chart-bar', group: 'Go to', keywords: 'analytics occupancy export catalog', route: '/reports', permissions: ['reports:view'] },
-  { id: 'nav-revenue-by-tenant', label: 'Revenue by Tenant', hint: 'Report', icon: 'users', group: 'Go to', keywords: 'revenue by tenant sales by customer details billed collected ledger money in', route: '/reports/revenue-by-tenant', permissions: ['reports:view'] },
+  { id: 'nav-revenue-by-resident', label: 'Revenue by Tenant', hint: 'Report', icon: 'users', group: 'Go to', keywords: 'revenue by tenant sales by customer details billed collected ledger money in', route: '/reports/revenue-by-resident', permissions: ['reports:view'] },
   { id: 'nav-portfolio-overview', label: 'Portfolio Overview', hint: 'Report', icon: 'chart-bar', group: 'Go to', keywords: 'collections aging occupancy dashboard', route: '/reports/portfolio-overview', permissions: ['reports:view'] },
   { id: 'nav-ar-aging-summary', label: 'AR Aging', hint: 'Report', icon: 'chart-pie', group: 'Go to', keywords: 'ar aging who owes you receivables arrears overdue buckets by tenant', route: '/reports/ar-aging-summary', permissions: ['reports:view'] },
   { id: 'nav-ar-aging-detail', label: 'Unpaid Bills', hint: 'Report', icon: 'exclamation-circle', group: 'Go to', keywords: 'ar aging detail who owes you unpaid bills overdue days late worklist', route: '/reports/ar-aging-detail', permissions: ['reports:view'] },
@@ -69,7 +69,7 @@ const COMMANDS: Command[] = [
   { id: 'nav-users', label: 'Users', hint: 'Settings', icon: 'users', group: 'Go to', keywords: 'team staff people members invite roles access deactivate', route: '/settings/users', permissions: ['members:view'] },
   { id: 'nav-audit-log', label: 'Audit log', hint: 'Settings', icon: 'history', group: 'Go to', keywords: 'audit history changes who changed roles invitations property access', route: '/settings/users', queryParams: { tab: 'audit' }, permissions: ['members:view', 'audit_log:view'] },
   { id: 'act-new-property', label: 'New property', hint: 'Create', icon: 'plus', group: 'Actions', keywords: 'add create building register', route: '/properties', queryParams: { create: '1' }, permissions: ['properties:manage'], needsEveryProperty: true },
-  { id: 'act-new-tenant', label: 'Onboard tenant', hint: 'Create', icon: 'user-plus', group: 'Actions', keywords: 'add create renter person new tenant onboarding move in', route: '/tenants', queryParams: { create: '1' }, permissions: ['leases:manage', 'tenants:manage'] },
+  { id: 'act-new-resident', label: 'Onboard tenant', hint: 'Create', icon: 'user-plus', group: 'Actions', keywords: 'add create renter person new tenant onboarding move in', route: '/residents', queryParams: { create: '1' }, permissions: ['leases:manage', 'residents:manage'] },
   { id: 'act-new-bill', label: 'New bill', hint: 'Create', icon: 'plus-circle', group: 'Actions', keywords: 'add create charge rent utility invoice', route: '/bills', queryParams: { create: '1' }, permissions: ['bills:manage'] },
   { id: 'act-unpaid-bills', label: 'View unpaid bills', hint: 'Filter', icon: 'exclamation-circle', group: 'Actions', keywords: 'overdue outstanding due money', route: '/bills', queryParams: { status: 'UNPAID' }, permissions: ['bills:view'] },
 ];
@@ -84,7 +84,7 @@ export class CommandPalette {
   private readonly palette = inject(CommandPaletteService);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
-  private readonly tenants = inject(TenantsService);
+  private readonly residents = inject(ResidentsService);
   private readonly destroyRef = inject(DestroyRef);
 
   /** The commands the session's permissions open; Settings only while one of its pages is open. */
@@ -110,7 +110,7 @@ export class CommandPalette {
       }),
   );
 
-  private readonly canSearchTenants = computed(() => this.auth.can('tenants:view'));
+  private readonly canSearchResidents = computed(() => this.auth.can('residents:view'));
 
   readonly isOpen = this.palette.isOpen;
   readonly query = signal('');
@@ -118,14 +118,14 @@ export class CommandPalette {
 
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
-  private readonly tenantResults = toSignal(
+  private readonly residentResults = toSignal(
     toObservable(this.query).pipe(
       debounceTime(200),
       distinctUntilChanged(),
       switchMap((q) => {
         const trimmed = q.trim();
-        if (trimmed.length < 2 || !this.canSearchTenants()) return of([]);
-        return this.tenants.list({ q: trimmed, limit: 5 }).pipe(
+        if (trimmed.length < 2 || !this.canSearchResidents()) return of([]);
+        return this.residents.list({ q: trimmed, limit: 5 }).pipe(
           map((result) => result.data),
         );
       }),
@@ -146,16 +146,16 @@ export class CommandPalette {
       run: () => void this.router.navigate([command.route], { queryParams: command.queryParams }),
     }));
 
-    const tenantItems: PaletteItem[] = this.tenantResults().map((tenant) => ({
-      id: `tenant-${tenant.id}`,
-      label: `${tenant.firstName} ${tenant.lastName}`,
-      hint: tenant.contactNo,
+    const residentItems: PaletteItem[] = this.residentResults().map((resident) => ({
+      id: `resident-${resident.id}`,
+      label: `${resident.firstName} ${resident.lastName}`,
+      hint: resident.contactNo,
       icon: 'user',
       group: 'Tenants',
-      run: () => void this.router.navigate(['/tenants', tenant.id]),
+      run: () => void this.router.navigate(['/residents', resident.id]),
     }));
 
-    return [...tenantItems, ...commandItems];
+    return [...residentItems, ...commandItems];
   });
 
   showGroupHeader(index: number): boolean {

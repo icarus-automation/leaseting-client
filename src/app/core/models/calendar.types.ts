@@ -14,7 +14,7 @@ export interface CalendarEntry {
   leaseId: string | null;
   property: { id: string; name: string };
   unit: { id: string; unitNo: string };
-  tenant: { id: string; name: string } | null;
+  resident: { id: string; name: string } | null;
   amount: string | null;
   balance: string | null;
 }

@@ -16,6 +16,6 @@ describe('navLinkIsActive', () => {
 
   it('still prefix-matches Settings and other sections', () => {
     expect(navLinkIsActive('/settings/payment-destinations', '/settings')).toBe(true);
-    expect(navLinkIsActive('/tenants/abc', '/tenants')).toBe(true);
+    expect(navLinkIsActive('/residents/abc', '/residents')).toBe(true);
   });
 });

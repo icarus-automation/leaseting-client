@@ -58,7 +58,7 @@ const NAV_SECTIONS: NavSection[] = [
     type: 'core',
     items: [
       { label: 'Properties', route: '/properties', icon: 'building', permissions: ['properties:view'] },
-      { label: 'Tenants', route: '/tenants', icon: 'users', permissions: ['tenants:view'] },
+      { label: 'Tenants', route: '/residents', icon: 'users', permissions: ['residents:view'] },
       { label: 'Leases', route: '/leases', icon: 'file-edit', permissions: ['leases:view'] },
     ],
   },

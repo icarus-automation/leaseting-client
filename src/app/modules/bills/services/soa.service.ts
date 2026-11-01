@@ -20,7 +20,7 @@ export class SoaService {
       .set('page', filters.page ?? 1)
       .set('limit', filters.limit ?? 10);
     if (filters.leaseId) params = params.set('leaseId', filters.leaseId);
-    if (filters.tenantId) params = params.set('tenantId', filters.tenantId);
+    if (filters.residentId) params = params.set('residentId', filters.residentId);
     return this.http.get<Paginated<SoaResponse>>(this.base, { params });
   }
 

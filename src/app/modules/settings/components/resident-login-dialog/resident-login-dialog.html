@@ -1,0 +1,146 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  [subheading]="subheading()"
+  [dirty]="stage() === 'form' && !isReset() && errors.dirty()"
+  width="32rem"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <div class="flex flex-col gap-4">
+    <p class="flex items-start gap-2 text-[12.5px] leading-relaxed text-muted">
+      <svg pIcon="info-circle" class="mt-0.5 shrink-0" [size]="13" aria-hidden="true"></svg>
+      <span>{{ helperText }}</span>
+    </p>
+
+    @if (stage() === 'result') {
+      @if (credentials(); as login) {
+        <div class="flex flex-col gap-3" role="status">
+          <dl class="m-0 flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <dt class="text-[12.5px] font-medium text-muted">Login email</dt>
+              <dd class="m-0 break-all text-[13.5px] text-heading">{{ login.email }}</dd>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <dt class="text-[12.5px] font-medium text-muted">Temporary password</dt>
+              <dd class="m-0 flex items-center gap-2">
+                <code class="min-w-0 flex-1 truncate rounded-base border border-border bg-surface px-2.5 py-1.5 text-[13.5px] text-heading">{{ login.password }}</code>
+                <button
+                  type="button"
+                  class="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                  (click)="copyPassword()"
+                >
+                  <svg pIcon="copy" [size]="12" aria-hidden="true"></svg>
+                  <span>Copy</span>
+                </button>
+              </dd>
+            </div>
+          </dl>
+          <p class="text-[12.5px] leading-relaxed text-muted">{{ oneTimeWarning }}</p>
+        </div>
+      } @else {
+        <p class="text-[13px] leading-relaxed text-body" role="status">
+          The login is ready, but the API did not return a temporary password. Reset the password to get one.
+        </p>
+      }
+    } @else if (isReset()) {
+      <p class="text-[13px] leading-relaxed text-body">
+        {{ member()?.name }} gets a new temporary password and is signed out of the Residence Care app everywhere.
+        Their old password stops working.
+      </p>
+    } @else {
+      <form id="resident-login-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-medium text-heading" for="resident-login-resident">Tenant</label>
+          <p-select
+            inputId="resident-login-resident"
+            formControlName="residentId"
+            [options]="residentOptions()"
+            optionLabel="label"
+            optionValue="id"
+            [filter]="true"
+            filterBy="label"
+            [loading]="loadingResidents()"
+            placeholder="Search active tenants by name"
+            emptyMessage="No active tenants found."
+            emptyFilterMessage="No tenants match."
+            styleClass="w-full"
+            appendTo="body"
+            (onFilter)="onResidentFilter($event)"
+          />
+          @if (errors.fieldError('residentId', residentMessages); as message) {
+            <p class="text-[12.5px] text-destructive">{{ message }}</p>
+          }
+          @if (existingLogin()) {
+            <p class="text-[12.5px] leading-relaxed text-destructive" role="alert">
+              This tenant already has a login. Find them under Tenants here to reset the password or turn it off.
+            </p>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[13px] font-medium text-heading" for="resident-login-email">Login email</label>
+          <input
+            id="resident-login-email"
+            type="email"
+            formControlName="email"
+            autocomplete="off"
+            inputmode="email"
+            autocapitalize="none"
+            spellcheck="false"
+            placeholder="tenant@email.com"
+            class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+            aria-required="true"
+            [attr.aria-invalid]="!!errors.fieldError('email', emailMessages)"
+            [attr.aria-describedby]="errors.fieldError('email', emailMessages) ? 'resident-login-email-error' : null"
+          />
+          @if (errors.fieldError('email', emailMessages); as message) {
+            <p class="text-[12.5px] text-destructive" id="resident-login-email-error">{{ message }}</p>
+          }
+        </div>
+      </form>
+    }
+  </div>
+
+  <ng-container dialog-footer>
+    @if (stage() === 'result') {
+      <button
+        type="button"
+        class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+        (click)="visible.set(false)"
+      >
+        Done
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+        (click)="dialog.requestClose()"
+      >
+        Cancel
+      </button>
+      <button
+        [attr.type]="isReset() ? 'button' : 'submit'"
+        [attr.form]="isReset() ? null : 'resident-login-form'"
+        class="inline-flex h-9 items-center gap-2 rounded-base border-none px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+        [class]="isReset()
+          ? 'bg-destructive enabled:hover:opacity-90'
+          : 'bg-primary enabled:hover:bg-primary-hover enabled:active:bg-primary-active'"
+        [disabled]="saving() || (!isReset() && !!existingLogin())"
+        [attr.aria-busy]="saving() ? 'true' : null"
+        (click)="isReset() ? submit() : null"
+      >
+        @if (saving()) {
+          <p-progress-spinner class="h-3.5 w-3.5 m-0 text-primary-foreground" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
+          <span>{{ isReset() ? 'Resetting…' : 'Creating…' }}</span>
+        } @else {
+          <span>{{ isReset() ? 'Reset password' : 'Create login' }}</span>
+        }
+      </button>
+    }
+  </ng-container>
+</app-form-dialog>

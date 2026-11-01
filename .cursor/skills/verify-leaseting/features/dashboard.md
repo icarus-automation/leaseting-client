@@ -8,7 +8,7 @@ Dashboard is the signed-in home: Kit's briefing, occupancy and billing overview,
 - `dash-kit` shows Kit's named briefing (an event, all-clear, or set-aside state) with severity as text.
 - `dash-overview` shows the `Property management` section, or first-run `Set up your portfolio` when the org has no properties.
 - `dash-quick-property` starts a new property from the dashboard.
-- `dash-quick-tenant` starts tenant onboarding from the dashboard.
+- `dash-quick-resident` starts tenant onboarding from the dashboard.
 - `dash-quick-bill` starts a new bill from the dashboard.
 
 ## How to get to it (user POV)

@@ -9,7 +9,7 @@ export interface PaymentSubmissionResponse {
   amount: string;
   paidOn: string;
   referenceNo: string | null;
-  tenantNote: string | null;
+  residentNote: string | null;
   destinationName: string;
   accountName: string;
   accountNumber: string;
@@ -20,11 +20,11 @@ export interface PaymentSubmissionResponse {
   cancelledAt: string | null;
   billId: string;
   leaseId: string;
-  tenantId: string;
+  residentId: string;
   paymentId: string | null;
   createdAt: string;
   updatedAt: string;
-  tenant?: { id: string; firstName: string; lastName: string };
+  resident?: { id: string; firstName: string; lastName: string };
   bill?: {
     id: string;
     type: BillType;
@@ -42,7 +42,7 @@ export interface PaymentSubmissionFilters {
   page?: number;
   limit?: number;
   status?: PaymentSubmissionStatus;
-  tenantId?: string;
+  residentId?: string;
   billId?: string;
   propertyId?: string;
 }

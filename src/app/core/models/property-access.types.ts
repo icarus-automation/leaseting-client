@@ -7,7 +7,7 @@ export interface PropertyRef {
 
 /**
  * Which properties someone works with (leaseting-api docs/fe-access-api.md,
- * "Property limits"). Empty limits mean every property; owners and tenants are
+ * "Property limits"). Empty limits mean every property; owners and residents are
  * never limited.
  */
 export interface PropertyAccess {

@@ -6,8 +6,8 @@ import { formatPhp } from '../../../shared/pipes/php-currency-pipe';
 import { parseApiDate } from '../../../shared/utils/date.util';
 
 export function deleteBillConfirmMessage(bill: BillListItem): string {
-  const tenant = `${bill.lease.tenant.firstName} ${bill.lease.tenant.lastName}`;
+  const resident = `${bill.lease.resident.firstName} ${bill.lease.resident.lastName}`;
   const type = BILL_TYPE_LABELS[bill.type];
   const due = format(parseApiDate(bill.dueDate), 'MMM d, yyyy');
-  return `Delete the unpaid ${type} bill of ${formatPhp(bill.amount)} for ${tenant} on Unit ${bill.lease.unit.unitNo}, due ${due}? This cannot be undone.`;
+  return `Delete the unpaid ${type} bill of ${formatPhp(bill.amount)} for ${resident} on Unit ${bill.lease.unit.unitNo}, due ${due}? This cannot be undone.`;
 }

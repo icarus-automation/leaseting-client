@@ -9,7 +9,7 @@ export interface FeatureFlags {
   sms: boolean;
 }
 
-export type Audience = 'staff' | 'tenant' | 'parking';
+export type Audience = 'staff' | 'resident' | 'parking';
 
 export interface SessionUser {
   id: string;

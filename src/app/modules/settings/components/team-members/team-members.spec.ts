@@ -17,14 +17,14 @@ import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { InvitationsService } from '../../services/invitations.service';
 import { MembersService } from '../../services/members.service';
 import { ParkingAttendantsService } from '../../services/parking-attendants.service';
-import { TenantLoginsService } from '../../services/tenant-logins.service';
-import { TenantLoginLookupError } from '../../utils/tenant-login.util';
+import { ResidentLoginsService } from '../../services/resident-logins.service';
+import { ResidentLoginLookupError } from '../../utils/resident-login.util';
 import { AttendantFormDialog } from '../attendant-form-dialog/attendant-form-dialog';
 import { AttendantPasswordDialog } from '../attendant-password-dialog/attendant-password-dialog';
 import { ChangeRoleDialog } from '../change-role-dialog/change-role-dialog';
 import { InviteStaffDialog } from '../invite-staff-dialog/invite-staff-dialog';
 import { PropertyAccessDialog } from '../property-access-dialog/property-access-dialog';
-import { TenantLoginDialog, type TenantLoginOutcome } from '../tenant-login-dialog/tenant-login-dialog';
+import { ResidentLoginDialog, type ResidentLoginOutcome } from '../resident-login-dialog/resident-login-dialog';
 import { TeamMembers } from './team-members';
 
 @Component({ selector: 'app-invite-staff-dialog', template: '' })
@@ -53,11 +53,11 @@ class AttendantPasswordDialogStub {
   readonly passwordReset = output<Member>();
 }
 
-@Component({ selector: 'app-tenant-login-dialog', template: '' })
-class TenantLoginDialogStub {
+@Component({ selector: 'app-resident-login-dialog', template: '' })
+class ResidentLoginDialogStub {
   readonly visible = model(false);
   readonly member = input<Member | null>(null);
-  readonly finished = output<TenantLoginOutcome>();
+  readonly finished = output<ResidentLoginOutcome>();
 }
 
 @Component({ selector: 'app-property-access-dialog', template: '' })
@@ -118,11 +118,11 @@ const PENDING: Invitation = {
 };
 
 const EVERY_TEAM_CODE: Permission[] = ['members:view', 'members:invite', 'members:update', 'members:deactivate'];
-const LOGIN_CODES: Permission[] = ['members:view', 'tenants:manage_access', 'parking_attendants:manage'];
+const LOGIN_CODES: Permission[] = ['members:view', 'residents:manage_access', 'parking_attendants:manage'];
 
-const TENANTS: Member[] = [
-  member({ id: 'm-t1', userId: 'u-t1', name: 'Tess Tenant', email: 'tess@example.com', role: 'tenant', roleName: 'Tenant', audience: 'tenant' }),
-  member({ id: 'm-t2', userId: 'u-t2', name: 'Tom Tenant', email: 'tom@example.com', role: 'tenant', roleName: 'Tenant', audience: 'tenant', status: 'DEACTIVATED' }),
+const RESIDENTS: Member[] = [
+  member({ id: 'm-t1', userId: 'u-t1', name: 'Tess Tenant', email: 'tess@example.com', role: 'resident', roleName: 'Resident', audience: 'resident' }),
+  member({ id: 'm-t2', userId: 'u-t2', name: 'Tom Tenant', email: 'tom@example.com', role: 'resident', roleName: 'Resident', audience: 'resident', status: 'DEACTIVATED' }),
 ];
 
 const ATTENDANTS: Member[] = [
@@ -138,7 +138,7 @@ describe('TeamMembers', () => {
   const members = { list: vi.fn(), deactivate: vi.fn(), reactivate: vi.fn(), transferOwnership: vi.fn() };
   const invitations = { list: vi.fn(), resend: vi.fn(), revoke: vi.fn() };
   const attendants = { disable: vi.fn(), enable: vi.fn() };
-  const tenantLogins = { findTenantId: vi.fn(), disable: vi.fn(), enable: vi.fn() };
+  const residentLogins = { findResidentId: vi.fn(), disable: vi.fn(), enable: vi.fn() };
   const confirm = { danger: vi.fn(), proceed: vi.fn() };
   const user = signal({ id: 'u-owner', name: 'Olive Reyes', email: 'olive@example.com', organizationRole: 'owner' });
   const held = signal<Permission[]>(EVERY_TEAM_CODE);
@@ -171,7 +171,7 @@ describe('TeamMembers', () => {
         { provide: MembersService, useValue: members },
         { provide: InvitationsService, useValue: invitations },
         { provide: ParkingAttendantsService, useValue: attendants },
-        { provide: TenantLoginsService, useValue: tenantLogins },
+        { provide: ResidentLoginsService, useValue: residentLogins },
         { provide: AuthService, useValue: auth },
         { provide: ConfirmService, useValue: confirm },
       ],
@@ -183,7 +183,7 @@ describe('TeamMembers', () => {
             ChangeRoleDialog,
             AttendantFormDialog,
             AttendantPasswordDialog,
-            TenantLoginDialog,
+            ResidentLoginDialog,
             PropertyAccessDialog,
           ],
         },
@@ -193,7 +193,7 @@ describe('TeamMembers', () => {
             ChangeRoleDialogStub,
             AttendantFormDialogStub,
             AttendantPasswordDialogStub,
-            TenantLoginDialogStub,
+            ResidentLoginDialogStub,
             PropertyAccessDialogStub,
           ],
         },
@@ -392,15 +392,15 @@ describe('TeamMembers', () => {
   it('lists tenants without staff actions, invitations or the Invite button', async () => {
     await render();
 
-    fixture.componentInstance.setAudience('tenants');
+    fixture.componentInstance.setAudience('residents');
     fixture.detectChanges();
 
-    expect(members.list).toHaveBeenLastCalledWith(expect.objectContaining({ audience: 'tenants', page: 1 }));
+    expect(members.list).toHaveBeenLastCalledWith(expect.objectContaining({ audience: 'residents', page: 1 }));
     expect(buttonLabelled('Invite staff')).toBeUndefined();
     expect(fixture.nativeElement.textContent).not.toContain('Pending invitations');
   });
 
-  async function openAudience(audience: 'tenants' | 'attendants', rows: Member[]): Promise<void> {
+  async function openAudience(audience: 'residents' | 'attendants', rows: Member[]): Promise<void> {
     await render();
     members.list.mockReturnValue(of(page(rows)));
     fixture.componentInstance.setAudience(audience);
@@ -536,15 +536,15 @@ describe('TeamMembers', () => {
   });
 
   describe('tenant logins', () => {
-    const OFF = { tenantId: 't-1', status: 'DISABLED', email: 'tess@example.com', mustChangePassword: false };
+    const OFF = { residentId: 't-1', status: 'DISABLED', email: 'tess@example.com', mustChangePassword: false };
 
     beforeEach(() => {
       held.set(LOGIN_CODES);
-      tenantLogins.findTenantId.mockReturnValue(of('t-1'));
+      residentLogins.findResidentId.mockReturnValue(of('t-1'));
     });
 
     it('lists tenants without a property column, and offers Add tenant login', async () => {
-      await openAudience('tenants', TENANTS);
+      await openAudience('residents', RESIDENTS);
 
       expect(rowFor('Tess Tenant').textContent).toContain('tess@example.com');
       expect(fixture.nativeElement.textContent).not.toContain('Property access');
@@ -554,20 +554,20 @@ describe('TeamMembers', () => {
     });
 
     it('opens the dialog to set a login up, and to reset one', async () => {
-      await openAudience('tenants', TENANTS);
+      await openAudience('residents', RESIDENTS);
 
       buttonLabelled('Add tenant login')?.click();
       fixture.detectChanges();
-      expect(stub(TenantLoginDialogStub).visible()).toBe(true);
-      expect(stub(TenantLoginDialogStub).member()).toBeNull();
+      expect(stub(ResidentLoginDialogStub).visible()).toBe(true);
+      expect(stub(ResidentLoginDialogStub).member()).toBeNull();
 
       menuItem('Tess Tenant', 'Reset password').command?.({});
       fixture.detectChanges();
-      expect(stub(TenantLoginDialogStub).member()?.userId).toBe('u-t1');
+      expect(stub(ResidentLoginDialogStub).member()?.userId).toBe('u-t1');
     });
 
     it('offers Reset password and Disable login on an active login, and only Enable login on one that is off', async () => {
-      await openAudience('tenants', TENANTS);
+      await openAudience('residents', RESIDENTS);
 
       expect(menuOf('Tess Tenant').map((item) => item.label)).toEqual(['Reset password', 'Disable login']);
       expect(menuOf('Tom Tenant').map((item) => item.label)).toEqual(['Enable login']);
@@ -575,7 +575,7 @@ describe('TeamMembers', () => {
 
     it('shows the list without Add tenant login or row actions to someone who cannot manage tenant logins', async () => {
       held.set(['members:view']);
-      await openAudience('tenants', TENANTS);
+      await openAudience('residents', RESIDENTS);
 
       expect(rowFor('Tess Tenant')).toBeTruthy();
       expect(buttonLabelled('Add tenant login')).toBeUndefined();
@@ -583,57 +583,57 @@ describe('TeamMembers', () => {
     });
 
     it('says the lease and billing stay put before it disables a login, then turns it off', async () => {
-      tenantLogins.disable.mockReturnValue(of(OFF));
-      await openAudience('tenants', TENANTS);
+      residentLogins.disable.mockReturnValue(of(OFF));
+      await openAudience('residents', RESIDENTS);
 
       menuItem('Tess Tenant', 'Disable login').command?.({});
       const options = confirm.danger.mock.calls[0][0];
       expect(options.header).toBe("Disable Tess Tenant's login?");
       expect(options.message).toContain('Their lease and billing stay as they are.');
-      expect(tenantLogins.disable).not.toHaveBeenCalled();
+      expect(residentLogins.disable).not.toHaveBeenCalled();
 
       options.onAccept();
       fixture.detectChanges();
 
-      expect(tenantLogins.findTenantId).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u-t1' }));
-      expect(tenantLogins.disable).toHaveBeenCalledWith('t-1');
+      expect(residentLogins.findResidentId).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u-t1' }));
+      expect(residentLogins.disable).toHaveBeenCalledWith('t-1');
       expect(rowFor('Tess Tenant').textContent).toContain('Login off');
     });
 
     it('turns a login back on without asking', async () => {
-      tenantLogins.enable.mockReturnValue(of({ ...OFF, status: 'ACTIVE' }));
-      await openAudience('tenants', TENANTS);
+      residentLogins.enable.mockReturnValue(of({ ...OFF, status: 'ACTIVE' }));
+      await openAudience('residents', RESIDENTS);
 
       menuItem('Tom Tenant', 'Enable login').command?.({});
       fixture.detectChanges();
 
       expect(confirm.danger).not.toHaveBeenCalled();
-      expect(tenantLogins.enable).toHaveBeenCalledWith('t-1');
+      expect(residentLogins.enable).toHaveBeenCalledWith('t-1');
       expect(rowFor('Tom Tenant').textContent).not.toContain('Login off');
     });
 
     it('leaves the login alone and says why when it cannot be tied to one tenant', async () => {
-      tenantLogins.findTenantId.mockReturnValue(throwError(() => new TenantLoginLookupError('No single match.')));
-      await openAudience('tenants', TENANTS);
+      residentLogins.findResidentId.mockReturnValue(throwError(() => new ResidentLoginLookupError('No single match.')));
+      await openAudience('residents', RESIDENTS);
       const add = vi.spyOn(TestBed.inject(MessageService), 'add');
 
       menuItem('Tess Tenant', 'Disable login').command?.({});
       confirm.danger.mock.calls[0][0].onAccept();
       fixture.detectChanges();
 
-      expect(tenantLogins.disable).not.toHaveBeenCalled();
+      expect(residentLogins.disable).not.toHaveBeenCalled();
       expect(add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error', detail: 'No single match.' }));
       expect(rowFor('Tess Tenant').textContent).not.toContain('Login off');
     });
 
     it('reloads the list from the first page once a login is set up', async () => {
-      await openAudience('tenants', TENANTS);
+      await openAudience('residents', RESIDENTS);
       members.list.mockClear();
 
-      stub(TenantLoginDialogStub).finished.emit({ kind: 'setup', email: 'new@example.com' });
+      stub(ResidentLoginDialogStub).finished.emit({ kind: 'setup', email: 'new@example.com' });
       fixture.detectChanges();
 
-      expect(members.list).toHaveBeenCalledWith(expect.objectContaining({ audience: 'tenants', page: 1 }));
+      expect(members.list).toHaveBeenCalledWith(expect.objectContaining({ audience: 'residents', page: 1 }));
     });
   });
 
@@ -655,9 +655,9 @@ describe('TeamMembers', () => {
     });
 
     it('lands on Tenants for ?audience=tenants', async () => {
-      await openAt('tenants');
+      await openAt('residents');
 
-      expect(fixture.componentInstance.audience()).toBe('tenants');
+      expect(fixture.componentInstance.audience()).toBe('residents');
     });
 
     it('lands on Staff for anything else', async () => {

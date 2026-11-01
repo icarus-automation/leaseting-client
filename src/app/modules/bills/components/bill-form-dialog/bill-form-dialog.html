@@ -35,7 +35,7 @@
         @if (!loadingLeases() && leaseOptions().length === 0) {
           <p class="text-[12.5px] text-muted">
             No active leases to bill.
-            <a routerLink="/tenants" class="font-medium text-primary hover:underline" (click)="visible.set(false)">
+            <a routerLink="/residents" class="font-medium text-primary hover:underline" (click)="visible.set(false)">
               Onboard a tenant
             </a>
             to start one.

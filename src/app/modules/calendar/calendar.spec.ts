@@ -14,7 +14,7 @@ describe('operations calendar interactions', () => {
   const entry: CalendarEntry = {
     id: 'bill-due:bill-1', sourceId: 'bill-1', type: 'BILL_DUE', title: 'Rent due', date: '2026-09-04',
     status: 'OVERDUE', statusLabel: 'Overdue', leaseId: 'lease-1', amount: '8000.00', balance: '6000.00',
-    tenant: { id: 'tenant-1', name: 'Mina Santos' }, unit: { id: 'unit-1', unitNo: '4B' },
+    resident: { id: 'resident-1', name: 'Mina Santos' }, unit: { id: 'unit-1', unitNo: '4B' },
     property: { id: 'property-1', name: 'Mabini Residences' },
   };
   const feed = (events = [entry]): CalendarFeed => ({ events, today: '2026-09-05', timeZone: 'Asia/Manila' });

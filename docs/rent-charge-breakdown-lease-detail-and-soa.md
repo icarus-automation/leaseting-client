@@ -48,7 +48,7 @@ The backend already has the detail endpoint and response:
 
 - `lease-linq-v2-backend/src/modules/leases/leases.service.ts`
   - `LeaseResponse` (l.14) → `LeaseListItem` (l.28) → `LeaseDetail` (l.42)
-  - `leaseRelationsSelect` (l.47) pulls tenant + unit + property
+  - `leaseRelationsSelect` (l.47) pulls resident + unit + property
 - `GET /leases/:id` in `leases.controller.ts`
 
 **Decide first:** whether this ships as a new `/leases/:id` page or as an

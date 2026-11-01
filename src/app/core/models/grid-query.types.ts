@@ -1,4 +1,4 @@
-export type GridId = 'tenants' | 'bills' | 'leases';
+export type GridId = 'residents' | 'bills' | 'leases';
 
 export type FilterValue = string | number | boolean;
 export type GridFilters = Record<string, FilterValue>;

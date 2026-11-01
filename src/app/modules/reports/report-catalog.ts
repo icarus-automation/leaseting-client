@@ -105,12 +105,12 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   },
 
   {
-    key: 'revenue-by-tenant',
+    key: 'revenue-by-resident',
     title: 'Revenue by Tenant',
     summary: 'Charges and payments in a period, grouped by tenant.',
     group: 'revenue',
     icon: 'users',
-    route: 'revenue-by-tenant',
+    route: 'revenue-by-resident',
     keywords: 'revenue by tenant sales by customer details customer transactions billed collected ledger',
   },
   {
@@ -207,7 +207,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'renewals expiring ending term rollover',
   },
   {
-    key: 'tenant-directory',
+    key: 'resident-directory',
     title: 'Tenant Directory',
     summary: 'Current tenants with unit, contact details, and lease dates.',
     group: 'portfolio',
@@ -294,7 +294,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'monthly parker customer recurring plan assignment vehicle rate contract reserved',
   },
   {
-    key: 'parking-history-by-tenant',
+    key: 'parking-history-by-resident',
     title: 'Parking Payments by Tenant',
     summary: 'Parking billed on a lease. Transient exits are cash at the terminal, with no tenant name.',
     group: 'parking',

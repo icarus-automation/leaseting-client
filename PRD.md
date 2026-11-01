@@ -34,11 +34,11 @@ Floor-plan editor (Konva) + viewer, floor tabs, map-units panel, unit panel w/ a
 List cards and pickers use thumbnail WebP. The floor-plan viewer and Map units editor use a map-sized WebP. Originals remain in R2 for non-hot paths.
 **Not built:** owner, amenities, beds/baths/sqft, bulk add/import, audit log.
 
-**Tenant Mgmt** **[built]** — `/tenants`, `/tenants/:id`
+**Tenant Mgmt** **[built]** — `/residents`, `/residents/:id`
 Tenant: name, email, contactNo, photo, notes, documents. Detail rolls up leases, bills, `outstandingBalance`, `unpaidBillCount`, `nextDueDate`.
 **Not built:** emergency contact.
 
-**Tenant Onboarding (move-in)** **[built]** — `/tenants/onboarding/:id`
+**Tenant Onboarding (move-in)** **[built]** — `/residents/onboarding/:id`
 Move-in is a guided walk, not a form. Eight ordered steps: **Overview → Tenant → Requirements → Lease terms → Deposit → Contract → Move-in payment → Turnover**. Steps persist individually; contract step can be explicitly deferred. Status: `IN_PROGRESS` / `COMPLETED` / `CANCELLED`. Completing the walk produces the lease.
 - **Overview** anchors the lease: property → unit → start/end dates.
 - **Requirements** pre-ticks anything already filed on the tenant's profile from an earlier onboarding, and links the document.
@@ -78,7 +78,7 @@ Article list + client-side search; one full article shipped (`/knowledge-base/ut
 Catalog-driven: `report-catalog.ts` is the single source of truth, 7 groups (Business Overview · Revenue · Who Owes You · Portfolio & Leases · Utilities · Documents & Audit · Parking). **Unbuilt reports stay listed with a `blockedBy` reason** — visible honesty beats a manager quietly keeping a parallel spreadsheet.
 Live: **Portfolio Overview**, **Revenue by Tenant** (BILLED/COLLECTED basis), **A/R Aging — Summary**, **A/R Aging — Detail**, **Delinquency & Reminders**. Plus favorites, shared filters, as-of date, CSV export (all unit-tested).
 Owed: Rent Roll · Lease Expirations · Occupancy by Property · Vacant Units · Tenant Directory · Move-ins/Move-outs · Bill + Payment Registers · Statements Issued · Utility Consumption + Run Summary. Blocked on missing features: P&L / Cash Flow / Owner Statement (Expenses, Owners) · Deposits Held (deposit tracking) · all Parking reports (Parking app integration).
-**Not built:** role-scoped dashboards (PM / Admin / Owner / Tenant).
+**Not built:** role-scoped dashboards (PM / Admin / Owner / Resident).
 
 **Kit — proactive monitoring** **[built]** — dashboard card + `/kit`
 Event types shipped: `RENT_OVERDUE` · `LEASE_EXPIRING` · `UNIT_VACANT`. Severity `INFO` / `WARNING` / `URGENT`, always readable as text — expression and colour are reinforcement, never the only cue. `message` is templated and deterministic; `flavor` is AI commentary and is null when DeepSeek is unset or fails. Dismissible, one card at a time ("this one today", not a feed). Nightly sweep, no polling. Five moods (neutral / concern / sad / happy / thinking) with full-body + 1:1 head art; celebration capped at 2.5s — a mascot that never stops moving is the Clippy failure mode.

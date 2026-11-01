@@ -36,7 +36,7 @@ import { showPopupMenu } from '../../../../shared/utils/popup-menu.util';
 import { InvitationsService } from '../../services/invitations.service';
 import { MembersService } from '../../services/members.service';
 import { ParkingAttendantsService } from '../../services/parking-attendants.service';
-import { TenantLoginsService } from '../../services/tenant-logins.service';
+import { ResidentLoginsService } from '../../services/resident-logins.service';
 import {
   type LastActiveLabel,
   type MemberAction,
@@ -50,13 +50,13 @@ import {
 } from '../../utils/member-access.util';
 import { type PropertyAccessSummary, propertyAccessSummary } from '../../utils/property-access.util';
 import { ATTENDANT_HANDHELD_NOTE } from '../../utils/parking-attendant.util';
-import { TenantLoginLookupError, sameEmail } from '../../utils/tenant-login.util';
+import { ResidentLoginLookupError, sameEmail } from '../../utils/resident-login.util';
 import { AttendantFormDialog } from '../attendant-form-dialog/attendant-form-dialog';
 import { AttendantPasswordDialog } from '../attendant-password-dialog/attendant-password-dialog';
 import { ChangeRoleDialog } from '../change-role-dialog/change-role-dialog';
 import { InviteStaffDialog } from '../invite-staff-dialog/invite-staff-dialog';
 import { PropertyAccessDialog } from '../property-access-dialog/property-access-dialog';
-import { TenantLoginDialog, type TenantLoginOutcome } from '../tenant-login-dialog/tenant-login-dialog';
+import { ResidentLoginDialog, type ResidentLoginOutcome } from '../resident-login-dialog/resident-login-dialog';
 
 type StatusFilter = 'ALL' | MemberStatus | 'INVITED';
 
@@ -65,19 +65,19 @@ const SEARCH_DEBOUNCE_MS = 250;
 
 const AUDIENCE_OPTIONS: readonly SegmentedOption<MemberAudienceFilter>[] = [
   { value: 'staff', label: 'Staff' },
-  { value: 'tenants', label: 'Tenants' },
+  { value: 'residents', label: 'Tenants' },
   { value: 'attendants', label: 'Attendants' },
 ];
 
 const AUDIENCE_NOUNS: Record<MemberAudienceFilter, string> = {
   staff: 'staff',
-  tenants: 'tenants',
+  residents: 'tenants',
   attendants: 'parking attendants',
 };
 
 /** `?audience=` on the Users URL picks the filter; anything else is Staff. */
 function audienceFromParam(value: string | null): MemberAudienceFilter {
-  return value === 'tenants' || value === 'attendants' ? value : 'staff';
+  return value === 'residents' || value === 'attendants' ? value : 'staff';
 }
 
 /** What a login's row reads as once the API has turned it on or off. */
@@ -104,7 +104,7 @@ function withLoginStatus(member: Member, on: boolean): Member {
     InviteStaffDialog,
     AttendantFormDialog,
     AttendantPasswordDialog,
-    TenantLoginDialog,
+    ResidentLoginDialog,
     PropertyAccessDialog,
   ],
   templateUrl: './team-members.html',
@@ -114,7 +114,7 @@ export class TeamMembers {
   private readonly membersApi = inject(MembersService);
   private readonly invitationsApi = inject(InvitationsService);
   private readonly attendantsApi = inject(ParkingAttendantsService);
-  private readonly tenantLogins = inject(TenantLoginsService);
+  private readonly residentLogins = inject(ResidentLoginsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
@@ -153,9 +153,9 @@ export class TeamMembers {
   readonly attendantTarget = signal<Member | null>(null);
   readonly propertyAccessOpen = signal(false);
   readonly propertyAccessTarget = signal<Member | null>(null);
-  readonly tenantLoginOpen = signal(false);
-  /** The tenant login whose password is being reset; none while setting one up. */
-  readonly tenantLoginTarget = signal<Member | null>(null);
+  readonly residentLoginOpen = signal(false);
+  /** The resident login whose password is being reset; none while setting one up. */
+  readonly residentLoginTarget = signal<Member | null>(null);
   /** The email of a login just added, so its row can flash once the list reloads. */
   private pendingFlashEmail: string | null = null;
 
@@ -166,7 +166,7 @@ export class TeamMembers {
   readonly canInvite = computed(() => this.auth.can('members:invite'));
   readonly canChangeRoles = computed(() => this.auth.can('members:update'));
   readonly canManageAttendants = computed(() => this.auth.can('parking_attendants:manage'));
-  readonly canManageTenantLogins = computed(() => this.auth.can('tenants:manage_access'));
+  readonly canManageResidentLogins = computed(() => this.auth.can('residents:manage_access'));
   readonly organizationName = computed(() => this.auth.activeOrganization()?.name ?? 'this organization');
 
   private readonly actor = computed<MemberActor>(() => ({
@@ -193,24 +193,24 @@ export class TeamMembers {
   );
 
   readonly isStaff = computed(() => this.audience() === 'staff');
-  readonly isTenants = computed(() => this.audience() === 'tenants');
+  readonly isResidents = computed(() => this.audience() === 'residents');
   readonly isAttendants = computed(() => this.audience() === 'attendants');
-  /** Tenants answer for their own lease, so the column is for staff and attendants. */
-  readonly showPropertyAccess = computed(() => !this.isTenants());
-  /** Staff and attendants sign in to work; a tenant row shows when they joined instead. */
-  readonly showLastActive = computed(() => !this.isTenants());
-  /** A tenant or attendant row has actions only for someone who can manage their logins. */
+  /** Residents answer for their own lease, so the column is for staff and attendants. */
+  readonly showPropertyAccess = computed(() => !this.isResidents());
+  /** Staff and attendants sign in to work; a resident row shows when they joined instead. */
+  readonly showLastActive = computed(() => !this.isResidents());
+  /** A resident or attendant row has actions only for someone who can manage their logins. */
   readonly showActions = computed(
     () =>
       this.isStaff() ||
-      (this.isTenants() && this.canManageTenantLogins()) ||
+      (this.isResidents() && this.canManageResidentLogins()) ||
       (this.isAttendants() && this.canManageAttendants()),
   );
-  /** The one thing to add on this filter: a staff invitation, a tenant login, or an attendant. */
+  /** The one thing to add on this filter: a staff invitation, a resident login, or an attendant. */
   readonly primaryAction = computed<{ label: string; run: () => void } | null>(() => {
     if (this.isStaff()) return this.canInvite() ? { label: 'Invite staff', run: () => this.openInvite() } : null;
-    if (this.isTenants()) {
-      return this.canManageTenantLogins() ? { label: 'Add tenant login', run: () => this.openAddTenantLogin() } : null;
+    if (this.isResidents()) {
+      return this.canManageResidentLogins() ? { label: 'Add tenant login', run: () => this.openAddResidentLogin() } : null;
     }
     return this.canManageAttendants() ? { label: 'Add attendant', run: () => this.openAddAttendant() } : null;
   });
@@ -375,9 +375,9 @@ export class TeamMembers {
     this.attendantFormOpen.set(true);
   }
 
-  openAddTenantLogin(): void {
-    this.tenantLoginTarget.set(null);
-    this.tenantLoginOpen.set(true);
+  openAddResidentLogin(): void {
+    this.residentLoginTarget.set(null);
+    this.residentLoginOpen.set(true);
   }
 
   onAttendantAdded(attendant: ParkingAttendantResponse): void {
@@ -391,12 +391,12 @@ export class TeamMembers {
   }
 
   /** The dialog shows the temporary password itself; the list only needs to catch up. */
-  onTenantLoginFinished(outcome: TenantLoginOutcome): void {
+  onResidentLoginFinished(outcome: ResidentLoginOutcome): void {
     if (outcome.kind === 'setup') {
       this.showNewLogin(outcome.email);
       return;
     }
-    const target = this.tenantLoginTarget();
+    const target = this.residentLoginTarget();
     if (target) this.flashId.set(target.id);
   }
 
@@ -456,22 +456,22 @@ export class TeamMembers {
         return { label: 'Reset password', command: () => this.openResetPassword(member) };
       case 'disable-login':
         return {
-          label: member.audience === 'tenant' ? 'Disable login' : 'Disable',
+          label: member.audience === 'resident' ? 'Disable login' : 'Disable',
           styleClass: 'row-overflow-danger',
           command: () => this.confirmDisableLogin(member),
         };
       case 'enable-login':
         return {
-          label: member.audience === 'tenant' ? 'Enable login' : 'Enable',
+          label: member.audience === 'resident' ? 'Enable login' : 'Enable',
           command: () => this.enableLogin(member),
         };
     }
   }
 
   private openResetPassword(member: Member): void {
-    if (member.audience === 'tenant') {
-      this.tenantLoginTarget.set(member);
-      this.tenantLoginOpen.set(true);
+    if (member.audience === 'resident') {
+      this.residentLoginTarget.set(member);
+      this.residentLoginOpen.set(true);
       return;
     }
     this.attendantTarget.set(member);
@@ -479,7 +479,7 @@ export class TeamMembers {
   }
 
   private confirmDisableLogin(member: Member): void {
-    if (member.audience === 'tenant') {
+    if (member.audience === 'resident') {
       this.confirm.danger({
         header: `Disable ${member.name}'s login?`,
         message: `${member.name} can't sign in to the Residence Care app until you enable the login, and any open session is signed out. Their lease and billing stay as they are.`,
@@ -487,7 +487,7 @@ export class TeamMembers {
         onAccept: () =>
           this.runOnMember(
             member,
-            () => this.tenantLoginCall(member, (tenantId) => this.tenantLogins.disable(tenantId), false),
+            () => this.residentLoginCall(member, (residentId) => this.residentLogins.disable(residentId), false),
             `${member.name}'s login disabled`,
           ),
       });
@@ -507,10 +507,10 @@ export class TeamMembers {
   }
 
   private enableLogin(member: Member): void {
-    if (member.audience === 'tenant') {
+    if (member.audience === 'resident') {
       this.runOnMember(
         member,
-        () => this.tenantLoginCall(member, (tenantId) => this.tenantLogins.enable(tenantId), true),
+        () => this.residentLoginCall(member, (residentId) => this.residentLogins.enable(residentId), true),
         `${member.name}'s login enabled`,
       );
       return;
@@ -522,14 +522,14 @@ export class TeamMembers {
     );
   }
 
-  /** Finds the tenant behind the login, makes the call, and returns the row as it now reads. */
-  private tenantLoginCall(
+  /** Finds the resident behind the login, makes the call, and returns the row as it now reads. */
+  private residentLoginCall(
     member: Member,
-    call: (tenantId: string) => Observable<unknown>,
+    call: (residentId: string) => Observable<unknown>,
     on: boolean,
   ): Observable<Member> {
-    return this.tenantLogins.findTenantId(member).pipe(
-      switchMap((tenantId) => call(tenantId)),
+    return this.residentLogins.findResidentId(member).pipe(
+      switchMap((residentId) => call(residentId)),
       map(() => withLoginStatus(member, on)),
     );
   }
@@ -621,7 +621,7 @@ export class TeamMembers {
           this.toast.add({
             severity: 'error',
             summary: `Could not update ${member.name}`,
-            detail: error instanceof TenantLoginLookupError ? error.message : apiErrorMessage(error),
+            detail: error instanceof ResidentLoginLookupError ? error.message : apiErrorMessage(error),
           });
         },
       });

@@ -26,6 +26,7 @@ import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { ImageDropzone } from '../../../../shared/ui/image-dropzone/image-dropzone';
+import { UtilityBillingFields, utilityBillingGroup } from '../../../../shared/ui/utility-billing-fields/utility-billing-fields';
 import { MediaThumb } from '../media-thumb/media-thumb';
 import { PropertyTypesService } from '../../../settings/services/property-types.service';
 import { PropertiesService } from '../../services/properties.service';
@@ -44,7 +45,18 @@ function defaultRateOnCreate(rate: number | null): number | undefined {
 
 @Component({
   selector: 'app-property-form-dialog',
-  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, Select, ErrorBanner, FormDialog, ImageDropzone, MediaThumb],
+  imports: [
+    ProgressSpinner,
+    ReactiveFormsModule,
+    PIcon,
+    InputNumber,
+    Select,
+    ErrorBanner,
+    FormDialog,
+    ImageDropzone,
+    MediaThumb,
+    UtilityBillingFields,
+  ],
   templateUrl: './property-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -64,6 +76,7 @@ export class PropertyFormDialog {
     addressLine: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
     city: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     defaultRatePerSqm: [null as number | null, [Validators.min(0)]],
+    utilities: utilityBillingGroup(),
   });
   readonly errors = createFormErrors(this.form);
 
@@ -113,6 +126,10 @@ export class PropertyFormDialog {
           addressLine: property.addressLine,
           city: property.city,
           defaultRatePerSqm: property.defaultRatePerSqm,
+          utilities: {
+            billsElectricity: property.billsElectricityByDefault,
+            billsWater: property.billsWaterByDefault,
+          },
         });
       } else {
         this.form.reset();
@@ -190,11 +207,16 @@ export class PropertyFormDialog {
       return;
     }
 
-    const raw = this.form.getRawValue();
+    const { utilities, ...raw } = this.form.getRawValue();
     const target = this.property();
+    const fields = {
+      ...raw,
+      billsElectricityByDefault: utilities.billsElectricity,
+      billsWaterByDefault: utilities.billsWater,
+    };
     const payload = target
-      ? raw
-      : { ...raw, defaultRatePerSqm: defaultRateOnCreate(raw.defaultRatePerSqm) };
+      ? fields
+      : { ...fields, defaultRatePerSqm: defaultRateOnCreate(raw.defaultRatePerSqm) };
     const image = this.imageFile();
     const removeImage = !!target?.imageUrl && this.imageTouched() && !image;
 

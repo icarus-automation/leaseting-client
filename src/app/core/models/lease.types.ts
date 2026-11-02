@@ -7,7 +7,13 @@ export interface LeaseRentSnapshot {
   rentRatePerSqm: number | null;
 }
 
-export interface LeaseResponse extends LeaseRentSnapshot {
+/** Whether Leaseting bills a lease's electricity and water. */
+export interface LeaseUtilityBilling {
+  billsElectricity: boolean;
+  billsWater: boolean;
+}
+
+export interface LeaseResponse extends LeaseRentSnapshot, LeaseUtilityBilling {
   id: string;
   startDate: string;
   endDate: string;
@@ -21,6 +27,8 @@ export interface LeaseResponse extends LeaseRentSnapshot {
   createdAt: string;
   updatedAt: string;
 }
+
+export type UpdateLeasePayload = Partial<LeaseUtilityBilling>;
 
 export interface LeaseListItem extends LeaseResponse {
   resident: { id: string; firstName: string; lastName: string };

@@ -22,6 +22,10 @@ export interface PropertyResponse {
   city: string;
   imageUrl: string | null;
   defaultRatePerSqm: number | null;
+  /** Whether a new lease here starts with Leaseting billing its electricity. */
+  billsElectricityByDefault: boolean;
+  /** Whether a new lease here starts with Leaseting billing its water. */
+  billsWaterByDefault: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -48,6 +52,8 @@ export interface CreatePropertyPayload {
   addressLine: string;
   city: string;
   defaultRatePerSqm?: number | null;
+  billsElectricityByDefault?: boolean;
+  billsWaterByDefault?: boolean;
 }
 
 export interface FloorResponse {

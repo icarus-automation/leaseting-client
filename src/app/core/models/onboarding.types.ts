@@ -54,6 +54,9 @@ export interface RequirementsStepData {
 export interface LeaseTermsStepData {
   dueDay: number;
   charges: ChargeLine[];
+  /** Left out by onboardings saved before this choice existed: the property's default applies. */
+  billsElectricity?: boolean;
+  billsWater?: boolean;
 }
 
 export interface DepositStepData {

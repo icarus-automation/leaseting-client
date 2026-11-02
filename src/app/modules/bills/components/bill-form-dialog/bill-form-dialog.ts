@@ -9,6 +9,7 @@ import {
   model,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { formatDate } from '@angular/common';
@@ -23,12 +24,13 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
-import { BILL_TYPE_OPTIONS, BillType } from '../../../../core/models/enums';
+import { BILL_TYPE_LABELS, BILL_TYPE_OPTIONS, BillType } from '../../../../core/models/enums';
 import type { LeaseListItem } from '../../../../core/models/lease.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { nextDueDate } from '../../../../shared/utils/date.util';
+import { leaseBillsType } from '../../../../shared/utils/lease-utility-billing.util';
 import { LeasesService } from '../../../leases/services/leases.service';
 import { BillsService } from '../../services/bills.service';
 
@@ -37,6 +39,8 @@ interface LeaseOption {
   label: string;
   monthlyRent: string;
   dueDay: number;
+  billsElectricity: boolean;
+  billsWater: boolean;
 }
 
 @Component({
@@ -54,8 +58,6 @@ export class BillFormDialog {
   readonly visible = model.required<boolean>();
   readonly presetLeaseId = input<string | null>(null);
   readonly saved = output<void>();
-
-  readonly typeOptions = BILL_TYPE_OPTIONS;
 
   readonly form = this.fb.nonNullable.group({
     leaseId: ['', [Validators.required]],
@@ -92,6 +94,30 @@ export class BillFormDialog {
     return type === 'ELECTRICITY' || type === 'WATER';
   });
 
+  private readonly selectedLeaseId = toSignal(this.form.controls.leaseId.valueChanges, {
+    initialValue: this.form.controls.leaseId.value,
+  });
+  /** The chosen lease, when it came from the picker (a preset lease is not loaded). */
+  private readonly selectedLease = computed(
+    () => this.leaseOptions().find((lease) => lease.id === this.selectedLeaseId()) ?? null,
+  );
+
+  /** Electricity and water are offered only where the lease has Leaseting bill them; the API refuses the rest. */
+  readonly typeOptions = computed(() => {
+    const lease = this.selectedLease();
+    return BILL_TYPE_OPTIONS.map((option) => ({
+      ...option,
+      disabled: lease !== null && !leaseBillsType(lease, option.value),
+    }));
+  });
+
+  readonly unbilledTypeHint = computed(() => {
+    const lease = this.selectedLease();
+    const type = this.selectedType();
+    if (!lease || leaseBillsType(lease, type)) return null;
+    return `Leaseting doesn't bill ${BILL_TYPE_LABELS[type].toLowerCase()} on this lease. Change it on the lease, under Utility billing.`;
+  });
+
   private readonly readingValues = toSignal(this.readingForm.valueChanges, {
     initialValue: this.readingForm.getRawValue(),
   });
@@ -117,31 +143,14 @@ export class BillFormDialog {
   private readonly dialog = viewChild.required(FormDialog);
 
   constructor() {
+    // Only opening the dialog, or a new preset lease, resets the form. The
+    // reset fires the valueChanges handlers below, which read signals; run
+    // untracked, those reads would become dependencies of this effect and the
+    // next render would wipe a lease the user just picked.
     effect(() => {
       if (!this.visible()) return;
-      this.errors.reset();
-      this.readingErrors.reset();
-      this.errorMessage.set(null);
-      this.saving.set(false);
-      this.readingMode.set(false);
-      this.form.reset({
-        leaseId: this.presetLeaseId() ?? '',
-        type: 'RENT',
-        amount: null,
-        dueDate: null,
-        notes: '',
-      });
-      this.readingForm.reset({
-        periodFrom: null,
-        periodTo: null,
-        previousReading: null,
-        presentReading: null,
-        multiplier: null,
-        adminFeePct: 0,
-        vatPct: 0,
-        whtPct: 0,
-      });
-      if (!this.presetLeaseId()) this.loadLeases();
+      const presetLeaseId = this.presetLeaseId();
+      untracked(() => this.resetForOpen(presetLeaseId));
     });
 
     this.form.controls.leaseId.valueChanges
@@ -157,6 +166,32 @@ export class BillFormDialog {
         if (!this.isUtilityType()) this.toggleReadingMode(false);
         else if (this.readingMode()) this.prefillFromLastReading();
       });
+  }
+
+  private resetForOpen(presetLeaseId: string | null): void {
+    this.errors.reset();
+    this.readingErrors.reset();
+    this.errorMessage.set(null);
+    this.saving.set(false);
+    this.readingMode.set(false);
+    this.form.reset({
+      leaseId: presetLeaseId ?? '',
+      type: 'RENT',
+      amount: null,
+      dueDate: null,
+      notes: '',
+    });
+    this.readingForm.reset({
+      periodFrom: null,
+      periodTo: null,
+      previousReading: null,
+      presentReading: null,
+      multiplier: null,
+      adminFeePct: 0,
+      vatPct: 0,
+      whtPct: 0,
+    });
+    if (!presetLeaseId) this.loadLeases();
   }
 
   toggleReadingMode(on: boolean): void {
@@ -319,6 +354,8 @@ function toLeaseOption(lease: LeaseListItem): LeaseOption {
     label: `Unit ${lease.unit.unitNo} · ${lease.unit.property.name} · ${lease.resident.firstName} ${lease.resident.lastName}`,
     monthlyRent: lease.monthlyRent,
     dueDay: lease.dueDay,
+    billsElectricity: lease.billsElectricity,
+    billsWater: lease.billsWater,
   };
 }
 

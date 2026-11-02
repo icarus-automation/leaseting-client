@@ -49,12 +49,16 @@
       <p-select
         inputId="bill-type"
         formControlName="type"
-        [options]="typeOptions"
+        [options]="typeOptions()"
         optionLabel="label"
         optionValue="value"
+        optionDisabled="disabled"
         styleClass="w-full"
         appendTo="body"
       />
+      @if (unbilledTypeHint(); as hint) {
+        <p class="text-[12.5px] text-destructive" role="status">{{ hint }}</p>
+      }
     </div>
 
     @if (isUtilityType()) {

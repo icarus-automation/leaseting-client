@@ -9,6 +9,7 @@ import type {
   LeaseListFilters,
   LeaseListItem,
   LeaseResponse,
+  UpdateLeasePayload,
 } from '../../../core/models/lease.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
 
@@ -24,6 +25,10 @@ export class LeasesService {
 
   get(id: string): Observable<LeaseDetail> {
     return this.http.get<LeaseDetail>(`${this.base}/${id}`);
+  }
+
+  update(id: string, payload: UpdateLeasePayload): Observable<LeaseListItem> {
+    return this.http.patch<LeaseListItem>(`${this.base}/${id}`, payload);
   }
 
   terminate(id: string): Observable<LeaseResponse> {

@@ -34,7 +34,7 @@ export class UtilityBillingGuide {
   ];
 
   readonly runSteps: string[] = [
-    'Pick the <strong class="font-medium text-heading">property</strong> and the <strong class="font-medium text-heading">utility</strong> (Electricity or Water). The units and their carried-over previous readings load on their own.',
+    'Pick the <strong class="font-medium text-heading">property</strong> and the <strong class="font-medium text-heading">utility</strong> (Electricity or Water). The units you bill for it, and their carried-over previous readings, load on their own.',
     'Set the <strong class="font-medium text-heading">rate</strong>: the provider\'s total bill for the building, or a fixed price per unit if you know it. The app shows the working rate as you type.',
     'Type each unit\'s <strong class="font-medium text-heading">present reading</strong>. Consumed and amount update live beside every row.',
     'Leave the <strong class="font-medium text-heading">dates</strong> alone. They are filled in for you, unless you need to adjust the period.',
@@ -46,6 +46,10 @@ export class UtilityBillingGuide {
     {
       q: 'A row says "skipped". Why?',
       a: 'Its present reading is blank, or that unit was already billed for this month. Skipped rows are never charged, so type a present reading to include it.',
+    },
+    {
+      q: 'A unit is missing from the run.',
+      a: 'Its lease is set so Leaseting doesn\'t bill that utility, for example because the tenant pays the provider directly. Open the lease and change it under Utility billing. New leases take the property\'s defaults, set when you edit the property. A single bill for that utility is refused too, until the lease bills it.',
     },
     {
       q: 'It warns "below previous".',

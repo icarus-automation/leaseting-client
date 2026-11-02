@@ -238,13 +238,13 @@
       <app-empty-state
         icon="building"
         heading="Pick a property"
-        description="The run lists each active lease and carries over the last meter reading."
+        description="The run lists each active lease where Leaseting bills this utility, and carries over the last meter reading."
       />
     } @else if (rows().length === 0) {
       <app-empty-state
         icon="users"
-        heading="No active leases"
-        description="This property has no active leases to bill."
+        heading="No leases to bill"
+        [description]="'No active lease at this property has ' + utilityName() + ' billed by Leaseting. Change it on the lease, under Utility billing.'"
       />
     } @else {
       @if (firstRun()) {
@@ -257,6 +257,9 @@
           </span>
         </div>
       }
+      <p class="text-[12.5px] text-muted">
+        Only leases where Leaseting bills {{ utilityName() }} are listed. A lease's utility billing is set on its page.
+      </p>
       <section class="overflow-x-auto rounded-base border border-border">
         <table class="w-full border-collapse text-left">
           <thead>

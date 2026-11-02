@@ -4,26 +4,29 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
-import type { LeaseBillItem, LeaseDetail } from '../../../../core/models/lease.types';
+import type { LeaseBillItem, LeaseDetail, LeaseUtilityBilling } from '../../../../core/models/lease.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge, type BadgeTone } from '../../../../shared/ui/status-badge/status-badge';
 import { isPastDue, leaseTermLabel, ordinal } from '../../../../shared/utils/date.util';
 import { formatStoredPerSqmRent } from '../../../../shared/utils/per-sqm-quote';
 import { leaseStatus } from '../../../../shared/utils/lease-status.util';
+import { LeaseUtilityBillingDialog } from '../../components/lease-utility-billing-dialog/lease-utility-billing-dialog';
 import { LeasesService } from '../../services/leases.service';
 
 @Component({
   selector: 'app-lease-detail',
-  imports: [DatePipe, RouterLink, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge],
+  imports: [DatePipe, RouterLink, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge, LeaseUtilityBillingDialog],
   templateUrl: './lease-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaseDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly leases = inject(LeasesService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly params = toSignal(this.route.paramMap, {
@@ -51,6 +54,19 @@ export class LeaseDetailPage {
     const lease = this.lease();
     return lease ? formatStoredPerSqmRent(lease) : null;
   });
+
+  readonly utilities = computed(() => {
+    const lease = this.lease();
+    if (!lease) return [];
+    return [
+      { label: 'Electricity', billed: lease.billsElectricity },
+      { label: 'Water', billed: lease.billsWater },
+    ];
+  });
+
+  /** The API refuses changes to a terminated lease. */
+  readonly canEditUtilities = computed(() => this.auth.can('leases:manage') && this.lease()?.terminatedAt === null);
+  readonly editingUtilities = signal(false);
 
   constructor() {
     effect(() => {
@@ -80,6 +96,10 @@ export class LeaseDetailPage {
   reload(): void {
     const id = this.params().get('id');
     if (id) this.load(id);
+  }
+
+  onUtilitiesSaved(billing: LeaseUtilityBilling): void {
+    this.lease.update((lease) => (lease ? { ...lease, ...billing } : lease));
   }
 
   billStatus(bill: LeaseBillItem): { label: string; tone: BadgeTone } {

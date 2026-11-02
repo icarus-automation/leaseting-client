@@ -79,12 +79,13 @@ function toFormData(
   return form;
 }
 
+/** Multipart carries text only: numbers and booleans go as their string form ("true"/"false"). */
 export function appendPropertyValue(
   form: FormData,
   key: string,
-  value: string | number | null | undefined,
+  value: string | number | boolean | null | undefined,
 ): void {
-  if (typeof value !== 'string' && typeof value !== 'number') return;
+  if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') return;
   form.append(key, String(value));
 }
 

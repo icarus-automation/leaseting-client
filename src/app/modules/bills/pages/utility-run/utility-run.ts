@@ -159,6 +159,9 @@ export class UtilityRun {
 
   readonly unitLabel = computed(() => (this.setupValues().type === 'WATER' ? 'cu.m' : 'kWh'));
 
+  /** The run lists only the leases where Leaseting bills this utility (set on each lease). */
+  readonly utilityName = computed(() => (this.setupValues().type === 'WATER' ? 'water' : 'electricity'));
+
   readonly rateModes = computed(() => [
     { value: 'derived' as RateMode, label: 'From total bill' },
     { value: 'direct' as RateMode, label: `Rate per ${this.unitLabel()}` },

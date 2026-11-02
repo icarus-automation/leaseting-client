@@ -216,6 +216,17 @@
     </div>
 
     <div class="flex flex-col gap-4">
+      <p class="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted">Utilities</p>
+
+      <app-utility-billing-fields
+        [group]="form.controls.utilities"
+        idPrefix="property-utilities"
+        legend="Utilities you bill on new leases"
+        description="Each new lease here starts with these. You can change them on the lease, and existing leases keep their own."
+      />
+    </div>
+
+    <div class="flex flex-col gap-4">
       <p class="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted">Photo</p>
 
       <app-image-dropzone

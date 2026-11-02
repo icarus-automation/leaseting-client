@@ -280,3 +280,14 @@ describe('appendDefaultRatePerSqm', () => {
     expect(omitted.get('city')).toBe('Quezon City');
   });
 });
+
+describe('appendPropertyValue', () => {
+  it('sends the utility billing defaults as "true" and "false", keeping false rather than dropping it', () => {
+    const form = new FormData();
+    appendPropertyValue(form, 'billsElectricityByDefault', true);
+    appendPropertyValue(form, 'billsWaterByDefault', false);
+
+    expect(form.get('billsElectricityByDefault')).toBe('true');
+    expect(form.get('billsWaterByDefault')).toBe('false');
+  });
+});

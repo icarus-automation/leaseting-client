@@ -35,6 +35,8 @@
               <div class="mt-1.5">
                 @if (activeLease()) {
                   <app-status-badge tone="success" label="Active tenant" />
+                } @else if (currentOwnership()) {
+                  <app-status-badge tone="success" label="Owner" />
                 } @else {
                   <app-status-badge tone="neutral" label="No active lease" />
                 }
@@ -81,6 +83,31 @@
                 <dt class="text-muted">Rent due</dt>
                 <dd class="m-0 font-medium text-body">Every {{ ordinal(lease.dueDay) }}</dd>
               </div>
+            </dl>
+          }
+
+          @if (!activeLease() && currentOwnership(); as ownership) {
+            <dl class="m-0 flex flex-col gap-2 border-t border-border pt-3 text-[13px]">
+              <div class="flex items-baseline justify-between gap-2">
+                <dt class="text-muted">Current unit</dt>
+                <dd class="m-0 text-right">
+                  <a
+                    [routerLink]="['/properties', ownership.unit.property.id]"
+                    class="rounded-[2px] font-medium text-heading hover:text-primary hover:underline"
+                  >Unit {{ ownership.unit.unitNo }}</a>
+                  <span class="block text-[12px] text-muted">{{ ownership.unit.property.name }}</span>
+                </dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-2">
+                <dt class="text-muted">Owner since</dt>
+                <dd class="m-0 font-medium text-body">{{ ownership.startDate | date: 'MMM d, y' }}</dd>
+              </div>
+              @if (ownership.price; as price) {
+                <div class="flex items-baseline justify-between gap-2">
+                  <dt class="text-muted">Price</dt>
+                  <dd class="m-0 font-medium text-body tabular-nums">{{ price | phpCurrency }}</dd>
+                </div>
+              }
             </dl>
           }
 
@@ -173,14 +200,10 @@
           }
         </section>
 
+        @if (t.leases.length > 0) {
         <section class="flex flex-col gap-2" aria-label="Lease history">
           <h2 class="font-heading text-base font-semibold text-heading">Lease history</h2>
-          @if (t.leases.length === 0) {
-            <p class="rounded-base border border-dashed border-border px-4 py-6 text-center text-[13px] text-muted">
-              No leases yet. Put this tenant into a vacant unit from a property's floor plan.
-            </p>
-          } @else {
-            <div class="relative overflow-x-auto rounded-base border border-border">
+          <div class="relative overflow-x-auto rounded-base border border-border">
               <table class="w-full border-collapse text-left">
                 <thead>
                   <tr class="border-b border-border bg-surface">
@@ -214,8 +237,55 @@
                 </tbody>
               </table>
             </div>
-          }
         </section>
+        } @else if (t.ownerships.length === 0) {
+          <section class="flex flex-col gap-2" aria-label="Lease history">
+            <h2 class="font-heading text-base font-semibold text-heading">Lease history</h2>
+            <p class="rounded-base border border-dashed border-border px-4 py-6 text-center text-[13px] text-muted">
+              No leases yet. Put this tenant into a vacant unit from a property's floor plan.
+            </p>
+          </section>
+        }
+
+        @if (t.ownerships.length > 0) {
+          <section class="flex flex-col gap-2" aria-label="Ownership history">
+            <h2 class="font-heading text-base font-semibold text-heading">Ownership history</h2>
+            <div class="relative overflow-x-auto rounded-base border border-border">
+              <table class="w-full border-collapse text-left">
+                <thead>
+                  <tr class="border-b border-border bg-surface">
+                    <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Unit</th>
+                    <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Term</th>
+                    <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ownership of t.ownerships; track ownership.id) {
+                    <tr class="border-b border-border last:border-b-0">
+                      <td class="px-4 py-3">
+                        <a
+                          [routerLink]="['/properties', ownership.unit.property.id]"
+                          class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                        >
+                          Unit {{ ownership.unit.unitNo }}
+                          <span class="font-normal text-muted">· {{ ownership.unit.property.name }}</span>
+                        </a>
+                      </td>
+                      <td class="px-4 py-3 text-[13px] text-body">
+                        {{ ownership.startDate | date: 'MMM d, y' }}
+                        to
+                        {{ ownership.endDate ? (ownership.endDate | date: 'MMM d, y') : 'now' }}
+                      </td>
+                      <td class="px-4 py-3 text-[13px] text-body tabular-nums">
+                        {{ ownership.price ? (ownership.price | phpCurrency) : '-' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+        }
 
         <section class="flex flex-col gap-2" aria-label="Documents">
           <div class="flex items-baseline justify-between gap-2">

@@ -116,6 +116,11 @@ export class FloorPlanViewer {
   }
 
   unitTitle(unit: FloorUnitItem): string {
+    if (unit.status === 'SOLD') {
+      const owner = unit.currentOwner ? `Owner ${unit.currentOwner.residentName}` : 'Owner';
+      return `Unit ${unit.unitNo} · Sold, ${owner}`;
+    }
+    if (unit.status === 'AVAILABLE') return `Unit ${unit.unitNo} · Available`;
     const resident = unit.activeLease ? `, ${unit.activeLease.residentName}` : '';
     return `Unit ${unit.unitNo} · ${this.statusLabel(unit)}${resident}`;
   }

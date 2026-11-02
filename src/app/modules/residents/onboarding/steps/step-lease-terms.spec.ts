@@ -16,6 +16,7 @@ function property(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
     type: { id: 'type-1', name: 'Boardinghouse' },
     addressLine: '624 Quezon Ave.',
     city: 'Quezon City',
+    mode: 'RENTAL',
     imageUrl: null,
     defaultRatePerSqm: null,
     billsElectricityByDefault: true,

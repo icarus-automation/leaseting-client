@@ -9,6 +9,7 @@ import type {
   PropertyDetail,
   PropertyListItem,
   PropertyResponse,
+  UpdatePropertyPayload,
 } from '../../../core/models/property.types';
 
 /** The API's largest page for `GET /properties`. */
@@ -48,7 +49,7 @@ export class PropertiesService {
 
   update(
     id: string,
-    payload: Partial<CreatePropertyPayload>,
+    payload: UpdatePropertyPayload,
     image: File | null,
     removeImage = false,
   ): Observable<PropertyResponse> {

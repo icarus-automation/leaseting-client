@@ -10,7 +10,6 @@ import type {
   UnitResponse,
   UpdateUnitPayload,
 } from '../../../core/models/property.types';
-import type { UnitStatus } from '../../../core/models/enums';
 
 @Injectable({ providedIn: 'root' })
 export class UnitsService {
@@ -20,7 +19,7 @@ export class UnitsService {
     return this.http.post<UnitResponse>(`${API_BASE_URL}/floors/${floorId}/units`, payload);
   }
 
-  listAll(occupancy?: UnitStatus): Observable<UnitPickerItem[]> {
+  listAll(occupancy?: 'OCCUPIED' | 'VACANT'): Observable<UnitPickerItem[]> {
     const params = occupancy ? { params: { occupancy } } : {};
     return this.http.get<UnitPickerItem[]>(`${API_BASE_URL}/units`, params);
   }

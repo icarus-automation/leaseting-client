@@ -4,6 +4,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import type { PropertyListItem } from '../../../../core/models/property.types';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
+import { floorSummaryBadges } from '../../../../shared/utils/unit-tone.util';
 import { MediaThumb } from '../media-thumb/media-thumb';
 
 @Component({
@@ -18,4 +19,5 @@ export class PropertyCard {
   readonly manageable = input(true);
   readonly edit = output<void>();
   readonly archive = output<void>();
+  readonly floorSummaryBadges = floorSummaryBadges;
 }

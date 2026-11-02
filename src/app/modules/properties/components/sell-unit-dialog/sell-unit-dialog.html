@@ -1,0 +1,113 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  [subheading]="intent() === 'resale' ? 'End the current ownership and start the next one.' : 'Record the buyer for this unit.'"
+  [dirty]="errors.dirty()"
+  width="32rem"
+>
+  @if (errorMessage(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="sell-unit-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" id="sell-resident-label" for="sell-resident">Resident</label>
+      @if (residentsError(); as message) {
+        <div class="flex items-center justify-between gap-2 rounded-base border border-border bg-surface px-3 py-2 text-[12.5px] text-body">
+          <span>{{ message }}</span>
+          <button type="button" class="shrink-0 font-medium text-primary hover:underline" (click)="loadResidents('')">
+            Retry
+          </button>
+        </div>
+      } @else {
+        <p-select
+          inputId="sell-resident"
+          [options]="residentOptions()"
+          optionLabel="label"
+          optionValue="id"
+          [filter]="true"
+          filterBy="label"
+          placeholder="Pick a resident"
+          formControlName="residentId"
+          ariaLabelledBy="sell-resident-label"
+          styleClass="w-full"
+          appendTo="body"
+          (onFilter)="onResidentFilter($event)"
+        />
+      }
+      @if (errors.fieldError('residentId', { required: 'Pick a resident.' }); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="sell-date">
+        {{ intent() === 'resale' ? 'Transfer date' : 'Start date' }}
+      </label>
+      <input
+        id="sell-date"
+        type="date"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="date"
+      />
+      @if (errors.fieldError('date', { required: 'Pick a date.' }); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="sell-price">
+        Price <span class="font-normal text-muted">(optional, ₱)</span>
+      </label>
+      <input
+        id="sell-price"
+        type="number"
+        min="0"
+        step="0.01"
+        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="price"
+        placeholder="Leave blank if unknown"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="sell-note">Note <span class="font-normal text-muted">(optional)</span></label>
+      <textarea
+        id="sell-note"
+        rows="2"
+        class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        formControlName="note"
+      ></textarea>
+    </div>
+
+    <app-utility-billing-fields
+      [group]="form.controls.utilities"
+      idPrefix="sell-utilities"
+      legend="Utilities you bill for this owner"
+      description="Starts from the property. A checked box is stored on this ownership."
+    />
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="sell-unit-form"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      @if (saving()) {
+        <p-progress-spinner class="h-3.5 w-3.5 m-0 text-primary-foreground" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
+      }
+      <span>{{ intent() === 'resale' ? 'Resell' : 'Sell' }}</span>
+    </button>
+  </ng-container>
+</app-form-dialog>

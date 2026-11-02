@@ -88,6 +88,11 @@ export class ResidentDetailPage {
     return resident?.leases.find((lease) => isLeaseActive(lease)) ?? null;
   });
 
+  readonly currentOwnership = computed(() => {
+    const resident = this.resident();
+    return resident?.ownerships.find((ownership) => ownership.endDate === null) ?? null;
+  });
+
   readonly billingHistory = computed<BillingHistoryRow[]>(() => {
     const resident = this.resident();
     if (!resident) return [];

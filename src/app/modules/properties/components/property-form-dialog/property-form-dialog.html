@@ -223,6 +223,53 @@
     <div class="flex flex-col gap-4">
       <p class="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted">Pricing</p>
 
+      @if (selectedMode() === 'CONDO') {
+        <div class="rounded-base border border-border bg-surface p-3.5">
+          <p class="text-[13px] font-semibold text-heading">Monthly association dues</p>
+          <p class="mt-0.5 text-[12px] text-muted">Used when the monthly owner billing run creates dues.</p>
+
+          <div class="mt-3 grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Association dues pricing basis">
+            @for (basis of [{ value: 'FIXED', label: 'Fixed amount' }, { value: 'PER_SQM', label: 'Per sqm' }]; track basis.value) {
+              <label
+                class="inline-flex cursor-pointer items-center justify-center rounded-base border px-2 py-1.5 text-[12px] font-medium"
+                [class]="form.controls.duesPricingBasis.value === basis.value
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-background text-body'"
+              >
+                <input class="sr-only" type="radio" formControlName="duesPricingBasis" [value]="basis.value" />
+                {{ basis.label }}
+              </label>
+            }
+          </div>
+
+          <div class="mt-3 grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[12.5px] font-medium text-heading" for="property-dues-amount">
+                {{ selectedDuesBasis() === 'FIXED' ? 'Monthly amount' : 'Rate per sqm' }}
+              </label>
+              @if (selectedDuesBasis() === 'FIXED') {
+                <p-inputnumber inputId="property-dues-amount" formControlName="duesAmount" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
+                @if (errors.fieldError('duesAmount', { required: 'Enter the monthly dues amount.' }); as message) {
+                  <p class="text-[12px] text-destructive">{{ message }}</p>
+                }
+              } @else {
+                <p-inputnumber inputId="property-dues-amount" formControlName="duesRatePerSqm" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
+                @if (errors.fieldError('duesRatePerSqm', { required: 'Enter the dues rate per sqm.' }); as message) {
+                  <p class="text-[12px] text-destructive">{{ message }}</p>
+                }
+              }
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[12.5px] font-medium text-heading" for="property-dues-day">Due day</label>
+              <p-inputnumber inputId="property-dues-day" formControlName="duesDueDay" [min]="1" [max]="31" [useGrouping]="false" styleClass="w-full" />
+              @if (errors.fieldError('duesDueDay'); as message) {
+                <p class="text-[12px] text-destructive">{{ message }}</p>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
       <div class="flex flex-col gap-1.5">
         <label class="text-[13px] font-medium text-heading" for="property-default-rate">
           Default rate per sqm <span class="font-normal text-muted">(optional, ₱)</span>
@@ -251,8 +298,10 @@
       <app-utility-billing-fields
         [group]="form.controls.utilities"
         idPrefix="property-utilities"
-        legend="Utilities you bill on new leases"
-        description="Each new lease here starts with these. You can change them on the lease, and existing leases keep their own."
+        [legend]="selectedMode() === 'CONDO' ? 'Utilities you bill on new ownerships' : 'Utilities you bill on new leases'"
+        [description]="selectedMode() === 'CONDO'
+          ? 'Each new owner starts with these settings. Existing ownerships keep their own.'
+          : 'Each new lease here starts with these. You can change them on the lease, and existing leases keep their own.'"
       />
     </div>
 

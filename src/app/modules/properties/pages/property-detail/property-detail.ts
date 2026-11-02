@@ -26,6 +26,7 @@ import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
+import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { floorSummaryBadges } from '../../../../shared/utils/unit-tone.util';
 import { FloorFormDialog } from '../../components/floor-form-dialog/floor-form-dialog';
 import { FloorMapEditor } from '../../components/floor-map-editor/floor-map-editor';
@@ -49,6 +50,7 @@ import { UnitsService } from '../../services/units.service';
     EmptyState,
     Skeleton,
     StatusBadge,
+    PhpCurrencyPipe,
     FloorFormDialog,
     FloorMapEditor,
     FloorPlanViewer,

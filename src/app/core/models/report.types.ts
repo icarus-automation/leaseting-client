@@ -66,7 +66,8 @@ export type AgingBucketTotals = Record<AgingBucketKey, string>;
 
 export interface AgingBillRow {
   billId: string;
-  leaseId: string;
+  leaseId: string | null;
+  ownershipId: string | null;
   unitId: string;
   dueDate: string;
   daysOverdue: number;

@@ -7,12 +7,13 @@ const commands = {
   openGenerateSoa: vi.fn(),
   openUtilityRun: () => undefined,
   generateRentBills: vi.fn(),
+  generateAssociationDues: vi.fn(),
 };
 
 describe('billingToolsMenuItems', () => {
-  it('lists SOA, generate, utility, and rent run — not New bill or submissions', () => {
+  it('lists SOA, generate, utility, rent, and association dues runs — not New bill or submissions', () => {
     const labels = billingToolsMenuItems(false, commands).map((item) => item.label);
-    expect(labels).toEqual(['SOA', 'Generate SOA', 'Utility run', 'Generate rent bills']);
+    expect(labels).toEqual(['SOA', 'Generate SOA', 'Utility run', 'Generate rent bills', 'Generate association dues']);
     expect(labels).not.toContain('New bill');
     expect(labels).not.toContain('Submissions');
   });

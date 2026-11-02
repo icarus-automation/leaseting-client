@@ -12,6 +12,7 @@ export interface CalendarEntry {
   statusLabel: string;
   sourceId: string;
   leaseId: string | null;
+  ownershipId: string | null;
   property: { id: string; name: string };
   unit: { id: string; unitNo: string };
   resident: { id: string; name: string } | null;

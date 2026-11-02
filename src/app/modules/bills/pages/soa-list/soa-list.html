@@ -48,7 +48,7 @@
     <app-empty-state
       icon="file-excel"
       heading="No SOA yet"
-      description="Generate an SOA from a lease's unpaid bills."
+      description="Generate an SOA from a tenant's or owner's unpaid bills."
       [ctaLabel]="canManage() ? 'Generate SOA' : null"
       (cta)="dialogVisible.set(true)"
     />
@@ -58,7 +58,7 @@
         <thead>
           <tr class="border-b border-border bg-surface">
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">SOA №</th>
-            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Tenant · Unit</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Resident · Unit</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Total due</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Generated</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">SMS</th>
@@ -69,17 +69,18 @@
         </thead>
         <tbody>
           @for (statement of items(); track statement.id) {
+            @let source = statement.lease ?? statement.ownership;
             <tr class="border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none">
               <td class="px-4 py-3 text-[13.5px] font-medium text-heading">{{ statement.soaNo }}</td>
               <td class="px-4 py-3">
                 <a
-                  [routerLink]="['/residents', statement.lease.resident.id]"
+                  [routerLink]="['/residents', source?.resident?.id]"
                   class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
                 >
-                  {{ statement.lease.resident.firstName }} {{ statement.lease.resident.lastName }}
+                  {{ source?.resident?.firstName }} {{ source?.resident?.lastName }}
                 </a>
                 <p class="text-[12px] text-muted">
-                  Unit {{ statement.lease.unit.unitNo }} · {{ statement.lease.unit.property.name }}
+                  Unit {{ source?.unit?.unitNo }} · {{ source?.unit?.property?.name }}
                 </p>
               </td>
               <td class="px-4 py-3 text-[13px] font-medium text-heading tabular-nums">

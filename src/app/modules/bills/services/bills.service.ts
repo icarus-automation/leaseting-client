@@ -41,6 +41,10 @@ export class BillsService {
     return this.http.post<{ created: number; skipped: number }>(`${this.base}/rent-run`, {});
   }
 
+  duesRun(): Observable<{ created: number; skipped: number }> {
+    return this.http.post<{ created: number; skipped: number }>(`${this.base}/dues-run`, {});
+  }
+
   utilityRunPreview(propertyId: string, type: BillType): Observable<UtilityRunPreviewRow[]> {
     const params = new HttpParams().set('propertyId', propertyId).set('type', type);
     return this.http.get<UtilityRunPreviewRow[]>(`${this.base}/utility-run/preview`, { params });

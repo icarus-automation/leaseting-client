@@ -87,7 +87,7 @@
         @if (setupErrors.fieldError('billingMonth'); as message) {
           <p class="text-[12.5px] text-destructive">{{ message }}</p>
         } @else {
-          <p class="text-[11.5px] text-muted">Bills fall due on each tenant's own due day, like rent.</p>
+          <p class="text-[11.5px] text-muted">Bills fall due on each tenant or owner's configured due day.</p>
         }
       </div>
     </section>
@@ -122,7 +122,7 @@
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-heading" for="run-period-from">Period from</label>
             <p-datepicker inputId="run-period-from" formControlName="periodFrom" dateFormat="yy-mm-dd" appendTo="body" styleClass="w-full" [showIcon]="true" />
-            <p class="text-[11.5px] text-muted">The first day this bill covers. It shows on the tenant's receipt.</p>
+            <p class="text-[11.5px] text-muted">The first day this bill covers. It shows on the resident's receipt.</p>
             @if (setupErrors.fieldError('periodFrom'); as message) {
               <p class="text-[12.5px] text-destructive">{{ message }}</p>
             }
@@ -238,13 +238,13 @@
       <app-empty-state
         icon="building"
         heading="Pick a property"
-        description="The run lists each active lease where Leaseting bills this utility, and carries over the last meter reading."
+        description="The run lists each active lease or current ownership where Leaseting bills this utility, and carries over the last meter reading."
       />
     } @else if (rows().length === 0) {
       <app-empty-state
         icon="users"
-        heading="No leases to bill"
-        [description]="'No active lease at this property has ' + utilityName() + ' billed by Leaseting. Change it on the lease, under Utility billing.'"
+        heading="No billing accounts"
+        [description]="'No active lease or current ownership at this property has ' + utilityName() + ' billed by Leaseting.'"
       />
     } @else {
       @if (firstRun()) {
@@ -258,13 +258,13 @@
         </div>
       }
       <p class="text-[12.5px] text-muted">
-        Only leases where Leaseting bills {{ utilityName() }} are listed. A lease's utility billing is set on its page.
+        Only leases and ownerships where Leaseting bills {{ utilityName() }} are listed.
       </p>
       <section class="overflow-x-auto rounded-base border border-border">
         <table class="w-full border-collapse text-left">
           <thead>
             <tr class="border-b border-border bg-surface">
-              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Unit · Tenant</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Unit · Resident</th>
               <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Previous</th>
               <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Present</th>
               <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Consumed</th>
@@ -272,7 +272,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (row of rows(); track row.leaseId; let i = $index) {
+            @for (row of rows(); track row.leaseId ?? row.ownershipId; let i = $index) {
               <tr
                 class="border-b border-border last:border-b-0"
                 [class.opacity-60]="rowMath()[i] === null"

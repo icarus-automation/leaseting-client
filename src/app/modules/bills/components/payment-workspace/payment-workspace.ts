@@ -36,6 +36,7 @@ import { PaymentDestinationsService } from '../../../settings/services/payment-d
 import { BillsService } from '../../services/bills.service';
 import { collectionMemoError } from '../../utils/collection-memo.util';
 import { finiteAmount } from '../../utils/payment-amount.util';
+import { billSourceOf } from '../../../../shared/utils/bill-source.util';
 import {
   staffCollectionMethodHint,
   staffCollectionMethodOptions,
@@ -117,10 +118,10 @@ export class PaymentWorkspace {
     return id ? `${API_BASE_URL}/payments/${id}/proof` : null;
   });
   readonly methodOptions = computed(() =>
-    staffCollectionMethodOptions(this.destinations(), this.snapshot()?.lease.unit.property.id),
+    staffCollectionMethodOptions(this.destinations(), this.snapshot() ? billSourceOf(this.snapshot()!).unit.property.id : undefined),
   );
   readonly methodHint = computed(() =>
-    staffCollectionMethodHint(this.destinations(), this.snapshot()?.lease.unit.property.id),
+    staffCollectionMethodHint(this.destinations(), this.snapshot() ? billSourceOf(this.snapshot()!).unit.property.id : undefined),
   );
   readonly showBodyCta = computed(() => this.cta() === 'body' && this.canMutate());
 

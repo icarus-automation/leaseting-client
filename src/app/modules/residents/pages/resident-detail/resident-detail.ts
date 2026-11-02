@@ -26,7 +26,7 @@ import { ResidentRiskPanel } from '../../components/resident-risk-panel/resident
 import { ResidentsService } from '../../services/residents.service';
 
 interface BillingHistoryRow extends ResidentLeaseBillItem {
-  leaseId: string;
+  sourceId: string;
   unitNo: string;
 }
 
@@ -96,10 +96,14 @@ export class ResidentDetailPage {
   readonly billingHistory = computed<BillingHistoryRow[]>(() => {
     const resident = this.resident();
     if (!resident) return [];
-    return resident.leases
-      .flatMap((lease) =>
-        lease.bills.map((bill) => ({ ...bill, leaseId: lease.id, unitNo: lease.unit.unitNo })),
-      )
+    return [
+      ...resident.leases.flatMap((lease) =>
+        lease.bills.map((bill) => ({ ...bill, sourceId: lease.id, unitNo: lease.unit.unitNo })),
+      ),
+      ...resident.ownerships.flatMap((ownership) =>
+        ownership.bills.map((bill) => ({ ...bill, sourceId: ownership.id, unitNo: ownership.unit.unitNo })),
+      ),
+    ]
       .sort((a, b) => b.dueDate.localeCompare(a.dueDate));
   });
 

@@ -14,6 +14,7 @@
   @if (loading()) {
     <p class="text-[13px] text-muted">Loading submission…</p>
   } @else if (submission(); as current) {
+    @let source = current.bill?.lease ?? current.bill?.ownership;
     <div class="mb-3 flex items-start justify-between gap-2">
       @if (badge(); as status) {
         <app-status-badge [tone]="status.tone" [label]="status.label" />
@@ -21,13 +22,13 @@
     </div>
     <dl class="mb-3 grid grid-cols-1 gap-2 text-[13px] sm:grid-cols-3">
       <div>
-        <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Tenant</dt>
+        <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Resident</dt>
         <dd class="m-0 text-heading">{{ current.resident?.firstName }} {{ current.resident?.lastName }}</dd>
       </div>
       <div class="sm:col-span-2">
         <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Unit</dt>
         <dd class="m-0 text-heading">
-          {{ current.bill?.lease?.unit?.unitNo }} · {{ current.bill?.lease?.unit?.property?.name }}
+          {{ source?.unit?.unitNo }} · {{ source?.unit?.property?.name }}
         </dd>
       </div>
       <div>
@@ -54,7 +55,7 @@
       }
       @if (current.residentNote) {
         <div class="sm:col-span-3">
-          <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Tenant note</dt>
+          <dt class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Resident note</dt>
           <dd class="m-0 text-heading">{{ current.residentNote }}</dd>
         </div>
       }
@@ -104,7 +105,7 @@
         novalidate
       >
         <label class="text-[13px] font-medium text-heading" for="rejection-reason">
-          Reason for the tenant <span class="font-normal text-muted">(optional)</span>
+          Reason for the resident <span class="font-normal text-muted">(optional)</span>
         </label>
         <textarea
           id="rejection-reason"
@@ -114,7 +115,7 @@
           class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
         ></textarea>
         <p id="rejection-reason-hint" class="text-[12px] text-muted">
-          The tenant sees this in Residence Care and can submit again.
+          The resident sees this in Residence Care and can submit again.
         </p>
       </form>
     }

@@ -22,18 +22,19 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { BillListItem } from '../../../../core/models/bill.types';
 import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
-import type { LeaseListItem } from '../../../../core/models/lease.types';
 import type { SoaResponse } from '../../../../core/models/soa.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
-import { LeasesService } from '../../../leases/services/leases.service';
+import { billSourceOf } from '../../../../shared/utils/bill-source.util';
 import { BillsService } from '../../services/bills.service';
 import { SoaService } from '../../services/soa.service';
 import { SoaLines } from '../soa-lines/soa-lines';
 
-interface LeaseOption {
-  id: string;
+interface BillingSourceOption {
+  key: string;
+  kind: 'lease' | 'ownership';
+  sourceId: string;
   label: string;
 }
 
@@ -46,7 +47,6 @@ interface LeaseOption {
 export class GenerateSoaDialog {
   private readonly auth = inject(AuthService);
   private readonly bills = inject(BillsService);
-  private readonly leases = inject(LeasesService);
   private readonly soa = inject(SoaService);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
@@ -57,9 +57,9 @@ export class GenerateSoaDialog {
 
   readonly billTypeLabels = BILL_TYPE_LABELS;
 
-  readonly leaseOptions = signal<LeaseOption[]>([]);
-  readonly loadingLeases = signal(false);
-  readonly selectedLeaseId = signal<string | null>(null);
+  readonly sourceOptions = signal<BillingSourceOption[]>([]);
+  readonly loadingSources = signal(false);
+  readonly selectedSourceKey = signal<string | null>(null);
   readonly unpaidBills = signal<BillListItem[]>([]);
   readonly loadingBills = signal(false);
   readonly checkedBillIds = signal<ReadonlySet<string>>(new Set());
@@ -76,7 +76,7 @@ export class GenerateSoaDialog {
       .reduce((sum, bill) => sum + Number(bill.balance), 0);
   });
   readonly canGenerate = computed(
-    () => !this.generating() && this.checkedBillIds().size > 0 && this.selectedLeaseId() !== null,
+    () => !this.generating() && this.checkedBillIds().size > 0 && this.selectedSourceKey() !== null,
   );
 
   constructor() {
@@ -89,20 +89,21 @@ export class GenerateSoaDialog {
       this.checkedBillIds.set(new Set());
       this.sendSms.set(this.smsAvailable());
       const preset = this.presetLeaseId();
-      this.selectedLeaseId.set(preset);
+      this.selectedSourceKey.set(preset ? sourceKey('lease', preset) : null);
       if (preset) {
-        this.loadUnpaidBills(preset);
+        this.loadUnpaidBills('lease', preset);
       } else {
-        this.loadLeases();
+        this.loadSources();
       }
     });
   }
 
-  onLeasePicked(leaseId: string | null): void {
-    this.selectedLeaseId.set(leaseId);
+  onSourcePicked(key: string | null): void {
+    this.selectedSourceKey.set(key);
     this.unpaidBills.set([]);
     this.checkedBillIds.set(new Set());
-    if (leaseId) this.loadUnpaidBills(leaseId);
+    const selected = this.sourceOptions().find((option) => option.key === key);
+    if (selected) this.loadUnpaidBills(selected.kind, selected.sourceId);
   }
 
   toggleBill(billId: string): void {
@@ -116,16 +117,24 @@ export class GenerateSoaDialog {
   }
 
   generate(): void {
-    const leaseId = this.selectedLeaseId();
-    if (!leaseId || this.checkedBillIds().size === 0) return;
+    const key = this.selectedSourceKey();
+    if (!key || this.checkedBillIds().size === 0) return;
+
+    const selected = this.sourceOptions().find((option) => option.key === key) ?? parseSourceKey(key);
+    if (!selected) return;
 
     this.generating.set(true);
     this.errorMessage.set(null);
-    this.soa
-      .generate(leaseId, {
+    const request = selected.kind === 'lease'
+      ? this.soa.generate(selected.sourceId, {
+          billIds: [...this.checkedBillIds()],
+          sendSms: this.smsAvailable() && this.sendSms(),
+        })
+      : this.soa.generateOwnership(selected.sourceId, {
         billIds: [...this.checkedBillIds()],
         sendSms: this.smsAvailable() && this.sendSms(),
-      })
+      });
+    request
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (statement) => {
@@ -145,27 +154,39 @@ export class GenerateSoaDialog {
     return this.soa.downloadUrl(statement.id);
   }
 
-  private loadLeases(): void {
-    this.loadingLeases.set(true);
-    this.leases
-      .list({ active: true, limit: 50 })
+  private loadSources(): void {
+    this.loadingSources.set(true);
+    this.bills
+      .list({ status: 'UNPAID', limit: 50 })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (page) => {
-          this.leaseOptions.set(page.data.map(toLeaseOption));
-          this.loadingLeases.set(false);
+          const options = new Map<string, BillingSourceOption>();
+          for (const bill of page.data) {
+            const source = billSourceOf(bill);
+            const kind = bill.ownershipId ? 'ownership' : 'lease';
+            const key = sourceKey(kind, source.id);
+            options.set(key, {
+              key,
+              kind,
+              sourceId: source.id,
+              label: `Unit ${source.unit.unitNo} · ${source.unit.property.name} · ${source.resident.firstName} ${source.resident.lastName} (${kind === 'ownership' ? 'owner' : 'tenant'})`,
+            });
+          }
+          this.sourceOptions.set([...options.values()].sort((a, b) => a.label.localeCompare(b.label)));
+          this.loadingSources.set(false);
         },
         error: () => {
-          this.loadingLeases.set(false);
-          this.errorMessage.set('Could not load active leases.');
+          this.loadingSources.set(false);
+          this.errorMessage.set('Could not load residents with unpaid bills.');
         },
       });
   }
 
-  private loadUnpaidBills(leaseId: string): void {
+  private loadUnpaidBills(kind: 'lease' | 'ownership', sourceId: string): void {
     this.loadingBills.set(true);
     this.bills
-      .list({ leaseId, status: 'UNPAID', limit: 50 })
+      .list({ [kind === 'lease' ? 'leaseId' : 'ownershipId']: sourceId, status: 'UNPAID', limit: 50 })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (page) => {
@@ -181,9 +202,15 @@ export class GenerateSoaDialog {
   }
 }
 
-function toLeaseOption(lease: LeaseListItem): LeaseOption {
-  return {
-    id: lease.id,
-    label: `Unit ${lease.unit.unitNo} · ${lease.unit.property.name} · ${lease.resident.firstName} ${lease.resident.lastName}`,
-  };
+function sourceKey(kind: 'lease' | 'ownership', id: string): string {
+  return `${kind}:${id}`;
+}
+
+function parseSourceKey(key: string): BillingSourceOption | null {
+  const separator = key.indexOf(':');
+  if (separator < 1) return null;
+  const kind = key.slice(0, separator);
+  const sourceId = key.slice(separator + 1);
+  if ((kind !== 'lease' && kind !== 'ownership') || !sourceId) return null;
+  return { key, kind, sourceId, label: '' };
 }

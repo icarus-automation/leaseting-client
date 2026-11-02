@@ -19,10 +19,6 @@ const bill = {
   balance: '10000',
   lease: {
     id: 'lease-1',
-    monthlyRent: '10000',
-    rentPricingBasis: 'FIXED',
-    rentFloorAreaSqm: null,
-    rentRatePerSqm: null,
     resident: { id: 'resident-1', firstName: 'Ada', lastName: 'Lovelace' },
     unit: { id: 'unit-1', unitNo: '1A', property: { id: 'prop-1', name: 'Mabini' } },
   },

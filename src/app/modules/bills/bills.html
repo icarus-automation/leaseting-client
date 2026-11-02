@@ -2,13 +2,15 @@
   <header class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="font-heading text-2xl font-semibold text-heading">Bills</h1>
-      <p class="mt-0.5 text-sm text-muted">Rent and utility charges: unpaid, overdue, and settled.</p>
+      <p class="mt-0.5 text-sm text-muted">Rent, association dues, and utility charges: unpaid, overdue, and settled.</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <app-bills-tools-menu
         [generatingRent]="generatingRent()"
+        [generatingDues]="generatingDues()"
         (generateSoa)="soaDialogVisible.set(true)"
         (rentRun)="generateRentBills()"
+        (duesRun)="generateAssociationDues()"
       />
       @if (canManageBills()) {
         <button
@@ -111,8 +113,8 @@
     }
     @if (residentIdFilter()) {
       <span class="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] bg-surface px-2.5 py-1 text-[12.5px] font-medium text-body">
-        Filtered to one tenant
-        <button type="button" class="text-muted hover:text-body" aria-label="Clear tenant filter" (click)="clearResidentFilter()">
+        Filtered to one resident
+        <button type="button" class="text-muted hover:text-body" aria-label="Clear resident filter" (click)="clearResidentFilter()">
           <svg pIcon="times" [size]="11" aria-hidden="true"></svg>
         </button>
       </span>
@@ -140,7 +142,7 @@
     <app-empty-state
       icon="wallet"
       heading="No bills found"
-      description="Add a rent or utility bill on an active lease. Overdue units turn red on the floor plan."
+      description="Bills appear here after a rent, dues, or utility run. Overdue units turn red on the floor plan."
       [ctaLabel]="canManageBills() ? 'New bill' : null"
       (cta)="drawerVisible.set(true)"
     />
@@ -149,7 +151,7 @@
       <table class="w-full border-collapse text-left">
         <thead>
           <tr class="border-b border-border bg-surface">
-            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Tenant · Unit</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Resident · Unit</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Type</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Amount</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Due</th>
@@ -161,24 +163,25 @@
         </thead>
         <tbody>
           @for (bill of items(); track bill.id) {
+            @let source = billSource(bill);
             <tr class="cursor-pointer border-b border-border last:border-b-0 transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none" (click)="openBill(bill.id)">
               <td class="px-4 py-3">
                 <a
                   [routerLink]="['/bills', bill.id]"
                   class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
-                  [attr.aria-label]="'Open bill for ' + bill.lease.resident.firstName + ' ' + bill.lease.resident.lastName"
+                  [attr.aria-label]="'Open bill for ' + source.resident.firstName + ' ' + source.resident.lastName"
                   (click)="$event.stopPropagation()"
                 >
-                  {{ bill.lease.resident.firstName }} {{ bill.lease.resident.lastName }}
+                  {{ source.resident.firstName }} {{ source.resident.lastName }}
                 </a>
                 <p class="text-[12px] text-muted">
-                  Unit {{ bill.lease.unit.unitNo }} · {{ bill.lease.unit.property.name }}
+                  Unit {{ source.unit.unitNo }} · {{ source.unit.property.name }}
                   ·
                   <a
-                    [routerLink]="['/residents', bill.lease.resident.id]"
+                    [routerLink]="['/residents', source.resident.id]"
                     class="hover:text-primary hover:underline"
                     (click)="$event.stopPropagation()"
-                  >Tenant</a>
+                  >{{ bill.ownershipId ? 'Owner' : 'Tenant' }}</a>
                 </p>
               </td>
               <td class="px-4 py-3 text-[13px] text-body">{{ bill.label || billTypeLabels[bill.type] }}</td>
@@ -217,7 +220,7 @@
                     <button
                       type="button"
                       class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                      [attr.aria-label]="'More actions for ' + billTypeLabels[bill.type] + ' bill, ' + bill.lease.resident.firstName + ' ' + bill.lease.resident.lastName + ', unit ' + bill.lease.unit.unitNo"
+                      [attr.aria-label]="'More actions for ' + billTypeLabels[bill.type] + ' bill, ' + source.resident.firstName + ' ' + source.resident.lastName + ', unit ' + source.unit.unitNo"
                       aria-haspopup="menu"
                       [attr.aria-expanded]="overflowForId() === bill.id"
                       (click)="openOverflow($event, bill)"

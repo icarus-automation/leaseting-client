@@ -25,6 +25,7 @@ import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../shared/ui/status-badge/status-badge';
 import { watchCreateParam } from '../../shared/utils/create-param.util';
 import { showPopupMenu } from '../../shared/utils/popup-menu.util';
+import { billSourceOf } from '../../shared/utils/bill-source.util';
 import { BillFormDialog } from './components/bill-form-dialog/bill-form-dialog';
 import { BillsToolsMenu } from './components/bills-tools-menu/bills-tools-menu';
 import { GenerateSoaDialog } from './components/generate-soa-dialog/generate-soa-dialog';
@@ -121,6 +122,7 @@ export class Bills {
   readonly paymentTarget = signal<BillListItem | null>(null);
   readonly soaDialogVisible = signal(false);
   readonly generatingRent = signal(false);
+  readonly generatingDues = signal(false);
   readonly skeletons = Array.from({ length: 6 });
   readonly overflowItems = signal<MenuItem[]>([]);
   readonly overflowForId = signal<string | null>(null);
@@ -327,6 +329,41 @@ export class Bills {
           });
         },
       });
+  }
+
+  generateAssociationDues(): void {
+    if (this.generatingDues()) return;
+    this.generatingDues.set(true);
+    this.bills
+      .duesRun()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ created }) => {
+          this.generatingDues.set(false);
+          this.toast.add({
+            severity: created > 0 ? 'success' : 'info',
+            summary: created > 0
+              ? `${created} association dues bill${created === 1 ? '' : 's'} created`
+              : 'Association dues are up to date',
+          });
+          if (created > 0) {
+            this.load(1);
+            this.loadSummary();
+          }
+        },
+        error: (error: unknown) => {
+          this.generatingDues.set(false);
+          this.toast.add({
+            severity: 'error',
+            summary: 'Could not generate association dues',
+            detail: apiErrorMessage(error),
+          });
+        },
+      });
+  }
+
+  billSource(bill: BillListItem) {
+    return billSourceOf(bill);
   }
 
   canDelete(bill: BillListItem): boolean {

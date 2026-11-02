@@ -159,7 +159,7 @@ export class UtilityRun {
 
   readonly unitLabel = computed(() => (this.setupValues().type === 'WATER' ? 'cu.m' : 'kWh'));
 
-  /** The run lists only the leases where Leaseting bills this utility (set on each lease). */
+  /** The run lists only billing accounts whose lease/ownership enables this utility. */
   readonly utilityName = computed(() => (this.setupValues().type === 'WATER' ? 'water' : 'electricity'));
 
   readonly rateModes = computed(() => [
@@ -293,7 +293,7 @@ export class UtilityRun {
       .map((row, index) => ({ row, math: math[index] }))
       .filter((entry) => entry.math !== null)
       .map(({ row }) => ({
-        leaseId: row.leaseId,
+        ...(row.leaseId ? { leaseId: row.leaseId } : { ownershipId: row.ownershipId! }),
         previousReading: row.previous!,
         presentReading: row.present!,
       }));
@@ -372,7 +372,7 @@ export class UtilityRun {
         },
         error: (error: unknown) => {
           this.loadingRows.set(false);
-          this.rowsError.set(apiErrorMessage(error, 'Could not load the leases for this property.'));
+          this.rowsError.set(apiErrorMessage(error, 'Could not load the billing accounts for this property.'));
         },
       });
   }

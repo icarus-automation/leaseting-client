@@ -59,6 +59,7 @@ function submission(overrides: Partial<PaymentSubmissionResponse> = {}): Payment
     cancelledAt: null,
     billId: 'bill-1',
     leaseId: 'lease-1',
+    ownershipId: null,
     residentId: 'resident-1',
     paymentId: null,
     createdAt: '2026-09-15T10:00:00.000Z',
@@ -76,6 +77,7 @@ function submission(overrides: Partial<PaymentSubmissionResponse> = {}): Payment
           property: { id: 'property-1', name: 'Brickstone Boarding House' },
         },
       },
+      ownership: null,
     },
     payment: null,
     ...overrides,
@@ -139,7 +141,7 @@ describe('SubmissionReviewDialog', () => {
     expect(fullSize.textContent?.trim()).toBe('Open full size');
     expect(fullSize.getAttribute('href')).toBe('blob:payment-proof');
     expect(fixture.nativeElement.querySelector('#rejection-reason')).toBeTruthy();
-    expect(fixture.nativeElement.textContent).toContain('Reason for the tenant (optional)');
+    expect(fixture.nativeElement.textContent).toContain('Reason for the resident (optional)');
     expect(fixture.nativeElement.querySelector('app-reason-dialog')).toBeNull();
   });
 

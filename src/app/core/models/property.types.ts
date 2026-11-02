@@ -23,6 +23,10 @@ export interface PropertyResponse {
   mode: PropertyMode;
   imageUrl: string | null;
   defaultRatePerSqm: number | null;
+  duesPricingBasis: PricingBasis;
+  duesAmount: number | null;
+  duesRatePerSqm: number | null;
+  duesDueDay: number;
   /** Whether a new lease here starts with Leaseting billing its electricity. */
   billsElectricityByDefault: boolean;
   /** Whether a new lease here starts with Leaseting billing its water. */
@@ -54,6 +58,10 @@ export interface CreatePropertyPayload {
   city: string;
   mode: PropertyMode;
   defaultRatePerSqm?: number | null;
+  duesPricingBasis?: PricingBasis;
+  duesAmount?: number | null;
+  duesRatePerSqm?: number | null;
+  duesDueDay?: number;
   billsElectricityByDefault?: boolean;
   billsWaterByDefault?: boolean;
 }
@@ -159,6 +167,7 @@ export interface UnitCurrentOwnership {
     email: string | null;
     contactNo: string;
   };
+  outstandingBills: UnitOutstandingBill[];
 }
 
 export interface UnitDetail extends UnitResponse {

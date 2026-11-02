@@ -74,6 +74,7 @@ export interface ResidentOwnershipItem {
     unitNo: string;
     property: { id: string; name: string };
   };
+  bills: ResidentLeaseBillItem[];
 }
 
 export interface ResidentDetail extends ResidentResponse {

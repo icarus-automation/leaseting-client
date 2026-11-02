@@ -36,14 +36,14 @@
     <app-empty-state
       icon="inbox"
       heading="No submissions"
-      description="When a tenant submits proof from Residence Care, it waits in Pending review."
+      description="When a resident submits proof from Residence Care, it waits in Pending review."
     />
   } @else {
     <div class="overflow-hidden rounded-base border border-border">
       <table class="w-full border-collapse text-left">
         <thead class="border-b border-border bg-surface text-[12px] font-medium uppercase tracking-wide text-muted">
           <tr>
-            <th class="px-4 py-2.5">Tenant</th>
+            <th class="px-4 py-2.5">Resident</th>
             <th class="px-4 py-2.5">Bill</th>
             <th class="px-4 py-2.5">Amount</th>
             <th class="px-4 py-2.5">Destination</th>
@@ -54,13 +54,14 @@
         </thead>
         <tbody>
           @for (submission of items(); track submission.id) {
+            @let source = submission.bill?.lease ?? submission.bill?.ownership;
             <tr class="border-b border-border last:border-b-0">
               <td class="px-4 py-3">
                 <p class="text-[13px] font-medium text-heading">
                   {{ submission.resident?.firstName }} {{ submission.resident?.lastName }}
                 </p>
                 <p class="text-[12px] text-muted">
-                  Unit {{ submission.bill?.lease?.unit?.unitNo }} · {{ submission.bill?.lease?.unit?.property?.name }}
+                  Unit {{ source?.unit?.unitNo }} · {{ source?.unit?.property?.name }}
                 </p>
               </td>
               <td class="px-4 py-3 text-[13px] text-body">

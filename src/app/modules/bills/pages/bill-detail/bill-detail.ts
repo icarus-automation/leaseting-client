@@ -17,6 +17,7 @@ import { paymentTargetFromRow, type PaymentTarget } from '../../components/payme
 import { BillsService } from '../../services/bills.service';
 import { formatStoredPerSqmRent } from '../../../../shared/utils/per-sqm-quote';
 import { billStatusBadge } from '../../utils/bill-status.util';
+import { billSourceOf } from '../../../../shared/utils/bill-source.util';
 
 @Component({
   selector: 'app-bill-detail',
@@ -54,9 +55,13 @@ export class BillDetailPage {
 
   readonly rentBreakdown = computed(() => {
     const bill = this.bill();
-    if (!bill || bill.type !== 'RENT') return null;
+    if (!bill || bill.type !== 'RENT' || !bill.lease) return null;
     return formatStoredPerSqmRent(bill.lease);
   });
+
+  billSource(bill: BillDetail) {
+    return billSourceOf(bill);
+  }
 
   constructor() {
     effect(() => {

@@ -22,10 +22,6 @@ function unpaidBill(overrides: Partial<BillListItem> = {}): BillListItem {
     balance: '8500',
     lease: {
       id: 'lease-1',
-      monthlyRent: '8500',
-      rentPricingBasis: 'FIXED',
-      rentFloorAreaSqm: null,
-      rentRatePerSqm: null,
       resident: { id: 't-1', firstName: 'Ana', lastName: 'Cruz' },
       unit: {
         id: 'u-1',

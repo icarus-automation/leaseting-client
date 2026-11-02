@@ -35,14 +35,20 @@ export interface SoaResponse {
   statementDate: string;
   totalDue: string;
   smsStatus: SoaSmsStatus;
-  leaseId: string;
+  leaseId: string | null;
+  ownershipId: string | null;
   createdAt: string;
   lines: SoaLine[];
   lease: {
     id: string;
     resident: { id: string; firstName: string; lastName: string };
     unit: { id: string; unitNo: string; property: { id: string; name: string } };
-  };
+  } | null;
+  ownership: {
+    id: string;
+    resident: { id: string; firstName: string; lastName: string };
+    unit: { id: string; unitNo: string; property: { id: string; name: string } };
+  } | null;
 }
 
 export interface GenerateSoaPayload {
@@ -54,5 +60,6 @@ export interface SoaListFilters {
   page?: number;
   limit?: number;
   leaseId?: string;
+  ownershipId?: string;
   residentId?: string;
 }

@@ -53,6 +53,18 @@
       }
     </header>
 
+    @if (p.mode === 'CONDO') {
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-1 rounded-base border border-border bg-surface px-3.5 py-2.5 text-[12.5px] text-body">
+        <span class="font-semibold text-heading">Association dues</span>
+        <span>
+          {{ p.duesPricingBasis === 'FIXED'
+            ? (p.duesAmount | phpCurrency)
+            : (p.duesRatePerSqm | phpCurrency) + ' per sqm' }}
+        </span>
+        <span class="text-muted">Due on day {{ p.duesDueDay }} each month</span>
+      </div>
+    }
+
     @if (p.floors.length === 0) {
       <app-empty-state
         icon="building"

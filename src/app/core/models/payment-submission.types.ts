@@ -19,7 +19,8 @@ export interface PaymentSubmissionResponse {
   reviewedByUserId: string | null;
   cancelledAt: string | null;
   billId: string;
-  leaseId: string;
+  leaseId: string | null;
+  ownershipId: string | null;
   residentId: string;
   paymentId: string | null;
   createdAt: string;
@@ -33,7 +34,10 @@ export interface PaymentSubmissionResponse {
     status: BillStatus;
     lease: {
       unit: { unitNo: string; property: { id: string; name: string } };
-    };
+    } | null;
+    ownership: {
+      unit: { unitNo: string; property: { id: string; name: string } };
+    } | null;
   };
   payment?: PaymentResponse | null;
 }

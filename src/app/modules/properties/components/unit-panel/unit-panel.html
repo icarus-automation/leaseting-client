@@ -7,7 +7,7 @@
       <svg pIcon="map" class="text-muted" [size]="22" aria-hidden="true"></svg>
       <p class="text-[13px] font-medium text-heading">No unit selected</p>
       <p class="max-w-[26ch] text-[12.5px] text-muted">
-        Click a unit on the floor plan to see its tenant, lease, and bills.
+        Click a unit on the floor plan to see its resident, account, and bills.
       </p>
     </div>
   } @else if (loading()) {
@@ -93,6 +93,42 @@
               </div>
             }
           </dl>
+        </section>
+
+        <section class="flex flex-col gap-2 border-t border-border pt-3" aria-label="Outstanding owner bills">
+          <h3 class="text-[12px] font-semibold uppercase tracking-wide text-muted">Outstanding bills</h3>
+          @if (ownership.outstandingBills.length === 0) {
+            <p class="flex items-center gap-1.5 text-[13px] text-body">
+              <svg pIcon="check-circle" class="text-success" [size]="14" aria-hidden="true"></svg>
+              All settled. Nothing due.
+            </p>
+          } @else {
+            <ul class="flex flex-col gap-1.5">
+              @for (bill of ownership.outstandingBills; track bill.id) {
+                <li
+                  class="flex items-center gap-2 rounded-base border px-2.5 py-2"
+                  [class]="isOverdue(bill) ? 'border-[color-mix(in_oklab,var(--destructive)_30%,transparent)] bg-muted-destructive' : 'border-border bg-background'"
+                >
+                  <div class="flex min-w-0 flex-1 flex-col">
+                    <span class="text-[13px] font-medium text-heading">{{ billTypeLabels[bill.type] }}</span>
+                    <span class="text-[12px]" [class]="isOverdue(bill) ? 'font-medium text-destructive' : 'text-muted'">
+                      {{ isOverdue(bill) ? 'Overdue since' : 'Due' }} {{ bill.dueDate | date: 'MMM d' }}
+                    </span>
+                  </div>
+                  <span class="text-[13px] font-semibold text-heading tabular-nums">{{ bill.amount | phpCurrency }}</span>
+                  @if (canViewPayments()) {
+                    <button
+                      type="button"
+                      class="shrink-0 rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body hover:bg-surface"
+                      (click)="openPaymentDialog(bill)"
+                    >
+                      {{ canRecordPayments() ? 'Record payment' : 'Payments' }}
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          }
         </section>
       } @else {
         <section class="flex flex-col gap-2 border-t border-border pt-3">

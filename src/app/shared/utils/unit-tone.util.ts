@@ -15,13 +15,13 @@ export interface FloorSummaryBadge {
 }
 
 export function unitTone(unit: UnitStatusLike): UnitTone {
-  if (unit.status === 'SOLD') return 'success';
+  if (unit.status === 'SOLD') return unit.hasOverdueBills ? 'destructive' : 'success';
   if (unit.status === 'AVAILABLE' || unit.status === 'VACANT') return 'vacant';
   return unit.hasOverdueBills ? 'destructive' : 'success';
 }
 
 export function unitToneLabel(unit: UnitStatusLike): 'Sold' | 'Available' | 'Settled' | 'Overdue' | 'Vacant' {
-  if (unit.status === 'SOLD') return 'Sold';
+  if (unit.status === 'SOLD') return unit.hasOverdueBills ? 'Overdue' : 'Sold';
   if (unit.status === 'AVAILABLE') return 'Available';
   switch (unitTone(unit)) {
     case 'vacant':
@@ -37,6 +37,7 @@ export function floorSummaryBadges(mode: PropertyMode, summary: UnitSummary): Fl
   if (mode === 'CONDO') {
     return [
       { tone: 'success', label: 'Sold', count: summary.settled },
+      { tone: 'destructive', label: 'Overdue', count: summary.overdue },
       { tone: 'vacant', label: 'Available', count: summary.vacant },
     ];
   }

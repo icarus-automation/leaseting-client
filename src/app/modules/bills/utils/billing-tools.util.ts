@@ -5,6 +5,7 @@ export interface BillingToolsCommands {
   openGenerateSoa: () => void;
   openUtilityRun: () => void;
   generateRentBills: () => void;
+  generateAssociationDues: () => void;
 }
 
 export function billingToolsMenuItems(
@@ -20,5 +21,6 @@ export function billingToolsMenuItems(
       disabled: generatingRent,
       command: commands.generateRentBills,
     },
+    { label: 'Generate association dues', command: commands.generateAssociationDues },
   ];
 }

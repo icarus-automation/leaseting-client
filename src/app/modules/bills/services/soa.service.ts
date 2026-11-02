@@ -15,11 +15,16 @@ export class SoaService {
     return this.http.post<SoaResponse>(`${API_BASE_URL}/leases/${leaseId}/soa`, payload);
   }
 
+  generateOwnership(ownershipId: string, payload: GenerateSoaPayload): Observable<SoaResponse> {
+    return this.http.post<SoaResponse>(`${API_BASE_URL}/ownerships/${ownershipId}/soa`, payload);
+  }
+
   list(filters: SoaListFilters = {}): Observable<Paginated<SoaResponse>> {
     let params = new HttpParams()
       .set('page', filters.page ?? 1)
       .set('limit', filters.limit ?? 10);
     if (filters.leaseId) params = params.set('leaseId', filters.leaseId);
+    if (filters.ownershipId) params = params.set('ownershipId', filters.ownershipId);
     if (filters.residentId) params = params.set('residentId', filters.residentId);
     return this.http.get<Paginated<SoaResponse>>(this.base, { params });
   }

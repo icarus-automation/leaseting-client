@@ -11,7 +11,7 @@ describe('calendar state', () => {
   };
   const bill: CalendarEntry = {
     id: 'bill-due:bill-1', sourceId: 'bill-1', type: 'BILL_DUE', title: 'Rent due', date: '2026-09-04',
-    status: 'OVERDUE', statusLabel: 'Overdue', leaseId: 'lease-1', amount: '8000.00', balance: '6000.00',
+    status: 'OVERDUE', statusLabel: 'Overdue', leaseId: 'lease-1', ownershipId: null, amount: '8000.00', balance: '6000.00',
     resident: { id: 'resident-1', name: 'Mina Santos' }, unit: { id: 'unit-1', unitNo: '4B' },
     property: { id: 'property-1', name: 'Mabini Residences' },
   };

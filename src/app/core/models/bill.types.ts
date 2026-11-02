@@ -22,7 +22,8 @@ export interface BillResponse {
   status: BillStatus;
   paidAt: string | null;
   notes: string | null;
-  leaseId: string;
+  leaseId: string | null;
+  ownershipId?: string;
   createdAt: string;
   updatedAt: string;
   utilityDetail: UtilityDetail | null;
@@ -32,20 +33,23 @@ export interface BillResponse {
   balance: string;
 }
 
-export interface BillListItem extends BillResponse {
-  lease: LeaseRentSnapshot & {
+export interface BillSourceSummary {
+  id: string;
+  resident: { id: string; firstName: string; lastName: string };
+  unit: {
     id: string;
-    monthlyRent: string;
-    resident: { id: string; firstName: string; lastName: string };
-    unit: {
-      id: string;
-      unitNo: string;
-      property: { id: string; name: string };
-    };
+    unitNo: string;
+    property: { id: string; name: string };
   };
 }
 
-export interface BillDetail extends BillListItem {
+export interface BillListItem extends BillResponse {
+  lease: BillSourceSummary | null;
+  ownership?: BillSourceSummary;
+}
+
+export interface BillDetail extends Omit<BillListItem, 'lease'> {
+  lease: (BillSourceSummary & LeaseRentSnapshot & { monthlyRent: string }) | null;
   payments: PaymentResponse[];
 }
 
@@ -99,6 +103,7 @@ export interface BillListFilters {
   page?: number;
   limit?: number;
   leaseId?: string;
+  ownershipId?: string;
   residentId?: string;
   status?: BillStatus;
   type?: BillType;
@@ -125,7 +130,8 @@ export interface BillsSummary {
 }
 
 export interface UtilityRunPreviewRow {
-  leaseId: string;
+  leaseId?: string;
+  ownershipId?: string;
   unitNo: string;
   residentName: string;
   dueDay: number;
@@ -145,12 +151,15 @@ export interface CreateUtilityRunPayload {
   ratePerUnit?: number;
   totalBillAmount?: number;
   totalConsumption?: number;
-  rows: { leaseId: string; previousReading: number; presentReading: number }[];
+  rows: (({ leaseId: string; ownershipId?: never } | { ownershipId: string; leaseId?: never }) & {
+    previousReading: number;
+    presentReading: number;
+  })[];
 }
 
 export interface UtilityRunResult {
   created: number;
-  skipped: { leaseId: string; unitNo: string; reason: string }[];
+  skipped: { leaseId?: string; ownershipId?: string; unitNo: string; reason: string }[];
   totalAmount: string;
 }
 

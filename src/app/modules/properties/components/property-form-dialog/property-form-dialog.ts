@@ -13,14 +13,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
-import type { PropertyMode } from '../../../../core/models/enums';
+import type { PricingBasis, PropertyMode } from '../../../../core/models/enums';
 import type { PropertyResponse } from '../../../../core/models/property.types';
 import type { PropertyTypeResponse } from '../../../../core/models/property-type.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
@@ -78,7 +78,17 @@ export class PropertyFormDialog {
     city: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     mode: ['RENTAL' as PropertyMode, [Validators.required]],
     defaultRatePerSqm: [null as number | null, [Validators.min(0)]],
+    duesPricingBasis: ['FIXED' as PricingBasis, [Validators.required]],
+    duesAmount: [null as number | null, [Validators.min(0)]],
+    duesRatePerSqm: [null as number | null, [Validators.min(0)]],
+    duesDueDay: [1, [Validators.required, Validators.min(1), Validators.max(31)]],
     utilities: utilityBillingGroup(),
+  });
+  readonly selectedMode = toSignal(this.form.controls.mode.valueChanges, {
+    initialValue: this.form.controls.mode.value,
+  });
+  readonly selectedDuesBasis = toSignal(this.form.controls.duesPricingBasis.valueChanges, {
+    initialValue: this.form.controls.duesPricingBasis.value,
   });
   readonly errors = createFormErrors(this.form);
 
@@ -129,6 +139,10 @@ export class PropertyFormDialog {
           city: property.city,
           mode: property.mode,
           defaultRatePerSqm: property.defaultRatePerSqm,
+          duesPricingBasis: property.duesPricingBasis,
+          duesAmount: property.duesAmount,
+          duesRatePerSqm: property.duesRatePerSqm,
+          duesDueDay: property.duesDueDay,
           utilities: {
             billsElectricity: property.billsElectricityByDefault,
             billsWater: property.billsWaterByDefault,
@@ -210,10 +224,29 @@ export class PropertyFormDialog {
       return;
     }
 
-    const { utilities, mode, ...raw } = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+    const duesAmountControl = raw.duesPricingBasis === 'FIXED'
+      ? this.form.controls.duesAmount
+      : this.form.controls.duesRatePerSqm;
+    if (raw.mode === 'CONDO' && duesAmountControl.value === null) {
+      duesAmountControl.setErrors({ ...duesAmountControl.errors, required: true });
+      duesAmountControl.markAsTouched();
+      return;
+    }
+
+    const {
+      utilities,
+      mode,
+      duesPricingBasis,
+      duesAmount,
+      duesRatePerSqm,
+      duesDueDay,
+      ...baseFields
+    } = raw;
     const target = this.property();
     const fields = {
-      ...raw,
+      ...baseFields,
+      ...(mode === 'CONDO' ? { duesPricingBasis, duesAmount, duesRatePerSqm, duesDueDay } : {}),
       billsElectricityByDefault: utilities.billsElectricity,
       billsWaterByDefault: utilities.billsWater,
     };
@@ -224,7 +257,7 @@ export class PropertyFormDialog {
     const request$ = target
       ? this.properties.update(target.id, fields, image, removeImage)
       : this.properties.create(
-          { ...fields, mode, defaultRatePerSqm: defaultRateOnCreate(raw.defaultRatePerSqm) },
+          { ...fields, mode, defaultRatePerSqm: defaultRateOnCreate(baseFields.defaultRatePerSqm) },
           image,
         );
 

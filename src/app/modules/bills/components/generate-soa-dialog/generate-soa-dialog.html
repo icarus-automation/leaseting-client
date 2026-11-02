@@ -3,7 +3,7 @@
   [visible]="visible()"
   (visibleChange)="visible.set($event)"
   heading="Generate Statement of Account"
-  subheading="Bundle a lease's pending bills into a printable SOA."
+  subheading="Bundle a tenant's or owner's pending bills into a printable SOA."
   width="36rem"
 >
   @if (errorMessage(); as message) {
@@ -17,12 +17,13 @@
       </span>
       <div>
         <p class="text-[15px] font-semibold text-heading">{{ statement.soaNo }}</p>
+        @let source = statement.lease ?? statement.ownership;
         <p class="text-[13px] text-muted">
-          {{ statement.lease.resident.firstName }} {{ statement.lease.resident.lastName }} · Unit
-          {{ statement.lease.unit.unitNo }} · total due {{ statement.totalDue | phpCurrency }}
+          {{ source?.resident?.firstName }} {{ source?.resident?.lastName }} · Unit
+          {{ source?.unit?.unitNo }} · total due {{ statement.totalDue | phpCurrency }}
         </p>
         @if (statement.smsStatus === 'SENT') {
-          <p class="mt-1 text-[12.5px] text-success">SMS summary sent to the tenant.</p>
+          <p class="mt-1 text-[12.5px] text-success">SMS summary sent to the resident.</p>
         } @else if (statement.smsStatus === 'FAILED') {
           <p class="mt-1 text-[12.5px] text-destructive">
             The text did not go through. You can send it again from the statement history.
@@ -42,18 +43,18 @@
     <div class="flex flex-col gap-4">
       @if (!presetLeaseId()) {
         <div class="flex flex-col gap-1.5">
-          <label class="text-[13px] font-medium text-heading" for="soa-lease">Lease</label>
+          <label class="text-[13px] font-medium text-heading" for="soa-source">Resident and unit</label>
           <p-select
-            inputId="soa-lease"
-            [options]="leaseOptions()"
+            inputId="soa-source"
+            [options]="sourceOptions()"
             optionLabel="label"
-            optionValue="id"
+            optionValue="key"
             [filter]="true"
             filterBy="label"
-            [loading]="loadingLeases()"
-            [ngModel]="selectedLeaseId()"
-            (ngModelChange)="onLeasePicked($event)"
-            placeholder="Pick an active lease"
+            [loading]="loadingSources()"
+            [ngModel]="selectedSourceKey()"
+            (ngModelChange)="onSourcePicked($event)"
+            placeholder="Pick a tenant or owner"
             styleClass="w-full"
             appendTo="body"
           />
@@ -62,9 +63,9 @@
 
       @if (loadingBills()) {
         <p class="py-4 text-center text-[13px] text-muted">Loading unpaid bills…</p>
-      } @else if (selectedLeaseId() && unpaidBills().length === 0) {
+      } @else if (selectedSourceKey() && unpaidBills().length === 0) {
         <p class="rounded-base border border-border bg-surface px-3 py-4 text-center text-[13px] text-muted">
-          Nothing unpaid on this lease, so there is nothing to put on a statement.
+          Nothing unpaid for this resident and unit, so there is nothing to put on a statement.
         </p>
       } @else if (unpaidBills().length > 0) {
         <fieldset class="flex flex-col gap-1.5">
@@ -108,7 +109,7 @@
             [checked]="sendSms()"
             (change)="sendSms.set(!sendSms())"
           />
-          Text the tenant a summary (1 SMS)
+          Text the resident a summary (1 SMS)
         </label>
       }
     </div>

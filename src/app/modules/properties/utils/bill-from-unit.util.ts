@@ -4,7 +4,22 @@ import type { UnitDetail, UnitOutstandingBill } from '../../../core/models/prope
 
 export function billFromUnit(unit: UnitDetail, bill: UnitOutstandingBill): BillListItem | null {
   const lease = unit.activeLease;
-  if (!lease) return null;
+  const ownership = unit.currentOwnership;
+  if (!lease && !ownership) return null;
+  const resident = lease?.resident ?? ownership!.resident;
+  const source = {
+    id: lease?.id ?? ownership!.id,
+    resident: {
+      id: resident.id,
+      firstName: resident.firstName,
+      lastName: resident.lastName,
+    },
+    unit: {
+      id: unit.id,
+      unitNo: unit.unitNo,
+      property: { id: unit.propertyId, name: '' },
+    },
+  };
   return {
     id: bill.id,
     type: bill.type,
@@ -13,7 +28,8 @@ export function billFromUnit(unit: UnitDetail, bill: UnitOutstandingBill): BillL
     status: 'UNPAID',
     paidAt: null,
     notes: null,
-    leaseId: lease.id,
+    leaseId: lease?.id ?? null,
+    ...(ownership ? { ownershipId: ownership.id } : {}),
     createdAt: '',
     updatedAt: '',
     utilityDetail: null,
@@ -21,22 +37,7 @@ export function billFromUnit(unit: UnitDetail, bill: UnitOutstandingBill): BillL
     label: BILL_TYPE_LABELS[bill.type],
     paidAmount: '0',
     balance: bill.amount,
-    lease: {
-      id: lease.id,
-      monthlyRent: lease.monthlyRent,
-      rentPricingBasis: lease.rentPricingBasis,
-      rentFloorAreaSqm: lease.rentFloorAreaSqm,
-      rentRatePerSqm: lease.rentRatePerSqm,
-      resident: {
-        id: lease.resident.id,
-        firstName: lease.resident.firstName,
-        lastName: lease.resident.lastName,
-      },
-      unit: {
-        id: unit.id,
-        unitNo: unit.unitNo,
-        property: { id: unit.propertyId, name: '' },
-      },
-    },
+    lease: lease ? source : null,
+    ...(ownership ? { ownership: source } : {}),
   };
 }

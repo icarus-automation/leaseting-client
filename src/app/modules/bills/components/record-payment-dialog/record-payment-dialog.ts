@@ -5,6 +5,7 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import type { BillListItem } from '../../../../core/models/bill.types';
 import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
+import { billSourceOf } from '../../../../shared/utils/bill-source.util';
 import { paymentTargetFromRow, type PaymentTarget } from '../payment-workspace/payment-target';
 import { PaymentWorkspace } from '../payment-workspace/payment-workspace';
 
@@ -33,8 +34,9 @@ export class RecordPaymentDialog {
   readonly subheading = computed(() => {
     const bill = this.bill();
     if (!bill) return null;
-    const resident = bill.lease.resident;
-    return `${resident.firstName} ${resident.lastName} · Unit ${bill.lease.unit.unitNo}`;
+    const source = billSourceOf(bill);
+    const resident = source.resident;
+    return `${resident.firstName} ${resident.lastName} · Unit ${source.unit.unitNo}`;
   });
   readonly target = computed<PaymentTarget | null>(() => {
     const bill = this.bill();

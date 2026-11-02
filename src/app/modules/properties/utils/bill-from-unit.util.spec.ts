@@ -18,6 +18,8 @@ const unit = {
   updatedAt: '',
   status: 'OCCUPIED',
   hasOverdueBills: false,
+  mode: 'RENTAL',
+  currentOwnership: null,
   activeLease: {
     id: 'lease-1',
     startDate: '2026-01-01',

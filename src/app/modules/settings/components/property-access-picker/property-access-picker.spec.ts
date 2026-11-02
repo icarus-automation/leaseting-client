@@ -22,7 +22,7 @@ class Host {
 }
 
 function property(id: string, name: string, city = 'Makati'): PropertyListItem {
-  return { id, name, city } as PropertyListItem;
+  return { id, name, city, mode: 'RENTAL' } as PropertyListItem;
 }
 
 const PROPERTIES = [property('p-harbor', 'Harbor View', 'Pasig'), property('p-brickstone', 'Brickstone')];

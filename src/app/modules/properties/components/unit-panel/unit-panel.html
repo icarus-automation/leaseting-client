@@ -36,7 +36,7 @@
             <svg pIcon="pencil" [size]="13" aria-hidden="true"></svg>
           </button>
         }
-        @if (u.status === 'VACANT' && canManageUnits()) {
+        @if ((u.status === 'VACANT' || u.status === 'AVAILABLE') && canManageUnits()) {
           <button
             type="button"
             class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--destructive)_35%,transparent)] hover:bg-muted-destructive hover:text-destructive motion-reduce:transition-none"
@@ -57,7 +57,82 @@
       </div>
     </header>
 
-    @if (u.activeLease; as lease) {
+    @if (u.mode === 'CONDO') {
+      @if (resaleWarning(); as warning) {
+        <p class="rounded-base border border-[color-mix(in_oklab,var(--warning)_35%,transparent)] bg-surface px-3 py-2 text-[13px] text-body" role="status">
+          Resale saved. The previous owner still has {{ warning.unpaidBillCount }} unpaid
+          {{ warning.unpaidBillCount === 1 ? 'bill' : 'bills' }} totaling {{ warning.outstandingBalance | phpCurrency }}.
+        </p>
+      }
+
+      @if (u.currentOwnership; as ownership) {
+        <section class="flex flex-col gap-2 border-t border-border pt-3" aria-label="Owner">
+          <h3 class="text-[12px] font-semibold uppercase tracking-wide text-muted">Owner</h3>
+          <div class="flex flex-col gap-1 text-[13px]">
+            <p class="font-medium text-heading">{{ ownership.resident.firstName }} {{ ownership.resident.lastName }}</p>
+            <p class="flex items-center gap-1.5 text-body">
+              <svg pIcon="phone" class="text-muted" [size]="12" aria-hidden="true"></svg>
+              {{ ownership.resident.contactNo }}
+            </p>
+            @if (ownership.resident.email; as email) {
+              <p class="flex items-center gap-1.5 break-all text-body">
+                <svg pIcon="envelope" class="text-muted" [size]="12" aria-hidden="true"></svg>
+                {{ email }}
+              </p>
+            }
+          </div>
+          <dl class="flex flex-col gap-1.5 text-[13px]">
+            <div class="flex justify-between gap-2">
+              <dt class="text-muted">Since</dt>
+              <dd class="font-medium text-body">{{ ownership.startDate | date: 'MMM d, y' }}</dd>
+            </div>
+            @if (ownership.price; as price) {
+              <div class="flex justify-between gap-2">
+                <dt class="text-muted">Price</dt>
+                <dd class="font-medium text-body">{{ price | phpCurrency }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+      } @else {
+        <section class="flex flex-col gap-2 border-t border-border pt-3">
+          <p class="text-[12.5px] text-muted">This unit is available.</p>
+        </section>
+      }
+
+      @if (ownerships().length > 0) {
+        <section class="flex flex-col gap-2 border-t border-border pt-3" aria-label="Ownership history">
+          <h3 class="text-[12px] font-semibold uppercase tracking-wide text-muted">History</h3>
+          <ul class="flex flex-col gap-1.5">
+            @for (row of ownerships(); track row.id) {
+              <li class="flex items-baseline justify-between gap-2 text-[13px]">
+                <span class="min-w-0 truncate font-medium text-heading">{{ row.resident.firstName }} {{ row.resident.lastName }}</span>
+                <span class="shrink-0 text-muted">
+                  {{ row.startDate | date: 'MMM d, y' }}
+                  @if (row.endDate) {
+                    to {{ row.endDate | date: 'MMM d, y' }}
+                  } @else {
+                    to now
+                  }
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @if (canManageLeases() && (u.status === 'AVAILABLE' || u.status === 'SOLD')) {
+        <div class="border-t border-border pt-3">
+          <button
+            type="button"
+            class="inline-flex h-9 items-center justify-center gap-2 rounded-base border-none bg-primary px-3 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover motion-reduce:transition-none"
+            (click)="openSale()"
+          >
+            {{ u.status === 'SOLD' ? 'Resell' : 'Sell' }}
+          </button>
+        </div>
+      }
+    } @else if (u.activeLease; as lease) {
       <section class="flex flex-col gap-2 border-t border-border pt-3" aria-label="Lease">
         <h3 class="text-[12px] font-semibold uppercase tracking-wide text-muted">Lease</h3>
         <dl class="flex flex-col gap-1.5 text-[13px]">
@@ -214,4 +289,18 @@
   [bill]="paymentTarget()"
   (changed)="onPaymentsChanged()"
 />
+
+@if (unit(); as saleUnit) {
+  @if (saleUnit.mode === 'CONDO') {
+    <app-sell-unit-dialog
+      [visible]="saleDialogVisible()"
+      (visibleChange)="saleDialogVisible.set($event)"
+      [unitId]="saleUnit.id"
+      [intent]="saleUnit.status === 'SOLD' ? 'resale' : 'sell'"
+      [billsElectricityByDefault]="billsElectricityByDefault()"
+      [billsWaterByDefault]="billsWaterByDefault()"
+      (saved)="onSaleSaved($event)"
+    />
+  }
+}
 

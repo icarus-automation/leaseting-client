@@ -64,8 +64,21 @@ export interface ResidentDocumentItem {
   createdAt: string;
 }
 
+export interface ResidentOwnershipItem {
+  id: string;
+  startDate: string;
+  endDate: string | null;
+  price: string | null;
+  unit: {
+    id: string;
+    unitNo: string;
+    property: { id: string; name: string };
+  };
+}
+
 export interface ResidentDetail extends ResidentResponse {
   leases: ResidentLeaseItem[];
+  ownerships: ResidentOwnershipItem[];
   documents: ResidentDocumentItem[];
   outstandingBalance: string;
   unpaidBillCount: number;

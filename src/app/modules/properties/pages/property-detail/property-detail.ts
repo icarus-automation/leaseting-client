@@ -26,6 +26,7 @@ import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
+import { floorSummaryBadges } from '../../../../shared/utils/unit-tone.util';
 import { FloorFormDialog } from '../../components/floor-form-dialog/floor-form-dialog';
 import { FloorMapEditor } from '../../components/floor-map-editor/floor-map-editor';
 import { FloorTabs } from '../../components/floor-tabs/floor-tabs';
@@ -97,6 +98,7 @@ export class PropertyDetailPage {
   readonly unitEditTarget = signal<UnitFormTarget | null>(null);
 
   readonly mapMode = signal(false);
+  readonly floorSummaryBadges = floorSummaryBadges;
   readonly mapTarget = signal<FloorUnitItem | null>(null);
   readonly savingCoordinates = signal(false);
   readonly pickerHint = signal(false);

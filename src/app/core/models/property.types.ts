@@ -1,5 +1,5 @@
 import type { ChargeLine } from './charge-item.types';
-import type { BillType, PricingBasis, UnitStatus } from './enums';
+import type { BillType, PricingBasis, PropertyMode, UnitStatus } from './enums';
 import type { LeaseRentSnapshot } from './lease.types';
 
 export interface UnitSummary {
@@ -20,6 +20,7 @@ export interface PropertyResponse {
   type: PropertyTypeRef;
   addressLine: string;
   city: string;
+  mode: PropertyMode;
   imageUrl: string | null;
   defaultRatePerSqm: number | null;
   /** Whether a new lease here starts with Leaseting billing its electricity. */
@@ -51,10 +52,13 @@ export interface CreatePropertyPayload {
   propertyTypeId: string;
   addressLine: string;
   city: string;
+  mode: PropertyMode;
   defaultRatePerSqm?: number | null;
   billsElectricityByDefault?: boolean;
   billsWaterByDefault?: boolean;
 }
+
+export type UpdatePropertyPayload = Partial<Omit<CreatePropertyPayload, 'mode'>>;
 
 export interface FloorResponse {
   id: string;
@@ -80,6 +84,7 @@ export interface FloorUnitItem {
   status: UnitStatus;
   hasOverdueBills: boolean;
   activeLease: { id: string; residentName: string } | null;
+  currentOwner: { id: string; residentName: string } | null;
 }
 
 export interface FloorDetail extends FloorResponse {
@@ -139,10 +144,29 @@ export interface UnitActiveLease extends LeaseRentSnapshot {
   outstandingBills: UnitOutstandingBill[];
 }
 
+export interface UnitCurrentOwnership {
+  id: string;
+  startDate: string;
+  endDate: string | null;
+  price: string | null;
+  note: string | null;
+  billsElectricity: boolean;
+  billsWater: boolean;
+  resident: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string | null;
+    contactNo: string;
+  };
+}
+
 export interface UnitDetail extends UnitResponse {
+  mode: PropertyMode;
   status: UnitStatus;
   hasOverdueBills: boolean;
   activeLease: UnitActiveLease | null;
+  currentOwnership: UnitCurrentOwnership | null;
 }
 
 export type UnitFieldsWrite = {

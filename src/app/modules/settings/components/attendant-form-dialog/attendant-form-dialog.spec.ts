@@ -37,7 +37,7 @@ const CREATED: ParkingAttendantResponse = {
   propertyAccess: EVERY_PROPERTY,
 };
 
-const BRICKSTONE = { id: 'p-brickstone', name: 'Brickstone', city: 'Makati' } as PropertyListItem;
+const BRICKSTONE = { id: 'p-brickstone', name: 'Brickstone', city: 'Makati', mode: 'RENTAL' } as PropertyListItem;
 
 describe('AttendantFormDialog', () => {
   const api = { create: vi.fn() };

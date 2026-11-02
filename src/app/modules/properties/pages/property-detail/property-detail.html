@@ -46,9 +46,9 @@
       </div>
       @if (floor(); as f) {
         <div class="flex items-center gap-1.5" aria-label="Floor status summary">
-          <app-status-badge tone="success" label="Settled" [count]="f.summary.settled" />
-          <app-status-badge tone="destructive" label="Overdue" [count]="f.summary.overdue" />
-          <app-status-badge tone="vacant" label="Vacant" [count]="f.summary.vacant" />
+          @for (badge of floorSummaryBadges(p.mode, f.summary); track badge.label) {
+            <app-status-badge [tone]="badge.tone" [label]="badge.label" [count]="badge.count" />
+          }
         </div>
       }
     </header>
@@ -241,6 +241,8 @@
         } @else {
           <app-unit-panel
             [unitId]="selectedUnitId()"
+            [billsElectricityByDefault]="p.billsElectricityByDefault"
+            [billsWaterByDefault]="p.billsWaterByDefault"
             (changed)="refreshFloor()"
             (editRequested)="openEditUnit($event)"
             (closeRequested)="selectedUnitId.set(null)"

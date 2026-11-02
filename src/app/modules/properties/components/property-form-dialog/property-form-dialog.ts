@@ -20,6 +20,7 @@ import { Select } from 'primeng/select';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
+import type { PropertyMode } from '../../../../core/models/enums';
 import type { PropertyResponse } from '../../../../core/models/property.types';
 import type { PropertyTypeResponse } from '../../../../core/models/property-type.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
@@ -75,6 +76,7 @@ export class PropertyFormDialog {
     propertyTypeId: ['', [Validators.required]],
     addressLine: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
     city: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    mode: ['RENTAL' as PropertyMode, [Validators.required]],
     defaultRatePerSqm: [null as number | null, [Validators.min(0)]],
     utilities: utilityBillingGroup(),
   });
@@ -125,6 +127,7 @@ export class PropertyFormDialog {
           propertyTypeId: property.type.id,
           addressLine: property.addressLine,
           city: property.city,
+          mode: property.mode,
           defaultRatePerSqm: property.defaultRatePerSqm,
           utilities: {
             billsElectricity: property.billsElectricityByDefault,
@@ -207,23 +210,23 @@ export class PropertyFormDialog {
       return;
     }
 
-    const { utilities, ...raw } = this.form.getRawValue();
+    const { utilities, mode, ...raw } = this.form.getRawValue();
     const target = this.property();
     const fields = {
       ...raw,
       billsElectricityByDefault: utilities.billsElectricity,
       billsWaterByDefault: utilities.billsWater,
     };
-    const payload = target
-      ? fields
-      : { ...fields, defaultRatePerSqm: defaultRateOnCreate(raw.defaultRatePerSqm) };
     const image = this.imageFile();
     const removeImage = !!target?.imageUrl && this.imageTouched() && !image;
 
     this.saving.set(true);
     const request$ = target
-      ? this.properties.update(target.id, payload, image, removeImage)
-      : this.properties.create(payload, image);
+      ? this.properties.update(target.id, fields, image, removeImage)
+      : this.properties.create(
+          { ...fields, mode, defaultRatePerSqm: defaultRateOnCreate(raw.defaultRatePerSqm) },
+          image,
+        );
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (saved) => {

@@ -24,9 +24,9 @@
 
     <div class="flex items-center justify-between gap-2 px-3.5 pb-3.5 pt-1">
       <div class="flex flex-wrap items-center gap-1.5" aria-label="Unit summary">
-        <app-status-badge tone="success" label="Settled" [count]="p.unitSummary.settled" />
-        <app-status-badge tone="destructive" label="Overdue" [count]="p.unitSummary.overdue" />
-        <app-status-badge tone="vacant" label="Vacant" [count]="p.unitSummary.vacant" />
+        @for (badge of floorSummaryBadges(p.mode, p.unitSummary); track badge.label) {
+          <app-status-badge [tone]="badge.tone" [label]="badge.label" [count]="badge.count" />
+        }
       </div>
 
       @if (manageable()) {

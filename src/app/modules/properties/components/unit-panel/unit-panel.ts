@@ -20,6 +20,8 @@ import { KitService } from '../../../../core/kit/kit.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { BILL_TYPE_LABELS } from '../../../../core/models/enums';
 import type { BillListItem } from '../../../../core/models/bill.types';
+import type { ResaleWarning } from '../../../../core/models/ownership.types';
+import type { OwnershipResponse } from '../../../../core/models/ownership.types';
 import type { UnitDetail, UnitOutstandingBill } from '../../../../core/models/property.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
@@ -29,19 +31,22 @@ import { isPastDue, leaseTermLabel, ordinal } from '../../../../shared/utils/dat
 import { unitTone, unitToneLabel } from '../../../../shared/utils/unit-tone.util';
 import { RecordPaymentDialog } from '../../../bills/components/record-payment-dialog/record-payment-dialog';
 import { LeasesService } from '../../../leases/services/leases.service';
+import { OwnershipsService } from '../../../ownerships/services/ownerships.service';
 import { OnboardingsService } from '../../../residents/services/onboardings.service';
 import { UnitsService } from '../../services/units.service';
 import { billFromUnit } from '../../utils/bill-from-unit.util';
+import { SellUnitDialog } from '../sell-unit-dialog/sell-unit-dialog';
 
 @Component({
   selector: 'app-unit-panel',
-  imports: [DatePipe, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge, RecordPaymentDialog],
+  imports: [DatePipe, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge, RecordPaymentDialog, SellUnitDialog],
   templateUrl: './unit-panel.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UnitPanel {
   private readonly units = inject(UnitsService);
   private readonly leasesService = inject(LeasesService);
+  private readonly ownershipApi = inject(OwnershipsService);
   private readonly kit = inject(KitService);
   private readonly onboardings = inject(OnboardingsService);
   private readonly router = inject(Router);
@@ -51,15 +56,20 @@ export class UnitPanel {
   private readonly auth = inject(AuthService);
 
   readonly unitId = input.required<string | null>();
+  readonly billsElectricityByDefault = input(true);
+  readonly billsWaterByDefault = input(true);
   readonly changed = output<void>();
   readonly editRequested = output<UnitDetail>();
   readonly closeRequested = output<void>();
   readonly archived = output<void>();
 
   readonly unit = signal<UnitDetail | null>(null);
+  readonly ownerships = signal<OwnershipResponse[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly startingOnboarding = signal(false);
+  readonly saleDialogVisible = signal(false);
+  readonly resaleWarning = signal<ResaleWarning | null>(null);
   readonly paymentDialogVisible = signal(false);
   readonly paymentTarget = signal<BillListItem | null>(null);
   readonly canRecordPayments = computed(() => this.auth.can('payments:record'));
@@ -90,9 +100,11 @@ export class UnitPanel {
     effect(() => {
       const id = this.unitId();
       if (id) {
+        this.resaleWarning.set(null);
         this.fetch(id);
       } else {
         this.unit.set(null);
+        this.ownerships.set([]);
         this.error.set(null);
       }
     });
@@ -121,6 +133,16 @@ export class UnitPanel {
   onPaymentsChanged(): void {
     this.kit.celebrate();
     this.kit.load();
+    this.refetch();
+    this.changed.emit();
+  }
+
+  openSale(): void {
+    this.saleDialogVisible.set(true);
+  }
+
+  onSaleSaved(warning: ResaleWarning | null): void {
+    this.resaleWarning.set(warning);
     this.refetch();
     this.changed.emit();
   }
@@ -216,11 +238,23 @@ export class UnitPanel {
         next: (unit) => {
           this.unit.set(unit);
           this.loading.set(false);
+          if (unit.mode === 'CONDO') this.loadOwnerships(unit.id);
+          else this.ownerships.set([]);
         },
         error: (error: unknown) => {
           this.loading.set(false);
           this.error.set(apiErrorMessage(error, 'Could not load this unit.'));
         },
+      });
+  }
+
+  private loadOwnerships(unitId: string): void {
+    this.ownershipApi
+      .list(unitId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (rows) => this.ownerships.set(rows),
+        error: () => this.ownerships.set([]),
       });
   }
 }

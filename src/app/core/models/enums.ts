@@ -45,7 +45,9 @@ export const PAYMENT_SOURCE_LABELS: Record<PaymentSource, string> = {
   LEGACY: 'Legacy',
 };
 
-export type UnitStatus = 'OCCUPIED' | 'VACANT';
+export type UnitStatus = 'OCCUPIED' | 'VACANT' | 'SOLD' | 'AVAILABLE';
+
+export type PropertyMode = 'RENTAL' | 'CONDO';
 
 export type PricingBasis = 'FIXED' | 'PER_SQM';
 

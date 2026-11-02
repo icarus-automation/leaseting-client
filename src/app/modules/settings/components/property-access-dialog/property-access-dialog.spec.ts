@@ -55,8 +55,8 @@ function member(overrides: Partial<Member> = {}): Member {
 }
 
 const PROPERTIES = [
-  { id: 'p-brickstone', name: 'Brickstone', city: 'Makati' },
-  { id: 'p-harbor', name: 'Harbor View', city: 'Pasig' },
+  { id: 'p-brickstone', name: 'Brickstone', city: 'Makati', mode: 'RENTAL' },
+  { id: 'p-harbor', name: 'Harbor View', city: 'Pasig', mode: 'RENTAL' },
 ] as PropertyListItem[];
 
 describe('PropertyAccessDialog', () => {

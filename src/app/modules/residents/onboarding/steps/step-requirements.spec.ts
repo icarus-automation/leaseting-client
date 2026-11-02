@@ -32,6 +32,7 @@ function residentDetail(overrides: Partial<ResidentDetail> = {}): ResidentDetail
     createdAt: '2026-09-26T00:00:00.000Z',
     updatedAt: '2026-09-26T00:00:00.000Z',
     leases: [],
+    ownerships: [],
     documents: [],
     outstandingBalance: '0',
     unpaidBillCount: 0,

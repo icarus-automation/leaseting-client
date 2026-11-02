@@ -66,8 +66,13 @@
                   }
                 </div>
                 @if (previewId() === destination.id) {
-                  <div class="mt-3 max-h-56 overflow-hidden rounded-base border border-border bg-surface p-2">
-                    <app-private-image [url]="qrUrl(destination.id)" [alt]="destination.displayName + ' QR'" />
+                  <div class="mt-3 flex h-80 items-center justify-center rounded-base border border-border bg-surface p-2">
+                    <app-private-image
+                      class="flex h-full w-full items-center justify-center"
+                      [url]="qrUrl(destination.id)"
+                      [alt]="destination.displayName + ' QR'"
+                      fit="contain"
+                    />
                   </div>
                 }
               }

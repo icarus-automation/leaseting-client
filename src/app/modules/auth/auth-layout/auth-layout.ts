@@ -9,8 +9,8 @@ const PANEL_QUERY = '(min-width: 48rem)';
 
 /**
  * The frame the signed-out pages share: a narrow image panel down the left of
- * a wide screen (a quarter of the width, 280–360px), and the page's content
- * centered on a plain ground beside it. Phones get the content alone.
+ * a wide screen (a quarter of the width, with a 280px minimum), and the
+ * page's content centered on a plain ground beside it. Phones get the content alone.
  */
 @Component({
   selector: 'app-auth-layout',
@@ -18,7 +18,7 @@ const PANEL_QUERY = '(min-width: 48rem)';
   host: { class: 'flex min-h-dvh bg-background' },
   template: `
     <div
-      class="sticky top-0 hidden h-dvh w-1/4 min-w-[280px] max-w-[360px] shrink-0 overflow-hidden bg-auth-panel md:block"
+      class="sticky top-0 hidden h-dvh w-1/4 min-w-[280px] shrink-0 overflow-hidden bg-auth-panel md:block"
     >
       @if (showPanel()) {
         <img class="object-cover object-center" [ngSrc]="image()" fill priority alt="" />

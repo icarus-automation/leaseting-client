@@ -35,6 +35,14 @@ describe('AuthLayout', () => {
     expect(image?.closest('main')).toBeNull();
   });
 
+  it('keeps the panel at a steady share of wide screens without a maximum-width cap', () => {
+    const panel = render(true).querySelector('img')?.parentElement;
+
+    expect(panel?.classList).toContain('w-1/4');
+    expect(panel?.classList).toContain('min-w-[280px]');
+    expect(panel?.classList).not.toContain('max-w-[360px]');
+  });
+
   it('leaves the art out on a phone, so it is never downloaded', () => {
     const page = render(false);
 

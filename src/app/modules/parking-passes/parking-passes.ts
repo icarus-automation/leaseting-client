@@ -32,7 +32,7 @@ import {
   formatPassDay,
   isLinked,
   passStatus,
-  refundablePayments,
+  paymentsWithRemainder,
   reviewReasonLabel,
   waitingBill,
 } from './utils/parking-pass.util';
@@ -179,7 +179,7 @@ export class ParkingPasses {
       items.push({ label: 'Change plate', command: () => this.openPlate(pass) });
       items.push({ label: 'End pass', styleClass: 'row-overflow-danger', command: () => this.openEnd(pass) });
     }
-    if (this.canAdminister() && refundablePayments(pass).length > 0) {
+    if (this.canAdminister() && paymentsWithRemainder(pass).length > 0) {
       items.push({ label: 'Refund', command: () => this.openRefund(pass) });
     }
     this.overflowItems.set(items);
@@ -189,7 +189,7 @@ export class ParkingPasses {
 
   hasActions(pass: ParkingPass): boolean {
     if (!pass.endedAt && (this.canSell() || this.canAdminister())) return true;
-    return this.canAdminister() && refundablePayments(pass).length > 0;
+    return this.canAdminister() && paymentsWithRemainder(pass).length > 0;
   }
 
   /** Turning auto-renew off cancels the waiting bill, so it asks first when one is there. */

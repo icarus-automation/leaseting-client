@@ -20,8 +20,17 @@ export interface ApiErrorBody {
   statusCode: number;
   message: string | string[];
   error: string;
+  /** Set on a refusal the client can tell apart, such as BILL_PAID_REFUND_UNSUPPORTED. */
+  code?: string;
   path: string;
   timestamp: string;
+}
+
+/** The refusal's `code`, or null when the API sent none. */
+export function apiErrorCode(error: unknown): string | null {
+  const body = (error as { error?: Partial<ApiErrorBody> | string | null } | null)?.error;
+  if (!body || typeof body !== 'object') return null;
+  return typeof body.code === 'string' ? body.code : null;
 }
 
 export function apiErrorMessage(error: unknown, fallback = 'Something went wrong.'): string {

@@ -1,3 +1,4 @@
+import { apiErrorCode, apiErrorMessage } from '../../../core/models/api.types';
 import type { BadgeTone } from '../../../shared/ui/status-badge/status-badge';
 import type { PaymentDestinationResponse } from '../../../core/models/payment-destination.types';
 import {
@@ -37,9 +38,24 @@ export function withBillingDefaults(pass: ParkingPass): ParkingPass {
   };
 }
 
+export const BILL_PAID_REFUND_UNSUPPORTED = 'BILL_PAID_REFUND_UNSUPPORTED';
+
+export const BILL_PAID_REFUND_MESSAGE = "This month was paid through a bill. Bill refunds aren't supported yet.";
+
+/** Months with money left on them, including months paid through a bill, which cannot be refunded yet. */
+export function paymentsWithRemainder(pass: Pick<ParkingPass, 'payments'>): ParkingPassPayment[] {
+  return pass.payments.filter((payment) => paymentRemainingCents(payment) > 0);
+}
+
 /** A month paid through its bill holds its money on the bill, so it cannot be refunded on the pass. */
 export function refundablePayments(pass: Pick<ParkingPass, 'payments'>): ParkingPassPayment[] {
-  return pass.payments.filter((payment) => payment.billId === null && paymentRemainingCents(payment) > 0);
+  return paymentsWithRemainder(pass).filter((payment) => payment.billId === null);
+}
+
+/** The API's own words for a bill-paid month, instead of a generic failure. */
+export function refundErrorMessage(error: unknown): string {
+  if (apiErrorCode(error) === BILL_PAID_REFUND_UNSUPPORTED) return BILL_PAID_REFUND_MESSAGE;
+  return apiErrorMessage(error, 'Could not refund the payment.');
 }
 
 export function isLinked(pass: Pick<ParkingPass, 'leaseId' | 'ownershipId'>): boolean {

@@ -30,7 +30,7 @@
           <th scope="col" class="px-4 py-2.5">{{ showProperty() ? 'Terminal · Property' : 'Terminal' }}</th>
           <th scope="col" class="px-4 py-2.5">Attendant</th>
           @if (canVoid()) {
-            <th scope="col" class="px-4 py-2.5 text-right"><span class="sr-only">Actions</span></th>
+            <th scope="col" class="w-px whitespace-nowrap px-2 py-2.5 text-right"><span class="sr-only">Actions</span></th>
           }
         </tr>
       </thead>
@@ -67,7 +67,7 @@
             </td>
             <td class="px-4 py-3 text-[13px] text-body">{{ row.session.entryAttendantName }}</td>
             @if (canVoid()) {
-              <td class="px-4 py-3 text-right">
+              <td class="w-px whitespace-nowrap px-2 py-3 text-right">
                 <button
                   type="button"
                   class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"

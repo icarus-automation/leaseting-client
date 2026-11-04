@@ -206,7 +206,7 @@
                   {{ showLastActive() ? 'Last active' : 'Joined' }}
                 </th>
                 @if (showActions()) {
-                  <th scope="col" class="w-12 px-2 py-2.5"><span class="sr-only">Actions</span></th>
+                  <th scope="col" class="w-px whitespace-nowrap px-2 py-2.5 text-right"><span class="sr-only">Actions</span></th>
                 }
               </tr>
             </thead>
@@ -291,7 +291,7 @@
                     }
                   </td>
                   @if (showActions()) {
-                    <td class="px-2 py-2.5 text-right">
+                    <td class="w-px whitespace-nowrap px-2 py-2.5 text-right">
                       @if (actionsFor(member).length > 0) {
                         <button
                           type="button"

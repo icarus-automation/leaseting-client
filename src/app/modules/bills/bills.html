@@ -156,7 +156,7 @@
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Amount</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Due</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Status</th>
-            <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">
+            <th scope="col" class="w-px whitespace-nowrap px-2 py-2.5 text-right text-[12.5px] font-medium text-muted">
               <span class="sr-only">Actions</span>
             </th>
           </tr>
@@ -197,7 +197,7 @@
               <td class="px-4 py-3">
                 <app-status-badge [tone]="statusBadge(bill).tone" [label]="statusBadge(bill).label" />
               </td>
-              <td class="px-4 py-3" (click)="$event.stopPropagation()">
+              <td class="w-px whitespace-nowrap px-2 py-3" (click)="$event.stopPropagation()">
                 <div class="flex items-center justify-end gap-1">
                   @if (bill.status === 'UNPAID' && canRecordPayments()) {
                     <button

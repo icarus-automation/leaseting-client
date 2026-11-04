@@ -1,0 +1,45 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="End pass"
+  [subheading]="pass() ? pass()!.plateDisplay + ' · ' + pass()!.holderName : null"
+  [dirty]="errors.dirty()"
+  width="28rem"
+>
+  @if (error(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+  <p class="mb-4 text-[13px] leading-relaxed text-muted">
+    The plate can be sold again. Ending a pass does not refund the payment.
+  </p>
+  <form id="end-pass-form" class="flex flex-col gap-1.5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label class="text-[13px] font-medium text-heading" for="end-pass-reason">Reason</label>
+    <textarea
+      id="end-pass-reason"
+      rows="3"
+      formControlName="reason"
+      class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+    ></textarea>
+    @if (errors.fieldError('reason'); as message) {
+      <p class="text-[12.5px] text-destructive">{{ message }}</p>
+    }
+  </form>
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="end-pass-form"
+      class="inline-flex h-9 items-center rounded-base border-none bg-destructive px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      {{ saving() ? 'Ending...' : 'End pass' }}
+    </button>
+  </ng-container>
+</app-form-dialog>

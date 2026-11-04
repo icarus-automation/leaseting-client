@@ -88,6 +88,7 @@ const NAV_SECTIONS: NavSection[] = [
         count: 'openWorkOrders',
       },
       { label: 'Parking Overview', route: '/parking', icon: 'car', permissions: ['parking:view'] },
+      { label: 'Parking passes', route: '/parking-passes', icon: 'ticket', permissions: ['parking:view'] },
     ],
   },
   {

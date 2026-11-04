@@ -33,6 +33,7 @@ describe('visibleSettingsGroups', () => {
     expect(groups[1].cards.map((card) => card.route)).toEqual([
       'vehicle-types',
       'rate-plans',
+      'parking-pass-prices',
       'parking-rules',
       'parking-terminals',
     ]);
@@ -57,6 +58,7 @@ describe('SETTINGS_GROUPS parking order', () => {
     expect(parking?.cards.map((card) => card.route)).toEqual([
       'vehicle-types',
       'rate-plans',
+      'parking-pass-prices',
       'parking-rules',
       'parking-terminals',
     ]);
@@ -72,13 +74,24 @@ describe('SETTINGS_GROUPS parking order', () => {
 describe('SETTINGS_GROUPS property management', () => {
   it('lists late fees after charge items', () => {
     const property = SETTINGS_GROUPS.find((group) => group.label === 'Property Management');
-    expect(property?.cards.map((card) => card.route)).toEqual([
-      'property-types',
-      'charge-items',
-      'late-fees',
-      'payment-destinations',
-    ]);
+    expect(property?.cards.map((card) => card.route)).toEqual(['property-types', 'charge-items', 'late-fees']);
     expect(property?.cards.every((card) => !card.comingSoon)).toBe(true);
+  });
+});
+
+describe('SETTINGS_GROUPS payments', () => {
+  it('keeps payment destinations in their own section', () => {
+    const payments = SETTINGS_GROUPS.find((group) => group.label === 'Payments');
+    expect(payments?.cards.map((card) => [card.route, card.permission])).toEqual([
+      ['payment-destinations', 'payments:view'],
+    ]);
+    expect(SETTINGS_GROUPS.map((group) => group.label)).toEqual([
+      'General',
+      'Team & Access',
+      'Property Management',
+      'Payments',
+      'Parking Management',
+    ]);
   });
 });
 

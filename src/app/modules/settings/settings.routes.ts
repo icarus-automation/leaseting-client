@@ -60,6 +60,14 @@ export const SETTINGS_ROUTES: Routes = [
       import('./pages/parking-rules-settings/parking-rules-settings').then(m => m.ParkingRulesSettingsPage),
   },
   {
+    path: 'parking-pass-prices',
+    canActivate: [permissionGuard('parking:view')],
+    loadComponent: () =>
+      import('./pages/parking-pass-prices-settings/parking-pass-prices-settings').then(
+        m => m.ParkingPassPricesSettingsPage,
+      ),
+  },
+  {
     path: 'parking-terminals',
     canActivate: [permissionGuard('parking:view')],
     loadComponent: () =>

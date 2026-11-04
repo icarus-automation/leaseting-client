@@ -58,6 +58,7 @@ const COMMANDS: Command[] = [
   { id: 'nav-submissions', label: 'Payment submissions', icon: 'inbox', group: 'Go to', keywords: 'payment reviews residence care proof', route: '/bills/submissions', permissions: ['payment_submissions:view'] },
   { id: 'nav-work-orders', label: 'Work Orders', icon: 'wrench', group: 'Go to', keywords: 'maintenance repairs tickets', route: '/work-orders', permissions: ['maintenance_requests:view'] },
   { id: 'nav-parking', label: 'Parking Overview', icon: 'car', group: 'Go to', keywords: 'parking monitoring occupancy spaces vehicles attendants activity void shift cash', route: '/parking', permissions: ['parking:view'] },
+  { id: 'nav-parking-passes', label: 'Parking passes', icon: 'ticket', group: 'Go to', keywords: 'monthly pass plate holder renew refund', route: '/parking-passes', permissions: ['parking:view'] },
   { id: 'nav-reports', label: 'Reports', icon: 'chart-bar', group: 'Go to', keywords: 'analytics occupancy export catalog', route: '/reports', permissions: ['reports:view'] },
   { id: 'nav-revenue-by-resident', label: 'Revenue by Tenant', hint: 'Report', icon: 'users', group: 'Go to', keywords: 'revenue by tenant sales by customer details billed collected ledger money in', route: '/reports/revenue-by-resident', permissions: ['reports:view'] },
   { id: 'nav-portfolio-overview', label: 'Portfolio Overview', hint: 'Report', icon: 'chart-bar', group: 'Go to', keywords: 'collections aging occupancy dashboard', route: '/reports/portfolio-overview', permissions: ['reports:view'] },

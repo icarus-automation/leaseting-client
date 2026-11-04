@@ -14,9 +14,12 @@ export type AuditAction =
   | 'ROLE_ACTIVATED'
   | 'ROLE_DEACTIVATED'
   | 'ROLE_DELETED'
-  | 'MEMBER_PROPERTY_ACCESS_CHANGED';
+  | 'MEMBER_PROPERTY_ACCESS_CHANGED'
+  | 'PARKING_PASS_PLATE_CHANGED'
+  | 'PARKING_PASS_ENDED'
+  | 'PARKING_PASS_REFUNDED';
 
-export type AuditTargetType = 'MEMBER' | 'INVITATION' | 'ROLE';
+export type AuditTargetType = 'MEMBER' | 'INVITATION' | 'ROLE' | 'PARKING_PASS' | 'PARKING_PASS_PAYMENT';
 
 export interface AuditEvent {
   id: string;

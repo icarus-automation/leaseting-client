@@ -7,6 +7,8 @@ import { apiErrorMessage } from '../../../../core/models/api.types';
 import type {
   ParkingRevenueGrouping,
   ParkingRevenueGroupRow,
+  ParkingRevenueLine,
+  ParkingRevenueLineKey,
   ParkingRevenueReport,
 } from '../../../../core/models/report.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
@@ -26,6 +28,12 @@ import {
 } from '../../parking-report.util';
 import { ReportFiltersService } from '../../services/report-filters.service';
 import { ReportsService } from '../../services/reports.service';
+
+const LINE_LABELS: Record<ParkingRevenueLineKey, string> = {
+  'gate-fees': 'Paid exits',
+  'pass-payments': 'Pass payments',
+  'pass-refunds': 'Pass refunds',
+};
 
 const GROUPINGS: (SegmentedOption<ParkingRevenueGrouping> & { column: string })[] = [
   { value: 'day', label: 'By day', column: 'Day' },
@@ -72,14 +80,20 @@ export class ParkingRevenue {
 
   readonly caption = computed(() => {
     if (!this.report()) return null;
-    return `${this.rangeText()} · ${this.scopeLabel()} · Paid exits, cash`;
+    return `${this.rangeText()} · ${this.scopeLabel()} · Paid exits and monthly passes`;
   });
 
   readonly rows = computed<ParkingRevenueGroupRow[]>(
     () => this.report()?.breakdowns[this.grouping()] ?? [],
   );
 
-  readonly isEmpty = computed(() => (this.report()?.totals.exits ?? 0) === 0);
+  readonly hasExits = computed(() => (this.report()?.totals.exits ?? 0) > 0);
+
+  /** Nothing to show only when there are no exits and no pass money either. */
+  readonly isEmpty = computed(() => {
+    const report = this.report();
+    return !report || report.lines.every((line) => line.count === 0);
+  });
 
   readonly columnHeader = computed(
     () => GROUPINGS.find((option) => option.value === this.grouping())?.column ?? 'Group',
@@ -125,6 +139,10 @@ export class ParkingRevenue {
     return minutesLabel(minutes);
   }
 
+  lineLabel(line: ParkingRevenueLine): string {
+    return LINE_LABELS[line.key];
+  }
+
   print(): void {
     window.print();
   }
@@ -153,6 +171,10 @@ export class ParkingRevenue {
         report.totals.averageFee,
         report.totals.exits === 0 ? 0 : 100,
       ],
+      [],
+      ['Line', '', 'Count', 'Amount'],
+      ...report.lines.map((line) => [this.lineLabel(line), '', line.count, line.amount]),
+      ['Net', '', '', report.net],
     ];
 
     downloadCsv(

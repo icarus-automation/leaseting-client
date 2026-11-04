@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
 import type {
+  ActivePassesQuery,
+  ActivePassesReport,
   AgingBucket,
   ArAgingDetail,
   ArAgingQuery,
@@ -11,6 +13,7 @@ import type {
   CollectionsMonth,
   DelinquencyQuery,
   DelinquencyReport,
+  ParkingPassPaymentsReport,
   ParkingReportQuery,
   ParkingRevenueReport,
   ParkingVoidReport,
@@ -18,6 +21,7 @@ import type {
   RevenueByResidentQuery,
   RevenueByResidentReport,
   ShiftCashVarianceReport,
+  UnpaidPassBillsReport,
 } from '../../../core/models/report.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
 
@@ -81,6 +85,24 @@ export class ReportsService {
 
   parkingVoids(query: ParkingReportQuery): Observable<ParkingVoidReport> {
     return this.http.get<ParkingVoidReport>(`${this.base}/parking/voids`, {
+      params: toHttpParams({ ...query }),
+    });
+  }
+
+  activePasses(query: ActivePassesQuery): Observable<ActivePassesReport> {
+    return this.http.get<ActivePassesReport>(`${this.base}/parking/passes`, {
+      params: toHttpParams({ ...query }),
+    });
+  }
+
+  passPayments(query: ParkingReportQuery): Observable<ParkingPassPaymentsReport> {
+    return this.http.get<ParkingPassPaymentsReport>(`${this.base}/parking/pass-payments`, {
+      params: toHttpParams({ ...query }),
+    });
+  }
+
+  unpaidPassBills(query: { propertyId?: string }): Observable<UnpaidPassBillsReport> {
+    return this.http.get<UnpaidPassBillsReport>(`${this.base}/parking/pass-bills`, {
       params: toHttpParams({ ...query }),
     });
   }

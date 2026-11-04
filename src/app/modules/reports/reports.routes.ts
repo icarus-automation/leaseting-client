@@ -38,4 +38,17 @@ export const REPORTS_ROUTES: Routes = [
     path: 'void-audit',
     loadComponent: () => import('./pages/void-audit/void-audit').then(m => m.VoidAudit),
   },
+  {
+    path: 'active-passes',
+    loadComponent: () => import('./pages/active-passes/active-passes').then(m => m.ActivePasses),
+  },
+  {
+    path: 'pass-payments',
+    loadComponent: () => import('./pages/pass-payments/pass-payments').then(m => m.PassPayments),
+  },
+  {
+    path: 'unpaid-pass-bills',
+    loadComponent: () =>
+      import('./pages/unpaid-pass-bills/unpaid-pass-bills').then(m => m.UnpaidPassBills),
+  },
 ];

@@ -70,6 +70,7 @@
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Holder</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Property</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Paid through</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Billing</th>
             <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Status</th>
             <th scope="col" class="w-px whitespace-nowrap px-2 py-2.5 text-right text-[12.5px] font-medium text-muted">
               <span class="sr-only">Actions</span>
@@ -108,6 +109,43 @@
                 }
               </td>
               <td class="px-4 py-3">
+                @if (!linked(pass)) {
+                  <p class="text-[13px] text-muted">Not billed</p>
+                  <p class="text-[12px] text-muted">Paid at the terminal or office</p>
+                } @else {
+                  @if (!pass.endedAt) {
+                    <p class="text-[13px] text-body">{{ pass.autoRenew ? 'Auto-renew on' : 'Auto-renew off' }}</p>
+                  }
+                  @if (nextBill(pass); as bill) {
+                    <p class="text-[12px] text-muted tabular-nums">
+                      @if (canViewBills()) {
+                        <a [routerLink]="['/bills', bill.id]" class="hover:text-primary hover:underline">
+                          Next bill {{ bill.balance | phpCurrency }}
+                        </a>
+                      } @else {
+                        Next bill {{ bill.balance | phpCurrency }}
+                      }
+                      · due {{ day(bill.dueDate) }}
+                    </p>
+                  } @else if (!pass.endedAt && pass.autoRenew) {
+                    <p class="text-[12px] text-muted">No bill raised yet</p>
+                  }
+                  @for (bill of flaggedBills(pass); track bill.id) {
+                    <p class="mt-0.5 flex items-center gap-1 text-[12px] text-body">
+                      <svg pIcon="exclamation-triangle" [size]="12" class="shrink-0 text-warning" aria-hidden="true"></svg>
+                      @if (canViewBills()) {
+                        <a [routerLink]="['/bills', bill.id]" class="hover:text-primary hover:underline">
+                          Review bill · {{ bill.balance | phpCurrency }} left
+                        </a>
+                      } @else {
+                        <span>Review bill · {{ bill.balance | phpCurrency }} left</span>
+                      }
+                    </p>
+                    <p class="text-[12px] text-muted">{{ reviewReason(bill.reviewReason) }}</p>
+                  }
+                }
+              </td>
+              <td class="px-4 py-3">
                 <app-status-badge [tone]="status(pass).tone" [label]="status(pass).label" />
               </td>
               <td class="w-px whitespace-nowrap px-2 py-3">
@@ -119,6 +157,8 @@
                     [attr.aria-label]="'Actions for ' + pass.plateDisplay"
                     aria-haspopup="menu"
                     [attr.aria-expanded]="overflowForId() === pass.id"
+                    [attr.aria-busy]="busyPassId() === pass.id"
+                    [disabled]="busyPassId() === pass.id"
                     (click)="openOverflow($event, pass)"
                   >
                     <svg pIcon="ellipsis-v" [size]="13" aria-hidden="true"></svg>

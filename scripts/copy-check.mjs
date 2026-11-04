@@ -64,6 +64,11 @@ const COPY_TS = new Set([
   'src/app/modules/reports/pages/parking-revenue/parking-revenue.ts',
   'src/app/modules/reports/pages/shift-cash-variance/shift-cash-variance.ts',
   'src/app/modules/reports/pages/void-audit/void-audit.ts',
+  'src/app/modules/reports/pages/active-passes/active-passes.ts',
+  'src/app/modules/reports/pages/pass-payments/pass-payments.ts',
+  'src/app/modules/reports/pages/unpaid-pass-bills/unpaid-pass-bills.ts',
+  'src/app/modules/reports/pass-report.util.ts',
+  'src/app/modules/parking-passes/parking-passes.ts',
 ]);
 
 const INLINE_TEMPLATE_TS = new Set([

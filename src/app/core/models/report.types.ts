@@ -1,3 +1,5 @@
+import type { ParkingPassBillReviewReason } from './parking-pass.types';
+
 export interface CollectionsMonth {
   month: string;
   total: string;
@@ -229,9 +231,20 @@ export interface ParkingRevenueGroupRow {
   share: number;
 }
 
+export type ParkingRevenueLineKey = 'gate-fees' | 'pass-payments' | 'pass-refunds';
+
+export interface ParkingRevenueLine {
+  key: ParkingRevenueLineKey;
+  label: string;
+  count: number;
+  /** Signed: pass refunds are negative. */
+  amount: string;
+}
+
 export interface ParkingRevenueReport {
   from: string;
   to: string;
+  /** Paid exits only. */
   totals: {
     exits: number;
     collected: string;
@@ -240,6 +253,134 @@ export interface ParkingRevenueReport {
     averageStayMinutes: number;
   };
   breakdowns: Record<ParkingRevenueGrouping, ParkingRevenueGroupRow[]>;
+  /** Paid exits beside monthly pass payments and pass refunds in the same window. */
+  lines: ParkingRevenueLine[];
+  net: string;
+}
+
+export interface PassResident {
+  id: string;
+  name: string;
+  unitNo: string;
+}
+
+export type ActivePassState = 'active' | 'expiring' | 'lapsed';
+
+export interface ActivePassesQuery {
+  propertyId?: string;
+  withinDays?: number;
+}
+
+export interface ActivePassRow {
+  passId: string;
+  plateDisplay: string;
+  vehicleTypeName: string;
+  holderName: string;
+  holderContact: string | null;
+  propertyId: string;
+  propertyName: string;
+  paidUntil: string;
+  coveredThrough: string;
+  daysLeft: number;
+  state: ActivePassState;
+  autoRenew: boolean;
+  leaseId: string | null;
+  ownershipId: string | null;
+  resident: PassResident | null;
+}
+
+export interface ActivePassesReport {
+  asOf: string;
+  withinDays: number;
+  totals: { passes: number; active: number; expiring: number; lapsed: number };
+  rows: ActivePassRow[];
+}
+
+export type PassPaymentGrouping = 'day' | 'month' | 'property' | 'method' | 'taker';
+
+export type PassPaymentSource = 'terminal' | 'office' | 'bill';
+
+export interface PassMoneyTotals {
+  payments: number;
+  collected: string;
+  refunds: number;
+  refunded: string;
+  net: string;
+}
+
+export interface PassPaymentGroupRow extends PassMoneyTotals {
+  key: string;
+  label: string;
+}
+
+export interface PassPaymentRow {
+  id: string;
+  kind: 'payment' | 'refund';
+  at: string;
+  day: string;
+  /** Signed: a refund is negative. */
+  amount: string;
+  method: string;
+  methodLabel: string;
+  destinationName: string | null;
+  source: PassPaymentSource;
+  paymentId: string;
+  billId: string | null;
+  passId: string;
+  plateDisplay: string;
+  holderName: string;
+  vehicleTypeName: string;
+  propertyId: string;
+  propertyName: string;
+  periodStart: string;
+  periodEnd: string;
+  takerId: string;
+  takerName: string;
+  reason: string | null;
+}
+
+export interface ParkingPassPaymentsReport {
+  from: string;
+  to: string;
+  totals: PassMoneyTotals;
+  breakdowns: Record<PassPaymentGrouping, PassPaymentGroupRow[]>;
+  rows: PassPaymentRow[];
+}
+
+export interface UnpaidPassBillRow {
+  billId: string;
+  passId: string;
+  plateDisplay: string;
+  vehicleTypeName: string;
+  holderName: string;
+  resident: PassResident;
+  leaseId: string | null;
+  ownershipId: string | null;
+  propertyId: string;
+  propertyName: string;
+  amount: string;
+  paidAmount: string;
+  balance: string;
+  dueDate: string;
+  daysOverdue: number;
+  paidUntil: string;
+  passValid: boolean;
+  passEnded: boolean;
+  needsReview: boolean;
+  reviewReason: ParkingPassBillReviewReason | null;
+}
+
+export interface UnpaidPassBillsReport {
+  asOf: string;
+  totals: {
+    bills: number;
+    balance: string;
+    overdue: number;
+    overdueBalance: string;
+    passStillValid: number;
+    needsReview: number;
+  };
+  rows: UnpaidPassBillRow[];
 }
 
 export type ShiftVarianceState = 'balanced' | 'short' | 'over';

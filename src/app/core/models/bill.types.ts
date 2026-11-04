@@ -31,6 +31,8 @@ export interface BillResponse {
   label: string;
   paidAmount: string;
   balance: string;
+  /** Set on a PARKING_PASS bill: the pass that paying it extends. */
+  parkingPassId?: string | null;
 }
 
 export interface BillSourceSummary {

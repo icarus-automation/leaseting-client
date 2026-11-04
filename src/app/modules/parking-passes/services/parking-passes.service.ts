@@ -38,6 +38,15 @@ export class ParkingPassesService {
     return this.http.post<ParkingPass>(`${this.base}/${id}/end`, { reason });
   }
 
+  setAutoRenew(id: string, autoRenew: boolean): Observable<ParkingPass> {
+    return this.http.patch<ParkingPass>(`${this.base}/${id}/auto-renew`, { autoRenew });
+  }
+
+  /** Raises the next month's bill by hand. Repeating it returns the same bill. */
+  billNextMonth(id: string): Observable<ParkingPass> {
+    return this.http.post<ParkingPass>(`${this.base}/${id}/bills`, {});
+  }
+
   refund(paymentId: string, amount: number, reason: string): Observable<ParkingPassRefund> {
     return this.http.post<ParkingPassRefund>(`${API_BASE_URL}/parking-pass-payments/${paymentId}/refunds`, {
       amount,

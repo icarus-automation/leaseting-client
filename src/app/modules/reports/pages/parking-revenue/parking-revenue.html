@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5">
   <app-report-header
     title="Parking Revenue"
-    description="Cash collected on paid exits, for the selected period."
+    description="Cash collected on paid exits, with monthly pass payments and refunds, for the selected period."
     [caption]="caption()"
   >
     <button
@@ -59,13 +59,58 @@
           <svg pIcon="car" [size]="18" aria-hidden="true"></svg>
         </div>
         <div class="flex flex-col gap-1">
-          <h2 class="font-heading text-[15px] font-semibold text-heading">No exits collected</h2>
+          <h2 class="font-heading text-[15px] font-semibold text-heading">Nothing collected</h2>
           <p class="max-w-[52ch] text-[13px] leading-relaxed text-muted">
-            No paid exits between {{ rangeText() }}. Vehicles still in park and voided stays have no fee, so they are not listed.
+            No paid exits and no pass payments between {{ rangeText() }}. Vehicles still in park and voided stays have no fee, so they are not listed.
           </p>
         </div>
       </div>
     } @else {
+      <section class="flex flex-col gap-3 rounded-base border border-border bg-background p-4" aria-labelledby="parking-revenue-lines">
+        <h2 id="parking-revenue-lines" class="font-heading text-[15px] font-semibold text-heading">Collected, all sources</h2>
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">Paid exits, pass payments, and pass refunds between {{ data.from }} and {{ data.to }}.</caption>
+          <thead>
+            <tr class="border-b border-border">
+              <th scope="col" class="py-2 pr-4 text-[12.5px] font-medium text-muted">Line</th>
+              <th scope="col" class="py-2 pr-4 text-right text-[12.5px] font-medium text-muted">Count</th>
+              <th scope="col" class="py-2 text-right text-[12.5px] font-medium text-muted">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of data.lines; track line.key) {
+              <tr class="border-b border-border">
+                <th scope="row" class="py-2 pr-4 text-left text-[13.5px] font-medium text-body">{{ lineLabel(line) }}</th>
+                <td class="whitespace-nowrap py-2 pr-4 text-right text-[13px] tabular-nums text-muted">{{ line.count }}</td>
+                <td
+                  class="whitespace-nowrap py-2 text-right text-[13px] tabular-nums"
+                  [class]="line.key === 'pass-refunds' && line.count > 0 ? 'text-destructive' : 'text-body'"
+                >
+                  {{ line.amount | phpCurrency }}
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row" class="pt-2 pr-4 text-left text-[13.5px] font-semibold text-heading">Net</th>
+              <td class="pt-2 pr-4"></td>
+              <td class="whitespace-nowrap pt-2 text-right text-[13.5px] font-semibold tabular-nums text-heading">
+                {{ data.net | phpCurrency }}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+        <p class="text-[12.5px] leading-relaxed text-muted">
+          Pass payments count every method, including months paid through a bill. Parking Pass Payments breaks them down.
+        </p>
+      </section>
+
+      @if (!hasExits()) {
+        <p class="rounded-base border border-dashed border-border bg-background px-4 py-3 text-[13px] text-muted">
+          No paid exits between {{ rangeText() }}, so there is no breakdown by terminal, attendant, or vehicle.
+        </p>
+      } @else {
       <div class="grid gap-3 sm:grid-cols-3">
         <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
           <span class="text-[12.5px] font-medium text-muted">Collected</span>
@@ -179,6 +224,7 @@
         {{ data.totals.collected | phpCurrency }}. Fees are the amount snapshotted at exit, not a
         re-pricing against today's rate plans.
       </p>
+      }
     }
   }
 </div>

@@ -1,0 +1,176 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="Unpaid Pass Bills"
+    description="Open parking pass bills, and whether each pass still covers the car."
+    [caption]="caption()"
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="exportCsv()"
+    >
+      <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+      <span>Export CSV</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  <section
+    class="grid gap-4 rounded-base border border-border bg-background p-4 print:hidden min-[1100px]:grid-cols-4"
+    aria-label="Report filters"
+  >
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="pass-bills-property">Property</label>
+      <p-select
+        inputId="pass-bills-property"
+        [options]="propertyOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="propertyId()"
+        (ngModelChange)="onPropertyChange($event)"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+  </section>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (row of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else if (report(); as data) {
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted-success text-success">
+          <svg pIcon="check-circle" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-[15px] font-semibold text-heading">No pass bill is open</h2>
+          <p class="max-w-[52ch] text-[13px] leading-relaxed text-muted">
+            Every parking pass bill here is paid. A linked pass with auto-renew on gets its next month as a
+            bill as soon as the current one is paid.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <div class="grid gap-3 sm:grid-cols-4">
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Outstanding</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.balance | phpCurrency }}</span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.totals.bills }} bill{{ data.totals.bills === 1 ? '' : 's' }}
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Overdue</span>
+          <span
+            class="font-heading text-xl font-semibold tabular-nums"
+            [class]="data.totals.overdue > 0 ? 'text-destructive' : 'text-heading'"
+          >
+            {{ data.totals.overdueBalance | phpCurrency }}
+          </span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.totals.overdue }} bill{{ data.totals.overdue === 1 ? '' : 's' }} past due
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Pass still covers</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.passStillValid }}</span>
+          <span class="text-[12px] text-muted">The car still gets in</span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Needs review</span>
+          <span
+            class="font-heading text-xl font-semibold tabular-nums"
+            [class]="data.totals.needsReview > 0 ? 'text-warning' : 'text-heading'"
+          >
+            {{ data.totals.needsReview }}
+          </span>
+          <span class="text-[12px] text-muted">Kept open by a payment</span>
+        </div>
+      </div>
+
+      <div class="relative overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">Open parking pass bills as of {{ data.asOf }}, most overdue first.</caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Due</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Pass</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Holder</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Balance</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Pass state</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of data.rows; track row.billId) {
+              <tr class="border-b border-border align-top transition-colors duration-150 ease-out last:border-b-0 hover:bg-surface motion-reduce:transition-none">
+                <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body">
+                  @if (canViewBills()) {
+                    <a [routerLink]="['/bills', row.billId]" class="block tabular-nums hover:text-primary hover:underline">{{ day(row.dueDate) }}</a>
+                  } @else {
+                    <span class="block tabular-nums">{{ day(row.dueDate) }}</span>
+                  }
+                  <span class="block text-[12px]" [class]="row.daysOverdue > 0 ? 'text-destructive' : 'text-muted'">{{ ageLabel(row) }}</span>
+                </td>
+                <th scope="row" class="px-4 py-2.5 text-left font-normal">
+                  <span class="block text-[13.5px] font-medium tracking-wide text-body">{{ row.plateDisplay }}</span>
+                  <span class="block text-[12px] text-muted">{{ row.vehicleTypeName }} · {{ row.propertyName }}</span>
+                </th>
+                <td class="px-4 py-2.5 text-[13px] text-body">
+                  <span class="block">{{ row.holderName }}</span>
+                  <span class="block text-[12px] text-muted">
+                    {{ row.resident.name }} · Unit {{ row.resident.unitNo }} · {{ row.leaseId ? 'Lease' : 'Ownership' }}
+                  </span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums">
+                  <span class="block font-semibold text-heading">{{ row.balance | phpCurrency }}</span>
+                  @if (row.paidAmount !== '0.00') {
+                    <span class="block text-[12px] text-muted">{{ row.paidAmount | phpCurrency }} of {{ row.amount | phpCurrency }} paid</span>
+                  }
+                </td>
+                <td class="px-4 py-2.5 text-[13px]">
+                  <app-status-badge [tone]="passBadge(row).tone" [label]="passBadge(row).label" />
+                  <span class="mt-1 block text-[12px] text-muted">Paid through {{ day(row.paidUntil) }}</span>
+                  @if (row.needsReview) {
+                    <span class="mt-0.5 flex items-center gap-1 text-[12px] text-body">
+                      <svg pIcon="exclamation-triangle" [size]="12" class="shrink-0 text-warning" aria-hidden="true"></svg>
+                      Needs review: {{ reviewLabel(row) }}
+                    </span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-[12.5px] leading-relaxed text-muted print:hidden">
+        Paying a pass bill on the lease or ownership extends the pass a month. Turning auto-renew off or ending
+        the pass cancels its unpaid bill. A bill that already has a payment stays open and is marked for review.
+      </p>
+    }
+  }
+</div>

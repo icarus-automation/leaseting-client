@@ -19,7 +19,7 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ChargeItemResponse } from '../../../../core/models/charge-item.types';
-import { BILL_TYPE_LABELS, BILL_TYPE_OPTIONS, type BillType } from '../../../../core/models/enums';
+import { BILL_TYPE_LABELS, MANUAL_BILL_TYPE_OPTIONS, type BillType } from '../../../../core/models/enums';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
@@ -47,7 +47,7 @@ export class ChargeItemSettings {
   readonly error = signal<string | null>(null);
   readonly loading = computed(() => this.items() === null && this.error() === null);
 
-  readonly billTypeOptions = BILL_TYPE_OPTIONS;
+  readonly billTypeOptions = MANUAL_BILL_TYPE_OPTIONS;
   readonly billTypeLabels = BILL_TYPE_LABELS;
 
   readonly createForm = this.buildForm();

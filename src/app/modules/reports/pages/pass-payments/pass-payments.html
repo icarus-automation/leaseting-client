@@ -1,0 +1,199 @@
+<div class="flex flex-col gap-5">
+  <app-report-header
+    title="Parking Pass Payments"
+    description="Monthly pass payments and refunds, for the selected period."
+    [caption]="caption()"
+  >
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="exportCsv()"
+    >
+      <svg pIcon="download" [size]="14" aria-hidden="true"></svg>
+      <span>Export CSV</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out enabled:hover:bg-surface disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="loading() || isEmpty()"
+      (click)="print()"
+    >
+      <svg pIcon="print" [size]="14" aria-hidden="true"></svg>
+      <span>Print</span>
+    </button>
+  </app-report-header>
+
+  <section
+    class="grid gap-4 rounded-base border border-border bg-background p-4 print:hidden min-[1100px]:grid-cols-5"
+    aria-label="Report filters"
+  >
+    <app-parking-scope-filter idPrefix="pass-payments" [value]="scope()" (valueChange)="onScopeChange($event)" />
+  </section>
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (row of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div
+      class="flex items-center gap-2 rounded-base border border-[color-mix(in_oklab,var(--destructive)_28%,transparent)] bg-muted-destructive px-3 py-2.5 text-[13px] text-body"
+      role="alert"
+    >
+      <svg pIcon="exclamation-circle" class="shrink-0 text-destructive" [size]="16" aria-hidden="true"></svg>
+      <span>{{ message }}</span>
+      <button type="button" class="ml-auto text-[13px] font-medium text-primary hover:underline" (click)="load()">
+        Retry
+      </button>
+    </div>
+  } @else if (report(); as data) {
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center gap-3 rounded-base border border-dashed border-border bg-background px-6 py-12 text-center">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-muted">
+          <svg pIcon="receipt" [size]="18" aria-hidden="true"></svg>
+        </div>
+        <div class="flex flex-col gap-1">
+          <h2 class="font-heading text-[15px] font-semibold text-heading">No pass payments</h2>
+          <p class="max-w-[52ch] text-[13px] leading-relaxed text-muted">
+            No monthly pass was paid for or refunded between {{ rangeText() }}. A terminal filter shows only
+            the payments taken on that terminal's shifts.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Collected</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.collected | phpCurrency }}</span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.totals.payments }} payment{{ data.totals.payments === 1 ? '' : 's' }}
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Refunded</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.refunded | phpCurrency }}</span>
+          <span class="text-[12px] tabular-nums text-muted">
+            {{ data.totals.refunds }} refund{{ data.totals.refunds === 1 ? '' : 's' }}
+          </span>
+        </div>
+        <div class="flex flex-col gap-0.5 rounded-base border border-border bg-background px-4 py-3">
+          <span class="text-[12.5px] font-medium text-muted">Net</span>
+          <span class="font-heading text-xl font-semibold tabular-nums text-heading">{{ data.totals.net | phpCurrency }}</span>
+          <span class="text-[12px] text-muted">Collected less refunded</span>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 print:hidden">
+        <app-segmented-control
+          [options]="groupings"
+          [value]="grouping()"
+          ariaLabel="Break the period down by"
+          (valueChange)="onGroupingChange($event)"
+        />
+        <span class="text-[12.5px] text-muted">
+          {{ groupRows().length }} row{{ groupRows().length === 1 ? '' : 's' }}
+        </span>
+      </div>
+
+      <div class="relative overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">
+            Pass payments and refunds between {{ data.from }} and {{ data.to }}, {{ columnHeader() }}.
+          </caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">{{ columnHeader() }}</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Payments</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Collected</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Refunds</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Refunded</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Net</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of groupRows(); track row.key) {
+              <tr class="border-b border-border transition-colors duration-150 ease-out last:border-b-0 hover:bg-surface motion-reduce:transition-none">
+                <th scope="row" class="px-4 py-2.5 text-left text-[13.5px] font-medium text-body">{{ groupLabel(row) }}</th>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-body">{{ row.payments }}</td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-body">{{ row.collected | phpCurrency }}</td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-muted">{{ row.refunds }}</td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] tabular-nums text-muted">{{ row.refunded | phpCurrency }}</td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums text-heading">{{ row.net | phpCurrency }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="border-t border-border bg-surface">
+              <th scope="row" class="px-4 py-2.5 text-left text-[13px] font-semibold text-heading">Total</th>
+              <td class="px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums text-heading">{{ data.totals.payments }}</td>
+              <td class="px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums text-heading">{{ data.totals.collected | phpCurrency }}</td>
+              <td class="px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums text-heading">{{ data.totals.refunds }}</td>
+              <td class="px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums text-heading">{{ data.totals.refunded | phpCurrency }}</td>
+              <td class="px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums text-heading">{{ data.totals.net | phpCurrency }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <h2 class="font-heading text-[15px] font-semibold text-heading">Every payment and refund</h2>
+      <div class="relative overflow-x-auto rounded-base border border-border print:overflow-visible print:rounded-none">
+        <table class="w-full border-collapse text-left">
+          <caption class="sr-only">Each pass payment and refund between {{ data.from }} and {{ data.to }}, newest first.</caption>
+          <thead>
+            <tr class="border-b border-border bg-surface">
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">When</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Pass</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Method</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Month</th>
+              <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Taken by</th>
+              <th scope="col" class="px-4 py-2.5 text-right text-[12.5px] font-medium text-muted">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of data.rows; track row.kind + row.id) {
+              <tr class="border-b border-border align-top transition-colors duration-150 ease-out last:border-b-0 hover:bg-surface motion-reduce:transition-none">
+                <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body">
+                  <span class="block tabular-nums">{{ stamp(row.at) }}</span>
+                  <span class="block text-[12px] text-muted">{{ isRefund(row) ? 'Refund' : 'Payment' }}</span>
+                </td>
+                <th scope="row" class="px-4 py-2.5 text-left font-normal">
+                  <span class="block text-[13.5px] font-medium tracking-wide text-body">{{ row.plateDisplay }}</span>
+                  <span class="block text-[12px] text-muted">{{ row.holderName }} · {{ row.propertyName }}</span>
+                </th>
+                <td class="px-4 py-2.5 text-[13px] text-body">
+                  <span class="block">{{ row.methodLabel }}</span>
+                  <span class="block text-[12px] text-muted">
+                    {{ sourceLabel(row) }}{{ row.destinationName ? ' · ' + row.destinationName : '' }}
+                  </span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-2.5 text-[13px] text-body">
+                  <span class="block tabular-nums">{{ day(row.periodStart) }}</span>
+                  <span class="block text-[12px] tabular-nums text-muted">to {{ day(row.periodEnd) }}</span>
+                </td>
+                <td class="px-4 py-2.5 text-[13px] text-body">
+                  <span class="block">{{ row.takerName }}</span>
+                  @if (row.reason) {
+                    <span class="block max-w-[36ch] text-[12px] text-muted">{{ row.reason }}</span>
+                  }
+                </td>
+                <td
+                  class="whitespace-nowrap px-4 py-2.5 text-right text-[13px] font-semibold tabular-nums"
+                  [class]="isRefund(row) ? 'text-destructive' : 'text-heading'"
+                >
+                  {{ row.amount | phpCurrency }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-[12.5px] leading-relaxed text-muted print:hidden">
+        A payment shows on the day it was taken. A month paid through a bill shows on the day the bill was settled,
+        and the bill's own payment is in the bill's history too. A refund comes out of the payment it names.
+      </p>
+    }
+  }
+</div>

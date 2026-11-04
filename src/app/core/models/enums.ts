@@ -5,7 +5,8 @@ export type BillType =
   | 'WATER'
   | 'INTERNET'
   | 'ASSOCIATION_DUES'
-  | 'OTHER';
+  | 'OTHER'
+  | 'PARKING_PASS';
 
 export const BILL_TYPE_LABELS: Record<BillType, string> = {
   RENT: 'Rent',
@@ -14,11 +15,16 @@ export const BILL_TYPE_LABELS: Record<BillType, string> = {
   INTERNET: 'Internet',
   ASSOCIATION_DUES: 'Association Dues',
   OTHER: 'Other',
+  PARKING_PASS: 'Parking Pass',
 };
 
+/** Every type, for filtering bill lists. */
 export const BILL_TYPE_OPTIONS = (
   Object.entries(BILL_TYPE_LABELS) as [BillType, string][]
 ).map(([value, label]) => ({ value, label }));
+
+/** Types staff raise by hand. A parking pass bill only comes from its pass, which it extends when paid. */
+export const MANUAL_BILL_TYPE_OPTIONS = BILL_TYPE_OPTIONS.filter((option) => option.value !== 'PARKING_PASS');
 
 export type BillStatus = 'UNPAID' | 'PAID';
 

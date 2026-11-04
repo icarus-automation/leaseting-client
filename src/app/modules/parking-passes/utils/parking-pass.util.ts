@@ -1,6 +1,12 @@
 import type { BadgeTone } from '../../../shared/ui/status-badge/status-badge';
 import type { PaymentDestinationResponse } from '../../../core/models/payment-destination.types';
-import type { ParkingPass, ParkingPassPayment } from '../../../core/models/parking-pass.types';
+import {
+  PARKING_PASS_BILL_REVIEW_LABELS,
+  type ParkingPass,
+  type ParkingPassBill,
+  type ParkingPassBillReviewReason,
+  type ParkingPassPayment,
+} from '../../../core/models/parking-pass.types';
 import { effectiveDestinationsForProperty } from '../../bills/utils/staff-collection-methods.util';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -16,6 +22,29 @@ export function formatPassDay(iso: string): string {
 
 export function paymentRemainingCents(payment: Pick<ParkingPassPayment, 'amount' | 'refundedAmount'>): number {
   return Math.round(Number(payment.amount) * 100) - Math.round(Number(payment.refundedAmount) * 100);
+}
+
+/** A month paid through its bill holds its money on the bill, so it cannot be refunded on the pass. */
+export function refundablePayments(pass: Pick<ParkingPass, 'payments'>): ParkingPassPayment[] {
+  return pass.payments.filter((payment) => payment.billId === null && paymentRemainingCents(payment) > 0);
+}
+
+export function isLinked(pass: Pick<ParkingPass, 'leaseId' | 'ownershipId'>): boolean {
+  return pass.leaseId !== null || pass.ownershipId !== null;
+}
+
+/** The bill for the pass's next month, when one is waiting and needs no review. */
+export function waitingBill(pass: Pick<ParkingPass, 'openBills'>): ParkingPassBill | null {
+  return pass.openBills.find((bill) => !bill.needsReview) ?? null;
+}
+
+/** With auto-renew off, an admin can still raise the next month's bill on an open linked pass. */
+export function canBillByHand(pass: Pick<ParkingPass, 'leaseId' | 'ownershipId' | 'endedAt' | 'autoRenew' | 'openBills'>): boolean {
+  return isLinked(pass) && pass.endedAt === null && !pass.autoRenew && waitingBill(pass) === null;
+}
+
+export function reviewReasonLabel(reason: ParkingPassBillReviewReason | null): string {
+  return reason ? PARKING_PASS_BILL_REVIEW_LABELS[reason] : '';
 }
 
 export function passStatus(pass: Pick<ParkingPass, 'valid' | 'endedAt'>): { tone: BadgeTone; label: string } {

@@ -1,4 +1,14 @@
-import { formatPassDay, passPaymentOptions, passStatus, paymentRemainingCents } from './parking-pass.util';
+import {
+  canBillByHand,
+  formatPassDay,
+  passPaymentOptions,
+  passStatus,
+  paymentRemainingCents,
+  refundablePayments,
+  reviewReasonLabel,
+  waitingBill,
+} from './parking-pass.util';
+import type { ParkingPassBill, ParkingPassPayment } from '../../../core/models/parking-pass.types';
 import type { PaymentDestinationResponse } from '../../../core/models/payment-destination.types';
 
 function destination(overrides: Partial<PaymentDestinationResponse>): PaymentDestinationResponse {
@@ -39,5 +49,61 @@ describe('parking pass display', () => {
       'prop-a',
     );
     expect(options.map((option) => option.label)).toEqual(['Cash', 'GCash']);
+  });
+});
+
+describe('parking pass billing display', () => {
+  const bill = (overrides: Partial<ParkingPassBill> = {}): ParkingPassBill => ({
+    id: 'bill-1',
+    amount: '1500.00',
+    paidAmount: '0.00',
+    balance: '1500.00',
+    dueDate: '2026-03-10',
+    billingPeriod: '2026-03-11',
+    needsReview: false,
+    reviewReason: null,
+    ...overrides,
+  });
+  const payment = (overrides: Partial<ParkingPassPayment>): ParkingPassPayment => ({
+    id: 'pay-1',
+    amount: '1500.00',
+    periodStart: '2026-02-10',
+    periodEnd: '2026-03-10',
+    method: 'CASH',
+    destinationId: null,
+    destinationName: null,
+    takenById: 'user-1',
+    shiftId: null,
+    billId: null,
+    refundedAmount: '0.00',
+    refunds: [],
+    createdAt: '2026-02-10T02:00:00.000Z',
+    ...overrides,
+  });
+
+  it('offers only months paid at the terminal or office for a refund', () => {
+    const refundable = refundablePayments({
+      payments: [
+        payment({ id: 'cash' }),
+        payment({ id: 'through-bill', billId: 'bill-9' }),
+        payment({ id: 'spent', refundedAmount: '1500.00' }),
+      ],
+    });
+    expect(refundable.map((row) => row.id)).toEqual(['cash']);
+  });
+
+  it('reads the waiting bill and leaves a flagged one out', () => {
+    expect(waitingBill({ openBills: [bill({ id: 'flagged', needsReview: true }), bill({ id: 'next' })] })?.id).toBe('next');
+    expect(waitingBill({ openBills: [bill({ needsReview: true, reviewReason: 'auto-renew-off' })] })).toBeNull();
+    expect(reviewReasonLabel('month-covered')).toBe('That month is already paid');
+  });
+
+  it('lets an admin bill by hand only on an open linked pass with auto-renew off and no waiting bill', () => {
+    const base = { leaseId: 'lease-1', ownershipId: null, endedAt: null, autoRenew: false, openBills: [] as ParkingPassBill[] };
+    expect(canBillByHand(base)).toBe(true);
+    expect(canBillByHand({ ...base, autoRenew: true })).toBe(false);
+    expect(canBillByHand({ ...base, leaseId: null })).toBe(false);
+    expect(canBillByHand({ ...base, endedAt: '2026-03-01T00:00:00.000Z' })).toBe(false);
+    expect(canBillByHand({ ...base, openBills: [bill()] })).toBe(false);
   });
 });

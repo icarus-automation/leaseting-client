@@ -59,7 +59,7 @@ export const REPORT_GROUPS: ReportGroup[] = [
   {
     key: 'parking',
     label: 'Parking',
-    description: 'Paid exits, shift cash, and voids.',
+    description: 'Paid exits, shift cash, voids, and monthly passes.',
   },
 ];
 
@@ -257,7 +257,7 @@ export const REPORT_ENTRIES: ReportEntry[] = [
   {
     key: 'parking-revenue',
     title: 'Parking Revenue',
-    summary: 'Cash collected on paid exits, by day, terminal, attendant, or vehicle.',
+    summary: 'Cash collected on paid exits, by day, terminal, attendant, or vehicle, with pass payments and refunds beside it.',
     group: 'parking',
     icon: 'chart-line',
     route: 'parking-revenue',
@@ -284,34 +284,33 @@ export const REPORT_ENTRIES: ReportEntry[] = [
     keywords: 'void voided cancelled struck off correction audit reason actor open stay session trail',
   },
   {
-    key: 'monthly-parking-customers',
-    title: 'Monthly Parking Customers',
-    summary: 'Monthly parkers with assigned space, vehicle, and rate.',
+    key: 'parking-active-passes',
+    title: 'Active Passes',
+    summary: 'Monthly passes still covering, about to expire, or lapsed, with holder, plate, and linked tenant.',
     group: 'parking',
-    icon: 'users',
-    route: null,
-    blockedBy: 'Monthly parking plans',
-    keywords: 'monthly parker customer recurring plan assignment vehicle rate contract reserved',
+    icon: 'ticket',
+    route: 'active-passes',
+    keywords:
+      'monthly parking pass parker active expiring lapsed renewal plate holder vehicle tenant lease ownership paid through customers',
   },
   {
-    key: 'parking-history-by-resident',
-    title: 'Parking Payments by Tenant',
-    summary: 'Parking billed on a lease. Transient exits are cash at the terminal, with no tenant name.',
+    key: 'parking-pass-payments',
+    title: 'Parking Pass Payments',
+    summary: 'Pass payments and refunds by period, property, method, and who took them.',
     group: 'parking',
     icon: 'receipt',
-    route: null,
-    blockedBy: 'Monthly parking plans',
-    keywords: 'parking payment history by tenant lease billed charge slot spot',
+    route: 'pass-payments',
+    keywords:
+      'monthly parking pass payment refund collected cash gcash bank method taker attendant office bill period history by tenant',
   },
   {
-    key: 'parking-delinquency',
-    title: 'Unpaid Parking Fees',
-    summary: 'Overdue parking charges on a lease. Transient exits are paid before the barrier lifts.',
+    key: 'parking-unpaid-pass-bills',
+    title: 'Unpaid Pass Bills',
+    summary: 'Open parking pass bills with holder, due date, and whether the pass still covers the car.',
     group: 'parking',
     icon: 'exclamation-circle',
-    route: null,
-    blockedBy: 'Monthly parking plans',
-    keywords: 'parking delinquency overdue arrears unpaid late fees slot monthly',
+    route: 'unpaid-pass-bills',
+    keywords: 'parking pass bill unpaid overdue arrears delinquency auto-renew monthly lease tenant due review',
   },
 ];
 

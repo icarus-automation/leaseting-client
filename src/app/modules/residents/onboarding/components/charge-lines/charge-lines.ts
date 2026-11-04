@@ -21,7 +21,7 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../../core/models/api.types';
 import type { ChargeItemResponse } from '../../../../../core/models/charge-item.types';
-import { BILL_TYPE_OPTIONS, type BillType } from '../../../../../core/models/enums';
+import { MANUAL_BILL_TYPE_OPTIONS, type BillType } from '../../../../../core/models/enums';
 import { ChargeItemsService } from '../../../../settings/services/charge-items.service';
 import { createChargeLineGroup, type ChargeLineArray, type ChargeLineGroup } from './charge-line-form';
 
@@ -52,7 +52,7 @@ export class ChargeLines {
   readonly addLabel = input('Add another charge');
   readonly emptyMessage = input('No charges yet.');
 
-  readonly billTypeOptions = BILL_TYPE_OPTIONS;
+  readonly billTypeOptions = MANUAL_BILL_TYPE_OPTIONS;
 
   readonly catalog = signal<ChargeItemResponse[] | null>(null);
   readonly catalogError = signal<string | null>(null);

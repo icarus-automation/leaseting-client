@@ -24,7 +24,7 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
-import { BILL_TYPE_LABELS, BILL_TYPE_OPTIONS, BillType } from '../../../../core/models/enums';
+import { BILL_TYPE_LABELS, BillType, MANUAL_BILL_TYPE_OPTIONS } from '../../../../core/models/enums';
 import type { LeaseListItem } from '../../../../core/models/lease.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
@@ -105,7 +105,7 @@ export class BillFormDialog {
   /** Electricity and water are offered only where the lease has Leaseting bill them; the API refuses the rest. */
   readonly typeOptions = computed(() => {
     const lease = this.selectedLease();
-    return BILL_TYPE_OPTIONS.map((option) => ({
+    return MANUAL_BILL_TYPE_OPTIONS.map((option) => ({
       ...option,
       disabled: lease !== null && !leaseBillsType(lease, option.value),
     }));

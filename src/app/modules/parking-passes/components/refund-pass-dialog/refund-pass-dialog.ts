@@ -10,7 +10,7 @@ import { formatPhp } from '../../../../shared/pipes/php-currency-pipe';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { ParkingPassesService } from '../../services/parking-passes.service';
-import { formatPassDay, paymentRemainingCents } from '../../utils/parking-pass.util';
+import { formatPassDay, paymentRemainingCents, refundablePayments } from '../../utils/parking-pass.util';
 
 @Component({
   selector: 'app-refund-pass-dialog',
@@ -39,12 +39,10 @@ export class RefundPassDialog {
   readonly paymentOptions = computed(() => {
     const pass = this.pass();
     if (!pass) return [];
-    return pass.payments
-      .filter((payment) => paymentRemainingCents(payment) > 0)
-      .map((payment) => ({
-        value: payment.id,
-        label: `${formatPassDay(payment.periodStart)} to ${formatPassDay(payment.periodEnd)} · ${formatPhp(paymentRemainingCents(payment) / 100)} left`,
-      }));
+    return refundablePayments(pass).map((payment) => ({
+      value: payment.id,
+      label: `${formatPassDay(payment.periodStart)} to ${formatPassDay(payment.periodEnd)} · ${formatPhp(paymentRemainingCents(payment) / 100)} left`,
+    }));
   });
 
   constructor() {

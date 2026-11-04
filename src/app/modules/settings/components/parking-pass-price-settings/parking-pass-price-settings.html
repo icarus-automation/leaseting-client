@@ -1,0 +1,89 @@
+<section class="flex flex-col gap-4" aria-label="Pass prices">
+  @if (error(); as message) {
+    <app-error-banner [message]="message" [retryable]="!!propertyControl.value" (retry)="load()" />
+  }
+
+  @if (properties() === null && !error()) {
+    <app-skeleton variant="panel" />
+  } @else if (properties()?.length === 0) {
+    <p class="text-[13px] text-muted">Add a property before setting pass prices.</p>
+  } @else {
+    <div class="flex w-full max-w-sm flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="pass-price-property">Property</label>
+      <p-select
+        inputId="pass-price-property"
+        [formControl]="propertyControl"
+        [options]="propertyOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Pick a property"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+
+    @if (propertyControl.value) {
+      @if (loading()) {
+        <app-skeleton variant="panel" />
+      } @else if (types().length === 0) {
+        <p class="text-[13px] text-muted">
+          Add a vehicle type first.
+          <a routerLink="/settings/vehicle-types" class="font-medium text-primary hover:underline">Vehicle types</a>
+        </p>
+      } @else {
+        <form class="flex max-w-lg flex-col gap-4" [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <p class="text-[13px] leading-relaxed text-muted">
+            Leave a vehicle type blank to keep it off the pass list. A pass already sold keeps the price it was sold at until the next renewal.
+          </p>
+          <div class="flex flex-col gap-3">
+            @for (type of types(); track type.id) {
+              <div class="flex items-center justify-between gap-4">
+                <label class="text-[13px] font-medium text-heading" [attr.for]="'pass-price-' + type.id">{{ type.name }}</label>
+                <input
+                  [id]="'pass-price-' + type.id"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  inputmode="decimal"
+                  [formControl]="amountControl(type.id)"
+                  placeholder="Not offered"
+                  class="h-9 w-36 rounded-base border border-border bg-background px-3 text-right text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring disabled:opacity-70 motion-reduce:transition-none"
+                />
+              </div>
+            }
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" for="pass-grace-days">Grace days</label>
+            <input
+              id="pass-grace-days"
+              type="number"
+              min="0"
+              max="366"
+              step="1"
+              formControlName="graceDays"
+              class="h-9 w-24 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring disabled:opacity-70 motion-reduce:transition-none"
+            />
+            <p class="text-[12.5px] text-muted">Extra days after the paid-through date. The last day still counts. Default is 0.</p>
+            @if (errors.fieldError('graceDays'); as message) {
+              <p class="text-[12.5px] text-destructive">{{ message }}</p>
+            }
+          </div>
+          @if (canManage()) {
+            <div class="flex items-center gap-3">
+              <button
+                type="submit"
+                class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+                [disabled]="saving()"
+              >
+                {{ saving() ? 'Saving...' : 'Save prices' }}
+              </button>
+              @if (saved()) {
+                <p class="text-[13px] text-muted" role="status">Saved.</p>
+              }
+            </div>
+          }
+        </form>
+      }
+    }
+  }
+</section>

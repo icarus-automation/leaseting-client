@@ -70,9 +70,14 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
         route: 'late-fees',
         permission: 'bills:view',
       },
+    ],
+  },
+  {
+    label: 'Payments',
+    cards: [
       {
         label: 'Payment destinations',
-        description: 'QR and account details tenants use to pay.',
+        description: 'QR and account details used to pay rent or a parking pass.',
         icon: 'qrcode',
         route: 'payment-destinations',
         permission: 'payments:view',
@@ -94,6 +99,13 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
         description: 'Charges by vehicle type, including opening bands and overnight.',
         icon: 'calendar-clock',
         route: 'rate-plans',
+        permission: 'parking:view',
+      },
+      {
+        label: 'Pass prices',
+        description: 'Monthly price for each vehicle type, set per property.',
+        icon: 'ticket',
+        route: 'parking-pass-prices',
         permission: 'parking:view',
       },
       {

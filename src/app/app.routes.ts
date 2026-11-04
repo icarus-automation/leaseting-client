@@ -73,6 +73,12 @@ export const routes: Routes = [
           import('./modules/parking/parking.routes').then(m => m.PARKING_ROUTES),
       },
       {
+        path: 'parking-passes',
+        canActivate: [permissionGuard('parking:view')],
+        loadChildren: () =>
+          import('./modules/parking-passes/parking-passes.routes').then(m => m.PARKING_PASS_ROUTES),
+      },
+      {
         path: 'knowledge-base',
         data: { contentWidth: 'standard' },
         loadChildren: () =>

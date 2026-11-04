@@ -1,0 +1,151 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="Sell a pass"
+  subheading="One plate, one property, paid through one month."
+  [dirty]="errors.dirty()"
+>
+  @if (error(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="sell-pass-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="pass-property">Property</label>
+      <p-select
+        inputId="pass-property"
+        formControlName="propertyId"
+        [options]="propertyOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [loading]="loadingCatalog()"
+        placeholder="Pick a property"
+        appendTo="body"
+        styleClass="w-full"
+      />
+      @if (errors.fieldError('propertyId'); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="pass-type">Vehicle type</label>
+      <p-select
+        inputId="pass-type"
+        formControlName="vehicleTypeId"
+        [options]="typeOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [loading]="loadingProperty()"
+        placeholder="Pick a priced type"
+        emptyMessage="This property has no pass prices yet."
+        appendTo="body"
+        styleClass="w-full"
+      />
+      @if (form.controls.propertyId.value && !loadingProperty() && typeOptions().length === 0) {
+        <p class="text-[12.5px] text-muted">
+          Set a monthly price first.
+          <a routerLink="/settings/parking-pass-prices" class="font-medium text-primary hover:underline" (click)="visible.set(false)">
+            Pass prices
+          </a>
+        </p>
+      }
+      @if (errors.fieldError('vehicleTypeId'); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="pass-plate">Plate</label>
+      <input
+        id="pass-plate"
+        formControlName="plate"
+        maxlength="20"
+        autocomplete="off"
+        class="h-9 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        placeholder="ABC-123"
+      />
+      @if (errors.fieldError('plate'); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    @if (canLinkLease()) {
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="pass-lease">Lease</label>
+        <p-select
+          inputId="pass-lease"
+          formControlName="leaseId"
+          [options]="leaseOptions()"
+          optionLabel="label"
+          optionValue="id"
+          [filter]="true"
+          filterBy="label"
+          [showClear]="true"
+          [loading]="loadingProperty()"
+          placeholder="Optional. Leave blank for an outsider."
+          emptyMessage="No active leases at this property."
+          appendTo="body"
+          styleClass="w-full"
+        />
+      </div>
+    }
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="pass-holder">Holder name</label>
+      <input
+        id="pass-holder"
+        formControlName="holderName"
+        maxlength="120"
+        class="h-9 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        placeholder="Required unless a lease is linked"
+      />
+      @if (errors.fieldError('holderName'); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="pass-contact">Contact</label>
+      <input
+        id="pass-contact"
+        formControlName="holderContact"
+        maxlength="120"
+        class="h-9 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        placeholder="Optional"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="pass-payment">Payment</label>
+      <p-select
+        inputId="pass-payment"
+        formControlName="payment"
+        [options]="paymentOptions()"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="sell-pass-form"
+      class="inline-flex h-9 items-center gap-1.5 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      {{ saving() ? 'Selling...' : 'Sell pass' }}
+    </button>
+  </ng-container>
+</app-form-dialog>

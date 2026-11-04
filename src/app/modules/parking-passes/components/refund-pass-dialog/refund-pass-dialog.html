@@ -1,0 +1,70 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="Refund a payment"
+  [subheading]="pass() ? pass()!.plateDisplay + ' · ' + pass()!.holderName : null"
+  [dirty]="errors.dirty()"
+>
+  @if (error(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+  <form id="refund-pass-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="refund-payment">Payment</label>
+      <p-select
+        inputId="refund-payment"
+        formControlName="paymentId"
+        [options]="paymentOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Pick a payment"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="refund-amount">Amount</label>
+      <input
+        id="refund-amount"
+        type="number"
+        min="0.01"
+        step="0.01"
+        formControlName="amount"
+        class="h-9 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+      />
+      @if (errors.fieldError('amount'); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="refund-reason">Reason</label>
+      <textarea
+        id="refund-reason"
+        rows="3"
+        formControlName="reason"
+        class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+      ></textarea>
+      @if (errors.fieldError('reason'); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+  </form>
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="refund-pass-form"
+      class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      {{ saving() ? 'Refunding...' : 'Refund' }}
+    </button>
+  </ng-container>
+</app-form-dialog>

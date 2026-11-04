@@ -1,4 +1,5 @@
 import type { AuditAction, AuditEvent } from '../../../core/models/audit-event.types';
+import { formatPhp } from '../../../shared/pipes/php-currency-pipe';
 import { systemRoleLabel } from './member-access.util';
 
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
@@ -18,6 +19,9 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   ROLE_DEACTIVATED: 'Role turned off',
   ROLE_DELETED: 'Role deleted',
   MEMBER_PROPERTY_ACCESS_CHANGED: 'Property access changed',
+  PARKING_PASS_PLATE_CHANGED: 'Pass plate changed',
+  PARKING_PASS_ENDED: 'Pass ended',
+  PARKING_PASS_REFUNDED: 'Pass payment refunded',
 };
 
 /** The action filter's options, grouped the way the log reads. */
@@ -40,6 +44,10 @@ export const AUDIT_ACTION_GROUPS: { label: string; actions: AuditAction[] }[] = 
   {
     label: 'Roles',
     actions: ['ROLE_CREATED', 'ROLE_UPDATED', 'ROLE_DUPLICATED', 'ROLE_ACTIVATED', 'ROLE_DEACTIVATED', 'ROLE_DELETED'],
+  },
+  {
+    label: 'Parking passes',
+    actions: ['PARKING_PASS_PLATE_CHANGED', 'PARKING_PASS_ENDED', 'PARKING_PASS_REFUNDED'],
   },
 ];
 
@@ -138,6 +146,21 @@ export function describeAuditEvent(event: AuditEvent): string {
     case 'MEMBER_PROPERTY_ACCESS_CHANGED': {
       const limitedTo = propertiesPhrase(after);
       return limitedTo ? `Limited ${target} to ${limitedTo}` : `Gave ${target} access to every property`;
+    }
+    case 'PARKING_PASS_PLATE_CHANGED': {
+      const from = text(before, 'plateDisplay') ?? 'the old plate';
+      const to = text(after, 'plateDisplay') ?? target;
+      return `Changed the plate from ${from} to ${to}`;
+    }
+    case 'PARKING_PASS_ENDED': {
+      const reason = text(after, 'endReason');
+      return reason ? `Ended the pass for ${target}. ${reason}` : `Ended the pass for ${target}`;
+    }
+    case 'PARKING_PASS_REFUNDED': {
+      const amount = text(after, 'amount');
+      const reason = text(after, 'reason');
+      const money = amount ? formatPhp(amount) : 'a payment';
+      return reason ? `Refunded ${money} on ${target}. ${reason}` : `Refunded ${money} on ${target}`;
     }
     default:
       return `${auditActionLabel(event.action)}: ${target}`;

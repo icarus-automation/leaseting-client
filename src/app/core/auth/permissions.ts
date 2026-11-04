@@ -28,6 +28,8 @@ export type Permission =
   | 'maintenance_requests:manage'
   | 'parking:view'
   | 'parking:void'
+  | 'parking_passes:sell'
+  | 'parking_passes:administer'
   | 'parking:confirm_shift'
   | 'parking_setup:manage'
   | 'parking_attendants:manage'

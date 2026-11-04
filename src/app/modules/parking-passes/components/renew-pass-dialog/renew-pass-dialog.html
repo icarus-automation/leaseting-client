@@ -1,0 +1,44 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="Renew pass"
+  [subheading]="pass() ? pass()!.plateDisplay + ' · paid through ' + paidThrough() : null"
+  [dirty]="errors.dirty()"
+>
+  @if (error(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+  <p class="mb-4 text-[13px] leading-relaxed text-muted">
+    A pass that still covers today keeps the days already paid. A lapsed pass starts again today. The charge is the current monthly price.
+  </p>
+  <form id="renew-pass-form" class="flex flex-col gap-1.5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label class="text-[13px] font-medium text-heading" for="renew-payment">Payment</label>
+    <p-select
+      inputId="renew-payment"
+      formControlName="payment"
+      [options]="paymentOptions()"
+      optionLabel="label"
+      optionValue="value"
+      appendTo="body"
+      styleClass="w-full"
+    />
+  </form>
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="renew-pass-form"
+      class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      {{ saving() ? 'Renewing...' : 'Renew' }}
+    </button>
+  </ng-container>
+</app-form-dialog>

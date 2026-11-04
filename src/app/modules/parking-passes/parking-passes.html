@@ -1,0 +1,170 @@
+<div class="flex flex-col gap-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="font-heading text-2xl font-semibold text-heading">Parking passes</h1>
+      <p class="mt-0.5 text-sm text-muted">A monthly pass covers one plate at one property for the month you paid.</p>
+    </div>
+    @if (canSell()) {
+      <button
+        type="button"
+        class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover active:bg-primary-active motion-reduce:transition-none"
+        (click)="sellVisible.set(true)"
+      >
+        <svg pIcon="plus" [size]="14" aria-hidden="true"></svg>
+        <span>Sell pass</span>
+      </button>
+    }
+  </header>
+
+  <div class="flex flex-wrap items-end gap-3">
+    <div class="flex w-full flex-col gap-1.5 sm:w-64">
+      <label class="text-[12.5px] font-medium text-muted" for="pass-filter-property">Property</label>
+      <p-select
+        inputId="pass-filter-property"
+        [formControl]="propertyControl"
+        [options]="propertyOptions()"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+    <div class="flex w-full flex-col gap-1.5 sm:w-56">
+      <label class="text-[12.5px] font-medium text-muted" for="pass-filter-plate">Plate</label>
+      <input
+        id="pass-filter-plate"
+        [formControl]="plateControl"
+        autocomplete="off"
+        placeholder="ABC 123"
+        class="h-9 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+      />
+    </div>
+  </div>
+
+  @if (error(); as message) {
+    <app-error-banner [message]="message" [retryable]="true" (retry)="load()" />
+  }
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border" aria-hidden="true">
+      @for (row of [1, 2, 3, 4]; track row) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error() && (items() ?? []).length === 0) {
+    <span class="sr-only">Parking passes could not be loaded.</span>
+  } @else if (items()?.length === 0) {
+    <app-empty-state
+      icon="ticket"
+      heading="No passes yet"
+      description="Sell a monthly pass for a plate. It is valid at that property until the paid-through date."
+      [ctaLabel]="canSell() ? 'Sell pass' : null"
+      (cta)="sellVisible.set(true)"
+    />
+  } @else {
+    <div class="relative overflow-x-auto rounded-base border border-border">
+      <table class="w-full border-collapse text-left">
+        <thead>
+          <tr class="border-b border-border bg-surface">
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Plate</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Holder</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Property</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Paid through</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Status</th>
+            <th scope="col" class="w-px whitespace-nowrap px-2 py-2.5 text-right text-[12.5px] font-medium text-muted">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (pass of items(); track pass.id) {
+            <tr class="border-b border-border last:border-b-0">
+              <td class="px-4 py-3">
+                <p class="text-[13.5px] font-medium text-heading">{{ pass.plateDisplay }}</p>
+                <p class="text-[12px] text-muted">{{ pass.vehicleTypeName }}</p>
+              </td>
+              <td class="px-4 py-3">
+                <p class="text-[13px] text-body">{{ pass.holderName }}</p>
+                <p class="text-[12px] text-muted">
+                  @if (pass.leaseId && canViewLeases()) {
+                    <a [routerLink]="['/leases', pass.leaseId]" class="hover:text-primary hover:underline">Lease</a>
+                  } @else if (pass.leaseId) {
+                    Lease
+                  } @else if (pass.ownershipId) {
+                    Ownership
+                  } @else {
+                    No lease
+                  }
+                  @if (pass.holderContact) {
+                    · {{ pass.holderContact }}
+                  }
+                </p>
+              </td>
+              <td class="px-4 py-3 text-[13px] text-body">{{ pass.propertyName }}</td>
+              <td class="px-4 py-3">
+                <p class="text-[13px] text-body">{{ day(pass.paidUntil) }}</p>
+                @if (latestAmount(pass); as amount) {
+                  <p class="text-[12px] text-muted tabular-nums">{{ amount | phpCurrency }}</p>
+                }
+              </td>
+              <td class="px-4 py-3">
+                <app-status-badge [tone]="status(pass).tone" [label]="status(pass).label" />
+              </td>
+              <td class="w-px whitespace-nowrap px-2 py-3">
+                @if (hasActions(pass)) {
+                  <div class="flex items-center justify-end">
+                  <button
+                    type="button"
+                    class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                    [attr.aria-label]="'Actions for ' + pass.plateDisplay"
+                    aria-haspopup="menu"
+                    [attr.aria-expanded]="overflowForId() === pass.id"
+                    (click)="openOverflow($event, pass)"
+                  >
+                    <svg pIcon="ellipsis-v" [size]="13" aria-hidden="true"></svg>
+                  </button>
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<p-menu
+  #overflowMenu
+  [model]="overflowItems()"
+  [popup]="true"
+  appendTo="body"
+  ariaLabel="Pass actions"
+  (onHide)="overflowForId.set(null)"
+/>
+
+<app-sell-pass-dialog [visible]="sellVisible()" (visibleChange)="sellVisible.set($event)" (saved)="onSold()" />
+<app-renew-pass-dialog
+  [visible]="renewVisible()"
+  (visibleChange)="renewVisible.set($event)"
+  [pass]="actionPass()"
+  (saved)="onRenewed()"
+/>
+<app-change-plate-dialog
+  [visible]="plateVisible()"
+  (visibleChange)="plateVisible.set($event)"
+  [pass]="actionPass()"
+  (saved)="onPlateChanged()"
+/>
+<app-end-pass-dialog
+  [visible]="endVisible()"
+  (visibleChange)="endVisible.set($event)"
+  [pass]="actionPass()"
+  (saved)="onEnded()"
+/>
+<app-refund-pass-dialog
+  [visible]="refundVisible()"
+  (visibleChange)="refundVisible.set($event)"
+  [pass]="actionPass()"
+  (saved)="onRefunded()"
+/>

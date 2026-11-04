@@ -1,0 +1,42 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  heading="Change plate"
+  [subheading]="pass()?.holderName ?? null"
+  [dirty]="errors.dirty()"
+>
+  @if (error(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+  <form id="change-plate-form" class="flex flex-col gap-1.5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label class="text-[13px] font-medium text-heading" for="change-plate">Plate</label>
+    <input
+      id="change-plate"
+      formControlName="plate"
+      maxlength="20"
+      autocomplete="off"
+      class="h-9 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+    />
+    @if (errors.fieldError('plate'); as message) {
+      <p class="text-[12.5px] text-destructive">{{ message }}</p>
+    }
+  </form>
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="change-plate-form"
+      class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      {{ saving() ? 'Saving...' : 'Save plate' }}
+    </button>
+  </ng-container>
+</app-form-dialog>

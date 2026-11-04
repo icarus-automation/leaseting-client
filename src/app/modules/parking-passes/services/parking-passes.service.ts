@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
 import type {
@@ -12,6 +12,7 @@ import type {
   SellParkingPassPayload,
 } from '../../../core/models/parking-pass.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
+import { withBillingDefaults } from '../utils/parking-pass.util';
 
 @Injectable({ providedIn: 'root' })
 export class ParkingPassesService {
@@ -19,32 +20,36 @@ export class ParkingPassesService {
   private readonly base = `${API_BASE_URL}/parking-passes`;
 
   list(filters: { propertyId?: string; plate?: string } = {}): Observable<ParkingPass[]> {
-    return this.http.get<ParkingPass[]>(this.base, { params: toHttpParams(filters) });
+    return this.http
+      .get<ParkingPass[]>(this.base, { params: toHttpParams(filters) })
+      .pipe(map((passes) => passes.map(withBillingDefaults)));
   }
 
   sell(payload: SellParkingPassPayload): Observable<ParkingPass> {
-    return this.http.post<ParkingPass>(this.base, payload);
+    return this.http.post<ParkingPass>(this.base, payload).pipe(map(withBillingDefaults));
   }
 
   renew(id: string, payload: RenewParkingPassPayload): Observable<ParkingPass> {
-    return this.http.post<ParkingPass>(`${this.base}/${id}/renewals`, payload);
+    return this.http.post<ParkingPass>(`${this.base}/${id}/renewals`, payload).pipe(map(withBillingDefaults));
   }
 
   changePlate(id: string, plate: string): Observable<ParkingPass> {
-    return this.http.patch<ParkingPass>(`${this.base}/${id}/plate`, { plate });
+    return this.http.patch<ParkingPass>(`${this.base}/${id}/plate`, { plate }).pipe(map(withBillingDefaults));
   }
 
   end(id: string, reason: string): Observable<ParkingPass> {
-    return this.http.post<ParkingPass>(`${this.base}/${id}/end`, { reason });
+    return this.http.post<ParkingPass>(`${this.base}/${id}/end`, { reason }).pipe(map(withBillingDefaults));
   }
 
   setAutoRenew(id: string, autoRenew: boolean): Observable<ParkingPass> {
-    return this.http.patch<ParkingPass>(`${this.base}/${id}/auto-renew`, { autoRenew });
+    return this.http
+      .patch<ParkingPass>(`${this.base}/${id}/auto-renew`, { autoRenew })
+      .pipe(map(withBillingDefaults));
   }
 
   /** Raises the next month's bill by hand. Repeating it returns the same bill. */
   billNextMonth(id: string): Observable<ParkingPass> {
-    return this.http.post<ParkingPass>(`${this.base}/${id}/bills`, {});
+    return this.http.post<ParkingPass>(`${this.base}/${id}/bills`, {}).pipe(map(withBillingDefaults));
   }
 
   refund(paymentId: string, amount: number, reason: string): Observable<ParkingPassRefund> {

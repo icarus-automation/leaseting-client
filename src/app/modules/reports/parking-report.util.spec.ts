@@ -5,7 +5,9 @@ import {
   scopeQuery,
   varianceStateLabel,
   varianceTone,
+  withRevenueLines,
 } from './parking-report.util';
+import type { ParkingRevenueReport } from '../../core/models/report.types';
 
 const scope = (overrides: Partial<ParkingReportScope> = {}): ParkingReportScope => ({
   preset: 'custom',
@@ -72,5 +74,25 @@ describe('parking-report.util', () => {
       expect(varianceStateLabel('balanced')).toBe('Balanced');
       expect(varianceTone('balanced')).toBe('success');
     });
+  });
+});
+
+describe('parking revenue rollout', () => {
+  const totals = { exits: 3, collected: '960.00', billedMinutes: 300, averageFee: '320.00', averageStayMinutes: 100 };
+
+  it('shows paid exits as the only line when an older API sends none', () => {
+    const older = { from: '2026-11-01', to: '2026-11-04', totals, breakdowns: {} } as unknown as ParkingRevenueReport;
+
+    const report = withRevenueLines(older);
+
+    expect(report.lines).toEqual([{ key: 'gate-fees', label: 'Paid exits', count: 3, amount: '960.00' }]);
+    expect(report.net).toBe('960.00');
+  });
+
+  it('keeps the lines the API sends', () => {
+    const lines = [{ key: 'pass-payments' as const, label: 'Pass payments', count: 1, amount: '1500.00' }];
+    const current = { from: 'a', to: 'b', totals, breakdowns: {}, lines, net: '2460.00' } as unknown as ParkingRevenueReport;
+
+    expect(withRevenueLines(current)).toBe(current);
   });
 });

@@ -1,20 +1,26 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PIcon } from '@primeicons/angular/p-icon';
 import { Select } from 'primeng/select';
 
-import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ParkingPass } from '../../../../core/models/parking-pass.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { formatPhp } from '../../../../shared/pipes/php-currency-pipe';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { ParkingPassesService } from '../../services/parking-passes.service';
-import { formatPassDay, paymentRemainingCents, refundablePayments } from '../../utils/parking-pass.util';
+import {
+  BILL_PAID_REFUND_MESSAGE,
+  formatPassDay,
+  paymentRemainingCents,
+  paymentsWithRemainder,
+  refundErrorMessage,
+} from '../../utils/parking-pass.util';
 
 @Component({
   selector: 'app-refund-pass-dialog',
-  imports: [ReactiveFormsModule, Select, ErrorBanner, FormDialog],
+  imports: [ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog],
   templateUrl: './refund-pass-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -36,13 +42,31 @@ export class RefundPassDialog {
   });
   readonly errors = createFormErrors(this.form);
 
+  /** Every month with money left. A month paid through a bill is listed so staff see why it can't be refunded. */
   readonly paymentOptions = computed(() => {
     const pass = this.pass();
     if (!pass) return [];
-    return refundablePayments(pass).map((payment) => ({
-      value: payment.id,
-      label: `${formatPassDay(payment.periodStart)} to ${formatPassDay(payment.periodEnd)} · ${formatPhp(paymentRemainingCents(payment) / 100)} left`,
-    }));
+    return paymentsWithRemainder(pass).map((payment) => {
+      const range = `${formatPassDay(payment.periodStart)} to ${formatPassDay(payment.periodEnd)}`;
+      const billPaid = payment.billId !== null;
+      return {
+        value: payment.id,
+        billPaid,
+        label: billPaid
+          ? `${range} · paid through a bill`
+          : `${range} · ${formatPhp(paymentRemainingCents(payment) / 100)} left`,
+      };
+    });
+  });
+
+  private readonly selectedPaymentId = toSignal(this.form.controls.paymentId.valueChanges, {
+    initialValue: this.form.controls.paymentId.value,
+  });
+
+  /** Shown in place of the form's action when the picked month was paid through a bill. */
+  readonly billPaidNotice = computed(() => {
+    const option = this.paymentOptions().find((row) => row.value === this.selectedPaymentId());
+    return option?.billPaid ? BILL_PAID_REFUND_MESSAGE : null;
   });
 
   constructor() {
@@ -50,7 +74,8 @@ export class RefundPassDialog {
       const options = this.paymentOptions();
       if (!this.visible()) return;
       untracked(() => {
-        this.form.reset({ paymentId: options[0]?.value ?? '', amount: null, reason: '' });
+        const first = options.find((option) => !option.billPaid) ?? options[0];
+        this.form.reset({ paymentId: first?.value ?? '', amount: null, reason: '' });
         this.error.set(null);
         this.errors.reset();
       });
@@ -59,6 +84,7 @@ export class RefundPassDialog {
 
   submit(): void {
     this.errors.submitted.set(true);
+    if (this.billPaidNotice()) return;
     if (this.form.invalid || this.saving()) {
       this.form.markAllAsTouched();
       return;
@@ -78,7 +104,7 @@ export class RefundPassDialog {
         },
         error: (error: unknown) => {
           this.saving.set(false);
-          this.error.set(apiErrorMessage(error, 'Could not refund the payment.'));
+          this.error.set(refundErrorMessage(error));
         },
       });
   }

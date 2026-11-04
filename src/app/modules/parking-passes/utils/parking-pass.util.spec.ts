@@ -1,9 +1,12 @@
 import {
+  BILL_PAID_REFUND_MESSAGE,
   canBillByHand,
   formatPassDay,
   passPaymentOptions,
   passStatus,
   paymentRemainingCents,
+  paymentsWithRemainder,
+  refundErrorMessage,
   refundablePayments,
   reviewReasonLabel,
   waitingBill,
@@ -126,5 +129,40 @@ describe('parking pass rollout', () => {
     expect(pass.payments[0].billId).toBeNull();
     expect(refundablePayments(pass).map((payment) => payment.id)).toEqual(['pay-1']);
     expect(waitingBill(pass)).toBeNull();
+  });
+});
+
+describe('refunding a bill-paid month', () => {
+  const refusal = {
+    status: 409,
+    error: {
+      statusCode: 409,
+      message: "This month was paid through a bill. Bill refunds aren't supported yet.",
+      error: 'Conflict',
+      code: 'BILL_PAID_REFUND_UNSUPPORTED',
+    },
+  };
+
+  it('shows the API message for the coded refusal, not a generic error', () => {
+    expect(refundErrorMessage(refusal)).toBe(BILL_PAID_REFUND_MESSAGE);
+    expect(BILL_PAID_REFUND_MESSAGE).toBe(refusal.error.message);
+  });
+
+  it('keeps the API wording for other refusals and a fallback for a bare failure', () => {
+    expect(refundErrorMessage({ status: 400, error: { message: 'That refund is more than the payment still has.' } })).toBe(
+      'That refund is more than the payment still has.',
+    );
+    expect(refundErrorMessage({ status: 500, error: null })).toBe('Could not refund the payment.');
+  });
+
+  it('counts a bill-paid month as having money left, so the dialog can say why it is not refundable', () => {
+    const pass = {
+      payments: [
+        { id: 'cash', amount: '1500.00', refundedAmount: '0.00', billId: null },
+        { id: 'through-bill', amount: '1500.00', refundedAmount: '0.00', billId: 'bill-9' },
+      ],
+    } as unknown as Pick<ParkingPass, 'payments'>;
+    expect(paymentsWithRemainder(pass).map((payment) => payment.id)).toEqual(['cash', 'through-bill']);
+    expect(refundablePayments(pass).map((payment) => payment.id)).toEqual(['cash']);
   });
 });

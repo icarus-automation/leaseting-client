@@ -22,6 +22,15 @@
         appendTo="body"
         styleClass="w-full"
       />
+      @if (billPaidNotice(); as notice) {
+        <p
+          class="mt-1 flex items-start gap-1.5 rounded-base border border-[color-mix(in_oklab,var(--warning)_35%,transparent)] bg-muted-warning px-3 py-2 text-[12.5px] text-body"
+          role="status"
+        >
+          <svg pIcon="info-circle" [size]="14" class="mt-px shrink-0 text-warning" aria-hidden="true"></svg>
+          <span>{{ notice }}</span>
+        </p>
+      }
     </div>
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="refund-amount">Amount</label>
@@ -62,7 +71,7 @@
       type="submit"
       form="refund-pass-form"
       class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
-      [disabled]="saving()"
+      [disabled]="saving() || billPaidNotice() !== null"
     >
       {{ saving() ? 'Refunding...' : 'Refund' }}
     </button>

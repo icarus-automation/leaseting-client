@@ -24,6 +24,19 @@ export function paymentRemainingCents(payment: Pick<ParkingPassPayment, 'amount'
   return Math.round(Number(payment.amount) * 100) - Math.round(Number(payment.refundedAmount) * 100);
 }
 
+/**
+ * Fills the billing fields an API from before parking pass billing leaves out, so the
+ * page keeps working while the client is deployed ahead of the API.
+ */
+export function withBillingDefaults(pass: ParkingPass): ParkingPass {
+  return {
+    ...pass,
+    autoRenew: pass.autoRenew ?? false,
+    openBills: pass.openBills ?? [],
+    payments: pass.payments.map((payment) => ({ ...payment, billId: payment.billId ?? null })),
+  };
+}
+
 /** A month paid through its bill holds its money on the bill, so it cannot be refunded on the pass. */
 export function refundablePayments(pass: Pick<ParkingPass, 'payments'>): ParkingPassPayment[] {
   return pass.payments.filter((payment) => payment.billId === null && paymentRemainingCents(payment) > 0);

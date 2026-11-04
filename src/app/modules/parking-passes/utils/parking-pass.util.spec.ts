@@ -7,8 +7,9 @@ import {
   refundablePayments,
   reviewReasonLabel,
   waitingBill,
+  withBillingDefaults,
 } from './parking-pass.util';
-import type { ParkingPassBill, ParkingPassPayment } from '../../../core/models/parking-pass.types';
+import type { ParkingPass, ParkingPassBill, ParkingPassPayment } from '../../../core/models/parking-pass.types';
 import type { PaymentDestinationResponse } from '../../../core/models/payment-destination.types';
 
 function destination(overrides: Partial<PaymentDestinationResponse>): PaymentDestinationResponse {
@@ -105,5 +106,25 @@ describe('parking pass billing display', () => {
     expect(canBillByHand({ ...base, leaseId: null })).toBe(false);
     expect(canBillByHand({ ...base, endedAt: '2026-03-01T00:00:00.000Z' })).toBe(false);
     expect(canBillByHand({ ...base, openBills: [bill()] })).toBe(false);
+  });
+});
+
+describe('parking pass rollout', () => {
+  it('fills the billing fields an older API leaves out, so refunds and the billing column still work', () => {
+    const older = {
+      id: 'pass-1',
+      leaseId: 'lease-1',
+      ownershipId: null,
+      endedAt: null,
+      payments: [{ id: 'pay-1', amount: '1500.00', refundedAmount: '0.00' }],
+    } as unknown as ParkingPass;
+
+    const pass = withBillingDefaults(older);
+
+    expect(pass.autoRenew).toBe(false);
+    expect(pass.openBills).toEqual([]);
+    expect(pass.payments[0].billId).toBeNull();
+    expect(refundablePayments(pass).map((payment) => payment.id)).toEqual(['pay-1']);
+    expect(waitingBill(pass)).toBeNull();
   });
 });

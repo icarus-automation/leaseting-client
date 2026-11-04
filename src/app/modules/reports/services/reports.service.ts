@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
 import type {
@@ -24,6 +24,7 @@ import type {
   UnpaidPassBillsReport,
 } from '../../../core/models/report.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
+import { withRevenueLines } from '../parking-report.util';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
@@ -72,9 +73,9 @@ export class ReportsService {
   }
 
   parkingRevenue(query: ParkingReportQuery): Observable<ParkingRevenueReport> {
-    return this.http.get<ParkingRevenueReport>(`${this.base}/parking/revenue`, {
-      params: toHttpParams({ ...query }),
-    });
+    return this.http
+      .get<ParkingRevenueReport>(`${this.base}/parking/revenue`, { params: toHttpParams({ ...query }) })
+      .pipe(map(withRevenueLines));
   }
 
   parkingShiftCash(query: ParkingReportQuery): Observable<ShiftCashVarianceReport> {

@@ -1,4 +1,4 @@
-import type { ParkingReportQuery, ShiftVarianceState } from '../../core/models/report.types';
+import type { ParkingReportQuery, ParkingRevenueReport, ShiftVarianceState } from '../../core/models/report.types';
 import type { BadgeTone } from '../../shared/ui/status-badge/status-badge';
 import { DateRange, DateRangePreset, resolvePreset, toIsoDate } from './date-range.util';
 
@@ -25,6 +25,19 @@ export function scopeQuery(scope: ParkingReportScope): ParkingReportQuery {
     to: toIsoDate(scope.range.to),
     propertyId: scope.propertyId || undefined,
     terminalId: scope.terminalId || undefined,
+  };
+}
+
+/**
+ * An API from before parking pass billing sends no `lines`. Paid exits are then the only
+ * line, so the report still renders while the client is deployed ahead of the API.
+ */
+export function withRevenueLines(report: ParkingRevenueReport): ParkingRevenueReport {
+  if (report.lines) return report;
+  return {
+    ...report,
+    lines: [{ key: 'gate-fees', label: 'Paid exits', count: report.totals.exits, amount: report.totals.collected }],
+    net: report.totals.collected,
   };
 }
 

@@ -3,7 +3,8 @@ import { Routes } from '@angular/router';
 import { permissionGuard } from '../../core/auth/permission.guard';
 
 export const SETTINGS_ROUTES: Routes = [
-  { path: '', loadComponent: () => import('./settings').then(m => m.Settings) },
+  // The index fills the content container; every sub-page keeps the parent's Standard column.
+  { path: '', data: { contentWidth: 'wide' }, loadComponent: () => import('./settings').then(m => m.Settings) },
   {
     path: 'organization',
     canActivate: [permissionGuard('organization:view')],

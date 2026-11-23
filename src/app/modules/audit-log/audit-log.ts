@@ -10,14 +10,12 @@ import { format } from 'date-fns';
 import { apiErrorMessage } from '../../core/models/api.types';
 import type { PageMeta } from '../../core/models/api.types';
 import type { AuditAction, AuditArea, AuditEvent } from '../../core/models/audit-event.types';
-import type { Member } from '../../core/models/member.types';
 import type { PropertyListItem } from '../../core/models/property.types';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorBanner } from '../../shared/ui/error-banner/error-banner';
 import { Pagination } from '../../shared/ui/pagination/pagination';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { PropertiesService } from '../properties/services/properties.service';
-import { MembersService } from '../settings/services/members.service';
 import { AuditEventsService } from './audit-events.service';
 import {
   AUDIT_ACTION_LABELS,
@@ -46,7 +44,6 @@ interface SelectOption {
 })
 export class AuditLog {
   private readonly audit = inject(AuditEventsService);
-  private readonly members = inject(MembersService);
   private readonly propertiesApi = inject(PropertiesService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -71,15 +68,12 @@ export class AuditLog {
   readonly error = signal<string | null>(null);
   readonly detail = signal<AuditEvent | null>(null);
 
-  readonly people = signal<Member[] | null>(null);
+  readonly people = signal<{ id: string; name: string; email: string }[] | null>(null);
   readonly peopleError = signal(false);
   readonly properties = signal<PropertyListItem[]>([]);
 
   readonly actorOptions = computed<SelectOption[]>(() =>
-    (this.people() ?? []).map((person) => ({
-      label: person.status === 'ACTIVE' ? person.name : `${person.name} (deactivated)`,
-      value: person.userId,
-    })),
+    (this.people() ?? []).map((person) => ({ label: person.name, value: person.id })),
   );
 
   readonly propertyOptions = computed<SelectOption[]>(() =>
@@ -156,8 +150,8 @@ export class AuditLog {
 
   loadPeople(): void {
     this.peopleError.set(false);
-    this.members
-      .listAllStaff()
+    this.audit
+      .actors()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (people) => this.people.set(people),

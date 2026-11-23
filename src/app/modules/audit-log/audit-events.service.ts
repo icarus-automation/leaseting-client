@@ -12,6 +12,11 @@ export class AuditEventsService {
   private readonly http = inject(HttpClient);
   private readonly base = `${API_BASE_URL}/audit-events`;
 
+  /** People who appear on events the caller can see. */
+  actors(): Observable<{ id: string; name: string; email: string }[]> {
+    return this.http.get<{ id: string; name: string; email: string }[]>(`${this.base}/actors`);
+  }
+
   /** Newest first. Read-only: no route edits or deletes an event. */
   list(filters: AuditEventFilters = {}): Observable<Paginated<AuditEvent>> {
     const params = toHttpParams({ page: 1, limit: 20, ...filters });

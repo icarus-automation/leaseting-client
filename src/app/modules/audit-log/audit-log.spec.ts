@@ -4,7 +4,6 @@ import { NEVER, of, throwError } from 'rxjs';
 
 import type { AuditEvent } from '../../core/models/audit-event.types';
 import { PropertiesService } from '../properties/services/properties.service';
-import { MembersService } from '../settings/services/members.service';
 import { AuditEventsService } from './audit-events.service';
 import { AuditLog } from './audit-log';
 
@@ -23,19 +22,17 @@ const ROLE_CHANGE: AuditEvent = {
 const page = (data: AuditEvent[]) => of({ data, meta: { total: data.length, page: 1, limit: 20, lastPage: 1 } });
 
 describe('AuditLog', { timeout: 15_000 }, () => {
-  const audit = { list: vi.fn() };
-  const members = { listAllStaff: vi.fn() };
+  const audit = { list: vi.fn(), actors: vi.fn() };
   const properties = { list: vi.fn() };
   let fixture: ComponentFixture<AuditLog>;
 
   beforeEach(async () => {
-    members.listAllStaff.mockReturnValue(of([]));
+    audit.actors.mockReturnValue(of([]));
     properties.list.mockReturnValue(of({ data: [], meta: { total: 0, page: 1, limit: 50, lastPage: 1 } }));
     await TestBed.configureTestingModule({
       imports: [AuditLog],
       providers: [
         { provide: AuditEventsService, useValue: audit },
-        { provide: MembersService, useValue: members },
         { provide: PropertiesService, useValue: properties },
       ],
     }).compileComponents();
@@ -155,19 +152,19 @@ describe('AuditLog', { timeout: 15_000 }, () => {
     expect(text()).toContain('Ana Cruz <ana@example.com>');
   });
 
-  it('lists people for the actor filter, marking deactivated ones', async () => {
+  it('lists people for the actor filter from the events the viewer can see', async () => {
     audit.list.mockReturnValue(page([]));
-    members.listAllStaff.mockReturnValue(
+    audit.actors.mockReturnValue(
       of([
-        { id: 'm-1', userId: 'u-1', name: 'Ana Cruz', status: 'ACTIVE' },
-        { id: 'm-2', userId: 'u-2', name: 'Ben Santos', status: 'DEACTIVATED' },
+        { id: 'u-1', name: 'Ana Cruz', email: 'ana@example.com' },
+        { id: 'u-2', name: 'Ben Santos', email: 'ben@example.com' },
       ]),
     );
     await render();
 
     expect(fixture.componentInstance.actorOptions()).toEqual([
       { label: 'Ana Cruz', value: 'u-1' },
-      { label: 'Ben Santos (deactivated)', value: 'u-2' },
+      { label: 'Ben Santos', value: 'u-2' },
     ]);
   });
 });

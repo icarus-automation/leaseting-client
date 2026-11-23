@@ -131,6 +131,8 @@ export interface UnitResponse extends UnitPricingRead {
 export interface UnitOutstandingBill {
   id: string;
   type: BillType;
+  /** Names the charge, such as Key Deposit or Late fee. Missing from an older API. */
+  chargeName?: string | null;
   amount: string;
   dueDate: string;
 }

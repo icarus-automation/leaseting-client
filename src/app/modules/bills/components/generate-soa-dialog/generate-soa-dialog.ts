@@ -11,6 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { billName } from '../../../../shared/utils/bill-name.util';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
@@ -56,6 +57,7 @@ export class GenerateSoaDialog {
   readonly generated = output<SoaResponse>();
 
   readonly billTypeLabels = BILL_TYPE_LABELS;
+  readonly billName = billName;
 
   readonly sourceOptions = signal<BillingSourceOption[]>([]);
   readonly loadingSources = signal(false);

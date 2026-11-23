@@ -20,13 +20,19 @@ import type {
   OnboardingDetail,
 } from '../../../../core/models/onboarding.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
+import { ChargeLines } from '../components/charge-lines/charge-lines';
+import {
+  createChargeLineArray,
+  createChargeLineGroup,
+  toChargeLines,
+} from '../components/charge-lines/charge-line-form';
 
 const DEFAULT_ADVANCE_MONTHS = 1;
 const DEFAULT_DEPOSIT_MONTHS = 2;
 
 @Component({
   selector: 'app-step-deposit',
-  imports: [ReactiveFormsModule, PIcon, InputNumber, PhpCurrencyPipe],
+  imports: [ReactiveFormsModule, PIcon, InputNumber, PhpCurrencyPipe, ChargeLines],
   templateUrl: './step-deposit.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -45,6 +51,7 @@ export class StepDeposit {
     advanceMonths: [DEFAULT_ADVANCE_MONTHS, [Validators.required, Validators.min(1), Validators.max(12)]],
     holdsDeposit: [true],
     depositMonths: [DEFAULT_DEPOSIT_MONTHS, [Validators.required, Validators.min(1), Validators.max(12)]],
+    oneTimeCharges: createChargeLineArray([]),
   });
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
@@ -63,7 +70,11 @@ export class StepDeposit {
   readonly depositTotal = computed(() =>
     this.holdsDeposit() ? this.monthlyRent() * (this.formValue().depositMonths ?? 0) : 0,
   );
-  readonly moveInTotal = computed(() => this.advanceTotal() + this.depositTotal());
+  /** Billed once at move-in, each on its own bill. */
+  readonly oneTimeTotal = computed(() =>
+    (this.formValue().oneTimeCharges ?? []).reduce((total, line) => total + (line.amount ?? 0), 0),
+  );
+  readonly moveInTotal = computed(() => this.advanceTotal() + this.depositTotal() + this.oneTimeTotal());
 
   constructor() {
     effect(() => {
@@ -86,9 +97,16 @@ export class StepDeposit {
 
   submit(): void {
     this.errorMessage.set(null);
-    if (this.form.invalid) {
+    const { advanceMonths: advanceControl, depositMonths: depositControl, oneTimeCharges: lines } = this.form.controls;
+    if (advanceControl.invalid || depositControl.invalid) {
       this.form.markAllAsTouched();
       this.errorMessage.set('Advance and deposit must each be at least 1 month, or answer “No”.');
+      return;
+    }
+    const oneTimeCharges = toChargeLines(lines);
+    if (oneTimeCharges.some((line) => !line.chargeItemId || !(line.amount > 0))) {
+      lines.markAllAsTouched();
+      this.errorMessage.set('Pick a charge and an amount above zero for each one-time charge, or remove it.');
       return;
     }
 
@@ -98,6 +116,8 @@ export class StepDeposit {
       advanceMonths: collectsAdvance ? advanceMonths : 0,
       holdsDeposit,
       depositMonths: holdsDeposit ? depositMonths : 0,
+      // Sent only when there are some: an API from before one-time charges refuses the field.
+      ...(oneTimeCharges.length > 0 ? { oneTimeCharges } : {}),
     });
   }
 
@@ -114,6 +134,10 @@ export class StepDeposit {
     });
     this.syncEnabled(this.form.controls.advanceMonths, collectsAdvance, DEFAULT_ADVANCE_MONTHS);
     this.syncEnabled(this.form.controls.depositMonths, holdsDeposit, DEFAULT_DEPOSIT_MONTHS);
+
+    const lines = this.form.controls.oneTimeCharges;
+    lines.clear();
+    for (const line of saved?.oneTimeCharges ?? []) lines.push(createChargeLineGroup(line));
   }
 
   private syncEnabled(control: (typeof this.form.controls)['advanceMonths'], enabled: boolean, fallback: number): void {

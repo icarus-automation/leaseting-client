@@ -183,7 +183,7 @@
                   @for (bill of billingHistory(); track bill.id) {
                     <tr class="border-b border-border last:border-b-0">
                       <td class="px-4 py-2.5 text-[13px] text-body">{{ bill.dueDate | date: 'MMM d, y' }}</td>
-                      <td class="px-4 py-2.5 text-[13px] text-body">{{ billTypeLabels[bill.type] }}</td>
+                      <td class="px-4 py-2.5 text-[13px] text-body">{{ billName(bill) }}</td>
                       <td class="px-4 py-2.5 text-[13px] text-muted">{{ bill.unitNo }}</td>
                       <td class="px-4 py-2.5 text-[13px] text-body tabular-nums">{{ bill.amount | phpCurrency }}</td>
                       <td class="px-4 py-2.5">

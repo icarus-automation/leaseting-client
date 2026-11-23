@@ -42,6 +42,8 @@ export interface LeaseListItem extends LeaseResponse {
 export interface LeaseBillItem {
   id: string;
   type: BillType;
+  /** Names the charge, such as Key Deposit or Late fee. Missing from an older API. */
+  chargeName?: string | null;
   amount: string;
   dueDate: string;
   status: BillStatus;

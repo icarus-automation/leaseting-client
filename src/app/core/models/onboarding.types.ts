@@ -64,6 +64,8 @@ export interface DepositStepData {
   advanceMonths: number;
   holdsDeposit: boolean;
   depositMonths: number;
+  /** Billed once at move-in, each as its own bill, such as a key deposit. */
+  oneTimeCharges?: ChargeLine[];
 }
 
 export interface ContractStepData {
@@ -75,6 +77,8 @@ export interface MoveInPaymentStepData extends PaymentMethodPayload {
   advanceAmount: number;
   depositAmount: number;
   paidOn: string;
+  /** Received for each one-time charge, in the deposit step's order. */
+  oneTimeAmounts?: number[];
   referenceNo?: string;
   notes?: string;
 }

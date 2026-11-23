@@ -1,5 +1,5 @@
 import type { BillListItem } from '../../../core/models/bill.types';
-import { BILL_TYPE_LABELS } from '../../../core/models/enums';
+import { billName } from '../../../shared/utils/bill-name.util';
 import type { UnitDetail, UnitOutstandingBill } from '../../../core/models/property.types';
 
 export function billFromUnit(unit: UnitDetail, bill: UnitOutstandingBill): BillListItem | null {
@@ -33,8 +33,8 @@ export function billFromUnit(unit: UnitDetail, bill: UnitOutstandingBill): BillL
     createdAt: '',
     updatedAt: '',
     utilityDetail: null,
-    chargeName: null,
-    label: BILL_TYPE_LABELS[bill.type],
+    chargeName: bill.chargeName ?? null,
+    label: billName(bill),
     paidAmount: '0',
     balance: bill.amount,
     lease: lease ? source : null,

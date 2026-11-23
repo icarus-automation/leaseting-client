@@ -109,7 +109,24 @@
     }
   </section>
 
-  <div class="grid gap-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-3">
+  <section class="flex flex-col gap-3 border-t border-border pt-4">
+    <div>
+      <h3 class="text-[13px] font-medium text-heading">Any one-time charges at move-in?</h3>
+      <p class="mt-0.5 text-[12.5px] leading-relaxed text-muted">
+        Billed once, each on its own bill, such as a key deposit. Monthly charges belong in lease terms.
+      </p>
+    </div>
+    <app-charge-lines
+      [lines]="form.controls.oneTimeCharges"
+      frequency="ONE_TIME"
+      idPrefix="one-time"
+      [busy]="busy()"
+      addLabel="Add a one-time charge"
+      emptyMessage="No one-time charges."
+    />
+  </section>
+
+  <div class="grid grid-cols-2 gap-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-4">
     <div class="flex flex-col">
       <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Advance</span>
       <span class="font-heading text-[15px] font-semibold text-heading">{{ advanceTotal() | phpCurrency }}</span>
@@ -117,6 +134,10 @@
     <div class="flex flex-col">
       <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Deposit</span>
       <span class="font-heading text-[15px] font-semibold text-heading">{{ depositTotal() | phpCurrency }}</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">One-time</span>
+      <span class="font-heading text-[15px] font-semibold text-heading">{{ oneTimeTotal() | phpCurrency }}</span>
     </div>
     <div class="flex flex-col sm:items-end">
       <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Due at move-in</span>

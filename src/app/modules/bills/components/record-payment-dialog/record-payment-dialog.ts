@@ -25,9 +25,18 @@ export class RecordPaymentDialog {
   readonly workspace = viewChild(PaymentWorkspace);
   readonly canMutate = computed(() => this.auth.can('payments:record'));
 
+  /**
+   * A settled bill opens as its payment history. The workspace knows the live balance,
+   * so a void that reopens the bill brings recording back; until it renders, the row's
+   * status decides.
+   */
+  readonly canRecord = computed(
+    () => this.workspace()?.canRecord() ?? (this.canMutate() && this.bill()?.status === 'UNPAID'),
+  );
+
   readonly heading = computed(() => {
     const bill = this.bill();
-    const verb = this.canMutate() ? 'Record payment' : 'Payments';
+    const verb = this.canRecord() ? 'Record payment' : 'Payments';
     if (!bill) return verb;
     return `${verb} · ${BILL_TYPE_LABELS[bill.type]}`;
   });

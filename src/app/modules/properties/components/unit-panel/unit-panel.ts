@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { billName } from '../../../../shared/utils/bill-name.util';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { PIcon } from '@primeicons/angular/p-icon';
@@ -80,6 +81,7 @@ export class UnitPanel {
   readonly canOnboard = computed(() => this.auth.canAll(['leases:manage', 'residents:manage']));
 
   readonly billTypeLabels = BILL_TYPE_LABELS;
+  readonly billName = billName;
 
   readonly statusTone = computed(() => {
     const unit = this.unit();

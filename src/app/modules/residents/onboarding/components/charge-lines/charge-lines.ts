@@ -20,17 +20,16 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../../core/models/api.types';
-import type { ChargeItemResponse } from '../../../../../core/models/charge-item.types';
+import type { ChargeFrequency, ChargeItemResponse } from '../../../../../core/models/charge-item.types';
 import { MANUAL_BILL_TYPE_OPTIONS, type BillType } from '../../../../../core/models/enums';
 import { ChargeItemsService } from '../../../../settings/services/charge-items.service';
-import { createChargeLineGroup, type ChargeLineArray, type ChargeLineGroup } from './charge-line-form';
-
-interface ChargeOption {
-  label: string;
-  value: string;
-  billType: BillType;
-  defaultAmount: number | null;
-}
+import {
+  createChargeLineGroup,
+  chargeOptions,
+  type ChargeLineArray,
+  type ChargeLineGroup,
+  type ChargeOption,
+} from './charge-line-form';
 
 @Component({
   selector: 'app-charge-lines',
@@ -51,6 +50,16 @@ export class ChargeLines {
   readonly busy = input(false);
   readonly addLabel = input('Add another charge');
   readonly emptyMessage = input('No charges yet.');
+  /** MONTHLY for lease terms (billed every month), ONE_TIME for charges billed once at move-in. */
+  readonly frequency = input<ChargeFrequency>('MONTHLY');
+  /** Keeps field ids unique when two lists share a page. */
+  readonly idPrefix = input('charge');
+  readonly descriptionPlaceholder = computed(() => (this.frequency() === 'MONTHLY' ? 'e.g. Slot B2' : 'e.g. 2 keys'));
+  readonly newItemHint = computed(() =>
+    this.frequency() === 'MONTHLY'
+      ? 'Added as a monthly charge. Deposits and other one-time charges are set up in Settings › Charge items.'
+      : 'Added as a one-time charge, billed once at move-in.',
+  );
 
   readonly billTypeOptions = MANUAL_BILL_TYPE_OPTIONS;
 
@@ -76,14 +85,7 @@ export class ChargeLines {
         .controls.map((group) => group.controls.chargeItemId.value)
         .filter((id): id is string => id !== null),
     );
-    return catalog
-      .filter((item) => !item.isArchived || chosen.has(item.id))
-      .map((item) => ({
-        label: item.isArchived ? `${item.name} (archived)` : item.name,
-        value: item.id,
-        billType: item.billType,
-        defaultAmount: item.defaultAmount === null ? null : Number(item.defaultAmount),
-      }));
+    return chargeOptions(catalog, chosen, this.frequency());
   });
 
   readonly loadingCatalog = computed(() => this.catalog() === null && this.catalogError() === null);
@@ -122,7 +124,7 @@ export class ChargeLines {
   onChargePicked(group: ChargeLineGroup, chargeItemId: string): void {
     const option = this.options().find((candidate) => candidate.value === chargeItemId);
     if (!option) return;
-    group.controls.name.setValue(option.label.replace(/ \(archived\)$/, ''));
+    group.controls.name.setValue(option.name);
     group.controls.billType.setValue(option.billType);
     if (group.controls.amount.value === null && option.defaultAmount !== null) {
       group.controls.amount.setValue(option.defaultAmount);
@@ -151,7 +153,8 @@ export class ChargeLines {
     this.creatingItem.set(true);
     this.newItemError.set(null);
     this.chargeItems
-      .create({ name: name.trim(), billType })
+      // Monthly is the API's default; leaving it out keeps an API from before frequencies working.
+      .create({ name: name.trim(), billType, ...(this.frequency() === 'MONTHLY' ? {} : { frequency: this.frequency() }) })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (created) => {
@@ -173,7 +176,7 @@ export class ChargeLines {
       if (group.controls.chargeItemId.value) continue;
       const name = group.controls.name.value.trim().toLowerCase();
       if (!name) continue;
-      const match = options.find((option) => option.label.toLowerCase() === name);
+      const match = options.find((option) => option.name.toLowerCase() === name);
       if (match) group.controls.chargeItemId.setValue(match.value);
     }
   }

@@ -91,6 +91,8 @@ export interface RecordPaymentPayload extends PaymentMethodPayload {
 
 export interface CreateBillPayload {
   type: BillType;
+  /** Names the bill after this charge item and takes its type. */
+  chargeItemId?: string;
   amount: number;
   dueDate: string;
   notes?: string;

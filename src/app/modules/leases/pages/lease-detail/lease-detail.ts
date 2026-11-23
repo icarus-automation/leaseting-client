@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { billName } from '../../../../shared/utils/bill-name.util';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -38,6 +39,7 @@ export class LeaseDetailPage {
   readonly error = signal<string | null>(null);
 
   readonly billTypeLabels = BILL_TYPE_LABELS;
+  readonly billName = billName;
   readonly ordinal = ordinal;
 
   readonly status = computed(() => {

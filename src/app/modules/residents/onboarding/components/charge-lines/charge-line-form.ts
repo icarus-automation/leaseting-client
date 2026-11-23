@@ -1,6 +1,11 @@
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
-import type { ChargeLine } from '../../../../../core/models/charge-item.types';
+import {
+  CHARGE_FREQUENCY_LABELS,
+  type ChargeFrequency,
+  type ChargeItemResponse,
+  type ChargeLine,
+} from '../../../../../core/models/charge-item.types';
 import type { BillType } from '../../../../../core/models/enums';
 
 export type ChargeLineGroup = FormGroup<{
@@ -48,4 +53,45 @@ export function toChargeLines(array: ChargeLineArray): ChargeLine[] {
 
 export function chargeLinesTotal(array: ChargeLineArray): number {
   return array.controls.reduce((total, group) => total + (group.controls.amount.value ?? 0), 0);
+}
+
+export interface ChargeOption {
+  label: string;
+  name: string;
+  value: string;
+  billType: BillType;
+  defaultAmount: number | null;
+}
+
+/**
+ * The items a line can use: live items of the frequency the list bills. Lease terms are
+ * billed every month, so they take monthly items; move-in charges are billed once, so
+ * they take one-time items. System items are never offered. A line saved before its item
+ * changed keeps showing it, marked, so the line can be swapped out; the API refuses it.
+ */
+export function chargeOptions(
+  catalog: ChargeItemResponse[],
+  chosenIds: ReadonlySet<string>,
+  frequency: ChargeFrequency = 'MONTHLY',
+): ChargeOption[] {
+  return catalog
+    .filter((item) => isOffered(item, frequency) || chosenIds.has(item.id))
+    .map((item) => ({
+      label: optionLabel(item, frequency),
+      name: item.name,
+      value: item.id,
+      billType: item.billType,
+      defaultAmount: item.defaultAmount === null ? null : Number(item.defaultAmount),
+    }));
+}
+
+function isOffered(item: ChargeItemResponse, frequency: ChargeFrequency): boolean {
+  return !item.isArchived && !item.isSystem && item.frequency === frequency;
+}
+
+function optionLabel(item: ChargeItemResponse, frequency: ChargeFrequency): string {
+  if (item.isSystem) return `${item.name} (system)`;
+  if (item.frequency !== frequency) return `${item.name} (${CHARGE_FREQUENCY_LABELS[item.frequency].toLowerCase()})`;
+  if (item.isArchived) return `${item.name} (archived)`;
+  return item.name;
 }

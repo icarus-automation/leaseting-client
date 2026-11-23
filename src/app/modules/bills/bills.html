@@ -184,7 +184,7 @@
                   >{{ bill.ownershipId ? 'Owner' : 'Tenant' }}</a>
                 </p>
               </td>
-              <td class="px-4 py-3 text-[13px] text-body">{{ bill.label || billTypeLabels[bill.type] }}</td>
+              <td class="px-4 py-3 text-[13px] text-body">{{ billName(bill) }}</td>
               <td class="px-4 py-3">
                 <p class="text-[13px] font-medium text-heading tabular-nums">{{ bill.amount | phpCurrency }}</p>
                 @if (isPartiallyPaid(bill)) {
@@ -202,7 +202,7 @@
                   @if (bill.status === 'UNPAID' && canRecordPayments()) {
                     <button
                       type="button"
-                      class="px-1.5 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:text-body hover:underline motion-reduce:transition-none"
+                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
                       (click)="openPaymentDialog(bill)"
                     >
                       Record payment
@@ -210,7 +210,7 @@
                   } @else if (canViewPayments()) {
                     <button
                       type="button"
-                      class="px-1.5 py-1 text-[12px] font-medium text-muted transition-colors duration-150 ease-out hover:text-body hover:underline motion-reduce:transition-none"
+                      class="rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
                       (click)="openPaymentDialog(bill)"
                     >
                       Payments
@@ -219,8 +219,8 @@
                   @if (canDelete(bill)) {
                     <button
                       type="button"
-                      class="flex h-7 w-7 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                      [attr.aria-label]="'More actions for ' + billTypeLabels[bill.type] + ' bill, ' + source.resident.firstName + ' ' + source.resident.lastName + ', unit ' + source.unit.unitNo"
+                      class="flex h-7 w-7 items-center justify-center rounded-base text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+                      [attr.aria-label]="'More actions for ' + billName(bill) + ' bill, ' + source.resident.firstName + ' ' + source.resident.lastName + ', unit ' + source.unit.unitNo"
                       aria-haspopup="menu"
                       [attr.aria-expanded]="overflowForId() === bill.id"
                       (click)="openOverflow($event, bill)"

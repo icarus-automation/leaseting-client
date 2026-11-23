@@ -19,13 +19,13 @@
     <header class="flex flex-wrap items-end justify-between gap-3">
       <div class="flex min-w-0 items-center gap-3.5">
         @if (p.imageUrl) {
-          <app-media-thumb
-            class="hidden h-14 w-20 shrink-0 rounded-base border border-border sm:block"
-            [src]="p.imageUrl"
-            [alt]="''"
-          >
-            <svg pIcon="building" class="text-muted" [size]="18" aria-hidden="true"></svg>
-          </app-media-thumb>
+          <!-- The size lives on this wrapper: app-media-thumb's own host classes fill
+               their parent, and sizing the host directly let full width win. -->
+          <div class="hidden h-14 w-20 shrink-0 overflow-hidden rounded-base border border-border bg-surface sm:block">
+            <app-media-thumb class="h-full w-full" [src]="p.imageUrl" [alt]="''">
+              <svg pIcon="building" class="text-muted" [size]="18" aria-hidden="true"></svg>
+            </app-media-thumb>
+          </div>
         }
         <div class="min-w-0">
           <div class="flex min-w-0 items-center gap-2">

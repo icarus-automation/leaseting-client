@@ -6,7 +6,10 @@
   }
 
   @if (terms(); as billed) {
-    <div class="grid gap-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-2">
+    <div
+      class="grid gap-2 rounded-base border border-border bg-surface px-4 py-3"
+      [class]="billed.oneTimeCharges.length > 0 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'"
+    >
       <div class="flex flex-col">
         <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">
           Advance billed{{ billed.advanceMonths > 0 ? ' (' + billed.advanceMonths + ' mo)' : '' }}
@@ -19,6 +22,12 @@
         </span>
         <span class="font-heading text-[15px] font-semibold text-heading">{{ billed.depositDue | phpCurrency }}</span>
       </div>
+      @if (billed.oneTimeCharges.length > 0) {
+        <div class="flex flex-col">
+          <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">One-time billed</span>
+          <span class="font-heading text-[15px] font-semibold text-heading">{{ billed.oneTimeDue | phpCurrency }}</span>
+        </div>
+      }
     </div>
   }
 
@@ -31,6 +40,26 @@
       <label class="text-[13px] font-medium text-heading" for="ob-deposit-paid">Deposit received</label>
       <p-inputnumber inputId="ob-deposit-paid" formControlName="depositAmount" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
     </div>
+    @if (terms(); as billed) {
+      <ng-container formArrayName="oneTimeAmounts">
+        @for (charge of billed.oneTimeCharges; track $index; let index = $index) {
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-heading" [attr.for]="'ob-one-time-' + index">
+              {{ charge.name }} received <span class="font-normal text-muted">of {{ charge.amount | phpCurrency }}</span>
+            </label>
+            <p-inputnumber
+              [inputId]="'ob-one-time-' + index"
+              [formControlName]="index"
+              mode="currency"
+              currency="PHP"
+              locale="en-PH"
+              [min]="0"
+              styleClass="w-full"
+            />
+          </div>
+        }
+      </ng-container>
+    }
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="ob-paid-on">Paid on</label>
       <p-datepicker inputId="ob-paid-on" formControlName="paidOn" dateFormat="M d, yy" [showIcon]="true" appendTo="body" styleClass="w-full" />

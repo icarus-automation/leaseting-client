@@ -15,11 +15,11 @@
       @for (group of lines().controls; track group; let index = $index, last = $last) {
         <li class="flex flex-wrap items-start gap-2" [formGroup]="group">
           <div class="flex min-w-[11rem] flex-1 flex-col gap-1">
-            <label class="text-[11.5px] font-medium text-muted" [attr.for]="'charge-item-' + index">
+            <label class="text-[11.5px] font-medium text-muted" [attr.for]="idPrefix() + '-item-' + index">
               What is this for?
             </label>
             <p-select
-              [inputId]="'charge-item-' + index"
+              [inputId]="idPrefix() + '-item-' + index"
               formControlName="chargeItemId"
               [options]="options()"
               optionLabel="label"
@@ -34,22 +34,22 @@
           </div>
 
           <div class="flex min-w-[10rem] flex-1 flex-col gap-1">
-            <label class="text-[11.5px] font-medium text-muted" [attr.for]="'charge-note-' + index">
+            <label class="text-[11.5px] font-medium text-muted" [attr.for]="idPrefix() + '-note-' + index">
               Description <span class="font-normal">(optional)</span>
             </label>
             <input
-              [id]="'charge-note-' + index"
+              [id]="idPrefix() + '-note-' + index"
               type="text"
               formControlName="description"
-              placeholder="e.g. Slot B2"
+              [placeholder]="descriptionPlaceholder()"
               class="h-10 w-full rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
             />
           </div>
 
           <div class="flex w-40 flex-col gap-1">
-            <label class="text-[11.5px] font-medium text-muted" [attr.for]="'charge-amount-' + index">Amount</label>
+            <label class="text-[11.5px] font-medium text-muted" [attr.for]="idPrefix() + '-amount-' + index">Amount</label>
             <p-inputnumber
-              [inputId]="'charge-amount-' + index"
+              [inputId]="idPrefix() + '-amount-' + index"
               formControlName="amount"
               mode="currency"
               currency="PHP"
@@ -81,10 +81,10 @@
       (ngSubmit)="submitNewItem()"
     >
       <div class="flex min-w-[11rem] flex-1 flex-col gap-1">
-        <label class="text-[11.5px] font-medium text-muted" for="new-charge-name">New charge item</label>
+        <label class="text-[11.5px] font-medium text-muted" [attr.for]="idPrefix() + '-new-name'">New charge item</label>
         <input
           #newItemInput
-          id="new-charge-name"
+          [id]="idPrefix() + '-new-name'"
           type="text"
           formControlName="name"
           placeholder="e.g. Laundry"
@@ -93,9 +93,9 @@
         />
       </div>
       <div class="flex w-44 flex-col gap-1">
-        <label class="text-[11.5px] font-medium text-muted" for="new-charge-type">Bills as</label>
+        <label class="text-[11.5px] font-medium text-muted" [attr.for]="idPrefix() + '-new-type'">Bills as</label>
         <p-select
-          inputId="new-charge-type"
+          [inputId]="idPrefix() + '-new-type'"
           formControlName="billType"
           [options]="billTypeOptions"
           optionLabel="label"
@@ -123,6 +123,8 @@
       </button>
       @if (newItemError(); as message) {
         <p class="w-full text-[12px] text-destructive animate-error-in motion-reduce:animate-none">{{ message }}</p>
+      } @else {
+        <p class="w-full text-[12px] text-muted">{{ newItemHint() }}</p>
       }
     </form>
   }

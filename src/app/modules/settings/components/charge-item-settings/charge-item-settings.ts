@@ -18,7 +18,13 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
-import type { ChargeItemResponse } from '../../../../core/models/charge-item.types';
+import {
+  CHARGE_FREQUENCY_LABELS,
+  CHARGE_FREQUENCY_OPTIONS,
+  type ChargeFrequency,
+  type ChargeItemResponse,
+  systemItemPurpose,
+} from '../../../../core/models/charge-item.types';
 import { BILL_TYPE_LABELS, MANUAL_BILL_TYPE_OPTIONS, type BillType } from '../../../../core/models/enums';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
@@ -49,6 +55,9 @@ export class ChargeItemSettings {
 
   readonly billTypeOptions = MANUAL_BILL_TYPE_OPTIONS;
   readonly billTypeLabels = BILL_TYPE_LABELS;
+  readonly frequencyOptions = CHARGE_FREQUENCY_OPTIONS;
+  readonly frequencyLabels = CHARGE_FREQUENCY_LABELS;
+  readonly systemPurpose = systemItemPurpose;
 
   readonly createForm = this.buildForm();
   readonly creating = signal(false);
@@ -89,12 +98,12 @@ export class ChargeItemSettings {
     this.creating.set(true);
     this.createError.set(null);
     this.chargeItems
-      .create(this.payloadOf(this.createForm))
+      .create(this.payloadOf(this.createForm, 'MONTHLY'))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (created) => {
           this.creating.set(false);
-          this.createForm.reset({ name: '', billType: 'OTHER', defaultAmount: null });
+          this.createForm.reset({ name: '', billType: 'OTHER', defaultAmount: null, frequency: 'MONTHLY' });
           this.replaceItem(created);
           this.flashId.set(created.id);
         },
@@ -106,10 +115,12 @@ export class ChargeItemSettings {
   }
 
   startEdit(item: ChargeItemResponse): void {
+    if (item.isSystem) return;
     this.editForm.reset({
       name: item.name,
       billType: item.billType,
       defaultAmount: item.defaultAmount === null ? null : Number(item.defaultAmount),
+      frequency: item.frequency,
     });
     this.editingId.set(item.id);
     this.editError.set(null);
@@ -132,7 +143,7 @@ export class ChargeItemSettings {
     this.saving.set(true);
     this.editError.set(null);
     this.chargeItems
-      .update(id, this.payloadOf(this.editForm))
+      .update(id, this.payloadOf(this.editForm, this.items()?.find((item) => item.id === id)?.frequency ?? 'MONTHLY'))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
@@ -206,12 +217,18 @@ export class ChargeItemSettings {
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
       billType: ['OTHER' as BillType, [Validators.required]],
       defaultAmount: [null as number | null, [Validators.min(0)]],
+      frequency: ['MONTHLY' as ChargeFrequency, [Validators.required]],
     });
   }
 
-  private payloadOf(form: ReturnType<ChargeItemSettings['buildForm']>) {
-    const { name, billType, defaultAmount } = form.getRawValue();
-    return { name: name.trim(), billType, defaultAmount };
+  /**
+   * Frequency is sent only when it changes something: a new item is monthly unless set,
+   * and an edit keeps the item's own. An API from before frequencies refuses the field,
+   * so ordinary saves keep working while the client ships ahead of the API.
+   */
+  private payloadOf(form: ReturnType<ChargeItemSettings['buildForm']>, unchanged: ChargeFrequency) {
+    const { name, billType, defaultAmount, frequency } = form.getRawValue();
+    return { name: name.trim(), billType, defaultAmount, ...(frequency === unchanged ? {} : { frequency }) };
   }
 
   private replaceItem(item: ChargeItemResponse): void {

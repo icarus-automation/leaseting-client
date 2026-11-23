@@ -191,7 +191,7 @@
               @for (bill of lease.bills; track bill.id) {
                 <tr class="border-b border-border last:border-b-0">
                   <td class="px-4 py-2.5 text-[13px] text-body">{{ bill.dueDate | date: 'MMM d, y' }}</td>
-                  <td class="px-4 py-2.5 text-[13px] text-body">{{ billTypeLabels[bill.type] }}</td>
+                  <td class="px-4 py-2.5 text-[13px] text-body">{{ billName(bill) }}</td>
                   <td class="px-4 py-2.5 text-[13px] text-body tabular-nums">{{ bill.amount | phpCurrency }}</td>
                   <td class="px-4 py-2.5">
                     <app-status-badge [tone]="billStatus(bill).tone" [label]="billStatus(bill).label" />

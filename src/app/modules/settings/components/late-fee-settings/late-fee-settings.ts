@@ -1,11 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { InputNumber } from 'primeng/inputnumber';
-import { Select } from 'primeng/select';
 import { forkJoin } from 'rxjs';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
@@ -25,7 +23,7 @@ import { LateFeeRuleService } from '../../services/late-fee-rule.service';
 
 @Component({
   selector: 'app-late-fee-settings',
-  imports: [ProgressSpinner, ReactiveFormsModule, RouterLink, PIcon, InputNumber, Select, SegmentedControl, Skeleton],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, SegmentedControl, Skeleton],
   templateUrl: './late-fee-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -62,31 +60,32 @@ export class LateFeeSettings {
   readonly enabled = computed(() => this.formValue()?.enabled === true);
   readonly basis = computed(() => this.formValue()?.basis ?? 'FIXED');
 
-  readonly livePostable = computed(() =>
-    (this.chargeItems() ?? []).filter((item) => !item.isArchived && item.billType !== 'RENT'),
-  );
-
-  readonly chargeItemOptions = computed<{ value: string; label: string }[]>(() => {
-    const currentId = this.formValue()?.chargeItemId ?? '';
-    return (this.chargeItems() ?? [])
-      .filter((item) => (!item.isArchived && item.billType !== 'RENT') || item.id === currentId)
-      .map((item) => ({
-        value: item.id,
-        label: item.isArchived ? `${item.name} (archived)` : item.name,
-      }));
+  /**
+   * Late fees always post as the system Late fee item. An API that predates it still
+   * requires the item's id, so the item named Late fee stands in until it is deployed.
+   */
+  readonly lateFeeItem = computed(() => {
+    const items = this.chargeItems() ?? [];
+    return (
+      items.find((item) => item.systemKey === 'LATE_FEE') ??
+      items.find((item) => item.name.trim().toLowerCase() === 'late fee') ??
+      null
+    );
   });
+  readonly lateFeeItemName = computed(() => this.rule()?.chargeItem?.name ?? this.lateFeeItem()?.name ?? 'Late fee');
 
   readonly payload = computed<UpdateLateFeeRulePayload | null>(() => {
     const v = this.formValue();
     if (!v) return null;
     if (!v.enabled) return { mode: 'OFF' };
-    if (!v.chargeItemId) return null;
+    const chargeItemId = v.chargeItemId || this.lateFeeItem()?.id;
+    const postAs = chargeItemId ? { chargeItemId } : {};
     if (v.basis === 'FIXED') {
       if (!(v.amount != null && v.amount >= 0.01)) return null;
       return {
         mode: 'ON',
         graceDays: v.graceDays ?? 5,
-        chargeItemId: v.chargeItemId,
+        ...postAs,
         fee: { kind: 'FIXED', amount: v.amount },
       };
     }
@@ -94,7 +93,7 @@ export class LateFeeSettings {
     return {
       mode: 'ON',
       graceDays: v.graceDays ?? 5,
-      chargeItemId: v.chargeItemId,
+      ...postAs,
       fee: { kind: 'PERCENT', percent: v.percent },
     };
   });
@@ -133,18 +132,11 @@ export class LateFeeSettings {
     this.form.controls.basis.markAsDirty();
   }
 
-  onChargeItemChange(id: string): void {
-    const item = (this.chargeItems() ?? []).find((candidate) => candidate.id === id);
-    if (item?.defaultAmount && this.form.controls.basis.value === 'FIXED' && this.form.controls.amount.value === 0) {
-      this.form.controls.amount.setValue(Number(item.defaultAmount));
-    }
-  }
-
   submit(): void {
     if (!this.canManage()) return;
     const payload = this.payload();
     if (!payload) {
-      this.saveError.set('Pick the charge item late fees post as.');
+      this.saveError.set('Enter a late fee above zero.');
       return;
     }
 

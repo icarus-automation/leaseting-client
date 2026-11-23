@@ -45,6 +45,25 @@
     }
 
     <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="bill-charge">
+        Charge <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <p-select
+        inputId="bill-charge"
+        formControlName="chargeItemId"
+        [options]="chargeOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [filter]="true"
+        [showClear]="true"
+        placeholder="None, pick a type below"
+        styleClass="w-full"
+        appendTo="body"
+      />
+      <p class="text-[12px] leading-relaxed text-muted">Names the bill after a charge item, such as Key Deposit, and sets its type.</p>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="bill-type">Type</label>
       <p-select
         inputId="bill-type"

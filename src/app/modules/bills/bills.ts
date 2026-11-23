@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, viewChild } from '@angular/core';
+import { billName } from '../../shared/utils/bill-name.util';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -98,6 +99,7 @@ export class Bills {
   readonly quickFilters = QUICK_FILTERS;
   readonly typeOptions = TYPE_OPTIONS;
   readonly billTypeLabels = BILL_TYPE_LABELS;
+  readonly billName = billName;
 
   readonly items = signal<BillListItem[]>([]);
   readonly meta = signal<PageMeta | null>(null);

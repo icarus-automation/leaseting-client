@@ -110,7 +110,7 @@
                   [class]="isOverdue(bill) ? 'border-[color-mix(in_oklab,var(--destructive)_30%,transparent)] bg-muted-destructive' : 'border-border bg-background'"
                 >
                   <div class="flex min-w-0 flex-1 flex-col">
-                    <span class="text-[13px] font-medium text-heading">{{ billTypeLabels[bill.type] }}</span>
+                    <span class="text-[13px] font-medium text-heading">{{ billName(bill) }}</span>
                     <span class="text-[12px]" [class]="isOverdue(bill) ? 'font-medium text-destructive' : 'text-muted'">
                       {{ isOverdue(bill) ? 'Overdue since' : 'Due' }} {{ bill.dueDate | date: 'MMM d' }}
                     </span>
@@ -243,7 +243,7 @@
                 [class]="isOverdue(bill) ? 'border-[color-mix(in_oklab,var(--destructive)_30%,transparent)] bg-muted-destructive' : 'border-border bg-background'"
               >
                 <div class="flex min-w-0 flex-1 flex-col">
-                  <span class="text-[13px] font-medium text-heading">{{ billTypeLabels[bill.type] }}</span>
+                  <span class="text-[13px] font-medium text-heading">{{ billName(bill) }}</span>
                   <span class="text-[12px]" [class]="isOverdue(bill) ? 'font-medium text-destructive' : 'text-muted'">
                     {{ isOverdue(bill) ? 'Overdue since' : 'Due' }} {{ bill.dueDate | date: 'MMM d' }}
                   </span>
@@ -253,7 +253,7 @@
                   <button
                     type="button"
                     class="shrink-0 rounded-base border border-border bg-background px-2 py-1 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--success)_45%,transparent)] hover:bg-muted-success motion-reduce:transition-none"
-                    [attr.aria-label]="(canRecordPayments() ? 'Record payment for ' : 'Payments for ') + billTypeLabels[bill.type] + ' bill'"
+                    [attr.aria-label]="(canRecordPayments() ? 'Record payment for ' : 'Payments for ') + billName(bill) + ' bill'"
                     (click)="openPaymentDialog(bill)"
                   >
                     {{ canRecordPayments() ? 'Record payment' : 'Payments' }}

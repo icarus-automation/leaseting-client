@@ -24,6 +24,7 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
+import { CHARGE_FREQUENCY_LABELS, type ChargeItemResponse } from '../../../../core/models/charge-item.types';
 import { BILL_TYPE_LABELS, BillType, MANUAL_BILL_TYPE_OPTIONS } from '../../../../core/models/enums';
 import type { LeaseListItem } from '../../../../core/models/lease.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
@@ -32,6 +33,7 @@ import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { nextDueDate } from '../../../../shared/utils/date.util';
 import { leaseBillsType } from '../../../../shared/utils/lease-utility-billing.util';
 import { LeasesService } from '../../../leases/services/leases.service';
+import { ChargeItemsService } from '../../../settings/services/charge-items.service';
 import { BillsService } from '../../services/bills.service';
 
 interface LeaseOption {
@@ -53,6 +55,7 @@ export class BillFormDialog {
   private readonly fb = inject(FormBuilder);
   private readonly bills = inject(BillsService);
   private readonly leases = inject(LeasesService);
+  private readonly chargeItemsApi = inject(ChargeItemsService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly visible = model.required<boolean>();
@@ -61,6 +64,7 @@ export class BillFormDialog {
 
   readonly form = this.fb.nonNullable.group({
     leaseId: ['', [Validators.required]],
+    chargeItemId: [''],
     type: ['RENT' as BillType, [Validators.required]],
     amount: [null as number | null, [Validators.required, Validators.min(0.01)]],
     dueDate: [null as Date | null, [Validators.required]],
@@ -84,6 +88,13 @@ export class BillFormDialog {
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly leaseOptions = signal<LeaseOption[]>([]);
+  readonly chargeItems = signal<ChargeItemResponse[]>([]);
+  /** Live items staff may bill by hand, monthly or one-time. System items are billed by Leaseting alone. */
+  readonly chargeOptions = computed(() =>
+    this.chargeItems()
+      .filter((item) => !item.isArchived && !item.isSystem)
+      .map((item) => ({ value: item.id, label: `${item.name} · ${CHARGE_FREQUENCY_LABELS[item.frequency]}` })),
+  );
   readonly loadingLeases = signal(false);
 
   private readonly selectedType = toSignal(this.form.controls.type.valueChanges, {
@@ -159,6 +170,9 @@ export class BillFormDialog {
         this.applyLeaseDefaults();
         if (this.readingMode()) this.prefillFromLastReading();
       });
+    this.form.controls.chargeItemId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((chargeItemId) => this.applyChargeItem(chargeItemId));
     this.form.controls.type.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
@@ -174,8 +188,10 @@ export class BillFormDialog {
     this.errorMessage.set(null);
     this.saving.set(false);
     this.readingMode.set(false);
+    this.form.controls.type.enable({ emitEvent: false });
     this.form.reset({
       leaseId: presetLeaseId ?? '',
+      chargeItemId: '',
       type: 'RENT',
       amount: null,
       dueDate: null,
@@ -192,6 +208,35 @@ export class BillFormDialog {
       whtPct: 0,
     });
     if (!presetLeaseId) this.loadLeases();
+    if (this.chargeItems().length === 0) this.loadChargeItems();
+  }
+
+  private loadChargeItems(): void {
+    this.chargeItemsApi
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (items) => this.chargeItems.set(items), error: () => this.chargeItems.set([]) });
+  }
+
+  /**
+   * A bill picked from a charge item takes the item's type, so the type is locked while
+   * one is picked. Unless staff typed an amount, the item's default amount replaces
+   * whatever was filled in for them (such as the lease's rent).
+   */
+  private applyChargeItem(chargeItemId: string | null): void {
+    const typeControl = this.form.controls.type;
+    const item = chargeItemId ? this.chargeItems().find((candidate) => candidate.id === chargeItemId) : undefined;
+    if (!item) {
+      typeControl.enable({ emitEvent: false });
+      return;
+    }
+    const amountControl = this.form.controls.amount;
+    if (amountControl.pristine && amountControl.enabled) {
+      amountControl.setValue(item.defaultAmount === null ? null : Number(item.defaultAmount));
+    }
+    // Setting the type runs the lease defaults, so a rent item with no default takes the lease's rent.
+    typeControl.setValue(item.billType);
+    typeControl.disable({ emitEvent: false });
   }
 
   toggleReadingMode(on: boolean): void {
@@ -258,7 +303,7 @@ export class BillFormDialog {
       return;
     }
 
-    const { leaseId, type, amount, dueDate, notes } = this.form.getRawValue();
+    const { leaseId, chargeItemId, type, amount, dueDate, notes } = this.form.getRawValue();
     if (dueDate === null) return;
 
     let payloadAmount = amount;
@@ -293,6 +338,7 @@ export class BillFormDialog {
     this.bills
       .create(leaseId, {
         type,
+        chargeItemId: chargeItemId || undefined,
         amount: payloadAmount,
         dueDate: formatDate(dueDate, 'yyyy-MM-dd', 'en-US'),
         notes: notes.trim() || undefined,
@@ -305,7 +351,8 @@ export class BillFormDialog {
           this.saved.emit();
           if (addAnother) {
             this.toggleReadingMode(false);
-            this.form.reset({ leaseId, type, amount: null, dueDate: null, notes: '' });
+            this.form.controls.type.enable({ emitEvent: false });
+            this.form.reset({ leaseId, chargeItemId: '', type, amount: null, dueDate: null, notes: '' });
             this.readingForm.reset({
               periodFrom: null,
               periodTo: null,

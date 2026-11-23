@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { billName } from '../../../../shared/utils/bill-name.util';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -72,6 +73,7 @@ export class ResidentDetailPage {
   readonly deletingDocumentId = signal<string | null>(null);
 
   readonly billTypeLabels = BILL_TYPE_LABELS;
+  readonly billName = billName;
   readonly acceptedDocumentTypes = ACCEPTED_DOCUMENT_TYPES;
   readonly ordinal = ordinal;
 

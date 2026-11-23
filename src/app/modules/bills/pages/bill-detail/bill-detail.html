@@ -35,7 +35,7 @@
       </a>
       <div class="flex flex-wrap items-center gap-2">
         <h1 class="font-heading text-2xl font-semibold text-heading">
-          {{ billTypeLabels[bill.type] }} · Unit {{ source.unit.unitNo }}
+          {{ billName(bill) }} · Unit {{ source.unit.unitNo }}
         </h1>
         @if (badge(); as badge) {
           <app-status-badge [tone]="badge.tone" [label]="badge.label" />
@@ -133,7 +133,7 @@
       @if (target(); as paymentTarget) {
         <section class="rounded-base border border-border bg-background p-4" aria-labelledby="record-payment-heading">
           <h2 id="record-payment-heading" class="font-heading text-base font-semibold text-heading">
-            {{ canRecordPayments() ? 'Record payment' : 'Payments' }}
+            {{ canRecordPayments() && bill.status === 'UNPAID' ? 'Record payment' : 'Payments' }}
           </h2>
           <div class="mt-3">
             <app-payment-workspace [target]="paymentTarget" cta="body" (changed)="refresh()" />

@@ -39,6 +39,7 @@ export type UpdateLateFeeRulePayload =
   | {
       mode: 'ON';
       graceDays: number;
-      chargeItemId: string;
+      /** Ignored by the API since the system Late fee item; still sent for an older API. */
+      chargeItemId?: string;
       fee: { kind: 'FIXED'; amount: number } | { kind: 'PERCENT'; percent: number };
     };

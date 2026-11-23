@@ -81,17 +81,22 @@ export class StepMoveInPayment {
     const monthlyRent = (terms.charges ?? []).reduce((total, charge) => total + charge.amount, 0);
     const advanceMonths = deposit.collectsAdvance ? deposit.advanceMonths : 0;
     const depositMonths = deposit.holdsDeposit ? deposit.depositMonths : 0;
+    const oneTimeCharges = deposit.oneTimeCharges ?? [];
     return {
       advanceMonths,
       depositMonths,
       advanceDue: monthlyRent * advanceMonths,
       depositDue: monthlyRent * depositMonths,
+      oneTimeCharges,
+      oneTimeDue: oneTimeCharges.reduce((total, charge) => total + charge.amount, 0),
     };
   });
 
   readonly form = this.fb.nonNullable.group({
     advanceAmount: [0, [Validators.required, Validators.min(0)]],
     depositAmount: [0, [Validators.required, Validators.min(0)]],
+    /** Received for each one-time charge, in the deposit step's order. */
+    oneTimeAmounts: this.fb.nonNullable.array<number>([]),
     paidOn: [new Date(), [Validators.required]],
     payment: createPaymentMethodGroup(),
     referenceNo: ['', [Validators.maxLength(80)]],
@@ -162,17 +167,20 @@ export class StepMoveInPayment {
       this.form.markAllAsTouched();
       return;
     }
-    const { advanceAmount, depositAmount, paidOn, payment, referenceNo, notes } = this.form.getRawValue();
+    const { advanceAmount, depositAmount, oneTimeAmounts, paidOn, payment, referenceNo, notes } = this.form.getRawValue();
 
     const terms = this.terms();
-    if (terms && (advanceAmount > terms.advanceDue || depositAmount > terms.depositDue)) {
-      this.errorMessage.set('That is more than what has been billed. Lower the payment, or adjust the lease terms.');
+    const oneTimeOver = terms?.oneTimeCharges.some((charge, index) => (oneTimeAmounts[index] ?? 0) > charge.amount);
+    if (terms && (advanceAmount > terms.advanceDue || depositAmount > terms.depositDue || oneTimeOver)) {
+      this.errorMessage.set('That is more than what has been billed. Lower the payment, or adjust the charges.');
       return;
     }
 
     this.next.emit({
       advanceAmount,
       depositAmount,
+      // Sent only with one-time charges: an API from before them refuses the field.
+      ...(oneTimeAmounts.length > 0 ? { oneTimeAmounts: oneTimeAmounts.map((amount) => amount ?? 0) } : {}),
       paidOn: formatDate(paidOn, 'yyyy-MM-dd', 'en-US'),
       ...paymentMethodPayload(payment),
       referenceNo: referenceNo.trim() || undefined,
@@ -182,6 +190,7 @@ export class StepMoveInPayment {
 
   private prefill(detail: OnboardingDetail): void {
     const saved = detail.stepsState['move-in-payment']?.data as Partial<MoveInPaymentStepData> | undefined;
+    this.prefillOneTime(saved?.oneTimeAmounts);
     if (saved) {
       this.form.patchValue({
         advanceAmount: saved.advanceAmount ?? 0,
@@ -202,6 +211,15 @@ export class StepMoveInPayment {
     const terms = this.terms();
     if (terms) {
       this.form.patchValue({ advanceAmount: terms.advanceDue, depositAmount: terms.depositDue });
+    }
+  }
+
+  /** One field per one-time charge: what was saved, otherwise the full charge, as most are paid at move-in. */
+  private prefillOneTime(saved: number[] | undefined): void {
+    const amounts = this.form.controls.oneTimeAmounts;
+    amounts.clear();
+    for (const [index, charge] of (this.terms()?.oneTimeCharges ?? []).entries()) {
+      amounts.push(this.fb.nonNullable.control(saved?.[index] ?? charge.amount, [Validators.min(0)]));
     }
   }
 }

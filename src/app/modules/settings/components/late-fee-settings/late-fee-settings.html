@@ -12,19 +12,6 @@
       </span>
       <button type="button" class="shrink-0 font-medium text-primary hover:underline" (click)="load()">Retry</button>
     </div>
-  } @else if (livePostable().length === 0) {
-    <div class="rounded-base border border-dashed border-border bg-background px-4 py-8 text-center">
-      <p class="text-[13.5px] font-medium text-heading">Add a charge item first</p>
-      <p class="mt-1 text-[13px] leading-relaxed text-muted">
-        Late fees post as a charge item. Add one that is not Rent, then come back here.
-      </p>
-      <a
-        routerLink="/settings/charge-items"
-        class="mt-3 inline-flex h-8 items-center rounded-base border-none bg-primary px-3 text-[12.5px] font-semibold text-primary-foreground no-underline transition-colors duration-150 ease-out hover:bg-primary-hover motion-reduce:transition-none"
-      >
-        Go to Charge items
-      </a>
-    </div>
   } @else {
     <form
       class="flex flex-col gap-5 rounded-base border border-border bg-background px-4 py-4"
@@ -114,23 +101,16 @@
           }
         </fieldset>
 
-        <label for="late-fee-charge-item" class="flex w-full flex-col gap-1.5">
-          <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Post as</span>
-          <p-select
-            inputId="late-fee-charge-item"
-            formControlName="chargeItemId"
-            [readonly]="!canManage()"
-            [options]="chargeItemOptions()"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Pick the charge item"
-            styleClass="w-full"
-            appendTo="body"
-            ariaLabel="Post as charge item"
-            (onChange)="onChargeItemChange($event.value)"
-          />
-          <span class="text-[12.5px] leading-relaxed text-muted">The late fee is billed as this charge item.</span>
-        </label>
+        <div class="flex w-full flex-col gap-1.5">
+          <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">Billed as</span>
+          <p class="flex items-center gap-2 text-[13px] text-heading">
+            <svg pIcon="lock" class="shrink-0 text-muted" [size]="12" aria-hidden="true"></svg>
+            <span>{{ lateFeeItemName() }}</span>
+          </p>
+          <span class="text-[12.5px] leading-relaxed text-muted">
+            A system charge item: Leaseting adds it to overdue bills, so it never appears in lease terms.
+          </span>
+        </div>
       }
 
       @if (canManage()) {

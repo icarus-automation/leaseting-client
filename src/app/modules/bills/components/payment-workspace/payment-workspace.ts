@@ -124,7 +124,13 @@ export class PaymentWorkspace {
     const snapshot = this.snapshot();
     return effectiveDestinationsForProperty(this.destinations(), snapshot ? billSourceOf(snapshot).unit.property.id : null);
   });
-  readonly showBodyCta = computed(() => this.cta() === 'body' && this.canMutate());
+  /** Known once the seed or the bill detail has given the balance, so nothing flashes before. */
+  private readonly balanceKnown = signal(false);
+  /** Paid in full: the API refuses another payment until a void reopens the bill. */
+  readonly isSettled = computed(() => this.balanceKnown() && Number(this.balance()) <= 0);
+  /** Hosts read this for their heading and footer button. */
+  readonly canRecord = computed(() => this.canMutate() && !this.isSettled());
+  readonly showBodyCta = computed(() => this.cta() === 'body' && this.canRecord());
 
   constructor() {
     effect(() => {
@@ -156,6 +162,7 @@ export class PaymentWorkspace {
     this.snapshot.set(target.seed ?? null);
     this.paidAmount.set(target.seed?.paidAmount ?? '0');
     this.balance.set(target.seed?.balance ?? '0');
+    this.balanceKnown.set(target.seed !== undefined);
     this.billedAmount.set(target.seed?.amount ?? '0');
     this.form.reset({
       amount: finiteAmount(target.seed?.balance ?? null),
@@ -178,6 +185,7 @@ export class PaymentWorkspace {
     this.snapshot.set(seed);
     this.paidAmount.set(seed.paidAmount);
     this.balance.set(seed.balance);
+    this.balanceKnown.set(true);
     this.billedAmount.set(seed.amount);
     const amountControl = this.form.controls.amount;
     if (amountControl.pristine) {
@@ -323,6 +331,7 @@ export class PaymentWorkspace {
           this.payments.set(detail.payments);
           this.paidAmount.set(detail.paidAmount);
           this.balance.set(detail.balance);
+          this.balanceKnown.set(true);
           this.billedAmount.set(detail.amount);
           const amountControl = this.form.controls.amount;
           if (amountControl.pristine) {

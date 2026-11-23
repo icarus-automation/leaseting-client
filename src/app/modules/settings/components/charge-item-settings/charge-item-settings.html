@@ -43,6 +43,15 @@
                     appendTo="body"
                     ariaLabel="Bill type"
                   />
+                  <p-select
+                    formControlName="frequency"
+                    [options]="frequencyOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    styleClass="w-32"
+                    appendTo="body"
+                    ariaLabel="How often it is billed"
+                  />
                   <p-inputnumber
                     formControlName="defaultAmount"
                     mode="currency"
@@ -92,11 +101,24 @@
                   <span class="rounded-full bg-surface px-2 py-px text-[11.5px] font-medium text-muted">
                     {{ billTypeLabels[item.billType] }}
                   </span>
+                  <span
+                    class="rounded-full px-2 py-px text-[11.5px] font-medium"
+                    [class]="item.frequency === 'MONTHLY' ? 'bg-surface text-muted' : 'bg-muted-warning text-body'"
+                    [attr.title]="item.frequency === 'MONTHLY' ? 'Can be part of the monthly rent on a lease' : 'Billed once, never part of rent'"
+                  >
+                    {{ frequencyLabels[item.frequency] }}
+                  </span>
+                  @if (item.isSystem) {
+                    <span class="inline-flex items-center gap-1 text-[12px] text-muted">
+                      <svg pIcon="lock" [size]="11" aria-hidden="true"></svg>
+                      System item: {{ systemPurpose(item) }}
+                    </span>
+                  }
                   @if (item.defaultAmount !== null) {
                     <span class="text-[12.5px] text-muted">{{ item.defaultAmount | phpCurrency }} default</span>
                   }
 
-                  @if (canManage()) {
+                  @if (canManage() && !item.isSystem) {
                     <span class="flex-1"></span>
 
                     <button
@@ -158,6 +180,15 @@
               styleClass="w-40"
               appendTo="body"
               ariaLabel="Bill type for the new charge item"
+            />
+            <p-select
+              formControlName="frequency"
+              [options]="frequencyOptions"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-32"
+              appendTo="body"
+              ariaLabel="How often the new charge item is billed"
             />
             <p-inputnumber
               formControlName="defaultAmount"

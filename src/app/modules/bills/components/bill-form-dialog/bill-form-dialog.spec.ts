@@ -2,9 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
+import type { ChargeItemResponse } from '../../../../core/models/charge-item.types';
 import type { LeaseListItem } from '../../../../core/models/lease.types';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { LeasesService } from '../../../leases/services/leases.service';
+import { ChargeItemsService } from '../../../settings/services/charge-items.service';
 import { BillsService } from '../../services/bills.service';
 import { BillFormDialog } from './bill-form-dialog';
 
@@ -31,11 +33,37 @@ function lease(id: string, billing: { billsElectricity: boolean; billsWater: boo
   };
 }
 
+function chargeItem(overrides: Partial<ChargeItemResponse>): ChargeItemResponse {
+  return {
+    id: 'key',
+    name: 'Key Deposit',
+    billType: 'OTHER',
+    defaultAmount: '1000.00',
+    isArchived: false,
+    frequency: 'ONE_TIME',
+    isSystem: false,
+    systemKey: null,
+    createdAt: '',
+    updatedAt: '',
+    ...overrides,
+  };
+}
+
+const CHARGE_ITEMS = [
+  chargeItem({}),
+  chargeItem({ id: 'parking', name: 'Parking', defaultAmount: null, frequency: 'MONTHLY' }),
+  chargeItem({ id: 'late', name: 'Late fee', defaultAmount: null, isSystem: true, systemKey: 'LATE_FEE' }),
+  chargeItem({ id: 'deposit', name: 'Security Deposit', defaultAmount: null, isSystem: true, systemKey: 'SECURITY_DEPOSIT' }),
+  chargeItem({ id: 'old', name: 'Gate card', isArchived: true }),
+];
+
 describe('BillFormDialog utility types', () => {
   let fixture: ComponentFixture<BillFormDialog>;
   let component: BillFormDialog;
+  let billsApi: { list: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
+    billsApi = { list: vi.fn().mockReturnValue(of({ data: [] })), create: vi.fn().mockReturnValue(of({})) };
     const leasesApi = {
       list: vi.fn().mockReturnValue(
         of({
@@ -53,7 +81,8 @@ describe('BillFormDialog utility types', () => {
       providers: [
         provideRouter([]),
         { provide: LeasesService, useValue: leasesApi },
-        { provide: BillsService, useValue: { list: vi.fn().mockReturnValue(of({ data: [] })) } },
+        { provide: BillsService, useValue: billsApi },
+        { provide: ChargeItemsService, useValue: { list: () => of(CHARGE_ITEMS) } },
         { provide: ConfirmService, useValue: { danger: vi.fn() } },
       ],
     }).compileComponents();
@@ -69,6 +98,48 @@ describe('BillFormDialog utility types', () => {
 
   const disabledTypes = () => component.typeOptions().filter((option) => option.disabled).map((option) => option.value);
 
+
+  it('offers live charge items to bill by hand, never a system item', () => {
+    expect(component.chargeOptions().map((option) => option.label)).toEqual(['Key Deposit · One-time', 'Parking · Monthly']);
+  });
+
+  it("takes a picked charge item's type and default amount, and frees the type when cleared", () => {
+    component.form.controls.chargeItemId.setValue('key');
+
+    expect(component.form.controls.type.value).toBe('OTHER');
+    expect(component.form.controls.type.disabled).toBe(true);
+    expect(component.form.controls.amount.value).toBe(1000);
+
+    component.form.controls.chargeItemId.setValue(null as unknown as string);
+
+    expect(component.form.controls.type.enabled).toBe(true);
+  });
+
+  it("replaces the lease's rent filled in for staff, but keeps an amount they typed", () => {
+    component.form.controls.leaseId.setValue('lease-both');
+    expect(component.form.controls.amount.value).toBe(4500);
+
+    component.form.controls.chargeItemId.setValue('parking');
+    expect(component.form.controls.amount.value).toBeNull();
+
+    component.form.controls.amount.setValue(750);
+    component.form.controls.amount.markAsDirty();
+    component.form.controls.chargeItemId.setValue('key');
+    expect(component.form.controls.amount.value).toBe(750);
+  });
+
+  it('sends the picked charge item with the bill', () => {
+    component.form.controls.leaseId.setValue('lease-both');
+    component.form.controls.chargeItemId.setValue('key');
+    component.form.controls.dueDate.setValue(new Date(2026, 10, 5));
+
+    component.onSubmit();
+
+    expect(billsApi.create).toHaveBeenCalledWith(
+      'lease-both',
+      expect.objectContaining({ type: 'OTHER', chargeItemId: 'key', amount: 1000, dueDate: '2026-11-05' }),
+    );
+  });
 
   it("greys out electricity for a lease where Leaseting doesn't bill it", () => {
     component.form.controls.leaseId.setValue('lease-water-only');

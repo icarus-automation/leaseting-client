@@ -58,7 +58,7 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
       },
       {
         label: 'Charge items',
-        description: 'Rent and deposit lines you can add to a lease.',
+        description: 'Monthly charges that make up lease rent, and one-time charges like deposits.',
         icon: 'money-bill',
         route: 'charge-items',
         permission: 'bills:view',

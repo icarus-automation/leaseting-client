@@ -17,11 +17,19 @@ describe('FloorTabs keyboard', () => {
   beforeEach(async () => {
     // jsdom has no ResizeObserver or scrollIntoView; the component only uses them to scroll the strip.
     globalThis.ResizeObserver ??= class {
-      observe(): void {}
-      disconnect(): void {}
-      unobserve(): void {}
+      observe(): void {
+        /* no-op stub */
+      }
+      disconnect(): void {
+        /* no-op stub */
+      }
+      unobserve(): void {
+        /* no-op stub */
+      }
     } as unknown as typeof ResizeObserver;
-    Element.prototype.scrollIntoView ??= function scrollIntoView(): void {};
+    Element.prototype.scrollIntoView ??= function scrollIntoView(): void {
+      /* no-op stub */
+    };
 
     fixture = TestBed.createComponent(FloorTabs);
     fixture.componentRef.setInput('floors', [floor(1), floor(2), floor(3)]);

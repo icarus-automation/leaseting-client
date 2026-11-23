@@ -1,10 +1,10 @@
 import type { BillDetail, BillListItem, PaymentResponse } from '../../../../core/models/bill.types';
 
-export type PaymentTarget = {
+export interface PaymentTarget {
   readonly billId: string;
   readonly seed?: BillListItem | BillDetail;
   readonly history?: readonly PaymentResponse[];
-};
+}
 
 export type PaymentCta = 'body' | 'footer';
 

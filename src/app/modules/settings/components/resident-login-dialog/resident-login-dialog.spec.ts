@@ -28,7 +28,9 @@ class FormDialogStub {
     this.visible.set(false);
   }
 
-  focusFirstField(): void {}
+  focusFirstField(): void {
+    /* no-op stub */
+  }
 }
 
 const LOGIN: Member = {

@@ -27,13 +27,13 @@ export function bitmapFromRows(rows: string[]): Bitmap {
 
 export function countSet(bitmap: Bitmap): number {
   let total = 0;
-  for (let index = 0; index < bitmap.data.length; index += 1) total += bitmap.data[index];
+  for (const value of bitmap.data) total += value;
   return total;
 }
 
 export function otsuThreshold(luminance: Uint8Array): number {
   const histogram = new Uint32Array(256);
-  for (let index = 0; index < luminance.length; index += 1) histogram[luminance[index]] += 1;
+  for (const value of luminance) histogram[value] += 1;
 
   const total = luminance.length;
   let sum = 0;

@@ -37,6 +37,8 @@
         @if (showGroupHeader(index)) {
           <li aria-hidden="true" class="px-4 pb-1 pt-2.5 text-[11.5px] font-medium text-muted">{{ item.group }}</li>
         }
+        <!-- Options are not focused: the search input drives them with aria-activedescendant and Enter. -->
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
         <li
           [id]="'palette-item-' + index"
           role="option"

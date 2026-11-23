@@ -6,7 +6,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { OnboardingDetail, ResidentStepData } from '../../../../core/models/onboarding.types';
-import type { ResidentListItem, ResidentResponse } from '../../../../core/models/resident.types';
+import type { ResidentListItem } from '../../../../core/models/resident.types';
 import { ResidentsService } from '../../services/residents.service';
 
 interface PickedResident {

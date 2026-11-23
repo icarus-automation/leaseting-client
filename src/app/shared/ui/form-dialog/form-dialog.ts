@@ -38,6 +38,8 @@ import { ConfirmService } from '../confirm/confirm.service';
            (no heading, no close button), so the dialog owns its own header.
            Ref is NOT named #content/#header/#footer — p-dialog content-queries
            those names and would treat the div as a TemplateRef. -->
+      <!-- Escape bubbles here from the focused field; the frame itself is not interactive. -->
+      <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
       <div #dialogBody class="flex flex-col" (keydown.escape)="requestClose()">
         <div class="flex w-full items-start justify-between gap-3 pb-3">
           <div class="flex flex-col gap-0.5">

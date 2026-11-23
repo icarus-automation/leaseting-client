@@ -1,3 +1,5 @@
+import type { PaymentMethodPayload } from './payment-method.types';
+
 export interface ParkingPassPrice {
   vehicleTypeId: string;
   vehicleTypeName: string;
@@ -31,6 +33,10 @@ export interface ParkingPassPayment {
   method: string;
   destinationId: string | null;
   destinationName: string | null;
+  checkNumber: string | null;
+  checkBank: string | null;
+  /** yyyy-MM-dd */
+  checkDate: string | null;
   takenById: string;
   shiftId: string | null;
   /** The PARKING_PASS bill this month was paid through. Such a month cannot be refunded here. */
@@ -85,16 +91,14 @@ export interface ParkingPass {
   openBills: ParkingPassBill[];
 }
 
-export interface SellParkingPassPayload {
+export interface SellParkingPassPayload extends PaymentMethodPayload {
   propertyId: string;
   vehicleTypeId: string;
   plate: string;
   holderName?: string;
   holderContact?: string;
   leaseId?: string;
-  destinationId?: string;
 }
 
-export interface RenewParkingPassPayload {
-  destinationId?: string;
-}
+/** A sale or renewal says how the month was paid, with the same rules as a bill payment. */
+export type RenewParkingPassPayload = PaymentMethodPayload;

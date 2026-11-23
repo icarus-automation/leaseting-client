@@ -1,6 +1,5 @@
 import { apiErrorCode, apiErrorMessage } from '../../../core/models/api.types';
 import type { BadgeTone } from '../../../shared/ui/status-badge/status-badge';
-import type { PaymentDestinationResponse } from '../../../core/models/payment-destination.types';
 import {
   PARKING_PASS_BILL_REVIEW_LABELS,
   type ParkingPass,
@@ -8,7 +7,6 @@ import {
   type ParkingPassBillReviewReason,
   type ParkingPassPayment,
 } from '../../../core/models/parking-pass.types';
-import { effectiveDestinationsForProperty } from '../../bills/utils/staff-collection-methods.util';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -34,7 +32,13 @@ export function withBillingDefaults(pass: ParkingPass): ParkingPass {
     ...pass,
     autoRenew: pass.autoRenew ?? false,
     openBills: pass.openBills ?? [],
-    payments: pass.payments.map((payment) => ({ ...payment, billId: payment.billId ?? null })),
+    payments: pass.payments.map((payment) => ({
+      ...payment,
+      billId: payment.billId ?? null,
+      checkNumber: payment.checkNumber ?? null,
+      checkBank: payment.checkBank ?? null,
+      checkDate: payment.checkDate ?? null,
+    })),
   };
 }
 
@@ -82,15 +86,3 @@ export function passStatus(pass: Pick<ParkingPass, 'valid' | 'endedAt'>): { tone
   return { tone: 'warning', label: 'Lapsed' };
 }
 
-/** Cash, then each destination the property would offer on a bill. */
-export function passPaymentOptions(
-  destinations: PaymentDestinationResponse[],
-  propertyId: string,
-): { value: string; label: string }[] {
-  const rows = effectiveDestinationsForProperty(destinations, propertyId);
-  return [{ value: 'cash', label: 'Cash' }, ...rows.map((row) => ({ value: row.id, label: row.displayName }))];
-}
-
-export function destinationIdFromPayment(value: string): string | undefined {
-  return value === 'cash' ? undefined : value;
-}

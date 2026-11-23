@@ -1,4 +1,6 @@
 import type { BillStatus, BillType, PaymentMethod, PaymentSource } from './enums';
+import type { PaymentDestinationSummary } from './payment-destination.types';
+import type { PaymentMethodPayload } from './payment-method.types';
 import type { LeaseRentSnapshot } from './lease.types';
 
 export interface UtilityDetail {
@@ -59,7 +61,14 @@ export interface PaymentResponse {
   id: string;
   amount: string;
   paidOn: string;
-  method: PaymentMethod;
+  /** CASH, CHECK, or ONLINE; an API not deployed yet can still return an older method. */
+  method: PaymentMethod | string;
+  /** Set on online payments, except ones recorded before destinations were linked. */
+  destinationId: string | null;
+  destination: PaymentDestinationSummary | null;
+  checkNumber: string | null;
+  checkBank: string | null;
+  checkDate: string | null;
   referenceNo: string | null;
   notes: string | null;
   hasReceipt: boolean;
@@ -73,10 +82,9 @@ export interface PaymentResponse {
   createdAt: string;
 }
 
-export interface RecordPaymentPayload {
+export interface RecordPaymentPayload extends PaymentMethodPayload {
   amount: number;
   paidOn: string;
-  method: PaymentMethod;
   referenceNo?: string;
   notes: string;
 }

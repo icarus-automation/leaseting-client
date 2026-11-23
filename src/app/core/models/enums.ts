@@ -28,19 +28,38 @@ export const MANUAL_BILL_TYPE_OPTIONS = BILL_TYPE_OPTIONS.filter((option) => opt
 
 export type BillStatus = 'UNPAID' | 'PAID';
 
-export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'GCASH' | 'CHECK' | 'OTHER';
+/** How staff received a payment. ONLINE names the destination the money went to. */
+export type PaymentMethod = 'CASH' | 'CHECK' | 'ONLINE';
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   CASH: 'Cash',
-  BANK_TRANSFER: 'Bank transfer',
-  GCASH: 'GCash',
   CHECK: 'Check',
-  OTHER: 'Other',
+  ONLINE: 'Online',
 };
 
 export const PAYMENT_METHOD_OPTIONS = (
   Object.entries(PAYMENT_METHOD_LABELS) as [PaymentMethod, string][]
 ).map(([value, label]) => ({ value, label }));
+
+/** Methods from before Cash, Check, and Online. An API that is not deployed yet still returns them. */
+const LEGACY_PAYMENT_METHOD_LABELS: Record<string, string> = {
+  BANK_TRANSFER: 'Bank transfer',
+  GCASH: 'GCash',
+  OTHER: 'Other',
+};
+
+export function paymentMethodLabel(method: string): string {
+  return PAYMENT_METHOD_LABELS[method as PaymentMethod] ?? LEGACY_PAYMENT_METHOD_LABELS[method] ?? method;
+}
+
+/** The kind of online account a payment destination is. */
+export type PaymentDestinationType = 'BANK_TRANSFER' | 'E_WALLET' | 'CRYPTO';
+
+export const PAYMENT_DESTINATION_TYPE_LABELS: Record<PaymentDestinationType, string> = {
+  BANK_TRANSFER: 'Bank transfer',
+  E_WALLET: 'E-wallet',
+  CRYPTO: 'Crypto',
+};
 
 export type PaymentSource = 'STAFF' | 'SUBMISSION' | 'ONBOARDING' | 'LEGACY';
 

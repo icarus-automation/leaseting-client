@@ -13,15 +13,13 @@
     A pass that still covers today keeps the days already paid. A lapsed pass starts again today. The charge is the current monthly price.
   </p>
   <form id="renew-pass-form" class="flex flex-col gap-1.5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-    <label class="text-[13px] font-medium text-heading" for="renew-payment">Payment</label>
-    <p-select
-      inputId="renew-payment"
-      formControlName="payment"
-      [options]="paymentOptions()"
-      optionLabel="label"
-      optionValue="value"
-      appendTo="body"
-      styleClass="w-full"
+    <app-payment-method-fields
+      [group]="form.controls.payment"
+      [destinations]="propertyDestinations()"
+      [errors]="errors"
+      groupPath="payment"
+      idPrefix="renew-payment"
+      methodLabel="Payment"
     />
   </form>
   <ng-container dialog-footer>

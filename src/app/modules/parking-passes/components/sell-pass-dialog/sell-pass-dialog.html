@@ -117,18 +117,14 @@
       />
     </div>
 
-    <div class="flex flex-col gap-1.5">
-      <label class="text-[13px] font-medium text-heading" for="pass-payment">Payment</label>
-      <p-select
-        inputId="pass-payment"
-        formControlName="payment"
-        [options]="paymentOptions()"
-        optionLabel="label"
-        optionValue="value"
-        appendTo="body"
-        styleClass="w-full"
-      />
-    </div>
+    <app-payment-method-fields
+      [group]="form.controls.payment"
+      [destinations]="propertyDestinations()"
+      [errors]="errors"
+      groupPath="payment"
+      idPrefix="pass-payment"
+      methodLabel="Payment"
+    />
   </form>
 
   <ng-container dialog-footer>

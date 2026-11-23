@@ -15,15 +15,21 @@ import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { formatPhp } from '../../../../shared/pipes/php-currency-pipe';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
+import { PaymentMethodFields } from '../../../../shared/ui/payment-method-fields/payment-method-fields';
+import {
+  createPaymentMethodGroup,
+  emptyPaymentMethodValue,
+  paymentMethodPayload,
+} from '../../../../shared/ui/payment-method-fields/payment-method-form';
+import { effectiveDestinationsForProperty } from '../../../../shared/utils/payment-destination.util';
 import { LeasesService } from '../../../leases/services/leases.service';
 import { PropertiesService } from '../../../properties/services/properties.service';
 import { PaymentDestinationsService } from '../../../settings/services/payment-destinations.service';
 import { ParkingPassesService } from '../../services/parking-passes.service';
-import { destinationIdFromPayment, passPaymentOptions } from '../../utils/parking-pass.util';
 
 @Component({
   selector: 'app-sell-pass-dialog',
-  imports: [ReactiveFormsModule, RouterLink, Select, ErrorBanner, FormDialog],
+  imports: [ReactiveFormsModule, RouterLink, Select, ErrorBanner, FormDialog, PaymentMethodFields],
   templateUrl: './sell-pass-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -63,7 +69,7 @@ export class SellPassDialog {
     ],
     holderContact: ['', Validators.maxLength(120)],
     leaseId: [''],
-    payment: ['cash', Validators.required],
+    payment: createPaymentMethodGroup(),
   });
   readonly errors = createFormErrors(this.form);
   private readonly propertyId = toSignal(this.form.controls.propertyId.valueChanges, { initialValue: '' });
@@ -81,13 +87,13 @@ export class SellPassDialog {
       label: `${lease.resident.firstName} ${lease.resident.lastName} · Unit ${lease.unit.unitNo}`,
     })),
   );
-  readonly paymentOptions = computed(() => passPaymentOptions(this.destinations(), this.propertyId()));
+  readonly propertyDestinations = computed(() => effectiveDestinationsForProperty(this.destinations(), this.propertyId()));
 
   constructor() {
     this.form.controls.propertyId.valueChanges.pipe(takeUntilDestroyed()).subscribe((propertyId) => {
       this.form.controls.vehicleTypeId.setValue('');
       this.form.controls.leaseId.setValue('');
-      this.form.controls.payment.setValue('cash');
+      this.form.controls.payment.reset(emptyPaymentMethodValue());
       this.loadProperty(propertyId);
     });
     this.form.controls.leaseId.valueChanges.pipe(takeUntilDestroyed()).subscribe((leaseId) => {
@@ -123,7 +129,7 @@ export class SellPassDialog {
         holderName: name || undefined,
         holderContact: raw.holderContact.trim() || undefined,
         leaseId: raw.leaseId || undefined,
-        destinationId: destinationIdFromPayment(raw.payment),
+        ...paymentMethodPayload(raw.payment),
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -148,7 +154,7 @@ export class SellPassDialog {
       holderName: '',
       holderContact: '',
       leaseId: '',
-      payment: 'cash',
+      payment: emptyPaymentMethodValue(),
     });
     this.prices.set([]);
     this.leases.set([]);

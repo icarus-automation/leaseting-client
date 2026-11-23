@@ -17,14 +17,13 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumber } from 'primeng/inputnumber';
-import { Select } from 'primeng/select';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { API_BASE_URL } from '../../../../core/config/api';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { BillDetail, BillListItem, PaymentResponse } from '../../../../core/models/bill.types';
-import { PAYMENT_METHOD_LABELS, PAYMENT_SOURCE_LABELS, PaymentMethod } from '../../../../core/models/enums';
+import { PAYMENT_SOURCE_LABELS } from '../../../../core/models/enums';
 import type { PaymentDestinationResponse } from '../../../../core/models/payment-destination.types';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
@@ -32,15 +31,19 @@ import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { PrivateImage } from '../../../../shared/ui/private-image/private-image';
 import { ReasonDialog } from '../../../../shared/ui/reason-dialog/reason-dialog';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
+import { PaymentMethodFields } from '../../../../shared/ui/payment-method-fields/payment-method-fields';
+import {
+  createPaymentMethodGroup,
+  emptyPaymentMethodValue,
+  paymentMethodPayload,
+} from '../../../../shared/ui/payment-method-fields/payment-method-form';
+import { effectiveDestinationsForProperty } from '../../../../shared/utils/payment-destination.util';
 import { PaymentDestinationsService } from '../../../settings/services/payment-destinations.service';
 import { BillsService } from '../../services/bills.service';
 import { collectionMemoError } from '../../utils/collection-memo.util';
 import { finiteAmount } from '../../utils/payment-amount.util';
 import { billSourceOf } from '../../../../shared/utils/bill-source.util';
-import {
-  staffCollectionMethodHint,
-  staffCollectionMethodOptions,
-} from '../../utils/staff-collection-methods.util';
+import { paymentMethodSummary } from '../../utils/payment-method-display.util';
 import type { PaymentCta, PaymentTarget } from './payment-target';
 
 const ACCEPTED_RECEIPT_TYPES = 'image/png,image/jpeg,image/webp';
@@ -55,7 +58,7 @@ const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
     PIcon,
     DatePicker,
     InputNumber,
-    Select,
+    PaymentMethodFields,
     PhpCurrencyPipe,
     ErrorBanner,
     PrivateImage,
@@ -78,7 +81,6 @@ export class PaymentWorkspace {
   readonly changed = output<void>();
   readonly settled = output<void>();
 
-  readonly methodLabels = PAYMENT_METHOD_LABELS;
   readonly sourceLabels = PAYMENT_SOURCE_LABELS;
   readonly acceptedReceiptTypes = ACCEPTED_RECEIPT_TYPES;
   readonly canMutate = computed(() => this.auth.can('payments:record'));
@@ -87,7 +89,7 @@ export class PaymentWorkspace {
   readonly form = this.fb.nonNullable.group({
     amount: [null as number | null, [Validators.required, Validators.min(0.01)]],
     paidOn: [null as Date | null, [Validators.required]],
-    method: ['CASH' as PaymentMethod, [Validators.required]],
+    payment: createPaymentMethodGroup(),
     referenceNo: [''],
     notes: ['', [Validators.required, Validators.minLength(1)]],
   });
@@ -117,12 +119,11 @@ export class PaymentWorkspace {
     const id = this.proofPaymentId();
     return id ? `${API_BASE_URL}/payments/${id}/proof` : null;
   });
-  readonly methodOptions = computed(() =>
-    staffCollectionMethodOptions(this.destinations(), this.snapshot() ? billSourceOf(this.snapshot()!).unit.property.id : undefined),
-  );
-  readonly methodHint = computed(() =>
-    staffCollectionMethodHint(this.destinations(), this.snapshot() ? billSourceOf(this.snapshot()!).unit.property.id : undefined),
-  );
+  /** The enabled destinations the bill's property offers, which an online payment picks from. */
+  readonly propertyDestinations = computed(() => {
+    const snapshot = this.snapshot();
+    return effectiveDestinationsForProperty(this.destinations(), snapshot ? billSourceOf(snapshot).unit.property.id : null);
+  });
   readonly showBodyCta = computed(() => this.cta() === 'body' && this.canMutate());
 
   constructor() {
@@ -131,15 +132,6 @@ export class PaymentWorkspace {
       untracked(() => this.onTarget(target));
     });
 
-    effect(() => {
-      const options = this.methodOptions();
-      untracked(() => {
-        const current = this.form.controls.method.value;
-        if (options.length > 0 && !options.some((option) => option.value === current)) {
-          this.form.controls.method.setValue(options[0].value, { emitEvent: false });
-        }
-      });
-    });
   }
 
   private onTarget(target: PaymentTarget): void {
@@ -168,7 +160,7 @@ export class PaymentWorkspace {
     this.form.reset({
       amount: finiteAmount(target.seed?.balance ?? null),
       paidOn: new Date(),
-      method: 'CASH',
+      payment: emptyPaymentMethodValue(),
       referenceNo: '',
       notes: '',
     });
@@ -221,7 +213,7 @@ export class PaymentWorkspace {
     }
 
     const billId = this.target().billId;
-    const { amount, paidOn, method, referenceNo, notes } = this.form.getRawValue();
+    const { amount, paidOn, payment, referenceNo, notes } = this.form.getRawValue();
     const memo = notes.trim();
     if (amount === null || paidOn === null || collectionMemoError(memo)) return;
 
@@ -232,7 +224,7 @@ export class PaymentWorkspace {
         {
           amount,
           paidOn: formatDate(paidOn, 'yyyy-MM-dd', 'en-US'),
-          method,
+          ...paymentMethodPayload(payment),
           referenceNo: referenceNo.trim() || undefined,
           notes: memo,
         },
@@ -251,6 +243,9 @@ export class PaymentWorkspace {
             this.toast.add({ severity: 'success', summary: 'Payment recorded' });
             this.receipt.set(null);
             this.form.patchValue({ referenceNo: '', notes: '' });
+            // The next payment starts clean: no required error on the memo just cleared.
+            this.form.controls.notes.markAsUntouched();
+            this.errors.reset();
           }
           this.loadDetail(billId);
         },
@@ -290,6 +285,10 @@ export class PaymentWorkspace {
           });
         },
       });
+  }
+
+  methodSummary(payment: PaymentResponse): string {
+    return paymentMethodSummary(payment);
   }
 
   toggleProof(payment: PaymentResponse): void {

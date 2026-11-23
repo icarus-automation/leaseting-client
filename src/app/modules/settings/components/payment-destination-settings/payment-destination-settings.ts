@@ -5,40 +5,61 @@ import {
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
+import type { MenuItem } from 'primeng/api';
 import { MessageService } from 'primeng/api';
-import { Select } from 'primeng/select';
+import { Menu } from 'primeng/menu';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
-import type {
-  PaymentDestinationPayload,
-  PaymentDestinationResponse,
-} from '../../../../core/models/payment-destination.types';
-import { PAYMENT_METHOD_OPTIONS, type PaymentMethod } from '../../../../core/models/enums';
+import type { PaymentDestinationResponse } from '../../../../core/models/payment-destination.types';
 import type { PropertyListItem } from '../../../../core/models/property.types';
-import { createFormErrors } from '../../../../shared/forms/form-errors';
+import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
+import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
+import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { PrivateImage } from '../../../../shared/ui/private-image/private-image';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
+import { showPopupMenu } from '../../../../shared/utils/popup-menu.util';
+import {
+  destinationAccountLine,
+  destinationHolder,
+  destinationKindLabel,
+  destinationMaskedNumber,
+} from '../../../../shared/utils/payment-destination.util';
 import { PropertiesService } from '../../../properties/services/properties.service';
 import { PaymentDestinationsService } from '../../services/payment-destinations.service';
-import { groupDestinationsByScope } from '../../utils/destination-scope.util';
+import {
+  groupDestinationsByScope,
+  ORGANIZATION_FALLBACK_LABEL,
+  reorderedSiblings,
+} from '../../utils/destination-scope.util';
+import { PaymentDestinationDialog } from '../payment-destination-dialog/payment-destination-dialog';
 
-const ACCEPTED_QR_TYPES = 'image/png,image/jpeg,image/webp';
-const MAX_QR_BYTES = 10 * 1024 * 1024;
-
+/**
+ * Payment destinations by property, organization fallback last. Add and Edit open one
+ * modal; each row's menu views the QR, edits, turns it on or off, and moves it.
+ */
 @Component({
   selector: 'app-payment-destination-settings',
-  imports: [ReactiveFormsModule, PIcon, Select, PrivateImage, Skeleton, StatusBadge],
+  imports: [
+    PIcon,
+    Menu,
+    EmptyState,
+    ErrorBanner,
+    FormDialog,
+    PrivateImage,
+    Skeleton,
+    StatusBadge,
+    PaymentDestinationDialog,
+  ],
   templateUrl: './payment-destination-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentDestinationSettings {
-  private readonly fb = inject(FormBuilder);
   private readonly destinationsApi = inject(PaymentDestinationsService);
   private readonly propertiesApi = inject(PropertiesService);
   private readonly auth = inject(AuthService);
@@ -51,61 +72,32 @@ export class PaymentDestinationSettings {
    * one takes every property; someone limited changes their properties' only.
    */
   readonly canMutateFallback = computed(() => this.canMutate() && this.auth.hasEveryProperty());
-  readonly methodOptions = PAYMENT_METHOD_OPTIONS;
-  readonly acceptedQrTypes = ACCEPTED_QR_TYPES;
 
   readonly destinations = signal<PaymentDestinationResponse[] | null>(null);
   readonly properties = signal<PropertyListItem[]>([]);
   readonly error = signal<string | null>(null);
   readonly loading = computed(() => this.destinations() === null && this.error() === null);
-  readonly groups = computed(() => groupDestinationsByScope(this.destinations() ?? []));
+  readonly groups = computed(() =>
+    groupDestinationsByScope(this.destinations() ?? [], (propertyId) => this.propertyName(propertyId)),
+  );
 
-  readonly createForm = this.buildForm();
-  readonly createErrors = createFormErrors(this.createForm);
-  readonly creating = signal(false);
-  readonly createError = signal<string | null>(null);
-  readonly qrFile = signal<File | null>(null);
-
-  readonly editingId = signal<string | null>(null);
-  readonly editForm = this.buildForm();
-  readonly editErrors = createFormErrors(this.editForm);
-  readonly saving = signal(false);
-  readonly editQr = signal<File | null>(null);
-  readonly previewId = signal<string | null>(null);
+  readonly dialogVisible = signal(false);
+  readonly editing = signal<PaymentDestinationResponse | null>(null);
+  readonly qrVisible = signal(false);
+  readonly qrDestination = signal<PaymentDestinationResponse | null>(null);
   readonly busyId = signal<string | null>(null);
+  readonly menuForId = signal<string | null>(null);
+  readonly menuItems = signal<MenuItem[]>([]);
+  readonly flashId = signal<string | null>(null);
 
-  readonly propertyOptions = computed(() => [
-    ...(this.auth.hasEveryProperty() ? [{ label: 'Organization fallback', value: '' }] : []),
-    ...this.properties().map((property) => ({ label: property.name, value: property.id })),
-  ]);
+  private readonly rowMenu = viewChild.required<Menu>('rowMenu');
 
   constructor() {
     this.load();
     this.propertiesApi
       .listAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (properties) => {
-          this.properties.set(properties);
-          // Without the fallback on offer, start a new destination on their first property.
-          if (!this.auth.hasEveryProperty() && !this.createForm.controls.propertyId.value && properties[0]) {
-            this.createForm.controls.propertyId.setValue(properties[0].id);
-          }
-        },
-      });
-  }
-
-  canMutateAt(propertyId: string | null): boolean {
-    return propertyId === null ? this.canMutateFallback() : this.canMutate();
-  }
-
-  propertyName(propertyId: string | null): string {
-    if (!propertyId) return 'Organization fallback';
-    return this.properties().find((property) => property.id === propertyId)?.name ?? 'Property';
-  }
-
-  qrUrl(id: string): string {
-    return this.destinationsApi.qrUrl(id);
+      .subscribe({ next: (properties) => this.properties.set(properties) });
   }
 
   load(): void {
@@ -116,203 +108,137 @@ export class PaymentDestinationSettings {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (destinations) => this.destinations.set(destinations),
-        error: (error: unknown) =>
-          this.error.set(apiErrorMessage(error, 'Could not load payment destinations.')),
+        error: (error: unknown) => this.error.set(apiErrorMessage(error, 'Could not load payment destinations.')),
       });
   }
 
-  onQrPicked(event: Event, target: 'create' | 'edit'): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0] ?? null;
-    input.value = '';
-    if (!file) return;
-    if (file.size > MAX_QR_BYTES) {
-      this.createError.set('QR image must be 10 MB or smaller.');
-      return;
-    }
-    if (target === 'create') this.qrFile.set(file);
-    else this.editQr.set(file);
+  canMutateAt(propertyId: string | null): boolean {
+    return propertyId === null ? this.canMutateFallback() : this.canMutate();
   }
 
-  submitCreate(): void {
-    this.createErrors.submitted.set(true);
-    if (!this.canMutate() || this.createForm.invalid) {
-      this.createForm.markAllAsTouched();
-      return;
-    }
-    const qr = this.qrFile();
-    if (!qr) {
-      this.createError.set('Upload a QR image.');
-      return;
-    }
-    if (!this.canMutateFallback() && !this.createForm.controls.propertyId.value) {
-      this.createError.set('Pick the property this destination is for.');
-      return;
-    }
-    this.creating.set(true);
-    this.createError.set(null);
-    this.destinationsApi
-      .create(this.payloadOf(this.createForm), qr)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (created) => {
-          this.creating.set(false);
-          this.createForm.reset({
-            displayName: '',
-            method: 'GCASH',
-            accountName: '',
-            accountNumber: '',
-            instructions: '',
-            propertyId: this.canMutateFallback() ? '' : (this.properties()[0]?.id ?? ''),
-          });
-          this.qrFile.set(null);
-          this.replace(created);
-          this.toast.add({ severity: 'success', summary: 'Destination added' });
-        },
-        error: (error: unknown) => {
-          this.creating.set(false);
-          this.createError.set(apiErrorMessage(error, 'Could not add the destination.'));
-        },
-      });
+  propertyName(propertyId: string | null): string {
+    if (!propertyId) return ORGANIZATION_FALLBACK_LABEL;
+    return this.properties().find((property) => property.id === propertyId)?.name ?? 'Property';
   }
 
-  startEdit(destination: PaymentDestinationResponse): void {
-    this.editingId.set(destination.id);
-    this.editQr.set(null);
-    this.editErrors.reset();
-    this.editForm.reset({
-      displayName: destination.displayName,
-      method: destination.method,
-      accountName: destination.accountName,
-      accountNumber: destination.accountNumber,
-      instructions: destination.instructions ?? '',
-      propertyId: destination.propertyId ?? '',
-    });
+  kindLabel(destination: PaymentDestinationResponse): string {
+    return destinationKindLabel(destination);
   }
 
-  submitEdit(): void {
-    const id = this.editingId();
-    this.editErrors.submitted.set(true);
-    if (!id || this.editForm.invalid || !this.canMutate()) {
-      this.editForm.markAllAsTouched();
-      return;
+  accountLine(destination: PaymentDestinationResponse): string {
+    return destinationAccountLine(destination);
+  }
+
+  holder(destination: PaymentDestinationResponse): string {
+    return destinationHolder(destination);
+  }
+
+  maskedNumber(destination: PaymentDestinationResponse): string {
+    return destinationMaskedNumber(destination);
+  }
+
+  qrUrl(id: string): string {
+    return this.destinationsApi.qrUrl(id);
+  }
+
+  openCreate(): void {
+    if (!this.canMutate()) return;
+    this.editing.set(null);
+    this.dialogVisible.set(true);
+  }
+
+  openEdit(destination: PaymentDestinationResponse): void {
+    if (!this.canMutateAt(destination.propertyId)) return;
+    this.editing.set(destination);
+    this.dialogVisible.set(true);
+  }
+
+  openQr(destination: PaymentDestinationResponse): void {
+    this.qrDestination.set(destination);
+    this.qrVisible.set(true);
+  }
+
+  onSaved(saved: PaymentDestinationResponse): void {
+    const isNew = !(this.destinations() ?? []).some((item) => item.id === saved.id);
+    this.replace(saved);
+    this.flashId.set(saved.id);
+    this.toast.add({ severity: 'success', summary: isNew ? 'Destination added' : 'Destination saved' });
+  }
+
+  openMenu(event: Event, destination: PaymentDestinationResponse, siblings: PaymentDestinationResponse[]): void {
+    const index = siblings.findIndex((item) => item.id === destination.id);
+    const editable = this.canMutateAt(destination.propertyId);
+    const items: MenuItem[] = [{ label: 'View QR', command: () => this.openQr(destination) }];
+    if (editable) {
+      items.push(
+        { label: 'Edit', command: () => this.openEdit(destination) },
+        {
+          label: destination.isEnabled ? 'Disable' : 'Enable',
+          styleClass: destination.isEnabled ? 'row-overflow-danger' : undefined,
+          command: () => this.toggleEnabled(destination),
+        },
+        { label: 'Move up', disabled: index <= 0, command: () => this.move(destination, siblings, -1) },
+        {
+          label: 'Move down',
+          disabled: index === -1 || index >= siblings.length - 1,
+          command: () => this.move(destination, siblings, 1),
+        },
+      );
     }
-    this.saving.set(true);
-    this.destinationsApi
-      .update(id, this.payloadOf(this.editForm), this.editQr())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (updated) => {
-          this.saving.set(false);
-          this.editingId.set(null);
-          this.replace(updated);
-          this.toast.add({ severity: 'success', summary: 'Destination updated' });
-        },
-        error: (error: unknown) => {
-          this.saving.set(false);
-          this.toast.add({
-            severity: 'error',
-            summary: 'Could not save',
-            detail: apiErrorMessage(error),
-          });
-        },
-      });
+    this.menuItems.set(items);
+    this.menuForId.set(destination.id);
+    showPopupMenu(this.rowMenu(), event, items);
   }
 
   toggleEnabled(destination: PaymentDestinationResponse): void {
     if (!this.canMutateAt(destination.propertyId)) return;
+    const isEnabled = !destination.isEnabled;
     this.busyId.set(destination.id);
     this.destinationsApi
-      .update(destination.id, {
-        ...this.asPayload(destination),
-        isEnabled: !destination.isEnabled,
-      })
+      .update(destination.id, { isEnabled })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
           this.busyId.set(null);
           this.replace(updated);
+          this.toast.add({
+            severity: 'success',
+            summary: isEnabled ? 'Destination enabled' : 'Destination disabled',
+            detail: isEnabled ? undefined : 'Residents no longer see it, and staff cannot record new payments to it.',
+          });
         },
         error: (error: unknown) => {
           this.busyId.set(null);
-          this.toast.add({
-            severity: 'error',
-            summary: 'Could not update',
-            detail: apiErrorMessage(error),
-          });
+          this.toast.add({ severity: 'error', summary: 'Could not update', detail: apiErrorMessage(error) });
         },
       });
   }
 
-  move(destination: PaymentDestinationResponse, direction: -1 | 1): void {
-    const list = this.destinations() ?? [];
-    const siblings = list.filter((item) => item.propertyId === destination.propertyId);
-    const index = siblings.findIndex((item) => item.id === destination.id);
-    const swap = siblings[index + direction];
-    if (!swap || !this.canMutateAt(destination.propertyId)) return;
-    const items = [
-      { id: destination.id, displayOrder: swap.displayOrder },
-      { id: swap.id, displayOrder: destination.displayOrder },
-    ];
+  move(destination: PaymentDestinationResponse, siblings: PaymentDestinationResponse[], direction: -1 | 1): void {
+    const items = reorderedSiblings(siblings, destination.id, direction);
+    if (!items || !this.canMutateAt(destination.propertyId)) return;
+    this.busyId.set(destination.id);
     this.destinationsApi
       .reorder(items)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (updated) => this.destinations.set(updated),
-        error: (error: unknown) =>
-          this.toast.add({
-            severity: 'error',
-            summary: 'Could not reorder',
-            detail: apiErrorMessage(error),
-          }),
+        next: (updated) => {
+          this.busyId.set(null);
+          this.destinations.set(updated);
+        },
+        error: (error: unknown) => {
+          this.busyId.set(null);
+          this.toast.add({ severity: 'error', summary: 'Could not reorder', detail: apiErrorMessage(error) });
+        },
       });
-  }
-
-  togglePreview(id: string): void {
-    this.previewId.update((current) => (current === id ? null : id));
   }
 
   private replace(updated: PaymentDestinationResponse): void {
     const list = this.destinations() ?? [];
-    const next = list.some((item) => item.id === updated.id)
-      ? list.map((item) => (item.id === updated.id ? updated : item))
-      : [...list, updated];
-    this.destinations.set(next);
-  }
-
-  private buildForm() {
-    return this.fb.nonNullable.group({
-      displayName: ['', [Validators.required, Validators.minLength(1)]],
-      method: ['GCASH' as PaymentMethod, [Validators.required]],
-      accountName: ['', [Validators.required, Validators.minLength(1)]],
-      accountNumber: ['', [Validators.required, Validators.minLength(1)]],
-      instructions: [''],
-      propertyId: [''],
-    });
-  }
-
-  private payloadOf(form: ReturnType<PaymentDestinationSettings['buildForm']>): PaymentDestinationPayload {
-    const value = form.getRawValue();
-    return {
-      displayName: value.displayName.trim(),
-      method: value.method,
-      accountName: value.accountName.trim(),
-      accountNumber: value.accountNumber.trim(),
-      instructions: value.instructions.trim() || undefined,
-      propertyId: value.propertyId || undefined,
-    };
-  }
-
-  private asPayload(destination: PaymentDestinationResponse): PaymentDestinationPayload {
-    return {
-      displayName: destination.displayName,
-      method: destination.method,
-      accountName: destination.accountName,
-      accountNumber: destination.accountNumber,
-      instructions: destination.instructions ?? undefined,
-      propertyId: destination.propertyId,
-      isEnabled: destination.isEnabled,
-      displayOrder: destination.displayOrder,
-    };
+    this.destinations.set(
+      list.some((item) => item.id === updated.id)
+        ? list.map((item) => (item.id === updated.id ? updated : item))
+        : [...list, updated],
+    );
   }
 }

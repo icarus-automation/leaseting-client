@@ -1,7 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 import { ProgressSpinner } from 'primeng/progressspinner';
@@ -90,10 +90,8 @@ export class PrivacyNoticeSettings {
   readonly publishError = signal<string | null>(null);
   readonly openVersion = signal<OpenVersion | null>(null);
 
-  readonly body = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required, Validators.maxLength(PRIVACY_NOTICE_LIMITS.max)],
-  });
+  /** Its limits are checked by `noticeDraftProblem`, which also knows about the current version. */
+  readonly body = new FormControl('', { nonNullable: true });
   readonly draft = toSignal(this.body.valueChanges, { initialValue: '' });
   readonly draftLength = computed(() => normalizeNoticeDraft(this.draft()).length);
 

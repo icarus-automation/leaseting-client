@@ -98,7 +98,7 @@ describe('StepMoveInPayment one-time charges', () => {
   it('leaves the amounts out without one-time charges, so an older API still takes the step', async () => {
     await render(undefined, []);
 
-    expect(fixture.nativeElement.querySelector('label[for^="ob-one-time-"]')).toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('label[for^="ob-one-time-"]')).toBeNull();
     component.submit();
 
     expect(emitted).toHaveLength(1);

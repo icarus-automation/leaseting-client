@@ -84,7 +84,13 @@ export function consentSummary(record: ResidentPrivacyConsents, formatDate: (iso
         }
 
         @if (current.consents.length > 0) {
-          <div class="relative overflow-x-auto rounded-base border border-border">
+          <!-- Focusable so the history can be scrolled sideways from the keyboard on a phone. -->
+          <div
+            class="relative overflow-x-auto rounded-base border border-border focus-visible:outline-2 focus-visible:outline-ring"
+            tabindex="0"
+            role="region"
+            aria-label="Consent history"
+          >
             <table class="w-full border-collapse text-left">
               <thead>
                 <tr class="border-b border-border bg-surface">

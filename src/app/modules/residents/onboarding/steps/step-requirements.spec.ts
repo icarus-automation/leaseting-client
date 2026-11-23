@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import type { OnboardingDetail } from '../../../../core/models/onboarding.types';
@@ -112,12 +112,12 @@ describe('StepRequirements', () => {
   }
 
   function nextButton(): HTMLButtonElement {
-    const buttons: HTMLButtonElement[] = [...fixture.nativeElement.querySelectorAll('button')];
+    const buttons: HTMLButtonElement[] = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')];
     return buttons.find((button) => button.textContent?.includes('Next: Lease terms'))!;
   }
 
   function checkbox(label: string): HTMLInputElement {
-    return fixture.nativeElement.querySelector(`input[type="checkbox"][aria-label^="${label}"]`)!;
+    return (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(`input[type="checkbox"][aria-label^="${label}"]`)!;
   }
 
   function attachFile(key: 'validId' | 'proofOfIncome' | 'priorAddress', file = new File(['id'], 'id.png', { type: 'image/png' })): void {
@@ -186,7 +186,7 @@ describe('StepRequirements', () => {
     expect(checkbox('Proof of income').checked).toBe(false);
     expect(component.canProceed()).toBe(true);
     expect(nextButton().disabled).toBe(false);
-    expect(fixture.nativeElement.textContent).toContain('philsys.png');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('philsys.png');
   });
 
   it('lets optional items stay skipped while a required file is attached', async () => {
@@ -217,7 +217,7 @@ describe('StepRequirements', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const remove = [...fixture.nativeElement.querySelectorAll('button')].find(
+    const remove = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(
       (button: HTMLButtonElement) => button.getAttribute('aria-label') === 'Remove philsys.png',
     ) as HTMLButtonElement;
     remove.click();
@@ -236,12 +236,12 @@ describe('StepRequirements', () => {
 
     expect(component.isAttached('validId')).toBe(true);
     expect(checkbox('Valid government ID').checked).toBe(true);
-    expect(fixture.nativeElement.textContent).toContain('On file');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('On file');
     expect(nextButton().disabled).toBe(false);
   });
 
   function openButton(): HTMLButtonElement | undefined {
-    return [...fixture.nativeElement.querySelectorAll('button')].find(
+    return [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(
       (button: HTMLButtonElement) => button.textContent?.trim() === 'Open',
     );
   }
@@ -250,7 +250,7 @@ describe('StepRequirements', () => {
     residentsApi.get.mockReturnValue(of(residentDetail({ documents: [documentItem()] })));
     await render();
 
-    expect(fixture.nativeElement.textContent).toContain('philsys.png');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('philsys.png');
     expect(openButton()).toBeUndefined();
   });
 

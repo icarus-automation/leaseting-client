@@ -94,7 +94,7 @@ describe('StepLeaseTerms utility billing', () => {
   }
 
   function checkbox(key: 'billsElectricity' | 'billsWater'): HTMLInputElement {
-    return fixture.nativeElement.querySelector(`#ob-utilities-${key}`) as HTMLInputElement;
+    return (fixture.nativeElement as HTMLElement).querySelector(`#ob-utilities-${key}`) as HTMLInputElement;
   }
 
   it("prefills both checkboxes from the property's defaults for a new lease", async () => {
@@ -103,7 +103,7 @@ describe('StepLeaseTerms utility billing', () => {
     expect(propertiesApi.get).toHaveBeenCalledWith('prop-1');
     expect(checkbox('billsElectricity').checked).toBe(true);
     expect(checkbox('billsWater').checked).toBe(false);
-    expect(fixture.nativeElement.textContent).toContain("Filled in from Brickstone's defaults.");
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain("Filled in from Brickstone's defaults.");
   });
 
   it('keeps what the step saved over the property defaults', async () => {

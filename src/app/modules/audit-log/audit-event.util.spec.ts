@@ -1,5 +1,11 @@
 import type { AuditEvent } from '../../core/models/audit-event.types';
-import { AUDIT_AREA_ACTIONS, auditActionLabel, describeAuditEvent, targetName } from './audit-event.util';
+import {
+  AUDIT_AREA_ACTIONS,
+  auditActionLabel,
+  auditFieldChanges,
+  describeAuditEvent,
+  targetName,
+} from './audit-event.util';
 
 function event(overrides: Partial<AuditEvent>): AuditEvent {
   return {
@@ -126,6 +132,36 @@ describe('describeAuditEvent', () => {
         event({ action: 'RESIDENT_RESTORED', target: { type: 'RESIDENT', id: 'r-1', label: 'Lauren Tan' } }),
       ),
     ).toBe('Restored Lauren Tan');
+  });
+
+  it('reads a tenant deleting their app account, and staff giving them a new login', () => {
+    const rafael = { type: 'RESIDENT', id: 'r-7', label: 'Rafael Domingo' } as const;
+    const deleted = event({
+      action: 'RESIDENT_APP_ACCOUNT_DELETED',
+      area: 'tenants',
+      actor: { id: 'u-7', name: 'Rafael Domingo', email: 'rafael.domingo@gmail.com' },
+      target: rafael,
+      before: { status: 'Active' },
+      after: { status: 'Deleted by tenant' },
+    });
+    const reEnabled = event({
+      action: 'RESIDENT_ACCESS_CHANGED',
+      area: 'tenants',
+      target: rafael,
+      before: { status: 'Deleted by tenant' },
+      after: { status: 'Must change password' },
+    });
+
+    expect(auditActionLabel('RESIDENT_APP_ACCOUNT_DELETED')).toBe('App account deleted');
+    expect(describeAuditEvent(deleted)).toBe('Rafael Domingo deleted their Residence Care account');
+    expect(auditFieldChanges(deleted.before, deleted.after)).toEqual([
+      { key: 'status', label: 'Status', kind: 'changed', before: 'Active', after: 'Deleted by tenant' },
+    ]);
+    expect(describeAuditEvent(reEnabled)).toBe('Residence Care access changed: Rafael Domingo');
+    expect(auditFieldChanges(reEnabled.before, reEnabled.after)).toEqual([
+      { key: 'status', label: 'Status', kind: 'changed', before: 'Deleted by tenant', after: 'Must change password' },
+    ]);
+    expect(AUDIT_AREA_ACTIONS.tenants).toContain('RESIDENT_APP_ACCOUNT_DELETED');
   });
 
   it('files privacy events under tenants and settings', () => {

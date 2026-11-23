@@ -22,6 +22,7 @@ import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../../../shared/ui/status-badge/status-badge';
 import { isPastDue, ordinal } from '../../../../shared/utils/date.util';
 import { isLeaseActive, leaseStatus } from '../../../../shared/utils/lease-status.util';
+import { ResidentAppAccountNotice } from '../../components/resident-app-account-notice/resident-app-account-notice';
 import { ResidentConsentPanel } from '../../components/resident-consent-panel/resident-consent-panel';
 import { ResidentFormDialog } from '../../components/resident-form-dialog/resident-form-dialog';
 import { ResidentRiskPanel } from '../../components/resident-risk-panel/resident-risk-panel';
@@ -49,6 +50,7 @@ const ACCEPTED_DOCUMENT_TYPES = 'application/pdf,image/png,image/jpeg,image/webp
     ResidentFormDialog,
     ResidentRiskPanel,
     ResidentConsentPanel,
+    ResidentAppAccountNotice,
   ],
   templateUrl: './resident-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,6 +67,8 @@ export class ResidentDetailPage {
   readonly canManage = computed(() => this.auth.can('residents:manage'));
   /** Opening or downloading a file. Upload and delete stay on residents:manage. */
   readonly canViewDocuments = computed(() => this.auth.can('residents:view_documents'));
+  /** Setting a Residence Care login up, which happens on the Users page. */
+  readonly canGiveLogin = computed(() => this.auth.can('residents:manage_access') && this.auth.can('members:view'));
 
   private readonly params = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,

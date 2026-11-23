@@ -12,6 +12,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
@@ -55,7 +56,7 @@ export interface ResidentLoginOutcome {
  */
 @Component({
   selector: 'app-resident-login-dialog',
-  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog],
+  imports: [DatePipe, ProgressSpinner, ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog],
   templateUrl: './resident-login-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -106,6 +107,8 @@ export class ResidentLoginDialog {
   });
   /** The chosen resident already has a login, so there is nothing to set up. */
   readonly existingLogin = signal<PortalAccessResponse | null>(null);
+  /** When the chosen resident deleted their app account. Setting up gives them a fresh login. */
+  readonly appAccountDeletedAt = signal<string | null>(null);
 
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -122,6 +125,7 @@ export class ResidentLoginDialog {
         this.saving.set(false);
         this.credentials.set(null);
         this.existingLogin.set(null);
+        this.appAccountDeletedAt.set(null);
         this.picked.set(null);
         this.found.set([]);
         if (!this.isReset()) this.search$.next('');
@@ -149,13 +153,18 @@ export class ResidentLoginDialog {
           const option = this.residentOptions().find((candidate) => candidate.id === id) ?? null;
           this.picked.set(option);
           this.existingLogin.set(null);
+          this.appAccountDeletedAt.set(null);
           if (!option) return of(null);
           this.form.controls.email.setValue(option.email ?? '');
           return this.logins.access(option.id).pipe(catchError(() => of(null)));
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((access) => this.existingLogin.set(access && access.status !== 'INACTIVE' ? access : null));
+      .subscribe((access) => {
+        const hasLogin = access !== null && access.status !== 'INACTIVE';
+        this.existingLogin.set(hasLogin ? access : null);
+        this.appAccountDeletedAt.set(!hasLogin ? (access?.appAccountDeletedAt ?? null) : null);
+      });
   }
 
   onResidentFilter(event: { filter?: string | null }): void {

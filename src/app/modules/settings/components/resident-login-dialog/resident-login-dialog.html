@@ -79,6 +79,14 @@
             <p class="text-[12.5px] leading-relaxed text-destructive" role="alert">
               This tenant already has a login. Find them under Tenants here to reset the password or turn it off.
             </p>
+          } @else if (appAccountDeletedAt(); as deletedAt) {
+            <p class="flex items-start gap-2 text-[12.5px] leading-relaxed text-body" role="status">
+              <svg pIcon="user-minus" class="mt-0.5 shrink-0 text-muted" [size]="13" aria-hidden="true"></svg>
+              <span>
+                This tenant deleted their app account on {{ deletedAt | date: 'MMM d, y' }}. Creating a login gives them
+                a new one with a new temporary password. They set their own password and agree to the privacy notice again.
+              </span>
+            </p>
           }
         </div>
 

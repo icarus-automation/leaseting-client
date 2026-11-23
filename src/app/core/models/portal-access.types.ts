@@ -5,5 +5,10 @@ export interface PortalAccessResponse {
   status: PortalAccessStatus;
   email: string | null;
   mustChangePassword: boolean;
+  /**
+   * When the tenant deleted their Residence Care account themselves. Set only
+   * while they have no login (`INACTIVE`); setting up a new login clears it.
+   */
+  appAccountDeletedAt: string | null;
   temporaryPassword?: string;
 }

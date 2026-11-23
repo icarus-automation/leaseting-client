@@ -59,6 +59,10 @@
             }
           </dl>
 
+          @if (t.appAccountDeletedAt; as deletedAt) {
+            <app-resident-app-account-notice [deletedAt]="deletedAt" [canGiveLogin]="canGiveLogin()" />
+          }
+
           @if (activeLease(); as lease) {
             <dl class="m-0 flex flex-col gap-2 border-t border-border pt-3 text-[13px]">
               <div class="flex items-baseline justify-between gap-2">

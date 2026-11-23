@@ -85,6 +85,8 @@ export interface ResidentDetail extends ResidentResponse {
   outstandingBalance: string;
   unpaidBillCount: number;
   nextDueDate: string | null;
+  /** When the tenant deleted their Residence Care account. Null while they have a login, or never had one. */
+  appAccountDeletedAt: string | null;
 }
 
 export interface CreateResidentPayload {

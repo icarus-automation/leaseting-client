@@ -69,10 +69,17 @@ const ISSUED: PortalAccessResponse = {
   status: 'MUST_CHANGE_PASSWORD',
   email: 'tess@example.com',
   mustChangePassword: true,
+  appAccountDeletedAt: null,
   temporaryPassword: 'Temp-once-123',
 };
 
-const NO_LOGIN: PortalAccessResponse = { residentId: 't-1', status: 'INACTIVE', email: null, mustChangePassword: false };
+const NO_LOGIN: PortalAccessResponse = {
+  residentId: 't-1',
+  status: 'INACTIVE',
+  email: null,
+  mustChangePassword: false,
+  appAccountDeletedAt: null,
+};
 
 describe('ResidentLoginDialog', () => {
   const logins = { searchActive: vi.fn(), access: vi.fn(), activate: vi.fn(), reset: vi.fn(), findResidentId: vi.fn() };
@@ -216,6 +223,26 @@ describe('ResidentLoginDialog', () => {
       expect(logins.activate).not.toHaveBeenCalled();
       const primary = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
       expect(primary.disabled).toBe(true);
+    });
+
+    it('gives a tenant who deleted their app account a fresh login, and says so first', async () => {
+      logins.access.mockReturnValue(
+        of({ ...NO_LOGIN, email: 'tess@example.com', appAccountDeletedAt: '2026-11-17T05:00:00.000Z' }),
+      );
+      await pickResident();
+
+      const note = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
+      expect(note.textContent).toContain('This tenant deleted their app account on Nov 17, 2026.');
+      expect(note.textContent).toContain('agree to the privacy notice again');
+      expect(text()).not.toContain('This tenant already has a login.');
+
+      component.submit();
+      fixture.detectChanges();
+
+      expect(logins.activate).toHaveBeenCalledWith('t-1', 'tess@example.com');
+      expect(heading()).toBe('Temporary password');
+      expect(text()).toContain('Temp-once-123');
+      expect(outcomes).toEqual([{ kind: 'setup', email: 'tess@example.com' }]);
     });
   });
 });

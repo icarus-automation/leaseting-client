@@ -27,6 +27,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   RESIDENT_ARCHIVED: 'Tenant archived',
   RESIDENT_RESTORED: 'Tenant restored',
   RESIDENT_ACCESS_CHANGED: 'Residence Care access changed',
+  RESIDENT_APP_ACCOUNT_DELETED: 'App account deleted',
   RESIDENT_DOCUMENT_UPLOADED: 'Document uploaded',
   RESIDENT_DOCUMENT_VIEWED: 'Document viewed',
   RESIDENT_DOCUMENT_DOWNLOADED: 'Document downloaded',
@@ -121,6 +122,7 @@ export const AUDIT_AREA_ACTIONS: Record<AuditArea, readonly AuditAction[]> = {
     'RESIDENT_ARCHIVED',
     'RESIDENT_RESTORED',
     'RESIDENT_ACCESS_CHANGED',
+    'RESIDENT_APP_ACCOUNT_DELETED',
     'PRIVACY_CONSENT_RECORDED',
   ],
   documents: [
@@ -271,6 +273,8 @@ export function describeAuditEvent(event: AuditEvent): string {
     }
     case 'RESIDENT_RESTORED':
       return `Restored ${target}`;
+    case 'RESIDENT_APP_ACCOUNT_DELETED':
+      return `${target} deleted their Residence Care account`;
     case 'PRIVACY_NOTICE_PUBLISHED': {
       const version = after?.['version'];
       return typeof version === 'number' ? `Published privacy notice v${version}` : 'Published the privacy notice';

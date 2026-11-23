@@ -37,6 +37,7 @@ function residentDetail(overrides: Partial<ResidentDetail> = {}): ResidentDetail
     outstandingBalance: '0',
     unpaidBillCount: 0,
     nextDueDate: null,
+    appAccountDeletedAt: null,
     ...overrides,
   };
 }

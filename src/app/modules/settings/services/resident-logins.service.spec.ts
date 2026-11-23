@@ -66,7 +66,13 @@ describe('ResidentLoginsService', () => {
   afterEach(() => http.verify());
 
   function answerAccess(residentId: string, status: PortalAccessStatus): void {
-    const body: PortalAccessResponse = { residentId, status, email: 'ana@example.com', mustChangePassword: false };
+    const body: PortalAccessResponse = {
+      residentId,
+      status,
+      email: 'ana@example.com',
+      mustChangePassword: false,
+      appAccountDeletedAt: null,
+    };
     http.expectOne(`${API_BASE_URL}/residents/${residentId}/portal-access`).flush(body);
   }
 

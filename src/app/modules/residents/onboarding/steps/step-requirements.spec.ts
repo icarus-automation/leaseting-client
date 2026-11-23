@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import type { OnboardingDetail } from '../../../../core/models/onboarding.types';
 import type { ResidentDetail, ResidentDocumentItem } from '../../../../core/models/resident.types';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
@@ -14,7 +15,6 @@ function documentItem(overrides: Partial<ResidentDocumentItem> = {}): ResidentDo
     mimeType: 'image/png',
     sizeBytes: 1200,
     label: 'Onboarding · Valid ID',
-    url: 'https://files.example/philsys.png',
     createdAt: '2026-09-26T00:00:00.000Z',
     ...overrides,
   };
@@ -63,7 +63,9 @@ describe('StepRequirements', () => {
     get: vi.fn(),
     uploadDocument: vi.fn(),
     deleteDocument: vi.fn(),
+    documentFile: vi.fn(),
   };
+  const auth = { can: vi.fn((_code: string) => false) };
   const confirm = {
     danger: vi.fn((options: { onAccept: () => void }) => options.onAccept()),
   };
@@ -75,6 +77,9 @@ describe('StepRequirements', () => {
     residentsApi.get.mockReturnValue(of(residentDetail()));
     residentsApi.uploadDocument.mockReset();
     residentsApi.deleteDocument.mockReset();
+    residentsApi.documentFile.mockReset();
+    auth.can.mockReset();
+    auth.can.mockReturnValue(false);
     confirm.danger.mockClear();
 
     await TestBed.configureTestingModule({
@@ -82,6 +87,7 @@ describe('StepRequirements', () => {
       providers: [
         { provide: ResidentsService, useValue: residentsApi },
         { provide: ConfirmService, useValue: confirm },
+        { provide: AuthService, useValue: auth },
       ],
     }).compileComponents();
 
@@ -228,5 +234,36 @@ describe('StepRequirements', () => {
     expect(checkbox('Valid government ID').checked).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('On file');
     expect(nextButton().disabled).toBe(false);
+  });
+
+  function openButton(): HTMLButtonElement | undefined {
+    return [...fixture.nativeElement.querySelectorAll('button')].find(
+      (button: HTMLButtonElement) => button.textContent?.trim() === 'Open',
+    );
+  }
+
+  it('hides Open when the session cannot view documents', async () => {
+    residentsApi.get.mockReturnValue(of(residentDetail({ documents: [documentItem()] })));
+    await render();
+
+    expect(fixture.nativeElement.textContent).toContain('philsys.png');
+    expect(openButton()).toBeUndefined();
+  });
+
+  it('shows Open and requests the document file when the session can view documents', async () => {
+    auth.can.mockImplementation((code: string) => code === 'residents:view_documents');
+    residentsApi.get.mockReturnValue(of(residentDetail({ documents: [documentItem()] })));
+    residentsApi.documentFile.mockReturnValue(of(new Blob(['id'], { type: 'image/png' })));
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:doc');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    vi.spyOn(window, 'open').mockImplementation(() => null);
+    await render();
+
+    const open = openButton();
+    expect(open).toBeTruthy();
+    open!.click();
+    await fixture.whenStable();
+
+    expect(residentsApi.documentFile).toHaveBeenCalledWith('doc-1', false);
   });
 });

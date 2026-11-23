@@ -62,7 +62,6 @@ export interface ResidentDocumentItem {
   mimeType: string;
   sizeBytes: number;
   label: string | null;
-  url: string;
   createdAt: string;
 }
 

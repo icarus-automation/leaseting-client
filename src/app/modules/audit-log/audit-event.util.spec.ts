@@ -1,4 +1,4 @@
-import type { AuditEvent } from '../../../core/models/audit-event.types';
+import type { AuditEvent } from '../../core/models/audit-event.types';
 import { auditActionLabel, describeAuditEvent, targetName } from './audit-event.util';
 
 function event(overrides: Partial<AuditEvent>): AuditEvent {
@@ -7,6 +7,8 @@ function event(overrides: Partial<AuditEvent>): AuditEvent {
     action: 'MEMBER_ROLE_CHANGED',
     actor: { id: 'u-1', name: 'Olive Reyes', email: 'olive@example.com' },
     target: { type: 'MEMBER', id: 'm-1', label: 'Ana Cruz <ana@example.com>' },
+    area: 'team',
+    propertyId: null,
     before: null,
     after: null,
     createdAt: '2026-10-30T02:20:11.000Z',

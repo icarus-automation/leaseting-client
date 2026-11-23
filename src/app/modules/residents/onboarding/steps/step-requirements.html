@@ -75,7 +75,14 @@
             @for (doc of filedFor(item.key); track doc.id) {
               <li class="flex flex-wrap items-center gap-1.5 text-[12.5px] text-body">
                 <svg pIcon="file" class="text-muted" [size]="11" aria-hidden="true"></svg>
-                <a [href]="doc.url" target="_blank" rel="noopener" class="text-primary hover:underline">{{ doc.fileName }}</a>
+                <span>{{ doc.label || doc.fileName }}</span>
+                @if (doc.label && doc.fileName !== doc.label) {
+                  <span class="text-muted">{{ doc.fileName }}</span>
+                }
+                @if (canViewDocuments()) {
+                  <button type="button" class="font-medium text-primary hover:underline" (click)="openDocument(doc, false)">Open</button>
+                  <button type="button" class="font-medium text-primary hover:underline" (click)="openDocument(doc, true)">Download</button>
+                }
                 <span class="text-[11.5px] text-muted">already on file</span>
                 <button
                   type="button"
@@ -91,7 +98,14 @@
             @for (doc of uploadsFor(item.key); track doc.id) {
               <li class="flex flex-wrap items-center gap-1.5 text-[12.5px] text-body">
                 <svg pIcon="file" class="text-muted" [size]="11" aria-hidden="true"></svg>
-                <a [href]="doc.url" target="_blank" rel="noopener" class="text-primary hover:underline">{{ doc.fileName }}</a>
+                <span>{{ doc.label || doc.fileName }}</span>
+                @if (doc.label && doc.fileName !== doc.label) {
+                  <span class="text-muted">{{ doc.fileName }}</span>
+                }
+                @if (canViewDocuments()) {
+                  <button type="button" class="font-medium text-primary hover:underline" (click)="openDocument(doc, false)">Open</button>
+                  <button type="button" class="font-medium text-primary hover:underline" (click)="openDocument(doc, true)">Download</button>
+                }
                 <button
                   type="button"
                   class="text-[11.5px] font-medium text-muted transition-colors duration-150 ease-out hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"

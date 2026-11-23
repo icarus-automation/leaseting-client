@@ -96,6 +96,7 @@ const NAV_SECTIONS: NavSection[] = [
     type: 'core',
     items: [
       { label: 'Reports', route: '/reports', icon: 'chart-bar', permissions: ['reports:view'] },
+      { label: 'Audit log', route: '/audit-log', icon: 'history', permissions: ['audit_log:view'] },
       { label: 'Knowledge Base', route: '/knowledge-base', icon: 'book' },
     ],
   },

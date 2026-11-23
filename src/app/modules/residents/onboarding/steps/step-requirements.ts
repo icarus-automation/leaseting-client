@@ -16,11 +16,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
+import { AuthService } from '../../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { OnboardingDetail, RequirementsStepData } from '../../../../core/models/onboarding.types';
 import type { ResidentDocumentItem } from '../../../../core/models/resident.types';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { ResidentsService } from '../../services/residents.service';
+import { presentDocumentBlob } from '../../utils/present-document-blob';
 
 type RequirementKey = 'validId' | 'proofOfIncome' | 'priorAddress';
 
@@ -68,7 +70,10 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 export class StepRequirements {
   private readonly residents = inject(ResidentsService);
   private readonly confirm = inject(ConfirmService);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly canViewDocuments = computed(() => this.auth.can('residents:view_documents'));
 
   readonly detail = input.required<OnboardingDetail>();
   readonly busy = input(false);
@@ -151,6 +156,18 @@ export class StepRequirements {
         error: (error: unknown) => {
           this.uploadingKey.set(null);
           this.errorMessage.set(apiErrorMessage(error, 'The upload did not go through. Try again.'));
+        },
+      });
+  }
+
+  openDocument(document: ResidentDocumentItem, download: boolean): void {
+    this.residents
+      .documentFile(document.id, download)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => presentDocumentBlob(blob, document.fileName, download),
+        error: (error: unknown) => {
+          this.errorMessage.set(apiErrorMessage(error, 'Could not open the document.'));
         },
       });
   }

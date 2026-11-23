@@ -1,0 +1,275 @@
+<div class="flex flex-col gap-5">
+  <header>
+    <h1 class="font-heading text-2xl font-semibold text-heading">Audit log</h1>
+    <p class="mt-0.5 text-sm text-muted">
+      Changes across the organization, newest first. Nobody can edit or delete an entry.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 gap-2 min-[720px]:grid-cols-2 min-[1100px]:grid-cols-3">
+    <div class="flex w-full flex-col gap-1">
+      <label class="text-[12.5px] font-medium text-heading" for="audit-area">Area</label>
+      <p-select
+        inputId="audit-area"
+        [options]="areaOptions"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="area()"
+        (ngModelChange)="setArea($event)"
+        [showClear]="true"
+        placeholder="Any area"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+
+    <div class="flex w-full flex-col gap-1">
+      <label class="text-[12.5px] font-medium text-heading" for="audit-action">Action</label>
+      <p-select
+        inputId="audit-action"
+        [options]="actionOptions()"
+        [group]="true"
+        optionGroupLabel="label"
+        optionGroupChildren="items"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="action()"
+        (ngModelChange)="setAction($event)"
+        [showClear]="true"
+        placeholder="Any action"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+
+    <div class="flex w-full flex-col gap-1">
+      <label class="text-[12.5px] font-medium text-heading" for="audit-actor">Person</label>
+      <p-select
+        inputId="audit-actor"
+        [options]="actorOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="actorId()"
+        (ngModelChange)="setActor($event)"
+        [filter]="true"
+        filterBy="label"
+        [showClear]="true"
+        [placeholder]="peopleError() ? 'Could not load people' : 'Anyone'"
+        [disabled]="people() === null || peopleError()"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+
+    <div class="flex w-full flex-col gap-1">
+      <label class="text-[12.5px] font-medium text-heading" for="audit-property">Property</label>
+      <p-select
+        inputId="audit-property"
+        [options]="propertyOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="propertyId()"
+        (ngModelChange)="setProperty($event)"
+        [filter]="true"
+        filterBy="label"
+        [showClear]="true"
+        placeholder="Any property"
+        styleClass="w-full"
+        appendTo="body"
+      />
+    </div>
+
+    <div class="flex w-full flex-col gap-1">
+      <label class="text-[12.5px] font-medium text-heading" for="audit-from">From</label>
+      <p-datepicker
+        inputId="audit-from"
+        [ngModel]="from()"
+        (ngModelChange)="setFrom($event)"
+        [maxDate]="to()"
+        dateFormat="M d, yy"
+        [showIcon]="true"
+        [showClear]="true"
+        placeholder="Any day"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+
+    <div class="flex w-full flex-col gap-1">
+      <label class="text-[12.5px] font-medium text-heading" for="audit-to">To</label>
+      <p-datepicker
+        inputId="audit-to"
+        [ngModel]="to()"
+        (ngModelChange)="setTo($event)"
+        [minDate]="from()"
+        dateFormat="M d, yy"
+        [showIcon]="true"
+        [showClear]="true"
+        placeholder="Any day"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    </div>
+
+    <div class="flex w-full flex-col gap-1 min-[1100px]:col-span-3">
+      <label class="text-[12.5px] font-medium text-heading" for="audit-q">Search</label>
+      <input
+        id="audit-q"
+        type="search"
+        [ngModel]="query()"
+        (ngModelChange)="setQuery($event)"
+        placeholder="Search targets"
+        class="h-10 w-full rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+      />
+    </div>
+  </div>
+
+  @if (isFiltered()) {
+    <div class="-mt-1 flex justify-end">
+      <button
+        type="button"
+        class="rounded-[2px] text-[12.5px] font-medium text-primary hover:underline"
+        (click)="clearFilters()"
+      >
+        Clear filters
+      </button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="overflow-hidden rounded-base border border-border">
+      @for (s of skeletons; track $index) {
+        <app-skeleton variant="row" />
+      }
+    </div>
+  } @else if (error(); as message) {
+    <app-error-banner [message]="message" [retryable]="true" (retry)="load(meta()?.page ?? 1)" />
+  } @else if (events().length === 0) {
+    @if (isFiltered()) {
+      <app-empty-state
+        icon="filter"
+        heading="No changes match"
+        description="Try another area, person, property, or date range."
+      />
+    } @else {
+      <app-empty-state
+        icon="history"
+        heading="No changes yet"
+        description="Team, tenant, billing, and property changes show here as they happen."
+      />
+    }
+  } @else {
+    <div class="overflow-x-auto rounded-base border border-border">
+      <table class="block w-full border-collapse text-left min-[720px]:table">
+        <caption class="sr-only">Audit log, newest first</caption>
+        <thead class="hidden min-[720px]:table-header-group">
+          <tr class="border-b border-border bg-surface">
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">When</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Who</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Action</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Target</th>
+            <th scope="col" class="px-4 py-2.5 text-[12.5px] font-medium text-muted">Area</th>
+          </tr>
+        </thead>
+        <tbody class="block min-[720px]:table-row-group">
+          @for (event of events(); track event.id) {
+            <tr
+              class="flex cursor-pointer flex-col gap-0.5 border-b border-border px-4 py-3 last:border-b-0 hover:bg-surface focus-visible:bg-surface focus-visible:outline-none min-[720px]:table-row min-[720px]:px-0 min-[720px]:py-0"
+              tabindex="0"
+              (click)="open(event)"
+              (keydown.enter)="open(event)"
+              (keydown.space)="$event.preventDefault(); open(event)"
+            >
+              <td class="order-1 whitespace-nowrap min-[720px]:table-cell min-[720px]:px-4 min-[720px]:py-2.5">
+                <time class="flex flex-col" [attr.datetime]="event.createdAt">
+                  <span class="text-[13px] text-body">{{ event.createdAt | date: 'MMM d, y' : manila }}</span>
+                  <span class="text-[12px] text-muted">{{ event.createdAt | date: 'h:mm a' : manila }}</span>
+                </time>
+              </td>
+              <td class="order-4 min-[720px]:table-cell min-[720px]:px-4 min-[720px]:py-2.5">
+                <span class="flex min-w-0 flex-col">
+                  <span class="text-[13px] font-medium text-heading">{{ event.actor.name ?? 'System' }}</span>
+                  @if (event.actor.email) {
+                    <span class="break-all text-[12px] text-muted">{{ event.actor.email }}</span>
+                  }
+                </span>
+              </td>
+              <td class="order-2 min-[720px]:table-cell min-[720px]:px-4 min-[720px]:py-2.5">
+                <span class="text-[13px] font-medium text-heading">{{ actionLabel(event) }}</span>
+              </td>
+              <td class="order-3 min-[720px]:table-cell min-[720px]:px-4 min-[720px]:py-2.5">
+                <span class="text-[13px] text-body">{{ event.target.label ?? 'Unknown' }}</span>
+              </td>
+              <td class="order-5 min-[720px]:table-cell min-[720px]:px-4 min-[720px]:py-2.5">
+                <span class="text-[13px] text-muted">{{ areaLabel(event) }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [meta]="meta()" (pageChange)="load($event)" />
+  }
+</div>
+
+<p-drawer
+  [visible]="detail() !== null"
+  (visibleChange)="onDrawerVisible($event)"
+  position="right"
+  [header]="drawerTitle()"
+  [style]="{ width: 'min(100%, 28rem)' }"
+>
+  @if (detail(); as event) {
+    <div class="flex flex-col gap-5">
+      <dl class="m-0 grid grid-cols-1 gap-3">
+        <div>
+          <dt class="text-[12px] text-muted">Action</dt>
+          <dd class="m-0 text-[13px] font-medium text-heading">{{ actionLabel(event) }}</dd>
+        </div>
+        <div>
+          <dt class="text-[12px] text-muted">Target</dt>
+          <dd class="m-0 text-[13px] text-body">{{ event.target.label ?? 'Unknown' }}</dd>
+        </div>
+        <div>
+          <dt class="text-[12px] text-muted">Who</dt>
+          <dd class="m-0 text-[13px] text-body">
+            {{ event.actor.name ?? 'System' }}
+            @if (event.actor.email) {
+              <span class="block text-[12px] text-muted">{{ event.actor.email }}</span>
+            }
+          </dd>
+        </div>
+        <div>
+          <dt class="text-[12px] text-muted">When</dt>
+          <dd class="m-0 text-[13px] text-body">
+            <time [attr.datetime]="event.createdAt">
+              {{ event.createdAt | date: 'MMM d, y' : manila }}
+              {{ event.createdAt | date: 'h:mm a' : manila }}
+            </time>
+          </dd>
+        </div>
+      </dl>
+
+      @if (changes(event).length === 0) {
+        <p class="m-0 text-[13px] leading-relaxed text-body">{{ describe(event) }}</p>
+      } @else {
+        <ul class="m-0 flex list-none flex-col gap-3 p-0">
+          @for (change of changes(event); track change.key) {
+            <li class="flex flex-col gap-0.5">
+              <span class="text-[12px] font-medium text-heading">{{ change.label }}</span>
+              @if (change.kind === 'added') {
+                <span class="text-[13px] text-body">Added {{ change.value }}</span>
+              } @else if (change.kind === 'removed') {
+                <span class="text-[13px] text-body">Removed {{ change.value }}</span>
+              } @else {
+                <span class="text-[13px] text-muted">{{ change.before }}</span>
+                <span class="text-[13px] text-body">{{ change.after }}</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</p-drawer>

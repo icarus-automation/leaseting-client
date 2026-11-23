@@ -61,6 +61,15 @@ export class ResidentsService {
   deleteDocument(documentId: string): Observable<ResidentDocumentItem> {
     return this.http.delete<ResidentDocumentItem>(`${API_BASE_URL}/resident-documents/${documentId}`);
   }
+
+  /** The file itself, with the session cookie. `download` asks the API for an attachment. */
+  documentFile(id: string, download = false): Observable<Blob> {
+    return this.http.get(`${API_BASE_URL}/resident-documents/${id}/file`, {
+      params: download ? { download: 'true' } : undefined,
+      responseType: 'blob',
+      withCredentials: true,
+    });
+  }
 }
 
 function toFormData(payload: UpdateResidentPayload, photo: File | null, removePhoto = false): FormData {

@@ -330,15 +330,24 @@
                     <span class="block truncate text-[13px] font-medium text-heading">{{ document.label || document.fileName }}</span>
                     <span class="block text-[12px] text-muted">{{ fileSizeLabel(document.sizeBytes) }} · {{ document.createdAt | date: 'MMM d, y' }}</span>
                   </span>
-                  <a
-                    [href]="document.url"
-                    target="_blank"
-                    rel="noopener"
-                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-base border border-border bg-background text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
-                    [attr.aria-label]="'Open ' + document.fileName"
-                  >
-                    <svg pIcon="external-link" [size]="12" aria-hidden="true"></svg>
-                  </a>
+                  @if (canViewDocuments()) {
+                    <button
+                      type="button"
+                      class="inline-flex h-7 shrink-0 items-center rounded-base border border-border bg-background px-2 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                      [attr.aria-label]="'Open ' + (document.label || document.fileName)"
+                      (click)="openDocument(document, false)"
+                    >
+                      Open
+                    </button>
+                    <button
+                      type="button"
+                      class="inline-flex h-7 shrink-0 items-center rounded-base border border-border bg-background px-2 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                      [attr.aria-label]="'Download ' + (document.label || document.fileName)"
+                      (click)="openDocument(document, true)"
+                    >
+                      Download
+                    </button>
+                  }
                   @if (canManage()) {
                     <button
                       type="button"

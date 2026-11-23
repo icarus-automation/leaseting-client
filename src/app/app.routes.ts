@@ -91,6 +91,13 @@ export const routes: Routes = [
           import('./modules/reports/reports.routes').then(m => m.REPORTS_ROUTES),
       },
       {
+        path: 'audit-log',
+        canActivate: [permissionGuard('audit_log:view')],
+        data: { contentWidth: 'wide' },
+        loadChildren: () =>
+          import('./modules/audit-log/audit-log.routes').then(m => m.AUDIT_LOG_ROUTES),
+      },
+      {
         path: 'settings',
         data: { contentWidth: 'standard' },
         loadChildren: () =>

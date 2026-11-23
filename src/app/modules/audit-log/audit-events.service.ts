@@ -2,10 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { API_BASE_URL } from '../../../core/config/api';
-import type { Paginated } from '../../../core/models/api.types';
-import type { AuditEvent, AuditEventFilters } from '../../../core/models/audit-event.types';
-import { toHttpParams } from '../../../shared/utils/http-params.util';
+import { API_BASE_URL } from '../../core/config/api';
+import type { Paginated } from '../../core/models/api.types';
+import type { AuditEvent, AuditEventFilters } from '../../core/models/audit-event.types';
+import { toHttpParams } from '../../shared/utils/http-params.util';
 
 @Injectable({ providedIn: 'root' })
 export class AuditEventsService {

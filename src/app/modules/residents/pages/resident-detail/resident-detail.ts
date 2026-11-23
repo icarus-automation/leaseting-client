@@ -25,6 +25,7 @@ import { isLeaseActive, leaseStatus } from '../../../../shared/utils/lease-statu
 import { ResidentFormDialog } from '../../components/resident-form-dialog/resident-form-dialog';
 import { ResidentRiskPanel } from '../../components/resident-risk-panel/resident-risk-panel';
 import { ResidentsService } from '../../services/residents.service';
+import { presentDocumentBlob } from '../../utils/present-document-blob';
 
 interface BillingHistoryRow extends ResidentLeaseBillItem {
   sourceId: string;
@@ -60,6 +61,8 @@ export class ResidentDetailPage {
 
   /** Editing the profile and its documents. */
   readonly canManage = computed(() => this.auth.can('residents:manage'));
+  /** Opening or downloading a file. Upload and delete stay on residents:manage. */
+  readonly canViewDocuments = computed(() => this.auth.can('residents:view_documents'));
 
   private readonly params = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
@@ -167,6 +170,22 @@ export class ResidentDetailPage {
 
   documentIcon(document: ResidentDocumentItem): string {
     return document.mimeType === 'application/pdf' ? 'file-pdf' : 'image';
+  }
+
+  openDocument(document: ResidentDocumentItem, download: boolean): void {
+    this.residents
+      .documentFile(document.id, download)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => presentDocumentBlob(blob, document.fileName, download),
+        error: (error: unknown) => {
+          this.toast.add({
+            severity: 'error',
+            summary: download ? 'Download failed' : 'Could not open the document',
+            detail: apiErrorMessage(error, 'Try again.'),
+          });
+        },
+      });
   }
 
   openDocumentPicker(): void {

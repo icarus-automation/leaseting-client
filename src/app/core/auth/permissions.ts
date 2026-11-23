@@ -10,6 +10,7 @@ export type Permission =
   | 'units:view'
   | 'units:manage'
   | 'residents:view'
+  | 'residents:view_documents'
   | 'residents:manage'
   | 'residents:manage_access'
   | 'leases:view'

@@ -1,11 +1,19 @@
-import type { PaymentMethod } from './enums';
+import type { PaymentDestinationType } from './enums';
 
+/**
+ * An online account residents pay into. Bank and e-wallet destinations carry an
+ * account name and number; crypto carries a network and wallet address. The other
+ * pair is null.
+ */
 export interface PaymentDestinationResponse {
   id: string;
   displayName: string;
-  method: PaymentMethod;
-  accountName: string;
-  accountNumber: string;
+  type: PaymentDestinationType;
+  providerName: string;
+  accountName: string | null;
+  accountNumber: string | null;
+  network: string | null;
+  walletAddress: string | null;
   instructions: string | null;
   isEnabled: boolean;
   displayOrder: number;
@@ -16,11 +24,22 @@ export interface PaymentDestinationResponse {
 
 export interface PaymentDestinationPayload {
   displayName: string;
-  method: PaymentMethod;
-  accountName: string;
-  accountNumber: string;
+  type: PaymentDestinationType;
+  providerName: string;
+  accountName?: string;
+  accountNumber?: string;
+  network?: string;
+  walletAddress?: string;
   instructions?: string;
   propertyId?: string | null;
   displayOrder?: number;
   isEnabled?: boolean;
+}
+
+/** The destination an online payment went to, as payment history shows it. */
+export interface PaymentDestinationSummary {
+  id: string;
+  displayName: string;
+  type: PaymentDestinationType;
+  providerName: string;
 }

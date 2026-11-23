@@ -20,7 +20,10 @@ import { findSettingsCard, settingsSetupSteps } from '../../settings-nav';
           <svg pIcon="chevron-right" class="text-muted" [size]="10" aria-hidden="true"></svg>
           <span class="font-medium text-heading" aria-current="page">{{ card()?.label ?? section() }}</span>
         </nav>
-        <h1 class="font-heading text-2xl font-semibold text-heading">{{ card()?.label ?? section() }}</h1>
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <h1 class="font-heading text-2xl font-semibold text-heading">{{ card()?.label ?? section() }}</h1>
+          <ng-content select="[shellActions]" />
+        </div>
         @if (card(); as details) {
           <p class="text-[13px] leading-relaxed text-muted">{{ details.description }}</p>
         }

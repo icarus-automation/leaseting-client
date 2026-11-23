@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
 import type { Paginated } from '../../../core/models/api.types';
@@ -21,7 +21,9 @@ import type {
 } from '../../../core/models/bill.types';
 import type { BillType } from '../../../core/models/enums';
 import type { ManualReminderResult } from '../../../core/models/report.types';
+import { appendPaymentMethod } from '../../../shared/ui/payment-method-fields/payment-method-form';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
+import { withPaymentDefaults } from '../utils/payment-method-display.util';
 
 @Injectable({ providedIn: 'root' })
 export class BillsService {
@@ -61,7 +63,9 @@ export class BillsService {
   }
 
   get(id: string): Observable<BillDetail> {
-    return this.http.get<BillDetail>(`${this.base}/${id}`);
+    return this.http
+      .get<BillDetail>(`${this.base}/${id}`)
+      .pipe(map((detail) => ({ ...detail, payments: detail.payments.map(withPaymentDefaults) })));
   }
 
   create(leaseId: string, payload: CreateBillPayload): Observable<BillListItem> {
@@ -84,19 +88,23 @@ export class BillsService {
     const form = new FormData();
     form.append('amount', String(payload.amount));
     form.append('paidOn', payload.paidOn);
-    form.append('method', payload.method);
+    appendPaymentMethod(form, payload);
     if (payload.referenceNo) form.append('referenceNo', payload.referenceNo);
     form.append('notes', payload.notes);
     if (receipt) form.append('receipt', receipt, receipt.name);
-    return this.http.post<PaymentResponse>(`${this.base}/${billId}/payments`, form);
+    return this.http.post<PaymentResponse>(`${this.base}/${billId}/payments`, form).pipe(map(withPaymentDefaults));
   }
 
   paymentsFor(billId: string): Observable<PaymentResponse[]> {
-    return this.http.get<PaymentResponse[]>(`${this.base}/${billId}/payments`);
+    return this.http
+      .get<PaymentResponse[]>(`${this.base}/${billId}/payments`)
+      .pipe(map((payments) => payments.map(withPaymentDefaults)));
   }
 
   voidPayment(paymentId: string, reason: string): Observable<PaymentResponse> {
-    return this.http.post<PaymentResponse>(`${API_BASE_URL}/payments/${paymentId}/void`, { reason });
+    return this.http
+      .post<PaymentResponse>(`${API_BASE_URL}/payments/${paymentId}/void`, { reason })
+      .pipe(map(withPaymentDefaults));
   }
 
   delete(id: string): Observable<BillResponse> {

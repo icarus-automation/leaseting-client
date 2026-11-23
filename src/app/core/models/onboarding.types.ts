@@ -1,5 +1,5 @@
 import type { ChargeLine } from './charge-item.types';
-import type { PaymentMethod } from './enums';
+import type { PaymentMethodPayload } from './payment-method.types';
 
 export type OnboardingStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
@@ -71,11 +71,10 @@ export interface ContractStepData {
   deferred?: boolean;
 }
 
-export interface MoveInPaymentStepData {
+export interface MoveInPaymentStepData extends PaymentMethodPayload {
   advanceAmount: number;
   depositAmount: number;
   paidOn: string;
-  method: PaymentMethod;
   referenceNo?: string;
   notes?: string;
 }

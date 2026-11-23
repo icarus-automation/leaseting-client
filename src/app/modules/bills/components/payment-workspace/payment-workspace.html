@@ -19,7 +19,7 @@
 
 @if (canMutate()) {
   <form id="payment-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-    <div class="grid grid-cols-2 gap-3">
+    <div class="grid gap-3 sm:grid-cols-2">
       <div class="flex flex-col gap-1.5">
         <label class="text-[13px] font-medium text-heading" for="payment-amount">Amount received</label>
         <p-inputnumber
@@ -53,25 +53,16 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-3">
-      <div class="flex flex-col gap-1.5">
-        <label class="text-[13px] font-medium text-heading" for="payment-method">Method</label>
-        <p-select
-          inputId="payment-method"
-          formControlName="method"
-          [options]="methodOptions()"
-          optionLabel="label"
-          optionValue="value"
-          styleClass="w-full"
-          appendTo="body"
-        />
-        @if (destinationsError(); as message) {
-          <p class="text-[12px] text-destructive">{{ message }}</p>
-        } @else if (methodHint(); as hint) {
-          <p class="text-[12px] text-muted">{{ hint }}</p>
-        }
-      </div>
-      <div class="flex flex-col gap-1.5">
+    <app-payment-method-fields
+      [group]="form.controls.payment"
+      [destinations]="propertyDestinations()"
+      [destinationsError]="destinationsError()"
+      [errors]="errors"
+      groupPath="payment"
+      idPrefix="payment"
+      layout="split"
+    >
+      <ng-container ngProjectAs="[besideMethod]">
         <label class="text-[13px] font-medium text-heading" for="payment-ref">
           Record No. <span class="font-normal text-muted">(optional)</span>
         </label>
@@ -81,10 +72,10 @@
           maxlength="80"
           placeholder="OR / transaction no."
           class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
-          formControlName="referenceNo"
+          [formControl]="form.controls.referenceNo"
         />
-      </div>
-    </div>
+      </ng-container>
+    </app-payment-method-fields>
 
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="payment-notes">Collection memo</label>
@@ -166,7 +157,7 @@
             <div class="min-w-0 flex-1">
               <p class="text-[13px] font-medium text-heading tabular-nums" [class.line-through]="payment.isVoided">
                 {{ payment.amount | phpCurrency }}
-                <span class="font-normal text-muted">· {{ methodLabels[payment.method] }}</span>
+                <span class="font-normal text-muted">· {{ methodSummary(payment) }}</span>
               </p>
               <p class="truncate text-[12px] text-muted">
                 {{ payment.paidOn | date: 'MMM d, y' }}

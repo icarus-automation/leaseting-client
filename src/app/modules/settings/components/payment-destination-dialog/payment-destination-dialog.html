@@ -1,0 +1,252 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="heading()"
+  subheading="An online account residents pay into."
+  [dirty]="dirty()"
+  width="36rem"
+>
+  @if (error(); as message) {
+    <app-error-banner class="mb-4" [message]="message" />
+  }
+
+  <form id="payment-destination-form" class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <fieldset class="flex flex-col gap-1.5">
+      <legend class="mb-1.5 text-[13px] font-medium text-heading">Type</legend>
+      <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Destination type">
+        @for (choice of typeChoices; track choice.value) {
+          <button
+            type="button"
+            role="radio"
+            [attr.autofocus]="type() === choice.value ? '' : null"
+            [attr.aria-checked]="type() === choice.value"
+            class="flex min-w-0 flex-col items-start gap-1 rounded-base border px-3 py-2.5 text-left transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring motion-reduce:transition-none"
+            [class]="
+              type() === choice.value
+                ? 'border-primary bg-[color-mix(in_oklab,var(--primary)_8%,var(--background))] text-heading'
+                : 'border-border bg-background text-body hover:bg-surface'
+            "
+            (click)="pickType(choice.value)"
+          >
+            <svg [pIcon]="choice.icon" [size]="16" aria-hidden="true" [class]="type() === choice.value ? 'text-primary' : 'text-muted'"></svg>
+            <span class="text-[13px] font-semibold">{{ choice.label }}</span>
+            <span class="truncate text-[11.5px] text-muted">{{ choice.hint }}</span>
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div class="flex min-w-0 flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="destination-provider">{{ copy().provider }}</label>
+        <input
+          id="destination-provider"
+          type="text"
+          formControlName="providerName"
+          maxlength="60"
+          autocomplete="off"
+          list="destination-provider-suggestions"
+          [placeholder]="copy().providerPlaceholder"
+          class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+          [attr.aria-invalid]="!!fieldError('providerName')"
+        />
+        <datalist id="destination-provider-suggestions">
+          @for (suggestion of copy().providerSuggestions; track suggestion) {
+            <option [value]="suggestion"></option>
+          }
+        </datalist>
+        @if (fieldError('providerName'); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+      </div>
+
+      @if (isCrypto()) {
+        <div class="flex min-w-0 flex-col gap-1.5">
+          <label class="text-[13px] font-medium text-heading" for="destination-network">Network</label>
+          <input
+            id="destination-network"
+            type="text"
+            formControlName="network"
+            maxlength="40"
+            autocomplete="off"
+            placeholder="e.g. TRC20"
+            class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+            [attr.aria-invalid]="!!fieldError('network')"
+          />
+          @if (fieldError('network'); as message) {
+            <p class="text-[12.5px] text-destructive">{{ message }}</p>
+          }
+        </div>
+        <div class="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
+          <label class="text-[13px] font-medium text-heading" for="destination-wallet">Wallet address</label>
+          <input
+            id="destination-wallet"
+            type="text"
+            formControlName="walletAddress"
+            maxlength="200"
+            autocomplete="off"
+            spellcheck="false"
+            autocapitalize="none"
+            class="h-10 rounded-base border border-border bg-background px-3 font-mono text-[13px] text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+            [attr.aria-invalid]="!!fieldError('walletAddress')"
+          />
+          @if (fieldError('walletAddress'); as message) {
+            <p class="text-[12.5px] text-destructive">{{ message }}</p>
+          } @else {
+            <p class="text-[12px] text-muted">Residents send only on this network. Check it twice.</p>
+          }
+        </div>
+      } @else {
+        <div class="flex min-w-0 flex-col gap-1.5">
+          <label class="text-[13px] font-medium text-heading" for="destination-account-name">Account name</label>
+          <input
+            id="destination-account-name"
+            type="text"
+            formControlName="accountName"
+            maxlength="120"
+            autocomplete="off"
+            class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+            [attr.aria-invalid]="!!fieldError('accountName')"
+          />
+          @if (fieldError('accountName'); as message) {
+            <p class="text-[12.5px] text-destructive">{{ message }}</p>
+          }
+        </div>
+        <div class="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
+          <label class="text-[13px] font-medium text-heading" for="destination-account-number">{{ copy().accountNumber }}</label>
+          <input
+            id="destination-account-number"
+            type="text"
+            formControlName="accountNumber"
+            maxlength="80"
+            autocomplete="off"
+            inputmode="numeric"
+            [placeholder]="copy().accountNumberPlaceholder"
+            class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+            [attr.aria-invalid]="!!fieldError('accountNumber')"
+          />
+          @if (fieldError('accountNumber'); as message) {
+            <p class="text-[12.5px] text-destructive">{{ message }}</p>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
+      <div class="flex min-w-0 flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="destination-display-name">Display name</label>
+        <input
+          id="destination-display-name"
+          type="text"
+          formControlName="displayName"
+          maxlength="80"
+          autocomplete="off"
+          placeholder="What residents see, e.g. Brickstone Maya"
+          class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"
+          [attr.aria-invalid]="!!fieldError('displayName')"
+        />
+        @if (fieldError('displayName'); as message) {
+          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        }
+      </div>
+      <div class="flex min-w-0 flex-col gap-1.5">
+        <label class="text-[13px] font-medium text-heading" for="destination-property">Used for</label>
+        <p-select
+          inputId="destination-property"
+          formControlName="propertyId"
+          [options]="propertyOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Pick a property"
+          styleClass="w-full"
+          appendTo="body"
+        />
+        @if (!form.controls.propertyId.value) {
+          <p class="text-[12px] leading-relaxed text-muted">Residents of every property without its own destinations see this one.</p>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-[13px] font-medium text-heading" for="destination-instructions">
+        Resident instructions <span class="font-normal text-muted">(optional)</span>
+      </label>
+      <textarea
+        id="destination-instructions"
+        rows="2"
+        formControlName="instructions"
+        maxlength="2000"
+        placeholder="Shown in Residence Care, e.g. Put your unit number in the note."
+        class="rounded-base border border-border bg-background px-3 py-2 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+      ></textarea>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[13px] font-medium text-heading">QR code</span>
+      <div class="flex items-center gap-3 rounded-base border border-border bg-surface p-3">
+        <div class="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-base border border-border bg-background">
+          @if (qrPreviewUrl(); as url) {
+            <img [src]="url" alt="New QR preview" class="max-h-full max-w-full object-contain" />
+          } @else if (existingQrUrl(); as url) {
+            <app-private-image class="flex h-full w-full items-center justify-center" [url]="url" alt="Current QR" [compact]="true" />
+          } @else {
+            <svg pIcon="qrcode" class="text-muted" [size]="28" aria-hidden="true"></svg>
+          }
+        </div>
+        <div class="flex min-w-0 flex-1 flex-col gap-2">
+          <p class="truncate text-[12.5px] text-muted">
+            @if (qrFile(); as file) {
+              {{ file.name }}
+            } @else if (isEdit()) {
+              Current QR. Replace it if the account changed.
+            } @else {
+              PNG, JPG, or WebP, up to 10 MB.
+            }
+          </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface-hover motion-reduce:transition-none"
+              (click)="qrInput.click()"
+            >
+              <svg pIcon="upload" [size]="12" aria-hidden="true"></svg>
+              <span>{{ qrFile() || isEdit() ? 'Replace QR' : 'Upload QR' }}</span>
+            </button>
+            @if (qrFile()) {
+              <button
+                type="button"
+                class="text-[12.5px] font-medium text-muted transition-colors duration-150 ease-out hover:text-destructive motion-reduce:transition-none"
+                (click)="removeQr()"
+              >
+                Remove
+              </button>
+            }
+          </div>
+        </div>
+        <input #qrInput type="file" class="hidden" [accept]="acceptedQrTypes" (change)="onQrPicked($event)" />
+      </div>
+      @if (qrError(); as message) {
+        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      }
+    </div>
+  </form>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      form="payment-destination-form"
+      class="inline-flex h-9 items-center rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="saving()"
+    >
+      {{ saving() ? 'Saving…' : isEdit() ? 'Save changes' : 'Add destination' }}
+    </button>
+  </ng-container>
+</app-form-dialog>

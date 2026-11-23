@@ -36,28 +36,16 @@
       <p-datepicker inputId="ob-paid-on" formControlName="paidOn" dateFormat="M d, yy" [showIcon]="true" appendTo="body" styleClass="w-full" />
     </div>
     <div class="flex flex-col gap-1.5">
-      <label class="text-[13px] font-medium text-heading" for="ob-method">Payment method</label>
-      <p-select
-        inputId="ob-method"
-        formControlName="method"
-        [options]="methodOptions"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        appendTo="body"
-      />
-    </div>
-    <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="ob-ref">Record No. <span class="font-normal text-muted">(optional)</span></label>
       <input
         id="ob-ref"
         type="text"
         formControlName="referenceNo"
-        placeholder="OR / GCash ref"
+        placeholder="OR / transaction no."
         class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
       />
     </div>
-    <div class="flex flex-col gap-1.5">
+    <div class="flex flex-col gap-1.5 sm:col-span-2">
       <label class="text-[13px] font-medium text-heading" for="ob-notes">Notes <span class="font-normal text-muted">(optional)</span></label>
       <input
         id="ob-notes"
@@ -68,14 +56,24 @@
     </div>
   </div>
 
+  <app-payment-method-fields
+    [group]="form.controls.payment"
+    [destinations]="propertyDestinations()"
+    [destinationsError]="destinationsError()"
+    [errors]="errors"
+    groupPath="payment"
+    idPrefix="ob-payment"
+    methodLabel="Payment method"
+  />
+
   <input #fileInput type="file" class="hidden" [accept]="acceptedTypes" (change)="onFilePicked($event)" />
   <div class="flex items-center justify-between rounded-base border border-dashed border-border px-3.5 py-2.5">
     <div class="flex items-center gap-2 text-[12.5px] text-muted">
       <svg pIcon="paperclip" [size]="12" aria-hidden="true"></svg>
       @if (receiptName(); as name) {
-        <span class="text-body">{{ name }}, filed on the tenant's documents</span>
+        <span class="text-body">{{ name }}, filed on the resident's documents</span>
       } @else {
-        <span>Receipt or deposit slip (optional), filed on the tenant's profile</span>
+        <span>Receipt or deposit slip (optional), filed on the resident's profile</span>
       }
     </div>
     <button

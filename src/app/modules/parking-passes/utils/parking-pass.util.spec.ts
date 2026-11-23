@@ -2,7 +2,6 @@ import {
   BILL_PAID_REFUND_MESSAGE,
   canBillByHand,
   formatPassDay,
-  passPaymentOptions,
   passStatus,
   paymentRemainingCents,
   paymentsWithRemainder,
@@ -13,24 +12,6 @@ import {
   withBillingDefaults,
 } from './parking-pass.util';
 import type { ParkingPass, ParkingPassBill, ParkingPassPayment } from '../../../core/models/parking-pass.types';
-import type { PaymentDestinationResponse } from '../../../core/models/payment-destination.types';
-
-function destination(overrides: Partial<PaymentDestinationResponse>): PaymentDestinationResponse {
-  return {
-    id: 'dest-1',
-    displayName: 'GCash',
-    method: 'GCASH',
-    accountName: 'Leaseting',
-    accountNumber: '0917',
-    instructions: null,
-    isEnabled: true,
-    displayOrder: 0,
-    propertyId: null,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
-    ...overrides,
-  };
-}
 
 describe('parking pass display', () => {
   it('formats a paid-through date on the calendar day it names', () => {
@@ -45,14 +26,6 @@ describe('parking pass display', () => {
 
   it('keeps the unpaid remainder of a payment in cents', () => {
     expect(paymentRemainingCents({ amount: '1500.00', refundedAmount: '500.00' })).toBe(100000);
-  });
-
-  it('offers cash and the property destinations', () => {
-    const options = passPaymentOptions(
-      [destination({ id: 'gcash', displayName: 'GCash', propertyId: 'prop-a' }), destination({ id: 'other', propertyId: 'prop-b' })],
-      'prop-a',
-    );
-    expect(options.map((option) => option.label)).toEqual(['Cash', 'GCash']);
   });
 });
 
@@ -76,6 +49,9 @@ describe('parking pass billing display', () => {
     method: 'CASH',
     destinationId: null,
     destinationName: null,
+    checkNumber: null,
+    checkBank: null,
+    checkDate: null,
     takenById: 'user-1',
     shiftId: null,
     billId: null,
@@ -127,6 +103,7 @@ describe('parking pass rollout', () => {
     expect(pass.autoRenew).toBe(false);
     expect(pass.openBills).toEqual([]);
     expect(pass.payments[0].billId).toBeNull();
+    expect(pass.payments[0]).toMatchObject({ checkNumber: null, checkBank: null, checkDate: null });
     expect(refundablePayments(pass).map((payment) => payment.id)).toEqual(['pay-1']);
     expect(waitingBill(pass)).toBeNull();
   });

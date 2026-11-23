@@ -58,6 +58,14 @@
     </section>
   }
 
+  <app-segmented-control
+    class="self-start"
+    [options]="scopes"
+    [value]="scope()"
+    ariaLabel="Current or archived tenants"
+    (valueChange)="setScope($event)"
+  />
+
   <app-nl-filter-bar
     grid="residents"
     placeholder="Try: tenants in Mabini with unpaid water bills over ₱1,000"
@@ -82,7 +90,13 @@
       </button>
     </div>
   } @else if (items().length === 0) {
-    @if (isFiltered()) {
+    @if (scope() === 'archived') {
+      <app-empty-state
+        icon="inbox"
+        heading="No archived tenants"
+        description="Tenants you archive show here, and a manager can restore them."
+      />
+    } @else if (isFiltered()) {
       <app-empty-state
         icon="search"
         heading="No tenants match"
@@ -122,12 +136,17 @@
               (animationend)="flashId.set(null)"
             >
               <td class="px-4 py-3">
-                <a
-                  [routerLink]="['/residents', resident.id]"
-                  class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
-                >
-                  {{ resident.firstName }} {{ resident.lastName }}
-                </a>
+                @if (scope() === 'archived') {
+                  <!-- An archived profile does not open until it is restored. -->
+                  <span class="text-[13.5px] font-medium text-heading">{{ resident.firstName }} {{ resident.lastName }}</span>
+                } @else {
+                  <a
+                    [routerLink]="['/residents', resident.id]"
+                    class="rounded-[2px] text-[13.5px] font-medium text-heading hover:text-primary hover:underline"
+                  >
+                    {{ resident.firstName }} {{ resident.lastName }}
+                  </a>
+                }
               </td>
               <td class="px-4 py-3 text-[13px] text-body">{{ resident.contactNo }}</td>
               <td class="hidden px-4 py-3 text-[13px] text-body md:table-cell">{{ resident.email ?? '-' }}</td>
@@ -146,7 +165,19 @@
               </td>
               <td class="hidden px-4 py-3 text-[13px] text-muted lg:table-cell">{{ resident.createdAt | date: 'MMM d, y' }}</td>
               <td class="px-4 py-3">
-                @if (canManage()) {
+                @if (canManage() && scope() === 'archived') {
+                  <div class="flex items-center justify-end">
+                    <button
+                      type="button"
+                      class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                      [attr.aria-label]="'Restore ' + resident.firstName + ' ' + resident.lastName"
+                      (click)="confirmRestore(resident)"
+                    >
+                      <svg pIcon="undo" [size]="12" aria-hidden="true"></svg>
+                      <span>Restore</span>
+                    </button>
+                  </div>
+                } @else if (canManage()) {
                   <div class="flex items-center justify-end gap-1">
                     <button
                       type="button"

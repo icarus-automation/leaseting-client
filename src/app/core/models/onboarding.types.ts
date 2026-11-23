@@ -1,11 +1,13 @@
 import type { ChargeLine } from './charge-item.types';
 import type { PaymentMethodPayload } from './payment-method.types';
+import type { OnboardingPrivacy } from './privacy.types';
 
 export type OnboardingStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export type OnboardingStepKey =
   | 'overview'
   | 'resident'
+  | 'consent'
   | 'requirements'
   | 'lease-terms'
   | 'deposit'
@@ -16,6 +18,7 @@ export type OnboardingStepKey =
 export const ONBOARDING_STEP_ORDER: OnboardingStepKey[] = [
   'overview',
   'resident',
+  'consent',
   'requirements',
   'lease-terms',
   'deposit',
@@ -27,6 +30,7 @@ export const ONBOARDING_STEP_ORDER: OnboardingStepKey[] = [
 export const ONBOARDING_STEP_LABELS: Record<OnboardingStepKey, string> = {
   overview: 'Overview',
   resident: 'Tenant',
+  consent: 'Consent',
   requirements: 'Requirements',
   'lease-terms': 'Lease terms',
   deposit: 'Deposit',
@@ -43,6 +47,12 @@ export interface OverviewStepData {
 
 export interface ResidentStepData {
   residentId: string;
+}
+
+/** The staff member's attestation. Saving it records the tenant's consent to that notice version. */
+export interface ConsentStepData {
+  attested: boolean;
+  noticeVersionId: string;
 }
 
 export interface RequirementsStepData {
@@ -92,6 +102,7 @@ export interface TurnoverStepData {
 export type OnboardingStepData =
   | OverviewStepData
   | ResidentStepData
+  | ConsentStepData
   | RequirementsStepData
   | LeaseTermsStepData
   | DepositStepData
@@ -119,4 +130,6 @@ export interface OnboardingListItem {
 
 export interface OnboardingDetail extends OnboardingListItem {
   stepsState: Partial<Record<OnboardingStepKey, OnboardingStepEntry>>;
+  /** The notice the consent step links, and the consent recorded here for the current tenant. */
+  privacy: OnboardingPrivacy;
 }

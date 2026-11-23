@@ -69,7 +69,10 @@ export type AuditAction =
   | 'LATE_FEE_RULE_UPDATED'
   | 'PROPERTY_TYPE_CREATED'
   | 'PROPERTY_TYPE_EDITED'
-  | 'PROPERTY_TYPE_ARCHIVED';
+  | 'PROPERTY_TYPE_ARCHIVED'
+  | 'RESIDENT_RESTORED'
+  | 'PRIVACY_NOTICE_PUBLISHED'
+  | 'PRIVACY_CONSENT_RECORDED';
 
 export type AuditTargetType =
   | 'MEMBER'
@@ -91,7 +94,9 @@ export type AuditTargetType =
   | 'CHARGE_ITEM'
   | 'RATE_PLAN'
   | 'LATE_FEE_RULE'
-  | 'PROPERTY_TYPE';
+  | 'PROPERTY_TYPE'
+  | 'PRIVACY_NOTICE'
+  | 'PRIVACY_CONSENT';
 
 export interface AuditEvent {
   id: string;

@@ -132,6 +132,14 @@
                 (back)="goBack()"
               />
             }
+            @case ('consent') {
+              <app-step-consent
+                [detail]="onboarding"
+                [busy]="saving()"
+                (next)="saveStep('consent', $event)"
+                (back)="goBack()"
+              />
+            }
             @case ('requirements') {
               <app-step-requirements
                 [detail]="onboarding"

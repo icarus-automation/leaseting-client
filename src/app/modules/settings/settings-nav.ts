@@ -25,6 +25,13 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
         route: 'organization',
         permission: 'organization:view',
       },
+      {
+        label: 'Privacy notice',
+        description: 'What you collect from tenants and why. Tenants agree to it at move-in and in Residence Care.',
+        icon: 'lock',
+        route: 'privacy-notice',
+        permission: 'organization:view',
+      },
     ],
   },
   {

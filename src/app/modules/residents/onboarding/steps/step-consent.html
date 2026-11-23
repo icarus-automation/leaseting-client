@@ -1,0 +1,87 @@
+<div class="flex flex-col gap-4">
+  <p class="m-0 text-[13.5px] leading-relaxed text-body">
+    Before you collect the tenant's ID and documents, go over the privacy notice with them and have them sign the
+    printed consent form. Consent is separate from the lease.
+  </p>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 rounded-base border border-border bg-surface px-4 py-3">
+    <div class="flex min-w-0 items-center gap-3">
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-background text-muted">
+        <svg pIcon="lock" [size]="15" aria-hidden="true"></svg>
+      </span>
+      <span class="flex min-w-0 flex-col">
+        <span class="text-[13.5px] font-medium text-heading">Privacy notice · Version {{ notice().version }}</span>
+        <span class="text-[12px] text-muted">Published {{ notice().publishedAt | date: 'MMM d, y' }}</span>
+      </span>
+    </div>
+    <a
+      [href]="notice().publicUrl"
+      target="_blank"
+      rel="noopener"
+      class="inline-flex h-8 items-center gap-1.5 rounded-base border border-border bg-background px-3 text-[12.5px] font-medium text-body no-underline transition-colors duration-150 ease-out hover:bg-surface-hover motion-reduce:transition-none"
+    >
+      <svg pIcon="external-link" [size]="12" aria-hidden="true"></svg>
+      <span>Open notice</span>
+      <span class="sr-only">(opens in a new tab)</span>
+    </a>
+  </div>
+
+  @if (recorded(); as consent) {
+    @if (recordedOnCurrent()) {
+      <div
+        class="flex items-start gap-2.5 rounded-base border border-[color-mix(in_oklab,var(--success)_30%,transparent)] bg-muted-success px-3.5 py-3 text-[13px] text-body"
+        role="status"
+      >
+        <svg pIcon="check-circle" class="mt-0.5 shrink-0 text-success" [size]="15" aria-hidden="true"></svg>
+        <span>
+          Consent to version {{ consent.noticeVersion }} recorded {{ consent.recordedAt | date: 'MMM d, y, h:mm a' }}
+          by {{ recorderName() }}.
+        </span>
+      </div>
+    } @else {
+      <div
+        class="flex items-start gap-2.5 rounded-base border border-[color-mix(in_oklab,var(--warning)_35%,transparent)] bg-muted-warning px-3.5 py-3 text-[13px] text-body"
+        role="status"
+      >
+        <svg pIcon="exclamation-triangle" class="mt-0.5 shrink-0 text-warning" [size]="15" aria-hidden="true"></svg>
+        <span>
+          Consent was recorded for version {{ consent.noticeVersion }}. Version {{ notice().version }} came out since:
+          go over it with the tenant and confirm again.
+        </span>
+      </div>
+    }
+  }
+
+  @if (!recordedOnCurrent()) {
+    <label class="flex cursor-pointer items-start gap-2.5 rounded-base border border-border px-3.5 py-3">
+      <input type="checkbox" class="mt-0.5 accent-primary" [checked]="attested()" (change)="toggle($event)" />
+      <span class="text-[13.5px] font-medium text-heading">{{ attestation }}</span>
+    </label>
+  }
+
+  <div class="flex items-center justify-between border-t border-border pt-4">
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="back.emit()"
+    >
+      <svg pIcon="arrow-left" [size]="12" aria-hidden="true"></svg>
+      <span>Back</span>
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="!canContinue() || busy()"
+      [title]="canContinue() ? '' : 'Confirm the signed consent form first'"
+      (click)="submit()"
+    >
+      @if (busy()) {
+        <p-progress-spinner class="m-0 h-3.5 w-3.5 text-primary-foreground" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
+        <span>Recording…</span>
+      } @else {
+        <span>Continue to requirements</span>
+        <svg pIcon="arrow-right" [size]="12" aria-hidden="true"></svg>
+      }
+    </button>
+  </div>
+</div>

@@ -49,6 +49,26 @@
     }
   </header>
 
+  @if (noticeNeedsReview()) {
+    <div
+      class="flex flex-wrap items-center gap-3 rounded-base border border-[color-mix(in_oklab,var(--warning)_35%,transparent)] bg-muted-warning px-4 py-3"
+      role="status"
+    >
+      <svg pIcon="exclamation-triangle" class="shrink-0 text-warning" [size]="16" aria-hidden="true"></svg>
+      <p class="m-0 min-w-0 flex-1 basis-64 text-[13px] leading-relaxed text-body">
+        <span class="font-semibold text-heading">Review your privacy notice.</span>
+        Tenants agree to the starter notice Leaseting wrote until you publish your own.
+      </p>
+      <a
+        routerLink="/settings/privacy-notice"
+        class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-base border border-border bg-background px-3 text-[12.5px] font-medium text-body no-underline transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      >
+        <span>Review notice</span>
+        <svg pIcon="arrow-right" [size]="11" aria-hidden="true"></svg>
+      </a>
+    </div>
+  }
+
   @if (canSeeOverview()) {
     <section class="flex flex-col gap-4" aria-labelledby="property-management-overview">
       <div>

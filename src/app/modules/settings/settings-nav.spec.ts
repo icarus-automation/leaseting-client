@@ -2,9 +2,12 @@ import type { Permission } from '../../core/auth/permissions';
 import { SETTINGS_GROUPS, settingsSetupSteps, visibleSettingsGroups } from './settings-nav';
 
 describe('SETTINGS_GROUPS general', () => {
-  it('lists organization as a live card', () => {
+  it('lists organization and the privacy notice as live cards', () => {
     const general = SETTINGS_GROUPS.find((group) => group.label === 'General');
-    expect(general?.cards.map((card) => card.route)).toEqual(['organization']);
+    expect(general?.cards.map((card) => [card.route, card.permission])).toEqual([
+      ['organization', 'organization:view'],
+      ['privacy-notice', 'organization:view'],
+    ]);
     expect(general?.cards.every((card) => !card.comingSoon)).toBe(true);
   });
 });

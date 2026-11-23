@@ -9,6 +9,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import type { BillListItem } from '../../core/models/bill.types';
 import type { LeaseListItem } from '../../core/models/lease.types';
 import type { PropertyListItem } from '../../core/models/property.types';
+import { PrivacyNoticeService } from '../../core/privacy/privacy-notice.service';
 import { PhpCurrencyPipe } from '../../shared/pipes/php-currency-pipe';
 import { KitCard } from '../../shared/ui/kit/kit-card';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
@@ -30,6 +31,7 @@ export class Home {
   private readonly leases = inject(LeasesService);
   private readonly bills = inject(BillsService);
   private readonly auth = inject(AuthService);
+  private readonly privacyNotice = inject(PrivacyNoticeService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly canUseKit = computed(() => this.auth.can('kit:use'));
@@ -46,6 +48,10 @@ export class Home {
     const firstName = this.auth.currentUser()?.name?.trim().split(/\s+/)[0];
     return firstName ? `Welcome, ${firstName}` : 'Welcome';
   });
+
+  /** Whoever can publish the notice is asked to review the starter until someone does. */
+  readonly canPublishNotice = computed(() => this.auth.can('organization:update'));
+  readonly noticeNeedsReview = signal(false);
 
   readonly loading = signal(true);
   readonly propertyItems = signal<PropertyListItem[]>([]);
@@ -112,6 +118,19 @@ export class Home {
 
   constructor() {
     this.load();
+    this.checkPrivacyNotice();
+  }
+
+  private checkPrivacyNotice(): void {
+    if (!this.canPublishNotice()) return;
+    this.privacyNotice
+      .get()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (notice) => this.noticeNeedsReview.set(notice.needsReview),
+        // The dashboard works without it; Settings shows the notice and any error.
+        error: () => this.noticeNeedsReview.set(false),
+      });
   }
 
   load(): void {

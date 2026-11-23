@@ -6,6 +6,7 @@ import { SETTINGS_ROUTES } from './settings.routes';
 
 const COLUMN_PAGES = [
   'organization',
+  'privacy-notice',
   'property-types',
   'charge-items',
   'late-fees',

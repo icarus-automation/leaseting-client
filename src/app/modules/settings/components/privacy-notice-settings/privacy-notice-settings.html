@@ -1,0 +1,207 @@
+<section class="flex flex-col gap-4" aria-label="Privacy notice">
+  @if (loadError(); as message) {
+    <app-error-banner [message]="message" [retryable]="true" (retry)="load()" />
+  } @else if (notice(); as current) {
+    @if (current.needsReview) {
+      <div
+        class="flex items-start gap-3 rounded-base border border-[color-mix(in_oklab,var(--warning)_35%,transparent)] bg-muted-warning px-4 py-3"
+        role="status"
+      >
+        <svg pIcon="exclamation-triangle" class="mt-0.5 shrink-0 text-warning" [size]="16" aria-hidden="true"></svg>
+        <div class="flex min-w-0 flex-col gap-1">
+          <p class="m-0 font-heading text-[14px] font-semibold text-heading">Review your privacy notice</p>
+          <p class="m-0 text-[13px] leading-relaxed text-body">
+            Leaseting published a starter notice so tenants can agree to it from day one. Read it, change what does not
+            match how you work, such as who tenants contact, and publish it as your own.
+            @if (!canEdit()) {
+              Ask an owner or an admin to do this.
+            }
+          </p>
+        </div>
+      </div>
+    }
+
+    <div class="flex flex-col gap-3 rounded-base border border-border bg-background px-4 py-4">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <h2 class="m-0 font-heading text-[15px] font-semibold text-heading">Version {{ current.current.version }}</h2>
+        @if (current.current.isStarter) {
+          <app-status-badge tone="warning" label="Starter, not reviewed" />
+        } @else {
+          <app-status-badge tone="success" label="Current" />
+        }
+        <span class="text-[12.5px] text-muted">
+          Published {{ current.current.publishedAt | date: 'MMM d, y, h:mm a' }} by {{ publisherName(current.current) }}
+        </span>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted" id="privacy-public-link">
+          Public link
+        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            readonly
+            [value]="current.publicUrl"
+            aria-labelledby="privacy-public-link"
+            class="h-9 min-w-0 flex-1 basis-60 rounded-base border border-border bg-surface px-2.5 text-[12.5px] text-body outline-none focus:border-primary focus:ring-[3px] focus:ring-ring"
+          />
+          <button
+            type="button"
+            class="inline-flex h-9 items-center gap-1.5 rounded-base border border-border bg-background px-3 text-[12.5px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+            (click)="copyLink(current.publicUrl)"
+          >
+            <svg pIcon="copy" [size]="12" aria-hidden="true"></svg>
+            <span>Copy</span>
+          </button>
+          <a
+            [href]="current.publicUrl"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex h-9 items-center gap-1.5 rounded-base border border-border bg-background px-3 text-[12.5px] font-medium text-body no-underline transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+          >
+            <svg pIcon="external-link" [size]="12" aria-hidden="true"></svg>
+            <span>Open</span>
+            <span class="sr-only">(opens in a new tab)</span>
+          </a>
+        </div>
+        <span class="text-[12.5px] leading-relaxed text-muted">
+          Anyone can open it without signing in. It always shows the current version, so print it with the consent
+          form or share it with applicants.
+        </span>
+      </div>
+    </div>
+
+    @if (canEdit()) {
+      <div class="flex flex-col gap-3 rounded-base border border-border bg-background px-4 py-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="m-0 font-heading text-[15px] font-semibold text-heading">Edit the notice</h2>
+          <app-segmented-control
+            [options]="modes"
+            [value]="mode()"
+            ariaLabel="Edit or preview the notice"
+            (valueChange)="mode.set($event)"
+          />
+        </div>
+
+        @if (mode() === 'edit') {
+          <label class="flex flex-col gap-1.5">
+            <span class="sr-only">Privacy notice text</span>
+            <textarea
+              [formControl]="body"
+              rows="18"
+              spellcheck="true"
+              class="min-h-64 w-full resize-y rounded-base border border-border bg-background px-3 py-2.5 text-[13px] leading-relaxed text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+              aria-describedby="privacy-format-hint"
+            ></textarea>
+          </label>
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <p id="privacy-format-hint" class="m-0 text-[12.5px] leading-relaxed text-muted">
+              Start a line with <code class="rounded-[2px] bg-surface px-1">##</code> for a heading and
+              <code class="rounded-[2px] bg-surface px-1">-</code> for a list item. Leave a blank line between
+              paragraphs.
+            </p>
+            <span
+              class="text-[12px] tabular-nums"
+              [class]="draftLength() > limits.max ? 'text-destructive' : 'text-muted'"
+            >
+              {{ draftLength() | number }} / {{ limits.max | number }}
+            </span>
+          </div>
+        } @else {
+          <div class="rounded-base border border-border bg-surface px-4 py-4">
+            <app-notice-body [body]="draft()" />
+          </div>
+        }
+
+        <div class="flex flex-col gap-2 border-t border-border pt-3">
+          <p class="m-0 text-[12.5px] leading-relaxed text-muted">
+            Publishing saves this as version {{ nextVersion() }}. Residence Care asks every tenant to agree to it the
+            next time they open the app, and earlier versions stay readable below.
+          </p>
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+              [disabled]="publishing() || draftProblem() !== null"
+              [title]="draftProblem() ?? ''"
+              (click)="confirmPublish()"
+            >
+              @if (publishing()) {
+                <p-progress-spinner class="m-0 h-3 w-3 text-primary-foreground" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
+              }
+              <span>Publish version {{ nextVersion() }}</span>
+            </button>
+            @if (publishError(); as message) {
+              <p class="m-0 text-[12.5px] text-destructive animate-error-in motion-reduce:animate-none" role="alert">
+                {{ message }}
+              </p>
+            } @else if (draftProblem(); as problem) {
+              <p class="m-0 text-[12.5px] text-muted">{{ problem }}</p>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <article class="rounded-base border border-border bg-background px-4 py-4" aria-label="Current notice">
+        <app-notice-body [body]="current.current.body" />
+        <p class="mb-0 mt-4 border-t border-border pt-3 text-[12.5px] text-muted">
+          Only owners and admins can publish a new version.
+        </p>
+      </article>
+    }
+
+    <section class="flex flex-col gap-2" aria-labelledby="privacy-versions-heading">
+      <h2 id="privacy-versions-heading" class="m-0 font-heading text-[15px] font-semibold text-heading">
+        Versions
+      </h2>
+      <ul class="m-0 flex list-none flex-col divide-y divide-border rounded-base border border-border bg-background p-0">
+        @for (version of current.versions; track version.id) {
+          <li class="flex flex-col">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
+              <span class="font-heading text-[13.5px] font-semibold text-heading">Version {{ version.version }}</span>
+              @if (version.version === current.current.version) {
+                <app-status-badge tone="success" label="Current" />
+              }
+              @if (version.isStarter) {
+                <span class="text-[12px] text-muted">Starter</span>
+              }
+              <span class="min-w-0 flex-1 text-[12.5px] text-muted">
+                {{ version.publishedAt | date: 'MMM d, y' }} · {{ publisherName(version) }}
+              </span>
+              <button
+                type="button"
+                class="inline-flex h-7 items-center gap-1.5 rounded-base border border-border bg-background px-2.5 text-[12px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+                [attr.aria-expanded]="openVersion()?.version === version.version"
+                [attr.aria-controls]="'privacy-version-' + version.version"
+                (click)="toggleVersion(version)"
+              >
+                {{ openVersion()?.version === version.version ? 'Hide' : 'Read' }}
+                <span class="sr-only">version {{ version.version }}</span>
+              </button>
+            </div>
+            @if (openVersion(); as open) {
+              @if (open.version === version.version) {
+                <div [id]="'privacy-version-' + version.version" class="border-t border-border bg-surface px-4 py-4">
+                  @switch (open.kind) {
+                    @case ('loading') {
+                      <app-skeleton variant="panel" />
+                    }
+                    @case ('error') {
+                      <p class="m-0 text-[13px] text-destructive" role="alert">{{ open.message }}</p>
+                    }
+                    @case ('ready') {
+                      <app-notice-body [body]="open.detail.body" />
+                    }
+                  }
+                </div>
+              }
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  } @else {
+    <app-skeleton variant="panel" />
+  }
+</section>

@@ -22,6 +22,7 @@ import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge, BadgeTone } from '../../../../shared/ui/status-badge/status-badge';
 import { isPastDue, ordinal } from '../../../../shared/utils/date.util';
 import { isLeaseActive, leaseStatus } from '../../../../shared/utils/lease-status.util';
+import { ResidentConsentPanel } from '../../components/resident-consent-panel/resident-consent-panel';
 import { ResidentFormDialog } from '../../components/resident-form-dialog/resident-form-dialog';
 import { ResidentRiskPanel } from '../../components/resident-risk-panel/resident-risk-panel';
 import { ResidentsService } from '../../services/residents.service';
@@ -47,6 +48,7 @@ const ACCEPTED_DOCUMENT_TYPES = 'application/pdf,image/png,image/jpeg,image/webp
     StatusBadge,
     ResidentFormDialog,
     ResidentRiskPanel,
+    ResidentConsentPanel,
   ],
   templateUrl: './resident-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

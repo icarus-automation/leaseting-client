@@ -31,6 +31,7 @@ import { Skeleton } from '../../../shared/ui/skeleton/skeleton';
 import { Stepper, type StepperStep } from '../../../shared/ui/stepper/stepper';
 import { leaseTermLabel } from '../../../shared/utils/date.util';
 import { OnboardingsService } from '../services/onboardings.service';
+import { StepConsent } from './steps/step-consent';
 import { StepContract } from './steps/step-contract';
 import { StepDeposit } from './steps/step-deposit';
 import { StepLeaseTerms } from './steps/step-lease-terms';
@@ -51,6 +52,7 @@ import { StepTurnover } from './steps/step-turnover';
     Stepper,
     StepOverview,
     StepResident,
+    StepConsent,
     StepRequirements,
     StepLeaseTerms,
     StepDeposit,

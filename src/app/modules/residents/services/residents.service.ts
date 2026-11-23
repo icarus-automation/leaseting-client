@@ -13,6 +13,7 @@ import type {
   ResidentResponse,
   UpdateResidentPayload,
 } from '../../../core/models/resident.types';
+import type { ResidentPrivacyConsents } from '../../../core/models/privacy.types';
 import type { ResidentRiskProfile } from '../../../core/models/risk.types';
 import { toHttpParams } from '../../../shared/utils/http-params.util';
 
@@ -49,6 +50,16 @@ export class ResidentsService {
 
   archive(id: string): Observable<ResidentResponse> {
     return this.http.delete<ResidentResponse>(`${this.base}/${id}`);
+  }
+
+  /** Brings an archived tenant back to the list. */
+  restore(id: string): Observable<ResidentResponse> {
+    return this.http.post<ResidentResponse>(`${this.base}/${id}/restore`, {});
+  }
+
+  /** Every consent to the privacy notice on record, and whether the current version is accepted. */
+  privacyConsents(id: string): Observable<ResidentPrivacyConsents> {
+    return this.http.get<ResidentPrivacyConsents>(`${this.base}/${id}/privacy-consents`);
   }
 
   uploadDocument(residentId: string, file: File, label?: string): Observable<ResidentDocumentItem> {

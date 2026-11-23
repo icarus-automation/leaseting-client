@@ -16,6 +16,12 @@ export const routes: Routes = [
       import('./modules/auth/invite.routes').then(m => m.INVITE_ROUTES),
   },
   {
+    // Public: an organization's privacy notice, at the stable link Settings shares.
+    path: 'privacy',
+    loadChildren: () =>
+      import('./modules/privacy/privacy.routes').then(m => m.PRIVACY_ROUTES),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>

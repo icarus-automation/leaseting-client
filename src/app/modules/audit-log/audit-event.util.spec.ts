@@ -1,5 +1,5 @@
 import type { AuditEvent } from '../../core/models/audit-event.types';
-import { auditActionLabel, describeAuditEvent, targetName } from './audit-event.util';
+import { AUDIT_AREA_ACTIONS, auditActionLabel, describeAuditEvent, targetName } from './audit-event.util';
 
 function event(overrides: Partial<AuditEvent>): AuditEvent {
   return {
@@ -89,6 +89,48 @@ describe('describeAuditEvent', () => {
         }),
       ),
     ).toBe('Edited the role Leasing agent: name, permissions');
+  });
+
+  it('reads a published privacy notice by its version', () => {
+    expect(
+      describeAuditEvent(
+        event({
+          action: 'PRIVACY_NOTICE_PUBLISHED',
+          area: 'settings',
+          target: { type: 'PRIVACY_NOTICE', id: 'n-2', label: 'Privacy notice v2' },
+          before: { version: 1 },
+          after: { version: 2 },
+        }),
+      ),
+    ).toBe('Published privacy notice v2');
+  });
+
+  it('tells a staff attestation from a tenant agreeing in Residence Care', () => {
+    const consent = (source: string) =>
+      event({
+        action: 'PRIVACY_CONSENT_RECORDED',
+        area: 'tenants',
+        target: { type: 'PRIVACY_CONSENT', id: 'c-1', label: 'Maria Santos' },
+        after: { noticeVersion: 2, source },
+      });
+
+    expect(describeAuditEvent(consent('Signed consent form'))).toBe(
+      "Recorded Maria Santos's signed consent to privacy notice v2",
+    );
+    expect(describeAuditEvent(consent('Residence Care'))).toBe('Maria Santos agreed to privacy notice v2 in Residence Care');
+  });
+
+  it('reads a restored tenant', () => {
+    expect(
+      describeAuditEvent(
+        event({ action: 'RESIDENT_RESTORED', target: { type: 'RESIDENT', id: 'r-1', label: 'Lauren Tan' } }),
+      ),
+    ).toBe('Restored Lauren Tan');
+  });
+
+  it('files privacy events under tenants and settings', () => {
+    expect(AUDIT_AREA_ACTIONS.tenants).toEqual(expect.arrayContaining(['RESIDENT_RESTORED', 'PRIVACY_CONSENT_RECORDED']));
+    expect(AUDIT_AREA_ACTIONS.settings).toContain('PRIVACY_NOTICE_PUBLISHED');
   });
 
   it('falls back to a readable label for an action this client does not know', () => {

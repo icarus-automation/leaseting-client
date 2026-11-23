@@ -15,7 +15,11 @@ function onboarding(deposit?: DepositStepData): OnboardingDetail {
     status: 'IN_PROGRESS',
     currentStepKey: 'deposit',
     completedSteps: ['overview', 'resident', 'requirements', 'lease-terms'],
-    totalSteps: 8,
+    totalSteps: 9,
+    privacy: {
+      notice: { id: 'notice-2', version: 2, publishedAt: '2026-11-03T03:00:00.000Z', publicUrl: 'http://localhost:4200/privacy/org' },
+      consent: null,
+    },
     resident: { id: 'resident-1', firstName: 'Ada', lastName: 'Lovelace' },
     unit: { id: 'unit-1', unitNo: '103', property: { id: 'prop-1', name: 'Brickstone' } },
     leaseId: null,

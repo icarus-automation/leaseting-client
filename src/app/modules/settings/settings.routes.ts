@@ -12,6 +12,12 @@ export const SETTINGS_ROUTES: Routes = [
       import('./pages/organization-settings/organization-settings').then(m => m.OrganizationSettingsPage),
   },
   {
+    path: 'privacy-notice',
+    canActivate: [permissionGuard('organization:view')],
+    loadComponent: () =>
+      import('./pages/privacy-notice-settings/privacy-notice-settings').then(m => m.PrivacyNoticeSettingsPage),
+  },
+  {
     path: 'users',
     canActivate: [permissionGuard('members:view')],
     loadComponent: () => import('./pages/users-settings/users-settings').then(m => m.UsersSettingsPage),

@@ -25,6 +25,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   RESIDENT_CREATED: 'Tenant created',
   RESIDENT_EDITED: 'Tenant edited',
   RESIDENT_ARCHIVED: 'Tenant archived',
+  RESIDENT_RESTORED: 'Tenant restored',
   RESIDENT_ACCESS_CHANGED: 'Residence Care access changed',
   RESIDENT_DOCUMENT_UPLOADED: 'Document uploaded',
   RESIDENT_DOCUMENT_VIEWED: 'Document viewed',
@@ -61,6 +62,8 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   PROPERTY_TYPE_CREATED: 'Property type created',
   PROPERTY_TYPE_EDITED: 'Property type edited',
   PROPERTY_TYPE_ARCHIVED: 'Property type archived',
+  PRIVACY_NOTICE_PUBLISHED: 'Privacy notice published',
+  PRIVACY_CONSENT_RECORDED: 'Privacy consent recorded',
 };
 
 export const AUDIT_AREAS: readonly AuditArea[] = [
@@ -112,7 +115,14 @@ export const AUDIT_AREA_ACTIONS: Record<AuditArea, readonly AuditAction[]> = {
     'ROLE_DELETED',
   ],
   parking: ['PARKING_PASS_PLATE_CHANGED', 'PARKING_PASS_ENDED', 'PARKING_PASS_REFUNDED'],
-  tenants: ['RESIDENT_CREATED', 'RESIDENT_EDITED', 'RESIDENT_ARCHIVED', 'RESIDENT_ACCESS_CHANGED'],
+  tenants: [
+    'RESIDENT_CREATED',
+    'RESIDENT_EDITED',
+    'RESIDENT_ARCHIVED',
+    'RESIDENT_RESTORED',
+    'RESIDENT_ACCESS_CHANGED',
+    'PRIVACY_CONSENT_RECORDED',
+  ],
   documents: [
     'RESIDENT_DOCUMENT_UPLOADED',
     'RESIDENT_DOCUMENT_VIEWED',
@@ -144,6 +154,7 @@ export const AUDIT_AREA_ACTIONS: Record<AuditArea, readonly AuditAction[]> = {
     'PROPERTY_TYPE_CREATED',
     'PROPERTY_TYPE_EDITED',
     'PROPERTY_TYPE_ARCHIVED',
+    'PRIVACY_NOTICE_PUBLISHED',
   ],
 };
 
@@ -257,6 +268,19 @@ export function describeAuditEvent(event: AuditEvent): string {
       const reason = text(after, 'reason');
       const money = amount ? formatPhp(amount) : 'a payment';
       return reason ? `Refunded ${money} on ${target}. ${reason}` : `Refunded ${money} on ${target}`;
+    }
+    case 'RESIDENT_RESTORED':
+      return `Restored ${target}`;
+    case 'PRIVACY_NOTICE_PUBLISHED': {
+      const version = after?.['version'];
+      return typeof version === 'number' ? `Published privacy notice v${version}` : 'Published the privacy notice';
+    }
+    case 'PRIVACY_CONSENT_RECORDED': {
+      const version = after?.['noticeVersion'];
+      const notice = typeof version === 'number' ? `privacy notice v${version}` : 'the privacy notice';
+      return text(after, 'source') === 'Residence Care'
+        ? `${target} agreed to ${notice} in Residence Care`
+        : `Recorded ${target}'s signed consent to ${notice}`;
     }
     default:
       return `${auditActionLabel(event.action)}: ${target}`;

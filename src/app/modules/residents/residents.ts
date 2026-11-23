@@ -17,12 +17,15 @@ import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { NlFilterBar } from '../../shared/ui/nl-filter-bar/nl-filter-bar';
 import { Pagination } from '../../shared/ui/pagination/pagination';
+import { SegmentedControl, type SegmentedOption } from '../../shared/ui/segmented-control/segmented-control';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { BadgeTone, StatusBadge } from '../../shared/ui/status-badge/status-badge';
 import { watchCreateParam } from '../../shared/utils/create-param.util';
 import { ResidentFormDialog } from './components/resident-form-dialog/resident-form-dialog';
 import { OnboardingsService } from './services/onboardings.service';
 import { ResidentsService } from './services/residents.service';
+
+type ResidentListScope = 'active' | 'archived';
 
 @Component({
   selector: 'app-residents',
@@ -34,6 +37,7 @@ import { ResidentsService } from './services/residents.service';
     EmptyState,
     NlFilterBar,
     Pagination,
+    SegmentedControl,
     Skeleton,
     StatusBadge,
     ResidentFormDialog,
@@ -59,6 +63,13 @@ export class Residents {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly flashId = signal<string | null>(null);
+
+  /** Current tenants, or the archived ones a manager can restore. */
+  readonly scope = signal<ResidentListScope>('active');
+  readonly scopes: readonly SegmentedOption<ResidentListScope>[] = [
+    { value: 'active', label: 'Current' },
+    { value: 'archived', label: 'Archived' },
+  ];
 
   readonly filters = signal<GridFilters>({});
   readonly isFiltered = computed(() => Object.keys(this.filters()).length > 0);
@@ -144,6 +155,12 @@ export class Residents {
       });
   }
 
+  setScope(scope: ResidentListScope): void {
+    if (scope === this.scope()) return;
+    this.scope.set(scope);
+    this.load(1);
+  }
+
   onFiltersChange(filters: GridFilters): void {
     this.filters.set(filters);
     this.load(1);
@@ -158,7 +175,7 @@ export class Residents {
     this.loading.set(true);
     this.error.set(null);
     this.residents
-      .list({ ...(this.filters() as ResidentListFilters), page, limit: 10 })
+      .list({ ...(this.filters() as ResidentListFilters), scope: this.scope(), page, limit: 10 })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -186,6 +203,33 @@ export class Residents {
     });
     this.flashId.set(resident.id);
     this.load(this.meta()?.page ?? 1);
+  }
+
+  confirmRestore(resident: ResidentResponse): void {
+    const name = `${resident.firstName} ${resident.lastName}`;
+    this.confirm.proceed({
+      header: 'Restore tenant',
+      message: `Restore ${name}? They come back to the current tenant list with their history.`,
+      acceptLabel: 'Restore',
+      onAccept: () => {
+        this.residents
+          .restore(resident.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.toast.add({ severity: 'success', summary: 'Tenant restored', detail: name });
+              this.load(this.meta()?.page ?? 1);
+            },
+            error: (error: unknown) => {
+              this.toast.add({
+                severity: 'error',
+                summary: 'Cannot restore',
+                detail: apiErrorMessage(error, 'Try again.'),
+              });
+            },
+          });
+      },
+    });
   }
 
   confirmArchive(resident: ResidentResponse): void {

@@ -24,8 +24,11 @@ import { ConfirmService } from '../../shared/ui/confirm/confirm.service';
 import { KitHead } from '../../shared/ui/kit/kit-head';
 import { KitDocumentCard } from './components/kit-document-card/kit-document-card';
 import { KitMarkdown } from './components/kit-markdown/kit-markdown';
+import { KitComposer } from './components/kit-composer/kit-composer';
 import type { KitChatMessage, KitConversationSummary, KitDocumentTurn } from './kit-chat.types';
-import { splitCommand, toMessageView } from './kit-command.util';
+import { splitCommand } from './kit-command.util';
+import { type DraftMention, type KitTextSegment, serializeDraft, trimDraft } from './kit-mention.util';
+import { toMessageView } from './kit-message-view.util';
 import type { KitStreamEvent } from './kit-stream.types';
 import { KitChatService } from './services/kit-chat.service';
 
@@ -36,12 +39,21 @@ const SUGGESTIONS = [
   'Draft a polite reminder for a tenant who is two weeks late on rent.',
 ];
 
+/** Each segment of a sent message inside its primary-coloured bubble. */
+const BUBBLE_CLASS: Record<KitTextSegment['kind'], string> = {
+  text: '',
+  command: 'rounded-[3px] bg-[color-mix(in_oklab,var(--primary-foreground)_22%,transparent)] px-1 font-semibold',
+  // A long name can wrap: clone the box so each line keeps its own rounded chip.
+  mention:
+    'rounded-[3px] bg-[color-mix(in_oklab,var(--primary-foreground)_22%,transparent)] px-1 font-semibold box-decoration-clone',
+};
+
 const POLL_INTERVAL_MS = 2_000;
 const MAX_POLLS = 110;
 
 @Component({
   selector: 'app-kit-chat',
-  imports: [ProgressSpinner, DatePipe, RouterLink, PIcon, KitHead, KitDocumentCard, KitMarkdown],
+  imports: [ProgressSpinner, DatePipe, RouterLink, PIcon, KitHead, KitDocumentCard, KitMarkdown, KitComposer],
   templateUrl: './kit-chat.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -54,7 +66,7 @@ export class KitChat {
   private readonly confirm = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly transcript = viewChild<ElementRef<HTMLDivElement>>('transcript');
-  private readonly highlight = viewChild<ElementRef<HTMLDivElement>>('highlight');
+  private readonly composer = viewChild(KitComposer);
 
   readonly suggestions = SUGGESTIONS.map((text) => ({ text, ...splitCommand(text) }));
 
@@ -65,18 +77,14 @@ export class KitChat {
   readonly messages = signal<KitChatMessage[]>([]);
   readonly activeId = signal<string | null>(null);
   readonly draft = signal('');
+  /** The tenants picked with @ in the draft, by where their chips sit. */
+  readonly mentions = signal<DraftMention[]>([]);
   readonly pending = signal(false);
   readonly loadingThread = signal(false);
   readonly historyOpen = signal(false);
 
   readonly isBlank = computed(() => this.messages().length === 0 && !this.loadingThread());
-  readonly canSend = computed(() => this.draft().trim().length > 0 && !this.pending());
-
   readonly view = computed(() => this.messages().map(toMessageView));
-
-  readonly draftParts = computed(() => splitCommand(this.draft()));
-
-  readonly isDocumentDraft = computed(() => this.draftParts().command !== null);
 
   readonly showThinking = computed(() => {
     if (!this.pending()) return false;
@@ -137,26 +145,24 @@ export class KitChat {
       .subscribe({ next: (items) => this.conversations.set(items), error: () => undefined });
   }
 
+  bubbleClass(kind: KitTextSegment['kind']): string {
+    return BUBBLE_CLASS[kind];
+  }
+
   useSuggestion(text: string): void {
     this.draft.set(text);
-  }
-
-  syncHighlight(event: Event): void {
-    const overlay = this.highlight()?.nativeElement;
-    if (overlay) overlay.scrollTop = (event.target as HTMLTextAreaElement).scrollTop;
-  }
-
-  onKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Enter' || event.shiftKey) return;
-    event.preventDefault();
-    this.send();
+    this.mentions.set([]);
+    this.composer()?.focusEnd();
   }
 
   send(): void {
-    const content = this.draft().trim();
+    const draft = { text: this.draft(), mentions: this.mentions() };
+    const ask = serializeDraft(trimDraft(draft));
+    const content = ask.content;
     if (!content || this.pending()) return;
 
     this.draft.set('');
+    this.mentions.set([]);
     this.pending.set(true);
 
     const now = new Date().toISOString();
@@ -177,7 +183,7 @@ export class KitChat {
     this.messages.update((messages) => [...messages, user, assistant]);
 
     const id = this.activeId();
-    const stream$ = id ? this.chat.streamFollowUp(id, content) : this.chat.streamStart(content);
+    const stream$ = id ? this.chat.streamFollowUp(id, ask) : this.chat.streamStart(ask);
     this.streamSub = stream$
       .pipe(
         finalize(() => this.dropAbandonedTurn()),
@@ -185,7 +191,7 @@ export class KitChat {
       )
       .subscribe({
         next: (event) => this.applyStream(event),
-        error: (error: unknown) => this.failSend(error, content),
+        error: (error: unknown) => this.failSend(error, draft),
       });
   }
 
@@ -277,7 +283,7 @@ export class KitChat {
     }
 
     this.bindConversation(event.conversationId);
-    this.takeServerAssistant(event.message);
+    this.takeServerReplies(event.messages?.length ? event.messages : [event.message]);
     this.pending.set(false);
     this.clearInFlight();
     this.refreshHistory();
@@ -290,16 +296,24 @@ export class KitChat {
     this.location.replaceState(`/kit/${conversationId}`);
   }
 
-  private takeServerAssistant(message: KitChatMessage): void {
+  /**
+   * The first reply takes the place of the streamed one. A letter to several
+   * tenants answers with a file each, and the others follow it in order.
+   */
+  private takeServerReplies([first, ...rest]: KitChatMessage[]): void {
     const id = this.inFlightAssistantId;
-    if (!id) return;
+    if (!id || !first) return;
     const current = this.messages().find((candidate) => candidate.id === id);
     this.replaceMessage(id, {
-      ...message,
-      content: message.content || current?.content || '',
-      document: message.document ?? current?.document,
+      ...first,
+      content: first.content || current?.content || '',
+      document: first.document ?? current?.document,
     });
-    this.inFlightAssistantId = message.id;
+    this.inFlightAssistantId = first.id;
+
+    const known = new Set(this.messages().map((message) => message.id));
+    const added = rest.filter((message) => !known.has(message.id));
+    if (added.length > 0) this.messages.update((messages) => [...messages, ...added]);
   }
 
   private replaceMessage(id: string, next: KitChatMessage): void {
@@ -334,11 +348,12 @@ export class KitChat {
     this.streamSub = undefined;
   }
 
-  private failSend(error: unknown, content: string): void {
+  private failSend(error: unknown, draft: { text: string; mentions: DraftMention[] }): void {
     this.pending.set(false);
     this.dropInFlight();
     this.clearInFlight();
-    this.draft.set(content);
+    this.draft.set(draft.text);
+    this.mentions.set(draft.mentions);
     this.toast.add({
       severity: 'error',
       summary: 'Kit could not reply',

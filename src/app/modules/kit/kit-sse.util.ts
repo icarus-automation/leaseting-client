@@ -70,14 +70,17 @@ function readDone(
   }
 
   const conversation = readConversation(data['conversation']);
-  const message = readMessage(data['message']) ?? conversation?.assistant ?? null;
+  const message = readMessage(data['message']) ?? conversation?.assistants[0] ?? null;
   if (!message) return { error: 'Kit sent a reply Kit could not read.' };
 
+  // An API from before split replies sends one `message` and no `messages`.
+  const listed = readMessages(data['messages']);
+  const messages = listed.length > 0 ? listed : (conversation?.assistants ?? [message]);
   const conversationId = readId(data['conversationId']) ?? conversation?.id;
   return {
     event: conversationId
-      ? { type: 'done', status: 'complete', conversationId, message }
-      : { type: 'done', status: 'complete', message },
+      ? { type: 'done', status: 'complete', conversationId, message, messages }
+      : { type: 'done', status: 'complete', message, messages },
   };
 }
 
@@ -85,19 +88,22 @@ function readId(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
+/** A new conversation: its replies are every assistant message after the opening question. */
 function readConversation(
   value: unknown,
-): { id: string; assistant: KitChatMessage } | null {
+): { id: string; assistants: KitChatMessage[] } | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   const conversation = value as Record<string, unknown>;
   const id = readId(conversation['id']);
-  if (!id || !Array.isArray(conversation['messages'])) return null;
+  if (!id) return null;
 
-  for (let i = conversation['messages'].length - 1; i >= 0; i -= 1) {
-    const message = readMessage(conversation['messages'][i]);
-    if (message?.role === 'ASSISTANT') return { id, assistant: message };
-  }
-  return null;
+  const assistants = readMessages(conversation['messages']).filter((message) => message.role === 'ASSISTANT');
+  return assistants.length > 0 ? { id, assistants } : null;
+}
+
+function readMessages(value: unknown): KitChatMessage[] {
+  if (!Array.isArray(value)) return [];
+  return value.map(readMessage).filter((message): message is KitChatMessage => message !== null);
 }
 
 function parseJson(raw: string): unknown {

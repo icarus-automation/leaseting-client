@@ -1,0 +1,72 @@
+<!-- preventDefault first: a plain <form> with no NgForm on it does a
+     native submit and reloads the app if this ever throws. -->
+<form
+  class="flex flex-col border-t border-border px-3 py-2.5"
+  (submit)="$event.preventDefault(); canSend() && submitted.emit()"
+>
+  @if (isDocumentDraft()) {
+    <p class="mb-1.5 flex items-start gap-1.5 text-[12px] text-primary" aria-live="polite">
+      <svg pIcon="file-export" [size]="11" class="mt-[3px] shrink-0" aria-hidden="true"></svg>
+      <span>
+        Lists come back as a spreadsheet, letters and notices as a PDF. Add “as a PDF” or “as a spreadsheet” to override.
+      </span>
+    </p>
+  }
+  <div class="flex items-end gap-2">
+    <label class="sr-only" for="kit-question">Your question</label>
+    <!-- The field and a styled copy of its text share one box: a textarea
+         cannot colour a substring, so the copy is painted on top and the
+         field itself renders nothing but its caret. Both carry identical
+         type, padding, border width and scrollbar gutter, which is what
+         keeps the two in register as the text wraps. Chips are colour and a
+         box-shadow only, never padding or weight, for the same reason. -->
+    <div class="relative min-w-0 flex-1">
+      @if (pickerOpen()) {
+        <app-kit-mention-picker
+          class="absolute bottom-full left-0 z-(--z-dropdown) mb-2 block w-full max-w-[22rem]"
+          [listId]="listId"
+          [options]="options()"
+          [activeIndex]="activeIndex()"
+          [query]="query()?.query ?? ''"
+          [loading]="loading()"
+          [limitReached]="limitReached()"
+          (activated)="activate($event)"
+          (picked)="pick($event)"
+        />
+      }
+      <div
+        #highlight
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre-wrap break-words rounded-base border border-transparent px-3 py-2 text-[13.5px] leading-relaxed text-body [scrollbar-gutter:stable]"
+      >@for (segment of segments(); track $index) {<span [class]="segmentClass(segment.kind)">{{ segment.text }}</span>}&#8203;</div>
+      <textarea
+        #field
+        id="kit-question"
+        rows="1"
+        maxlength="2000"
+        placeholder="Ask Kit, @ to pick a tenant, or /document to build a file…"
+        aria-autocomplete="list"
+        aria-describedby="kit-mention-hint"
+        [attr.aria-controls]="pickerOpen() && !limitReached() ? listId : null"
+        [attr.aria-activedescendant]="activeOptionId()"
+        class="block max-h-32 min-h-[2.25rem] w-full resize-y rounded-base border border-border bg-background px-3 py-2 text-[13.5px] leading-relaxed text-transparent caret-[var(--text-body)] placeholder:text-muted focus-visible:border-primary focus-visible:outline-none [scrollbar-gutter:stable]"
+        [value]="draft()"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        (keyup)="onCaretMove()"
+        (click)="onCaretMove()"
+        (blur)="onBlur()"
+        (scroll)="syncHighlight($event)"
+      ></textarea>
+      <p id="kit-mention-hint" class="sr-only">Type @ to mention a tenant. Backspace removes a mentioned tenant.</p>
+      <p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+    </div>
+    <button
+      type="submit"
+      class="shrink-0 rounded-base border-none bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out hover:bg-primary-hover disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+      [disabled]="!canSend()"
+    >
+      Send
+    </button>
+  </div>
+</form>

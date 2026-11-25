@@ -1,0 +1,42 @@
+<div
+  class="overflow-hidden rounded-base border border-border bg-background p-1 shadow-lifted animate-pop-in motion-reduce:animate-none"
+>
+  @if (limitReached()) {
+    <p class="px-2.5 py-2 text-[12.5px] text-muted">You can mention up to {{ mentionsMax }} tenants in one message.</p>
+  } @else {
+    <ul [id]="listId()" role="listbox" aria-label="Tenants" class="max-h-56 overflow-y-auto">
+      @for (row of rows(); track row.option.id; let index = $index) {
+        <!-- Options are not focused: the message box drives them with aria-activedescendant and Enter. -->
+        <li
+          [id]="optionId(index)"
+          role="option"
+          [attr.aria-selected]="index === activeIndex()"
+          [attr.aria-label]="row.description"
+          [title]="row.description"
+          class="flex cursor-pointer items-center gap-2.5 rounded-base px-2.5 py-2 text-[13px] text-body aria-selected:bg-surface aria-selected:text-heading"
+          (mouseenter)="activated.emit(index)"
+          (mousedown)="$event.preventDefault(); picked.emit(row.option)"
+        >
+          <span
+            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] bg-[color-mix(in_oklab,var(--primary)_14%,transparent)] text-primary"
+            aria-hidden="true"
+          >
+            <svg pIcon="user" [size]="11"></svg>
+          </span>
+          <span class="min-w-0 flex-1 truncate font-medium">{{ row.option.name }}</span>
+          <span class="max-w-[45%] shrink-0 truncate text-[12px] text-muted">{{ row.place }}</span>
+        </li>
+      } @empty {
+        <li class="px-2.5 py-2 text-[12.5px] text-muted" role="presentation">
+          @if (loading()) {
+            Looking for tenants…
+          } @else if (query()) {
+            No active tenants match “{{ query() }}”.
+          } @else {
+            No active tenants to mention yet.
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -141,7 +141,7 @@ describe('KitChat streaming', () => {
     expect(component.pending()).toBe(false);
     expect(component.activeId()).toBe('c1');
     expect(TestBed.inject(Location).replaceState).toHaveBeenCalledWith('/kit/c1');
-    expect(api.streamStart).toHaveBeenCalledWith('Who has an unpaid balance right now?');
+    expect(api.streamStart).toHaveBeenCalledWith({ content: 'Who has an unpaid balance right now?', mentions: [] });
   });
 
   it('binds the conversation from done when started omitted the id', () => {
@@ -166,7 +166,7 @@ describe('KitChat streaming', () => {
     component.activeId.set('c1');
     send('What about unit 2?');
 
-    expect(api.streamFollowUp).toHaveBeenCalledWith('c1', 'What about unit 2?');
+    expect(api.streamFollowUp).toHaveBeenCalledWith('c1', { content: 'What about unit 2?', mentions: [] });
     expect(api.streamStart).not.toHaveBeenCalled();
   });
 

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, Subscriber } from 'rxjs';
 
@@ -11,8 +11,15 @@ import type {
   KitConversationSummary,
   KitDocumentTurn,
 } from '../kit-chat.types';
+import type { KitMentionOption } from '../kit-mention.util';
 import { decodeKitSseFrame, splitSseFrames } from '../kit-sse.util';
 import type { KitStreamEvent } from '../kit-stream.types';
+
+/** A message as sent: tenant mentions travel as tokens in `content` and as ids in `mentions`. */
+export interface KitAskBody {
+  content: string;
+  mentions: string[];
+}
 
 @Injectable({ providedIn: 'root' })
 export class KitChatService {
@@ -20,6 +27,7 @@ export class KitChatService {
   private readonly router = inject(Router);
   private readonly base = `${API_BASE_URL}/kit/conversations`;
   private readonly documents = `${API_BASE_URL}/kit/documents`;
+  private readonly residents = `${API_BASE_URL}/kit/residents`;
 
   list(): Observable<KitConversationSummary[]> {
     return this.http.get<KitConversationSummary[]>(this.base);
@@ -29,20 +37,28 @@ export class KitChatService {
     return this.http.get<KitConversationDetail>(`${this.base}/${id}`);
   }
 
-  start(content: string): Observable<KitConversationDetail> {
-    return this.http.post<KitConversationDetail>(this.base, { content });
+  start(ask: KitAskBody): Observable<KitConversationDetail> {
+    return this.http.post<KitConversationDetail>(this.base, requestBody(ask));
   }
 
-  send(id: string, content: string): Observable<KitChatMessage> {
-    return this.http.post<KitChatMessage>(`${this.base}/${id}/messages`, { content });
+  send(id: string, ask: KitAskBody): Observable<KitChatMessage> {
+    return this.http.post<KitChatMessage>(`${this.base}/${id}/messages`, requestBody(ask));
   }
 
-  streamStart(content: string): Observable<KitStreamEvent> {
-    return this.stream(`${this.base}/stream`, content);
+  streamStart(ask: KitAskBody): Observable<KitStreamEvent> {
+    return this.stream(`${this.base}/stream`, ask);
   }
 
-  streamFollowUp(id: string, content: string): Observable<KitStreamEvent> {
-    return this.stream(`${this.base}/${id}/messages/stream`, content);
+  streamFollowUp(id: string, ask: KitAskBody): Observable<KitStreamEvent> {
+    return this.stream(`${this.base}/${id}/messages/stream`, ask);
+  }
+
+  /** The @ picker: active tenants within the user's properties, filtered by name or unit. */
+  searchResidents(search: string): Observable<KitMentionOption[]> {
+    return this.http.get<KitMentionOption[]>(this.residents, {
+      params: new HttpParams().set('search', search),
+      headers: new HttpHeaders({ [SKIP_CACHE_HEADER]: '1' }),
+    });
   }
 
   remove(id: string): Observable<void> {
@@ -63,17 +79,17 @@ export class KitChatService {
     return `${this.documents}/${id}/download`;
   }
 
-  private stream(url: string, content: string): Observable<KitStreamEvent> {
+  private stream(url: string, ask: KitAskBody): Observable<KitStreamEvent> {
     return new Observable((subscriber) => {
       const controller = new AbortController();
-      void this.consume(url, content, controller.signal, subscriber);
+      void this.consume(url, ask, controller.signal, subscriber);
       return () => controller.abort();
     });
   }
 
   private async consume(
     url: string,
-    content: string,
+    ask: KitAskBody,
     signal: AbortSignal,
     subscriber: Subscriber<KitStreamEvent>,
   ): Promise<void> {
@@ -86,7 +102,7 @@ export class KitChatService {
           Accept: 'text/event-stream',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify(requestBody(ask)),
         signal,
       });
     } catch (error) {
@@ -192,6 +208,14 @@ export class KitChatService {
     if (status !== 401 || this.router.url.startsWith('/login')) return;
     void this.router.navigateByUrl('/login');
   }
+}
+
+/**
+ * Leaves `mentions` out when there are none: an API that predates mentions
+ * refuses unknown fields, and a plain message should still reach it.
+ */
+function requestBody(ask: KitAskBody): { content: string; mentions?: string[] } {
+  return ask.mentions.length > 0 ? { content: ask.content, mentions: ask.mentions } : { content: ask.content };
 }
 
 function emitFrames(

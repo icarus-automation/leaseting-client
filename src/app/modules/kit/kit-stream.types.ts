@@ -13,7 +13,10 @@ export interface KitSseDelta {
 export interface KitSseDone {
   status: 'complete';
   conversationId?: string;
+  /** The first reply of the turn. */
   message: KitChatMessage;
+  /** Every reply of the turn: a letter to several tenants comes back as one file each. */
+  messages?: KitChatMessage[];
 }
 
 export interface KitSseError {

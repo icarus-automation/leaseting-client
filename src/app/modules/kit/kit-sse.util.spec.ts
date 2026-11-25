@@ -58,17 +58,19 @@ describe('Ask Kit SSE framing', () => {
     const [frame] = parseSseBlock(
       'event: done\ndata: {"status":"complete","conversation":{"id":"3c2d1b0a-9f8e-7d6c-5b4a-3210fedcba98","title":"How do I record a partial payment?","updatedAt":"2026-09-19T19:12:03.104Z","messages":[{"id":"11111111-1111-1111-1111-111111111111","role":"USER","content":"How do I record a partial payment?","createdAt":"2026-09-19T19:12:03.080Z"},{"id":"22222222-2222-2222-2222-222222222222","role":"ASSISTANT","content":"Partial payments go on the bill itself. Open the bill and record what came in.","createdAt":"2026-09-19T19:12:03.095Z"}]}}',
     );
+    const message = {
+      id: '22222222-2222-2222-2222-222222222222',
+      role: 'ASSISTANT',
+      content: 'Partial payments go on the bill itself. Open the bill and record what came in.',
+      createdAt: '2026-09-19T19:12:03.095Z',
+    };
     expect(decodeKitSseFrame(frame)).toEqual({
       event: {
         type: 'done',
         status: 'complete',
         conversationId: '3c2d1b0a-9f8e-7d6c-5b4a-3210fedcba98',
-        message: {
-          id: '22222222-2222-2222-2222-222222222222',
-          role: 'ASSISTANT',
-          content: 'Partial payments go on the bill itself. Open the bill and record what came in.',
-          createdAt: '2026-09-19T19:12:03.095Z',
-        },
+        message,
+        messages: [message],
       },
     });
   });
@@ -77,17 +79,15 @@ describe('Ask Kit SSE framing', () => {
     const [frame] = parseSseBlock(
       'event: done\ndata: {"status":"complete","message":{"id":"a2","role":"ASSISTANT","content":"Unit 2 is current.","createdAt":"2026-09-19T00:00:00.000Z"}}',
     );
+    const message = {
+      id: 'a2',
+      role: 'ASSISTANT',
+      content: 'Unit 2 is current.',
+      createdAt: '2026-09-19T00:00:00.000Z',
+    };
+    // An API from before split replies sends no `messages`: the one reply stands for them.
     expect(decodeKitSseFrame(frame)).toEqual({
-      event: {
-        type: 'done',
-        status: 'complete',
-        message: {
-          id: 'a2',
-          role: 'ASSISTANT',
-          content: 'Unit 2 is current.',
-          createdAt: '2026-09-19T00:00:00.000Z',
-        },
-      },
+      event: { type: 'done', status: 'complete', message, messages: [message] },
     });
   });
 
@@ -111,27 +111,47 @@ describe('Ask Kit SSE framing', () => {
     const [frame] = parseSseBlock(
       'event: done\ndata: {"status":"complete","conversation":{"id":"c1","title":"Unpaid tenants","updatedAt":"2026-09-19T00:00:00.000Z","messages":[{"id":"u1","role":"USER","content":"/document unpaid","createdAt":"2026-09-19T00:00:00.000Z"},{"id":"a1","role":"ASSISTANT","content":"","createdAt":"2026-09-19T00:00:00.000Z","document":{"id":"d1","status":"PENDING","format":"XLSX","title":"Unpaid tenants","fileName":null,"error":null,"expiresAt":"2026-09-19T01:00:00.000Z"}}]}}',
     );
-    expect(decodeKitSseFrame(frame)).toEqual({
-      event: {
-        type: 'done',
-        status: 'complete',
-        conversationId: 'c1',
-        message: {
-          id: 'a1',
-          role: 'ASSISTANT',
-          content: '',
-          createdAt: '2026-09-19T00:00:00.000Z',
-          document: {
-            id: 'd1',
-            status: 'PENDING',
-            format: 'XLSX',
-            title: 'Unpaid tenants',
-            fileName: null,
-            error: null,
-            expiresAt: '2026-09-19T01:00:00.000Z',
-          },
-        },
+    const message = {
+      id: 'a1',
+      role: 'ASSISTANT',
+      content: '',
+      createdAt: '2026-09-19T00:00:00.000Z',
+      document: {
+        id: 'd1',
+        status: 'PENDING',
+        format: 'XLSX',
+        title: 'Unpaid tenants',
+        fileName: null,
+        error: null,
+        expiresAt: '2026-09-19T01:00:00.000Z',
       },
+    };
+    expect(decodeKitSseFrame(frame)).toEqual({
+      event: { type: 'done', status: 'complete', conversationId: 'c1', message, messages: [message] },
     });
+  });
+
+  it('reads every reply of a turn that split a letter into one file per tenant', () => {
+    const reply = (id: string, documentId: string) =>
+      `{"id":"${id}","role":"ASSISTANT","content":"","createdAt":"2026-09-19T00:00:00.000Z","document":{"id":"${documentId}","status":"PENDING","format":null,"title":"Notice","fileName":null,"error":null,"expiresAt":"2026-09-19T01:00:00.000Z"}}`;
+    const [frame] = parseSseBlock(
+      `event: done\ndata: {"status":"complete","message":${reply('a1', 'd1')},"messages":[${reply('a1', 'd1')},${reply('a2', 'd2')}]}`,
+    );
+
+    const decoded = decodeKitSseFrame(frame);
+    if (!decoded || !('event' in decoded) || decoded.event.type !== 'done') throw new Error('expected done');
+    expect(decoded.event.message.id).toBe('a1');
+    expect(decoded.event.messages?.map((message) => message.document?.id)).toEqual(['d1', 'd2']);
+  });
+
+  it('reads every reply of a new conversation that split a letter', () => {
+    const [frame] = parseSseBlock(
+      'event: done\ndata: {"status":"complete","conversation":{"id":"c1","title":"Notices","updatedAt":"2026-09-19T00:00:00.000Z","messages":[{"id":"u1","role":"USER","content":"Notices","createdAt":"2026-09-19T00:00:00.000Z"},{"id":"a1","role":"ASSISTANT","content":"","createdAt":"2026-09-19T00:00:00.001Z"},{"id":"a2","role":"ASSISTANT","content":"","createdAt":"2026-09-19T00:00:00.002Z"}]}}',
+    );
+
+    const decoded = decodeKitSseFrame(frame);
+    if (!decoded || !('event' in decoded) || decoded.event.type !== 'done') throw new Error('expected done');
+    expect(decoded.event.message.id).toBe('a1');
+    expect(decoded.event.messages?.map((message) => message.id)).toEqual(['a1', 'a2']);
   });
 });

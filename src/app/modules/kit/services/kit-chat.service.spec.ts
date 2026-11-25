@@ -1,11 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { firstValueFrom, toArray } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
+import { SKIP_CACHE_HEADER } from '../../../core/http/cache.interceptor';
+import type { KitMentionOption } from '../kit-mention.util';
 import type { KitStreamEvent } from '../kit-stream.types';
 import { KitChatService } from './kit-chat.service';
 
@@ -83,7 +85,7 @@ describe('KitChatService streams', () => {
       ]),
     );
 
-    const events = await firstValueFrom(service.streamStart('Who is late?').pipe(toArray()));
+    const events = await firstValueFrom(service.streamStart({ content: 'Who is late?', mentions: [] }).pipe(toArray()));
 
     expect(fetchMock).toHaveBeenCalledWith(
       `${API_BASE_URL}/kit/conversations/stream`,
@@ -133,7 +135,7 @@ describe('KitChatService streams', () => {
       ]),
     );
 
-    const events = await firstValueFrom(service.streamStart('How do I record a partial payment?').pipe(toArray()));
+    const events = await firstValueFrom(service.streamStart({ content: 'How do I record a partial payment?', mentions: [] }).pipe(toArray()));
     const done = events.at(-1);
 
     expect(events.map((event) => event.type)).toEqual(['started', 'delta', 'done']);
@@ -142,6 +144,7 @@ describe('KitChatService streams', () => {
       status: 'complete',
       conversationId: conversation.id,
       message: conversation.messages[1],
+      messages: [conversation.messages[1]],
     });
   });
 
@@ -153,7 +156,7 @@ describe('KitChatService streams', () => {
       ]),
     );
 
-    await firstValueFrom(service.streamFollowUp('c1', 'And unit 2?').pipe(toArray()));
+    await firstValueFrom(service.streamFollowUp('c1', { content: 'And unit 2?', mentions: [] }).pipe(toArray()));
 
     expect(fetchMock).toHaveBeenCalledWith(
       `${API_BASE_URL}/kit/conversations/c1/messages/stream`,
@@ -163,6 +166,38 @@ describe('KitChatService streams', () => {
         body: JSON.stringify({ content: 'And unit 2?' }),
       }),
     );
+  });
+
+  it('sends the picked tenant ids beside the message that names them', async () => {
+    fetchMock.mockResolvedValue(
+      sseResponse([`event: done
+data: ${JSON.stringify({ status: 'complete', message: assistant })}`]),
+    );
+    const content = 'Notice for @[Maria Santos](resident:c3a9d7e1-8b42-4f6c-a0d5-2e7b9c1f4a86)';
+
+    await firstValueFrom(
+      service.streamFollowUp('c1', { content, mentions: ['c3a9d7e1-8b42-4f6c-a0d5-2e7b9c1f4a86'] }).pipe(toArray()),
+    );
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(JSON.parse(init.body as string)).toEqual({
+      content,
+      mentions: ['c3a9d7e1-8b42-4f6c-a0d5-2e7b9c1f4a86'],
+    });
+  });
+
+  it('searches mentionable tenants on GET /kit/residents without the cache', () => {
+    const http = TestBed.inject(HttpTestingController);
+    const found: KitMentionOption[] = [];
+
+    service.searchResidents('maria').subscribe((options) => found.push(...options));
+
+    const request = http.expectOne((candidate) => candidate.url === `${API_BASE_URL}/kit/residents`);
+    expect(request.request.params.get('search')).toBe('maria');
+    expect(request.request.headers.has(SKIP_CACHE_HEADER)).toBe(true);
+    request.flush([{ id: 'r1', name: 'Maria Santos', unitNo: 'A1', propertyName: 'Lakeview Residences' }]);
+    expect(found.map((option) => option.unitNo)).toEqual(['A1']);
+    http.verify();
   });
 
   it('appends mocked SSE delta chunks in order when the body arrives split', async () => {
@@ -176,7 +211,7 @@ describe('KitChatService streams', () => {
       ]),
     );
 
-    const events = await firstValueFrom(service.streamStart('Long answer').pipe(toArray()));
+    const events = await firstValueFrom(service.streamStart({ content: 'Long answer', mentions: [] }).pipe(toArray()));
     expect(
       events
         .filter((event): event is Extract<KitStreamEvent, { type: 'delta' }> => event.type === 'delta')
@@ -191,7 +226,7 @@ describe('KitChatService streams', () => {
   ])('surfaces pre-stream %s as an error', async (status, message) => {
     fetchMock.mockResolvedValue(jsonError(status, message));
 
-    const error = await firstValueFrom(service.streamStart('Hello').pipe()).catch((caught) => caught);
+    const error = await firstValueFrom(service.streamStart({ content: 'Hello', mentions: [] }).pipe()).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(HttpErrorResponse);
     expect((error as HttpErrorResponse).status).toBe(status);
@@ -214,7 +249,7 @@ describe('KitChatService streams', () => {
 
     const events: KitStreamEvent[] = [];
     let failed: unknown;
-    const sub = service.streamStart('Cancel me').subscribe({
+    const sub = service.streamStart({ content: 'Cancel me', mentions: [] }).subscribe({
       next: (event) => events.push(event),
       error: (error) => {
         failed = error;

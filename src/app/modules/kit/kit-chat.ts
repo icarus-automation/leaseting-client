@@ -39,13 +39,17 @@ const SUGGESTIONS = [
   'Draft a polite reminder for a tenant who is two weeks late on rent.',
 ];
 
-/** Each segment of a sent message inside its primary-coloured bubble. */
+/**
+ * Each segment of a sent message inside its primary-coloured bubble. Chips
+ * invert the bubble: a tint of the bubble's own colour measured 3.9:1, under
+ * WCAG AA, while primary on primary-foreground clears it in both schemes.
+ */
+const BUBBLE_CHIP = 'rounded-[3px] bg-primary-foreground px-1 font-semibold text-primary';
 const BUBBLE_CLASS: Record<KitTextSegment['kind'], string> = {
   text: '',
-  command: 'rounded-[3px] bg-[color-mix(in_oklab,var(--primary-foreground)_22%,transparent)] px-1 font-semibold',
+  command: BUBBLE_CHIP,
   // A long name can wrap: clone the box so each line keeps its own rounded chip.
-  mention:
-    'rounded-[3px] bg-[color-mix(in_oklab,var(--primary-foreground)_22%,transparent)] px-1 font-semibold box-decoration-clone',
+  mention: `${BUBBLE_CHIP} box-decoration-clone`,
 };
 
 const POLL_INTERVAL_MS = 2_000;

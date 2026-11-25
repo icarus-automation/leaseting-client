@@ -73,6 +73,8 @@ export class KitComposer {
   readonly options = signal<KitMentionOption[]>([]);
   readonly activeIndex = signal(0);
   readonly loading = signal(false);
+  /** The last search failed, so an empty list says nothing about the tenants. */
+  readonly searchFailed = signal(false);
 
   /** The `@` the user closed with Escape: it stays closed until they type a new one. */
   private dismissedAt: number | null = null;
@@ -92,6 +94,7 @@ export class KitComposer {
     if (!this.pickerOpen() || this.loading()) return '';
     if (this.limitReached()) return `You can mention up to ${MENTIONS_MAX} tenants in one message.`;
     const count = this.options().length;
+    if (this.searchFailed()) return 'Tenants could not be loaded.';
     if (count === 0) return 'No tenants match.';
     return `${count} ${count === 1 ? 'tenant' : 'tenants'} found. Use the up and down arrows, then Enter to pick.`;
   });
@@ -102,15 +105,16 @@ export class KitComposer {
         debounceTime(SEARCH_DEBOUNCE_MS),
         switchMap((search) =>
           this.chat.searchResidents(search).pipe(
-            map((options) => ({ search, options })),
-            catchError(() => of({ search, options: [] as KitMentionOption[] })),
+            map((options) => ({ search, options, failed: false })),
+            catchError(() => of({ search, options: [] as KitMentionOption[], failed: true })),
           ),
         ),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(({ search, options }) => {
+      .subscribe(({ search, options, failed }) => {
         if (this.query()?.query.trim() !== search) return;
         this.options.set(options);
+        this.searchFailed.set(failed);
         this.activeIndex.set(0);
         this.loading.set(false);
       });
@@ -236,11 +240,20 @@ export class KitComposer {
     this.options.set([]);
     this.activeIndex.set(0);
     this.loading.set(false);
+    this.searchFailed.set(false);
   }
 
+  /**
+   * Writes the box itself now, not only on the next render: a key pressed
+   * right after a pick would otherwise edit the old text and its stale caret.
+   * The binding later sets the same value, which leaves the caret alone.
+   */
   private applyDraft(text: string, mentions: DraftMention[], caret: number): void {
     this.draft.set(text);
     this.mentions.set(mentions);
+    const field = this.field().nativeElement;
+    field.value = text;
+    field.setSelectionRange(caret, caret);
     this.placeCaret(caret);
   }
 

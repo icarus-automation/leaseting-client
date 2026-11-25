@@ -115,6 +115,29 @@ describe('KitComposer mentions', () => {
     expect(chip.textContent).toBe('@Maria Santos');
   });
 
+  it('updates the box and its caret at once, so the next key edits the new text', () => {
+    type('Create a notice for @mar');
+    const box = field();
+    // No render in between: the very next key must already see the pick.
+    box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    const backspace = new KeyboardEvent('keydown', { key: 'Backspace', cancelable: true });
+    expect(box.value).toBe('Create a notice for @Maria Santos ');
+    expect(box.selectionStart).toBe(box.value.length);
+
+    box.dispatchEvent(backspace);
+    expect(backspace.defaultPrevented).toBe(false);
+    box.value = box.value.slice(0, -1);
+    box.setSelectionRange(box.value.length, box.value.length);
+    box.dispatchEvent(new Event('input'));
+    const second = new KeyboardEvent('keydown', { key: 'Backspace', cancelable: true });
+    box.dispatchEvent(second);
+
+    expect(second.defaultPrevented).toBe(true);
+    expect(composer.draft()).toBe('Create a notice for ');
+    expect(box.value).toBe('Create a notice for ');
+    expect(composer.mentions()).toEqual([]);
+  });
+
   it('removes a chip whole on Backspace', () => {
     type('@mar');
     press('Enter');
@@ -148,12 +171,26 @@ describe('KitComposer mentions', () => {
     expect(submitted).toHaveBeenCalledTimes(1);
   });
 
-  it('says so when no tenant matches, and survives a failed search', () => {
-    api.searchResidents.mockReturnValue(throwError(() => new Error('offline')));
+  it('says so when no tenant matches', () => {
+    api.searchResidents.mockReturnValue(of([]));
     type('@zzz');
 
     expect(options()).toHaveLength(0);
     expect(fixture.nativeElement.textContent).toContain('No active tenants match “zzz”.');
+  });
+
+  it('tells a failed search apart from no matches, and recovers on the next keystroke', () => {
+    api.searchResidents.mockReturnValue(throwError(() => new Error('offline')));
+    type('@mar');
+
+    expect(options()).toHaveLength(0);
+    expect(fixture.nativeElement.textContent).toContain('Tenants could not be loaded just now.');
+    expect(fixture.nativeElement.textContent).not.toContain('No active tenants');
+
+    api.searchResidents.mockReturnValue(of([LAKEVIEW_MARIA]));
+    type('@mari');
+    expect(options()).toHaveLength(1);
+    expect(fixture.nativeElement.textContent).not.toContain('could not be loaded');
   });
 
   it('never opens on an email address', () => {

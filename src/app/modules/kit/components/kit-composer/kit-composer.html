@@ -29,6 +29,7 @@
           [activeIndex]="activeIndex()"
           [query]="query()?.query ?? ''"
           [loading]="loading()"
+          [failed]="searchFailed()"
           [limitReached]="limitReached()"
           (activated)="activate($event)"
           (picked)="pick($event)"

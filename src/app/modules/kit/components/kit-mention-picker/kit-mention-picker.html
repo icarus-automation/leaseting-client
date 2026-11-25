@@ -30,6 +30,8 @@
         <li class="px-2.5 py-2 text-[12.5px] text-muted" role="presentation">
           @if (loading()) {
             Looking for tenants…
+          } @else if (failed()) {
+            Tenants could not be loaded just now. Keep typing to try again.
           } @else if (query()) {
             No active tenants match “{{ query() }}”.
           } @else {

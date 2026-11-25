@@ -28,6 +28,7 @@ export class KitMentionPicker {
   readonly activeIndex = input(0);
   readonly query = input('');
   readonly loading = input(false);
+  readonly failed = input(false);
   readonly limitReached = input(false);
 
   readonly mentionsMax = MENTIONS_MAX;

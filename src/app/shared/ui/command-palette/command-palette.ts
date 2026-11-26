@@ -9,6 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { A11yModule } from '@angular/cdk/a11y';
@@ -19,24 +20,38 @@ import hotkeys from 'hotkeys-js';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import type { Permission } from '../../../core/auth/permissions';
+import { DOCS_URL } from '../../../core/config/docs';
 import { visibleSettingsGroups } from '../../../modules/settings/settings-nav';
 import { ResidentsService } from '../../../modules/residents/services/residents.service';
 import { CommandPaletteService } from './command-palette.service';
 
-interface Command {
+interface CommandBase {
   id: string;
   label: string;
   hint?: string;
   icon: string;
   group: 'Go to' | 'Actions';
   keywords: string;
-  route: string;
-  queryParams?: Record<string, string>;
   /** Every code the destination asks for. Without them the command isn't offered. */
   permissions?: Permission[];
   /** It reaches every property (adding one), so it isn't offered to someone limited to some. */
   needsEveryProperty?: boolean;
 }
+
+interface RouteCommand extends CommandBase {
+  route: string;
+  queryParams?: Record<string, string>;
+  href?: never;
+}
+
+/** A page outside the app, opened in a new tab. */
+interface ExternalCommand extends CommandBase {
+  href: string;
+  route?: never;
+  queryParams?: never;
+}
+
+type Command = RouteCommand | ExternalCommand;
 
 interface PaletteItem {
   id: string;
@@ -65,7 +80,7 @@ const COMMANDS: Command[] = [
   { id: 'nav-ar-aging-summary', label: 'AR Aging', hint: 'Report', icon: 'chart-pie', group: 'Go to', keywords: 'ar aging who owes you receivables arrears overdue buckets by tenant', route: '/reports/ar-aging-summary', permissions: ['reports:view'] },
   { id: 'nav-ar-aging-detail', label: 'Unpaid Bills', hint: 'Report', icon: 'exclamation-circle', group: 'Go to', keywords: 'ar aging detail who owes you unpaid bills overdue days late worklist', route: '/reports/ar-aging-detail', permissions: ['reports:view'] },
   { id: 'nav-delinquency', label: 'Delinquency', hint: 'Report', icon: 'bell', group: 'Go to', keywords: 'delinquency late payers chronic sms reminders chase collections', route: '/reports/delinquency', permissions: ['reports:view'] },
-  { id: 'nav-kb', label: 'Knowledge Base', icon: 'book', group: 'Go to', keywords: 'articles help docs', route: '/knowledge-base' },
+  { id: 'nav-kb', label: 'Knowledge Base', hint: 'New tab', icon: 'book', group: 'Go to', keywords: 'articles help docs guides', href: DOCS_URL },
   { id: 'nav-settings', label: 'Settings', icon: 'cog', group: 'Go to', keywords: 'organization team preferences', route: '/settings' },
   { id: 'nav-users', label: 'Users', hint: 'Settings', icon: 'users', group: 'Go to', keywords: 'team staff people members invite roles access deactivate', route: '/settings/users', permissions: ['members:view'] },
   { id: 'nav-audit-log', label: 'Audit log', icon: 'history', group: 'Go to', keywords: 'audit history changes who changed roles invitations property access', route: '/audit-log', permissions: ['audit_log:view'] },
@@ -84,6 +99,7 @@ const COMMANDS: Command[] = [
 export class CommandPalette {
   private readonly palette = inject(CommandPaletteService);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
   private readonly auth = inject(AuthService);
   private readonly residents = inject(ResidentsService);
   private readonly destroyRef = inject(DestroyRef);
@@ -144,7 +160,7 @@ export class CommandPalette {
       hint: command.hint,
       icon: command.icon,
       group: command.group,
-      run: () => void this.router.navigate([command.route], { queryParams: command.queryParams }),
+      run: () => this.run(command),
     }));
 
     const residentItems: PaletteItem[] = this.residentResults().map((resident) => ({
@@ -228,5 +244,13 @@ export class CommandPalette {
   execute(item: PaletteItem): void {
     this.close();
     item.run();
+  }
+
+  private run(command: Command): void {
+    if (command.href !== undefined) {
+      this.document.defaultView?.open(command.href, '_blank', 'noopener');
+      return;
+    }
+    void this.router.navigate([command.route], { queryParams: command.queryParams });
   }
 }

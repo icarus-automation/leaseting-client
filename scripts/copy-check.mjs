@@ -60,7 +60,6 @@ const COPY_TS = new Set([
   'src/app/modules/work-orders/utils/maintenance-request.util.ts',
   'src/app/modules/work-orders/components/request-detail-dialog/request-detail-dialog.ts',
   'src/app/modules/kit/kit-chat.ts',
-  'src/app/modules/knowledge-base/knowledge-base.ts',
   'src/app/modules/reports/pages/parking-revenue/parking-revenue.ts',
   'src/app/modules/reports/pages/shift-cash-variance/shift-cash-variance.ts',
   'src/app/modules/reports/pages/void-audit/void-audit.ts',

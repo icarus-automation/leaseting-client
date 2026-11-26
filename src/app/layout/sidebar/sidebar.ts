@@ -5,6 +5,7 @@ import { filter, map } from 'rxjs';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { AuthService } from '../../core/auth/auth.service';
 import type { Permission } from '../../core/auth/permissions';
+import { DOCS_URL } from '../../core/config/docs';
 import { PendingPaymentSubmissionsService } from '../../core/payment-submissions/pending-payment-submissions.service';
 import { OpenRequestsService } from '../../core/work-orders/open-requests.service';
 import { visibleSettingsGroups } from '../../modules/settings/settings-nav';
@@ -97,7 +98,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: 'Reports', route: '/reports', icon: 'chart-bar', permissions: ['reports:view'] },
       { label: 'Audit log', route: '/audit-log', icon: 'history', permissions: ['audit_log:view'] },
-      { label: 'Knowledge Base', route: '/knowledge-base', icon: 'book' },
+      { label: 'Knowledge Base', href: DOCS_URL, icon: 'book', external: true },
     ],
   },
   {

@@ -12,11 +12,15 @@
         One property per run. Last month's readings carry over. Enter this month's present reading to create the bills.
       </p>
       <a
-        routerLink="/knowledge-base/utility-billing"
+        [href]="guideUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Utility billing guide, opens in a new tab"
         class="mt-1.5 inline-flex items-center gap-1.5 rounded-[2px] text-[13px] font-medium text-primary transition-colors duration-150 ease-out hover:underline motion-reduce:transition-none"
       >
         <svg pIcon="book" [size]="13" aria-hidden="true"></svg>
         Utility billing
+        <svg pIcon="external-link" [size]="11" aria-hidden="true"></svg>
       </a>
     </div>
     <div class="flex flex-col items-end gap-1">

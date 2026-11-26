@@ -20,6 +20,7 @@ import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
+import { UTILITY_BILLING_GUIDE_URL } from '../../../../core/config/docs';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { ReceiptScanResult, UtilityRunPreviewRow } from '../../../../core/models/bill.types';
 import type { BillType } from '../../../../core/models/enums';
@@ -87,6 +88,7 @@ export class UtilityRun {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly typeOptions = UTILITY_TYPE_OPTIONS;
+  readonly guideUrl = UTILITY_BILLING_GUIDE_URL;
 
   readonly setupForm = this.fb.nonNullable.group({
     propertyId: ['', [Validators.required]],

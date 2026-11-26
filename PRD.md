@@ -71,8 +71,8 @@ Routes used: `GET /maintenance-requests`, `GET /maintenance-requests/:id`, `GET 
 **Parking** **[stub, satellite app]**
 Ships as a **separate deployed app** at `parking.leaseting.com`, reached from "Connected Apps" in the sidebar — not an in-app route. Placeholder component exists but is **not wired into `app.routes.ts`**. Scope: spot inventory (Available / Assigned / Reserved / Out of Service), assignments tied to units and leases, flags occupied units with no spot, utilization reporting. Treat Leaseting as one product with at least one satellite app.
 
-**Knowledge Base** **[partial]** — `/knowledge-base`
-Article list + client-side search; one full article shipped (`/knowledge-base/utility-billing`). Articles are hardcoded, not authored data. **Not built:** categories, visibility scoping (internal/owner/tenant/public), tags, author, server-side full-text search.
+**Knowledge Base** **[partial, satellite site]** — `docs.leaseting.com`
+Moved out of the app to the `leaseting-docs` help site (Fumadocs), reached from "Knowledge Base" in the sidebar and the command palette, which open it in a new tab; there is no in-app route. Categories, full-text search, `/llms.txt` and a Markdown version of each article come from the site. One full article shipped (`/billing/utility-bills`, linked from the utility run); House rules and move-in is a stub. **Not built:** visibility scoping (internal/owner/tenant/public), tags, author.
 
 **Reporting** **[partial]** — `/reports`
 Catalog-driven: `report-catalog.ts` is the single source of truth, 7 groups (Business Overview · Revenue · Who Owes You · Portfolio & Leases · Utilities · Documents & Audit · Parking). **Unbuilt reports stay listed with a `blockedBy` reason** — visible honesty beats a manager quietly keeping a parallel spreadsheet.

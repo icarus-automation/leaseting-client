@@ -135,6 +135,15 @@ describe('Sidebar', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Money');
   });
 
+  it('opens the Knowledge Base on the docs site in a new tab', () => {
+    const link = navLink('Knowledge Base');
+
+    expect(link.getAttribute('href')).toBe('https://docs.leaseting.com');
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(link.getAttribute('aria-label')).toBe('Knowledge Base, opens in a new tab');
+  });
+
   it('shows Settings once any settings page is open to the role', async () => {
     held.set(['members:view']);
     await fixture.whenStable();

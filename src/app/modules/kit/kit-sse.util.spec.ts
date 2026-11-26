@@ -75,6 +75,43 @@ describe('Ask Kit SSE framing', () => {
     });
   });
 
+  it('keeps a reply’s sources on done, for a new thread and a follow-up', () => {
+    const sources = [
+      { kind: 'docs', title: 'Bill utilities from meter readings', section: 'Bill a whole property this month', url: 'https://docs.leaseting.com/billing/utility-bills#monthly-run' },
+      { kind: 'app', title: 'Properties', section: null, route: '/properties' },
+      // Saved before sources had a kind: still a web page.
+      { title: 'Icarus.Automation', section: null, url: 'https://icarusautomation.tech' },
+    ];
+    const reply = { id: 'a1', role: 'ASSISTANT', content: 'Choose Utility run.[1][2][3]', createdAt: '2026-11-26T00:00:00.000Z', sources };
+
+    const [followUp] = parseSseBlock(`event: done\ndata: ${JSON.stringify({ status: 'complete', message: reply })}`);
+    const [newThread] = parseSseBlock(
+      `event: done\ndata: ${JSON.stringify({ status: 'complete', conversation: { id: 'c1', messages: [reply] } })}`,
+    );
+
+    for (const frame of [followUp, newThread]) {
+      const decoded = decodeKitSseFrame(frame);
+      if (!decoded || !('event' in decoded) || decoded.event.type !== 'done') throw new Error('expected done');
+      expect(decoded.event.message.sources).toEqual([sources[0], sources[1], { kind: 'docs', ...sources[2] }]);
+    }
+  });
+
+  it('draws none of a reply’s sources when one is not a safe link, since markers count positions', () => {
+    for (const bad of [
+      { kind: 'docs', title: 'Bad', section: null, url: 'javascript:alert(1)' },
+      { kind: 'app', title: 'Away', section: null, route: '//evil.example' },
+      { kind: 'app', title: 'Away', section: null, route: 'https://evil.example/properties' },
+      { kind: 'other', title: 'Odd', section: null, url: 'https://x.test' },
+    ]) {
+      const sources = [{ kind: 'app', title: 'Properties', section: null, route: '/properties' }, bad];
+      const reply = { id: 'a1', role: 'ASSISTANT', content: 'Open it.[1][2]', createdAt: '2026-11-26T00:00:00.000Z', sources };
+      const [frame] = parseSseBlock(`event: done\ndata: ${JSON.stringify({ status: 'complete', message: reply })}`);
+      const decoded = decodeKitSseFrame(frame);
+      if (!decoded || !('event' in decoded) || decoded.event.type !== 'done') throw new Error('expected done');
+      expect(decoded.event.message.sources).toBeUndefined();
+    }
+  });
+
   it('reads a follow-up done event that carries message and omits conversationId', () => {
     const [frame] = parseSseBlock(
       'event: done\ndata: {"status":"complete","message":{"id":"a2","role":"ASSISTANT","content":"Unit 2 is current.","createdAt":"2026-09-19T00:00:00.000Z"}}',

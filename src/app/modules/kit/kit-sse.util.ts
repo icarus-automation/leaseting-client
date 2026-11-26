@@ -1,4 +1,5 @@
 import type { KitChatMessage, KitDocument } from './kit-chat.types';
+import { readSources } from './kit-sources.util';
 import type { KitSseFrame, KitStreamEvent } from './kit-stream.types';
 
 export function splitSseFrames(buffer: string): { frames: KitSseFrame[]; rest: string } {
@@ -129,6 +130,8 @@ function readMessage(value: unknown): KitChatMessage | null {
   };
   const document = readDocument(message['document']);
   if (document) read.document = document;
+  const sources = readSources(message['sources']);
+  if (sources.length > 0) read.sources = sources;
   return read;
 }
 

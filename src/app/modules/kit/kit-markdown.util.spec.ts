@@ -1,4 +1,5 @@
 import { parseMarkdown, parseSpans } from './kit-markdown.util';
+import { sourceAddress } from './kit-sources.util';
 
 const flatten = (text: string): string =>
   parseSpans(text)
@@ -104,5 +105,83 @@ describe('parseMarkdown', () => {
   it('produces nothing for an empty reply, so the bubble stays hidden', () => {
     expect(parseMarkdown('')).toEqual([]);
     expect(parseMarkdown('\n\n  \n')).toEqual([]);
+  });
+});
+
+describe('citations', () => {
+  const run = { kind: 'docs' as const, title: 'Bill utilities from meter readings', section: 'Bill a whole property this month', url: 'https://docs.leaseting.com/billing/utility-bills#monthly-run' };
+  const readings = { kind: 'docs' as const, title: 'Bill utilities from meter readings', section: 'How meter readings carry over', url: 'https://docs.leaseting.com/billing/utility-bills#readings' };
+
+  it('turns markers into one chip at the end of the sentence they follow', () => {
+    const spans = parseSpans('Choose **Utility run**.[1] Previous fills itself in.[2][1]', [run, readings]);
+    expect(spans.map((span) => span.cite ?? span.text)).toEqual([
+      'Choose ',
+      'Utility run',
+      '.',
+      [run],
+      ' Previous fills itself in.',
+      [readings, run],
+    ]);
+  });
+
+  it('hides a marker with no source behind it, as while a reply streams', () => {
+    expect(flattenCited('Choose Utility run.[1] Done [2, 3].', [])).toBe('Choose Utility run. Done.');
+    expect(flattenCited('Choose Utility run.[3]', [run])).toBe('Choose Utility run.');
+  });
+
+  it('reads markers inside bold and list items, and leaves code alone', () => {
+    const [list] = parseMarkdown('- **Open Bills.[1]**\n- Type `arr[1]` as is', [run]);
+    if (list.kind !== 'bullets') throw new Error('expected bullets');
+    expect(list.items[0].map((span) => span.cite ?? span.text)).toEqual(['Open Bills.', [run]]);
+    expect(list.items[1][1]).toMatchObject({ text: 'arr[1]', code: true });
+  });
+
+  it('keeps ordinary brackets that are not markers', () => {
+    expect(flattenCited('Unit [A1] and [the lobby]', [run])).toBe('Unit [A1] and [the lobby]');
+  });
+});
+
+function flattenCited(text: string, sources: Parameters<typeof parseSpans>[1]): string {
+  return parseSpans(text, sources)
+    .filter((span) => !span.cite)
+    .map((span) => span.text)
+    .join('');
+}
+
+describe('repeated citations', () => {
+  const run = { kind: 'docs' as const, title: 'Bill utilities from meter readings', section: 'Bill a whole property this month', url: 'https://docs.leaseting.com/billing/utility-bills#monthly-run' };
+  const readings = { kind: 'docs' as const, title: 'Bill utilities from meter readings', section: 'How meter readings carry over', url: 'https://docs.leaseting.com/billing/utility-bills#readings' };
+  const chips = (spans: { cite?: unknown[] }[]) => spans.filter((span) => span.cite).length;
+
+  it('draws one chip for a run of steps on the same source, as a reply saved before the API settled it', () => {
+    const blocks = parseMarkdown('Go to Bills.[1]\n\n1. Pick the property.[1]\n2. Set the rate.[1]\n3. Type the readings.[1]', [run]);
+    const [intro, list] = blocks;
+    if (intro.kind !== 'paragraph' || list.kind !== 'numbered') throw new Error('expected a paragraph and a list');
+    expect(chips(intro.spans)).toBe(1);
+    expect(list.items.map(chips)).toEqual([0, 0, 1]);
+    expect(list.items[0].map((span) => span.text).join('')).toBe('Pick the property.');
+  });
+
+  it('keeps each chip when the sources change from one sentence to the next', () => {
+    const [paragraph] = parseMarkdown('Open Bills.[1] Previous carries over.[2] Then create the bills.[1]', [run, readings]);
+    if (paragraph.kind !== 'paragraph') throw new Error('expected paragraph');
+    expect(paragraph.spans.filter((span) => span.cite).map((span) => span.cite?.[0] && sourceAddress(span.cite[0]))).toEqual([run.url, readings.url, run.url]);
+  });
+});
+
+describe('app page citations', () => {
+  const properties = { kind: 'app' as const, title: 'Properties', section: null, route: '/properties' };
+  const bills = { kind: 'app' as const, title: 'Bills', section: null, route: '/bills' };
+  const guide = { kind: 'docs' as const, title: 'Set up your first property', section: null, url: 'https://docs.leaseting.com/getting-started' };
+
+  it('gives each app page a chip of its own, then the web sources together', () => {
+    const spans = parseSpans('Go to Properties and click New property.[1][2][3]', [guide, properties, bills]);
+    expect(spans.filter((span) => span.cite).map((span) => span.cite)).toEqual([[properties], [bills], [guide]]);
+  });
+
+  it('keeps one chip for a page cited after every step', () => {
+    const [list] = parseMarkdown('1. Open Properties.[1]\n2. Click New property.[1]', [properties]);
+    if (list.kind !== 'numbered') throw new Error('expected numbered');
+    expect(list.items.map((item) => item.filter((span) => span.cite).length)).toEqual([0, 1]);
   });
 });

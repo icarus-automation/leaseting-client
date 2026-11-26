@@ -1,6 +1,8 @@
 <ng-template #spans let-runs>
   @for (run of runs; track $index) {
-    @if (run.bold) {
+    @if (run.cite) {
+      <app-kit-source-chip [sources]="run.cite" />
+    } @else if (run.bold) {
       <strong class="font-semibold text-heading">{{ run.text }}</strong>
     } @else if (run.italic) {
       <em class="italic">{{ run.text }}</em>
@@ -10,7 +12,9 @@
         >{{ run.text }}</code
       >
     } @else {
-      {{ run.text }}
+      <!-- One line on purpose: the paragraph keeps whitespace (pre-line), so
+           indentation here would show as a space before every comma. -->
+      <ng-container>{{ run.text }}</ng-container>
     }
   }
 </ng-template>

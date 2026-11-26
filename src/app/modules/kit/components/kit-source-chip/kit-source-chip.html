@@ -1,0 +1,81 @@
+@if (page(); as page) {
+  <a
+    [routerLink]="page.route"
+    class="ml-1 inline-flex max-w-[min(15rem,100%)] items-center gap-1 rounded-full border border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] bg-[color-mix(in_oklab,var(--primary)_7%,var(--background))] px-1.5 py-px align-middle text-[11.5px] font-medium leading-4 text-primary no-underline transition-colors duration-150 ease-out hover:bg-[color-mix(in_oklab,var(--primary)_14%,var(--background))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+    [attr.aria-label]="'Open ' + page.title"
+  >
+    <svg [pIcon]="page.icon" [size]="10" class="shrink-0" aria-hidden="true"></svg>
+    <span class="min-w-0 truncate">{{ page.title }}</span>
+  </a>
+} @else if (docs().length > 0) {
+  <button
+    type="button"
+    class="ml-1 inline-flex max-w-[min(15rem,100%)] items-center gap-1 rounded-full border border-border bg-background px-1.5 py-px align-middle text-[11.5px] font-medium leading-4 text-muted transition-colors duration-150 ease-out hover:border-[color-mix(in_oklab,var(--primary)_35%,var(--border))] hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+    [class.border-[color-mix(in_oklab,var(--primary)_35%,var(--border))]]="open()"
+    [class.text-primary]="open()"
+    aria-haspopup="dialog"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="chipLabel()"
+    (click)="toggle($event)"
+  >
+    <svg pIcon="book" [size]="10" class="shrink-0" aria-hidden="true"></svg>
+    <span class="min-w-0 truncate">{{ docs()[0].title }}</span>
+    @if (more() > 0) {
+      <span class="shrink-0 tabular-nums">+{{ more() }}</span>
+    }
+  </button>
+
+  <p-popover
+    #panel
+    appendTo="body"
+    styleClass="w-72 max-w-[calc(100vw-2rem)]"
+    ariaLabel="Sources"
+    (onShow)="open.set(true)"
+    (onHide)="open.set(false)"
+  >
+    <div class="flex flex-col gap-1.5 text-[13px] leading-snug">
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          class="rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent motion-reduce:transition-none"
+          aria-label="Previous source"
+          [disabled]="index() === 0"
+          (click)="previous()"
+        >
+          <svg pIcon="chevron-left" [size]="11" aria-hidden="true"></svg>
+        </button>
+        <span class="min-w-[2.5rem] text-center text-[12px] tabular-nums text-muted" aria-live="polite">
+          {{ index() + 1 }}/{{ docs().length }}
+        </span>
+        <button
+          type="button"
+          class="rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent motion-reduce:transition-none"
+          aria-label="Next source"
+          [disabled]="index() === docs().length - 1"
+          (click)="next()"
+        >
+          <svg pIcon="chevron-right" [size]="11" aria-hidden="true"></svg>
+        </button>
+      </div>
+
+      @if (current(); as source) {
+        <a
+          [href]="source.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group -mx-1 flex items-start gap-2 rounded-base px-1 py-1 no-underline transition-colors duration-150 ease-out hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none"
+        >
+          <svg pIcon="book" [size]="12" class="mt-0.5 shrink-0 text-primary" aria-hidden="true"></svg>
+          <span class="min-w-0 flex-1">
+            <span class="block font-medium text-heading group-hover:text-primary">{{ source.title }}</span>
+            @if (source.section) {
+              <span class="mt-0.5 block text-[12.5px] text-muted">{{ source.section }}</span>
+            }
+          </span>
+          <svg pIcon="external-link" [size]="11" class="mt-1 shrink-0 text-muted" aria-hidden="true"></svg>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      }
+    </div>
+  </p-popover>
+}

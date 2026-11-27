@@ -2,6 +2,19 @@ import { signal } from '@angular/core';
 
 export type PlanLoadStatus = 'loading' | 'ready' | 'error';
 
+/**
+ * Every plan load (warm-up, viewer, map editor) uses this CORS mode. The API answers media with
+ * `Vary: Origin`, so mixing modes makes the browser keep two cache entries and download twice.
+ */
+export const PLAN_IMAGE_CROSS_ORIGIN = 'anonymous';
+
+/** Starts downloading a plan into the browser cache, so a later load of the same URL reuses it. */
+export function warmPlanImage(url: string): void {
+  const image = new Image();
+  image.crossOrigin = PLAN_IMAGE_CROSS_ORIGIN;
+  image.src = url;
+}
+
 export function createPlanBoardLoad() {
   const status = signal<PlanLoadStatus>('loading');
   const image = signal<HTMLImageElement | null>(null);

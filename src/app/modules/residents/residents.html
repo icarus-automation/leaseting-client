@@ -208,9 +208,11 @@
   }
 </div>
 
-<app-resident-form-dialog
-  [visible]="drawerVisible()"
-  (visibleChange)="drawerVisible.set($event)"
-  [resident]="editTarget()"
-  (saved)="onSaved($event)"
-/>
+@defer (when drawerVisible()) {
+  <app-resident-form-dialog
+    [visible]="drawerVisible()"
+    (visibleChange)="drawerVisible.set($event)"
+    [resident]="editTarget()"
+    (saved)="onSaved($event)"
+  />
+}

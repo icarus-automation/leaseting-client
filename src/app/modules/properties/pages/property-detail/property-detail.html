@@ -216,15 +216,22 @@
           <app-skeleton variant="panel" />
         } @else if (floor(); as f) {
           @if (mapMode() && f.planImageUrl) {
-            <app-floor-map-editor
-              [floor]="f"
-              [target]="mapTarget()"
-              (unitPicked)="onUnitClicked($event)"
-              (saveRequested)="saveMapping()"
-              (clearRequested)="clearMapping()"
-              (hintRequested)="onMappingHint()"
-              (traceFailed)="onTraceFailed($event)"
-            />
+            @defer (on immediate) {
+              <app-floor-map-editor
+                #mapEditor
+                [floor]="f"
+                [target]="mapTarget()"
+                (unitPicked)="onUnitClicked($event)"
+                (saveRequested)="saveMapping()"
+                (clearRequested)="clearMapping()"
+                (hintRequested)="onMappingHint()"
+                (traceFailed)="onTraceFailed($event)"
+              />
+            } @placeholder {
+              <app-skeleton variant="panel" />
+            } @loading {
+              <app-skeleton variant="panel" />
+            }
           } @else {
             <app-floor-plan-viewer
               [floor]="f"
@@ -267,19 +274,23 @@
 </div>
 
 @if (property(); as p) {
-  <app-property-form-dialog
-    [visible]="propertyDrawerVisible()"
-    (visibleChange)="propertyDrawerVisible.set($event)"
-    [property]="p"
-    (saved)="onPropertySaved()"
-  />
-  <app-floor-form-dialog
-    [visible]="floorDrawerVisible()"
-    (visibleChange)="floorDrawerVisible.set($event)"
-    [propertyId]="p.id"
-    [floor]="floorEditTarget()"
-    (saved)="onFloorSaved($event)"
-  />
+  @defer (when propertyDrawerVisible()) {
+    <app-property-form-dialog
+      [visible]="propertyDrawerVisible()"
+      (visibleChange)="propertyDrawerVisible.set($event)"
+      [property]="p"
+      (saved)="onPropertySaved()"
+    />
+  }
+  @defer (when floorDrawerVisible()) {
+    <app-floor-form-dialog
+      [visible]="floorDrawerVisible()"
+      (visibleChange)="floorDrawerVisible.set($event)"
+      [propertyId]="p.id"
+      [floor]="floorEditTarget()"
+      (saved)="onFloorSaved($event)"
+    />
+  }
 }
 
 @if (selectedFloorId(); as floorId) {

@@ -37,6 +37,7 @@ import { FloorPlanViewer } from '../../components/floor-plan-viewer/floor-plan-v
 import { PropertyFormDialog } from '../../components/property-form-dialog/property-form-dialog';
 import { UnitFormDialog, UnitFormTarget } from '../../components/unit-form-dialog/unit-form-dialog';
 import { UnitPanel } from '../../components/unit-panel/unit-panel';
+import { warmPlanImage } from '../../plan-board-load';
 import { FloorsService } from '../../services/floors.service';
 import { PropertiesService } from '../../services/properties.service';
 import { UnitsService } from '../../services/units.service';
@@ -106,7 +107,11 @@ export class PropertyDetailPage {
   readonly pickerHint = signal(false);
   private readonly autoAdvance = signal(false);
 
-  readonly mapEditor = viewChild(FloorMapEditor);
+  /**
+   * Located by template ref, not by class: a class locator is a value reference that would keep
+   * the editor (and Konva) out of its `@defer` chunk.
+   */
+  readonly mapEditor = viewChild<FloorMapEditor>('mapEditor');
 
   readonly activeFloor = computed(() => {
     const id = this.selectedFloorId();
@@ -195,7 +200,14 @@ export class PropertyDetailPage {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+    this.warmFloorPlan(floorId);
     this.loadFloor(floorId);
+  }
+
+  /** Starts the plan download from the property response, alongside `GET /floors/:id` instead of after it. */
+  private warmFloorPlan(floorId: string): void {
+    const url = this.property()?.floors.find((floor) => floor.id === floorId)?.planImageUrl;
+    if (url) warmPlanImage(url);
   }
 
   refreshFloor(): void {

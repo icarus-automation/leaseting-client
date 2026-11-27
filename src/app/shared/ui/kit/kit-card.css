@@ -8,7 +8,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background-color: var(--surface);
-  background-image: url('/kit/kit-dashboard-backdrop.png');
+  background-image: url('/kit/kit-dashboard-backdrop.webp');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;

@@ -59,9 +59,11 @@
   }
 </div>
 
-<app-property-form-dialog
-  [visible]="drawerVisible()"
-  (visibleChange)="drawerVisible.set($event)"
-  [property]="editTarget()"
-  (saved)="onSaved($event)"
-/>
+@defer (when drawerVisible()) {
+  <app-property-form-dialog
+    [visible]="drawerVisible()"
+    (visibleChange)="drawerVisible.set($event)"
+    [property]="editTarget()"
+    (saved)="onSaved($event)"
+  />
+}

@@ -376,10 +376,12 @@
 </div>
 
 @if (resident(); as t) {
-  <app-resident-form-dialog
-    [visible]="drawerVisible()"
-    (visibleChange)="drawerVisible.set($event)"
-    [resident]="t"
-    (saved)="onSaved()"
-  />
+  @defer (when drawerVisible()) {
+    <app-resident-form-dialog
+      [visible]="drawerVisible()"
+      (visibleChange)="drawerVisible.set($event)"
+      [resident]="t"
+      (saved)="onSaved()"
+    />
+  }
 }

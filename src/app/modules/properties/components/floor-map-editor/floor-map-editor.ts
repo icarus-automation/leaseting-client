@@ -19,7 +19,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 
 import type { FloorDetail, FloorUnitItem } from '../../../../core/models/property.types';
 import { PLAN_MIN_HEIGHT_PX, PLAN_VIEWPORT_RESERVE_PX } from '../../floor-plan.constants';
-import { createPlanBoardLoad } from '../../plan-board-load';
+import { createPlanBoardLoad, PLAN_IMAGE_CROSS_ORIGIN } from '../../plan-board-load';
 import { unitTone } from '../../../../shared/utils/unit-tone.util';
 import { readPlanLuminance, type PlanLuminance } from '../../plan-trace/plan-luminance.util';
 import {
@@ -174,7 +174,7 @@ export class FloorMapEditor {
       const url = this.floor().planImageUrl;
       if (!ready) return;
       untracked(() => {
-        this.planLoad.start(url, { crossOrigin: 'anonymous' }); // canvas stays untainted for tap-to-fill
+        this.planLoad.start(url, { crossOrigin: PLAN_IMAGE_CROSS_ORIGIN }); // canvas stays untainted for tap-to-fill
       });
     });
 

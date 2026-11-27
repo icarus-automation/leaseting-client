@@ -17,19 +17,19 @@ export interface KitEvent {
 export type KitMood = 'neutral' | 'concern' | 'sad' | 'happy' | 'thinking';
 
 export const KIT_ART: Record<KitMood, string> = {
-  neutral: '/kit/kit-neutral.png',
-  concern: '/kit/kit-concern.png',
-  sad: '/kit/kit-sad.png',
-  happy: '/kit/kit-happy.png',
-  thinking: '/kit/kit-thinking.png',
+  neutral: '/kit/kit-neutral.webp',
+  concern: '/kit/kit-concern.webp',
+  sad: '/kit/kit-sad.webp',
+  happy: '/kit/kit-happy.webp',
+  thinking: '/kit/kit-thinking.webp',
 };
 
 export const KIT_HEAD_ART: Record<KitMood, string> = {
-  neutral: '/kit/square/kit-head-neutral.png',
-  concern: '/kit/square/kit-head-concern.png',
-  sad: '/kit/square/kit-head-sad.png',
-  happy: '/kit/square/kit-head-happy.png',
-  thinking: '/kit/square/kit-head-thinking.png',
+  neutral: '/kit/square/kit-head-neutral.webp',
+  concern: '/kit/square/kit-head-concern.webp',
+  sad: '/kit/square/kit-head-sad.webp',
+  happy: '/kit/square/kit-head-happy.webp',
+  thinking: '/kit/square/kit-head-thinking.webp',
 };
 
 export const KIT_SEVERITY_LABELS: Record<KitSeverity, string> = {

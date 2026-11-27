@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, untracked } from '@angular/core';
 import { PIcon } from '@primeicons/angular/p-icon';
 
-import { createPlanBoardLoad } from '../../plan-board-load';
+import { createPlanBoardLoad, PLAN_IMAGE_CROSS_ORIGIN } from '../../plan-board-load';
 
 @Component({
   selector: 'app-plan-load-frame',
@@ -30,7 +30,13 @@ import { createPlanBoardLoad } from '../../plan-board-load';
         </div>
       }
       @case ('ready') {
-        <img [src]="src()" alt="" class="block h-full w-full select-none" draggable="false" />
+        <img
+          crossorigin="anonymous"
+          [src]="src()"
+          alt=""
+          class="block h-full w-full select-none"
+          draggable="false"
+        />
         <ng-content />
       }
     }
@@ -50,7 +56,8 @@ export class PlanLoadFrame {
   constructor() {
     effect(() => {
       const url = this.src();
-      untracked(() => this.load.start(url));
+      // Same CORS mode as the <img> below and the map editor, so all three share one download.
+      untracked(() => this.load.start(url, { crossOrigin: PLAN_IMAGE_CROSS_ORIGIN }));
     });
 
     effect(() => {

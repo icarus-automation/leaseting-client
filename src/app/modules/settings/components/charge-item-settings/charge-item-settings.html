@@ -52,15 +52,10 @@
                     appendTo="body"
                     ariaLabel="How often it is billed"
                   />
-                  <p-inputnumber
+                  <app-peso-input
                     formControlName="defaultAmount"
-                    mode="currency"
-                    currency="PHP"
-                    locale="en-PH"
-                    [min]="0"
                     placeholder="No default"
-                    styleClass="w-36"
-                    inputStyleClass="w-full"
+                    class="w-36"
                     ariaLabel="Default amount"
                   />
 
@@ -190,15 +185,10 @@
               appendTo="body"
               ariaLabel="How often the new charge item is billed"
             />
-            <p-inputnumber
+            <app-peso-input
               formControlName="defaultAmount"
-              mode="currency"
-              currency="PHP"
-              locale="en-PH"
-              [min]="0"
               placeholder="No default"
-              styleClass="w-36"
-              inputStyleClass="w-full"
+              class="w-36"
               ariaLabel="Default amount for the new charge item"
             />
             <button

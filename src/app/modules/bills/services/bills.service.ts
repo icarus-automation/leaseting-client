@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api';
+import { SKIP_CACHE_HEADER } from '../../../core/http/cache.interceptor';
 import type { Paginated } from '../../../core/models/api.types';
 import type {
   BillDetail,
@@ -37,6 +38,23 @@ export class BillsService {
 
   summary(): Observable<BillsSummary> {
     return this.http.get<BillsSummary>(`${this.base}/summary`);
+  }
+
+  /**
+   * How many bills `rentRun` would create now. Creates nothing. Never cached:
+   * the confirm shows the count at the moment someone decides to run.
+   */
+  rentRunPreview(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.base}/rent-run/preview`, {
+      headers: { [SKIP_CACHE_HEADER]: 'true' },
+    });
+  }
+
+  /** How many bills `duesRun` would create now. Creates nothing, never cached. */
+  duesRunPreview(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.base}/dues-run/preview`, {
+      headers: { [SKIP_CACHE_HEADER]: 'true' },
+    });
   }
 
   rentRun(): Observable<{ created: number; skipped: number }> {

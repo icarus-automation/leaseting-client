@@ -21,7 +21,6 @@ import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
-import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { CHARGE_FREQUENCY_LABELS, type ChargeItemResponse } from '../../../../core/models/charge-item.types';
@@ -35,6 +34,12 @@ import { leaseBillsType } from '../../../../shared/utils/lease-utility-billing.u
 import { LeasesService } from '../../../leases/services/leases.service';
 import { ChargeItemsService } from '../../../settings/services/charge-items.service';
 import { BillsService } from '../../services/bills.service';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
+import { UtilityChargeLines } from '../../../../shared/ui/utility-charge-lines/utility-charge-lines';
+import { UTILITY_TAX_BASIS_LABELS, utilityChargeLines } from '../../../../shared/utils/utility-breakdown.util';
+import { SegmentedControl, type SegmentedOption } from '../../../../shared/ui/segmented-control/segmented-control';
+import type { UtilityTaxBasis } from '../../../../core/models/bill.types';
+import { computeRow } from '../../pages/utility-run/utility-run-math.util';
 
 interface LeaseOption {
   id: string;
@@ -47,7 +52,7 @@ interface LeaseOption {
 
 @Component({
   selector: 'app-bill-form-dialog',
-  imports: [ProgressSpinner, ReactiveFormsModule, RouterLink, DatePicker, InputNumber, Select, PhpCurrencyPipe, ErrorBanner, FormDialog],
+  imports: [ProgressSpinner, ReactiveFormsModule, RouterLink, DatePicker, InputNumber, Select, ErrorBanner, FormDialog, PesoInput, UtilityChargeLines, SegmentedControl],
   templateUrl: './bill-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -80,10 +85,15 @@ export class BillFormDialog {
     multiplier: [null as number | null, [Validators.required, Validators.min(0.0001)]],
     adminFeePct: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     vatPct: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+    taxBasis: ['WHOLE_CHARGE' as UtilityTaxBasis],
     whtPct: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
   });
   readonly readingErrors = createFormErrors(this.readingForm);
   readonly readingMode = signal(false);
+  readonly taxBasisOptions: SegmentedOption<UtilityTaxBasis>[] = (['WHOLE_CHARGE', 'ADMIN_FEE'] as const).map((value) => ({
+    value,
+    label: UTILITY_TAX_BASIS_LABELS[value],
+  }));
 
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -129,26 +139,36 @@ export class BillFormDialog {
     return `Leaseting doesn't bill ${BILL_TYPE_LABELS[type].toLowerCase()} on this lease. Change it on the lease, under Utility billing.`;
   });
 
-  private readonly readingValues = toSignal(this.readingForm.valueChanges, {
+  protected readonly readingValues = toSignal(this.readingForm.valueChanges, {
     initialValue: this.readingForm.getRawValue(),
   });
+  /** The bill as it will read once created, with the same math the API stores. */
   readonly breakdown = computed(() => {
     if (!this.readingMode()) return null;
-    const { previousReading, presentReading, multiplier, adminFeePct, vatPct, whtPct } = this.readingValues();
-    if (
-      previousReading == null ||
-      presentReading == null ||
-      multiplier == null ||
-      presentReading < previousReading
-    ) {
-      return null;
-    }
-    const consumed = presentReading - previousReading;
-    const total = round2(consumed * multiplier);
-    const adminFee = round2(total * ((adminFeePct ?? 0) / 100));
-    const vat = round2(total * ((vatPct ?? 0) / 100));
-    const wht = round2(total * ((whtPct ?? 0) / 100));
-    return { consumed, total, adminFee, vat, wht, netDue: round2(total + adminFee + vat - wht) };
+    const { previousReading, presentReading, multiplier, adminFeePct, vatPct, taxBasis, whtPct } = this.readingValues();
+    if (previousReading == null || presentReading == null || multiplier == null) return null;
+    const rates = {
+      ratePerUnit: multiplier,
+      adminFeePct: adminFeePct ?? 0,
+      vatPct: vatPct ?? 0,
+      taxBasis: taxBasis ?? 'WHOLE_CHARGE',
+      whtPct: whtPct ?? 0,
+    };
+    const math = computeRow(previousReading, presentReading, rates);
+    if (!math) return null;
+    return {
+      consumed: math.consumed,
+      netDue: math.netDue,
+      lines: utilityChargeLines({
+        subtotal: math.subtotal,
+        adminFee: math.adminFee,
+        vat: math.vat,
+        vatRate: rates.vatPct / 100,
+        wht: math.wht,
+        whtRate: rates.whtPct / 100,
+        total: math.netDue,
+      }),
+    };
   });
 
   private readonly dialog = viewChild.required(FormDialog);
@@ -329,6 +349,7 @@ export class BillFormDialog {
         multiplier: reading.multiplier!,
         adminFeeRate: (reading.adminFeePct ?? 0) / 100,
         vatRate: (reading.vatPct ?? 0) / 100,
+        taxBasis: reading.taxBasis,
         whtRate: (reading.whtPct ?? 0) / 100,
       };
     }
@@ -404,8 +425,4 @@ function toLeaseOption(lease: LeaseListItem): LeaseOption {
     billsElectricity: lease.billsElectricity,
     billsWater: lease.billsWater,
   };
-}
-
-function round2(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
 }

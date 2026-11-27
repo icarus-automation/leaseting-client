@@ -13,6 +13,7 @@ import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { UtilityBillingFields, utilityBillingGroup } from '../../../../shared/ui/utility-billing-fields/utility-billing-fields';
 import { OwnershipsService } from '../../../ownerships/services/ownerships.service';
 import { ResidentsService } from '../../../residents/services/residents.service';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 interface ResidentOption {
   id: string;
@@ -28,7 +29,7 @@ function todayInput(): string {
 
 @Component({
   selector: 'app-sell-unit-dialog',
-  imports: [ReactiveFormsModule, Select, ProgressSpinner, ErrorBanner, FormDialog, UtilityBillingFields],
+  imports: [ReactiveFormsModule, Select, ProgressSpinner, ErrorBanner, FormDialog, UtilityBillingFields, PesoInput],
   templateUrl: './sell-unit-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

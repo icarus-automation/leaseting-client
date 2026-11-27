@@ -8,13 +8,12 @@ export interface SoaUtilityLine {
   presentReading: string;
   consumed: string;
   multiplier: string;
-  total: string;
-  adminFeeRate: string;
-  adminFee: string;
-  vatRate: string;
-  vat: string;
-  whtRate: string;
-  wht: string;
+  /**
+   * The bill's lines, labelled by the API: Subtotal, Admin fee, VAT, Withholding
+   * (negative) and Total, then Paid (negative) on a partly paid bill. Statements
+   * made before itemizing have none.
+   */
+  breakdown?: { label: string; amount: string }[];
   netDue: string;
 }
 

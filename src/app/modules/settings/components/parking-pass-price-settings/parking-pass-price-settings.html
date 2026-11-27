@@ -37,18 +37,23 @@
           </p>
           <div class="flex flex-col gap-3">
             @for (type of types(); track type.id) {
-              <div class="flex items-center justify-between gap-4">
-                <label class="text-[13px] font-medium text-heading" [attr.for]="'pass-price-' + type.id">{{ type.name }}</label>
-                <input
-                  [id]="'pass-price-' + type.id"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  inputmode="decimal"
-                  [formControl]="amountControl(type.id)"
-                  placeholder="Not offered"
-                  class="h-9 w-36 rounded-base border border-border bg-background px-3 text-right text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring disabled:opacity-70 motion-reduce:transition-none"
-                />
+              @let priceId = 'pass-price-' + type.id;
+              @let priceError = priceErrors.fieldError(type.id, priceMessages);
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center justify-between gap-4">
+                  <label class="text-[13px] font-medium text-heading" [attr.for]="priceId">{{ type.name }}</label>
+                  <app-peso-input
+                    class="w-40"
+                    [inputId]="priceId"
+                    [formControl]="amountControl(type.id)"
+                    placeholder="Not offered"
+                    [invalid]="!!priceError"
+                    [ariaDescribedBy]="priceError ? priceId + '-error' : undefined"
+                  />
+                </div>
+                @if (priceError) {
+                  <p class="self-end text-[12.5px] text-destructive" [id]="priceId + '-error'">{{ priceError }}</p>
+                }
               </div>
             }
           </div>

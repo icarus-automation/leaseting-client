@@ -3,13 +3,15 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  Injector,
+  afterNextRender,
   computed,
   effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { DatePipe, formatDate } from '@angular/common';
+import { DatePipe, DecimalPipe, formatDate } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -22,17 +24,19 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { UTILITY_BILLING_GUIDE_URL } from '../../../../core/config/docs';
 import { apiErrorMessage } from '../../../../core/models/api.types';
-import type { ReceiptScanResult, UtilityRunPreviewRow } from '../../../../core/models/bill.types';
+import type { ReceiptScanResult, UtilityRunPreviewRow, UtilityTaxBasis } from '../../../../core/models/bill.types';
 import type { BillType } from '../../../../core/models/enums';
 import type { PropertyListItem } from '../../../../core/models/property.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
-import { SegmentedControl } from '../../../../shared/ui/segmented-control/segmented-control';
+import { SegmentedControl, type SegmentedOption } from '../../../../shared/ui/segmented-control/segmented-control';
+import { UTILITY_TAX_BASIS_LABELS } from '../../../../shared/utils/utility-breakdown.util';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { PropertiesService } from '../../../properties/services/properties.service';
 import { BillsService } from '../../services/bills.service';
-import { computeRow, deriveRate, type UtilityRowMath } from './utility-run-math.util';
+import { consumedReading, deriveRate, utilityRowState, type UtilityRowState } from './utility-run-math.util';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 type UtilityType = Extract<BillType, 'ELECTRICITY' | 'WATER'>;
 type RateMode = 'direct' | 'derived';
@@ -71,10 +75,12 @@ function addMonths(date: Date, months: number): Date {
     InputNumber,
     Select,
     DatePipe,
+    DecimalPipe,
     PhpCurrencyPipe,
     EmptyState,
     SegmentedControl,
     Skeleton,
+    PesoInput,
   ],
   templateUrl: './utility-run.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -86,6 +92,8 @@ export class UtilityRun {
   private readonly router = inject(Router);
   private readonly toast = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   readonly typeOptions = UTILITY_TYPE_OPTIONS;
   readonly guideUrl = UTILITY_BILLING_GUIDE_URL;
@@ -108,8 +116,14 @@ export class UtilityRun {
     totalConsumption: [null as number | null],
     adminFeePct: [0, [Validators.min(0), Validators.max(100)]],
     vatPct: [0, [Validators.min(0), Validators.max(100)]],
+    taxBasis: ['WHOLE_CHARGE' as UtilityTaxBasis],
     whtPct: [0, [Validators.min(0), Validators.max(100)]],
   });
+
+  readonly taxBasisOptions: SegmentedOption<UtilityTaxBasis>[] = (['WHOLE_CHARGE', 'ADMIN_FEE'] as const).map((value) => ({
+    value,
+    label: UTILITY_TAX_BASIS_LABELS[value],
+  }));
 
   readonly rateMode = signal<RateMode>('derived');
   readonly propertyOptions = signal<PropertyListItem[]>([]);
@@ -126,7 +140,7 @@ export class UtilityRun {
   private readonly setupValues = toSignal(this.setupForm.valueChanges, {
     initialValue: this.setupForm.getRawValue(),
   });
-  private readonly rateValues = toSignal(this.rateForm.valueChanges, {
+  protected readonly rateValues = toSignal(this.rateForm.valueChanges, {
     initialValue: this.rateForm.getRawValue(),
   });
 
@@ -139,24 +153,29 @@ export class UtilityRun {
     return deriveRate(values.totalBillAmount, values.totalConsumption);
   });
 
-  readonly rowMath = computed<(UtilityRowMath | null)[]>(() => {
+  /** Each row's amount, or what it still needs: a reading, a previous reading, a higher reading, or a rate. */
+  readonly rowStates = computed<UtilityRowState[]>(() => {
     const rate = this.effectiveRate();
-    const { adminFeePct, vatPct, whtPct } = this.rateValues();
-    return this.rows().map((row) => {
-      if (rate == null || row.previous == null || row.present == null) return null;
-      return computeRow(row.previous, row.present, {
-        ratePerUnit: rate,
-        adminFeePct: adminFeePct ?? 0,
-        vatPct: vatPct ?? 0,
-        whtPct: whtPct ?? 0,
-      });
-    });
+    const { adminFeePct, vatPct, taxBasis, whtPct } = this.rateValues();
+    const rates =
+      rate == null
+        ? null
+        : {
+            ratePerUnit: rate,
+            adminFeePct: adminFeePct ?? 0,
+            vatPct: vatPct ?? 0,
+            taxBasis: taxBasis ?? 'WHOLE_CHARGE',
+            whtPct: whtPct ?? 0,
+          };
+    return this.rows().map((row) => utilityRowState(row.previous, row.present, rates));
   });
 
-  readonly filledCount = computed(() => this.rowMath().filter((math) => math !== null).length);
+  readonly consumed = computed(() => this.rows().map((row) => consumedReading(row.previous, row.present)));
+
+  readonly filledCount = computed(() => this.rowStates().filter((row) => row.state === 'ready').length);
 
   readonly grandTotal = computed(() =>
-    this.rowMath().reduce((sum, math) => sum + (math?.netDue ?? 0), 0),
+    this.rowStates().reduce((sum, row) => sum + (row.state === 'ready' ? row.math.netDue : 0), 0),
   );
 
   readonly unitLabel = computed(() => (this.setupValues().type === 'WATER' ? 'cu.m' : 'kWh'));
@@ -201,6 +220,27 @@ export class UtilityRun {
 
   updateRow(index: number, patch: Partial<Pick<RunRow, 'previous' | 'present'>>): void {
     this.rows.update((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  }
+
+  /** Enter in a Present reading moves down a row instead of submitting the run. */
+  onPresentEnter(event: Event, index: number): void {
+    event.preventDefault();
+    this.focusPresent(index + 1);
+  }
+
+  /** Enter in a Previous reading moves across to the same row's Present. */
+  onPreviousEnter(event: Event, index: number): void {
+    event.preventDefault();
+    this.focusPresent(index);
+  }
+
+  private focusPresent(index: number): void {
+    this.host.nativeElement.querySelector<HTMLInputElement>(`#run-present-${index}`)?.focus();
+  }
+
+  private focusFirstEmptyPresent(): void {
+    const index = this.rows().findIndex((row) => row.present == null);
+    if (index >= 0) this.focusPresent(index);
   }
 
   openScanPicker(): void {
@@ -290,11 +330,10 @@ export class UtilityRun {
       return;
     }
 
-    const math = this.rowMath();
+    const states = this.rowStates();
     const payloadRows = this.rows()
-      .map((row, index) => ({ row, math: math[index] }))
-      .filter((entry) => entry.math !== null)
-      .map(({ row }) => ({
+      .filter((_, index) => states[index].state === 'ready')
+      .map((row) => ({
         ...(row.leaseId ? { leaseId: row.leaseId } : { ownershipId: row.ownershipId! }),
         previousReading: row.previous!,
         presentReading: row.present!,
@@ -303,7 +342,7 @@ export class UtilityRun {
       this.toast.add({
         severity: 'warn',
         summary: 'No readings entered',
-        detail: 'Type at least one present reading. Blank rows are skipped.',
+        detail: 'Type at least one present reading. Rows that need a reading are left out.',
       });
       return;
     }
@@ -322,6 +361,7 @@ export class UtilityRun {
         periodTo: formatDate(periodTo!, 'yyyy-MM-dd', 'en-US'),
         adminFeeRate: (rate.adminFeePct ?? 0) / 100,
         vatRate: (rate.vatPct ?? 0) / 100,
+        taxBasis: rate.taxBasis,
         whtRate: (rate.whtPct ?? 0) / 100,
         ...(direct
           ? { ratePerUnit: rate.ratePerUnit! }
@@ -371,6 +411,7 @@ export class UtilityRun {
             })),
           );
           this.applyPeriodDefaults(preview);
+          afterNextRender(() => this.focusFirstEmptyPresent(), { injector: this.injector });
         },
         error: (error: unknown) => {
           this.loadingRows.set(false);

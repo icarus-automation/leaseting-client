@@ -1,93 +1,61 @@
-<div class="ops-calendar">
-  <header class="flex flex-wrap items-start justify-between gap-3">
-    <div>
-      <h1 class="font-heading text-2xl font-semibold text-heading">Calendar</h1>
-      <p class="mt-1 text-sm text-muted">Lease dates, bills due, and planned move-ins.</p>
-    </div>
+<div class="ops-calendar group flex flex-col gap-3 text-body data-fit:h-[calc(100dvh-var(--header-height)-4rem)]"
+  [attr.data-fit]="fit() ? '' : null">
+  <header class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <h1 class="font-heading text-2xl font-semibold text-heading">Calendar</h1>
+    <p class="text-sm text-muted">Lease dates, issued bills, and planned move-ins. Future rent shows once it's billed.</p>
   </header>
 
-  <section class="ops-filters" aria-label="Calendar filters">
-    <div class="ops-filter-fields">
-      <div class="ops-search-field">
-        <label for="calendar-search">Search</label>
-        <div class="ops-search">
-          <svg pIcon="search" [size]="15" aria-hidden="true"></svg>
-          <input id="calendar-search" type="search" placeholder="Tenant, unit or property" maxlength="120"
-            [ngModel]="searchText()" (ngModelChange)="searchText.set($event)" />
-        </div>
-      </div>
-      <div class="ops-filter-field">
-        <label for="calendar-property">Property</label>
-        <p-select inputId="calendar-property" [options]="propertyOptions()" optionLabel="label" optionValue="value"
-          [ngModel]="state().propertyId" (ngModelChange)="setState({ propertyId: $event })"
-          [filter]="properties().length > 8" filterBy="label" styleClass="w-full" appendTo="body" />
-      </div>
-      <div class="ops-filter-field">
-        <label for="calendar-scope">Show</label>
-        <p-select inputId="calendar-scope" [options]="scopeOptions" optionLabel="label" optionValue="value"
-          [ngModel]="state().scope" (ngModelChange)="setState({ scope: $event })" styleClass="w-full" appendTo="body" />
-      </div>
+  <!-- One compact row. Each control shows its own value, so the labels are for screen readers only. -->
+  <section class="flex flex-wrap items-center gap-x-2.5 gap-y-2" aria-label="Calendar filters">
+    <div class="flex h-control min-w-40 max-w-72 flex-[1_1_12rem] items-center gap-2 rounded-base border border-border px-2.5 text-muted max-md:max-w-none max-md:basis-full">
+      <label for="calendar-search" class="sr-only">Search</label>
+      <svg pIcon="search" [size]="14" aria-hidden="true"></svg>
+      <input id="calendar-search" type="search" class="h-full w-full min-w-0 text-[13px] text-body caret-primary placeholder:text-muted" placeholder="Search tenant, unit or property" maxlength="120"
+        [ngModel]="searchText()" (ngModelChange)="searchText.set($event)" />
     </div>
-    @if (propertiesError()) {
-      <p class="text-[13px] text-destructive" role="alert">
-        Property choices could not load.
-        <button type="button" class="font-medium underline underline-offset-2" (click)="loadProperties()">Retry properties</button>
-      </p>
-    }
-    <div class="ops-type-row">
-      <div class="ops-types" role="group" aria-label="Entry types">
-        @for (type of eventTypes; track type.value) {
-          <button type="button" class="ops-type" [attr.aria-pressed]="state().types.includes(type.value)"
-            (click)="toggleType(type.value)">
-            <svg [pIcon]="type.icon" [size]="14" aria-hidden="true"></svg>
-            {{ type.label }}
-            <span class="ops-count">{{ loading() || error() ? '—' : typeCounts()[type.value] }}</span>
-          </button>
-        }
-      </div>
-      @if (hasFilters()) {
-        <button type="button" class="ops-reset" (click)="resetFilters()">Reset filters</button>
-      }
+    <div class="w-42 max-md:min-w-0 max-md:flex-1">
+      <span id="calendar-property-label" class="sr-only">Property</span>
+      <p-select inputId="calendar-property" ariaLabelledBy="calendar-property-label" [options]="propertyOptions()"
+        optionLabel="label" optionValue="value"
+        [ngModel]="state().propertyId" (ngModelChange)="setState({ propertyId: $event })"
+        [filter]="properties().length > 8" filterBy="label" styleClass="w-full" appendTo="body" />
     </div>
-  </section>
-
-  @if (selected(); as entry) {
-    <aside #details tabindex="-1" class="ops-details" aria-label="Calendar entry details" (keydown.escape)="closeEntry()">
-      <div class="ops-detail-heading">
-        <div>
-          <h2 class="font-heading text-base font-semibold">{{ entry.title }}</h2>
-          <!-- Anchor the literal day before formatting; Angular parses a bare date as local midnight. -->
-          <p class="mt-1 text-sm text-muted"><time [attr.datetime]="entry.date">{{ entry.date + 'T00:00:00Z' | date: 'EEEE, MMMM d, y' : 'UTC' }}</time></p>
-        </div>
-        <button type="button" class="ops-icon-button" aria-label="Close calendar entry details" (click)="closeEntry()">
-          <svg pIcon="times" [size]="15" aria-hidden="true"></svg>
+    <div class="w-40 max-md:min-w-0 max-md:flex-1">
+      <span id="calendar-scope-label" class="sr-only">Show</span>
+      <p-select inputId="calendar-scope" ariaLabelledBy="calendar-scope-label" [options]="scopeOptions"
+        optionLabel="label" optionValue="value"
+        [ngModel]="state().scope" (ngModelChange)="setState({ scope: $event })" styleClass="w-full" appendTo="body" />
+    </div>
+    <div class="flex flex-wrap gap-1.5" role="group" aria-label="Entry types">
+      @for (type of eventTypes; track type.value) {
+        <button type="button" class="ops-type" [attr.aria-pressed]="state().types.includes(type.value)"
+          (click)="toggleType(type.value)">
+          <svg [pIcon]="type.icon" [size]="13" aria-hidden="true"></svg>
+          {{ type.label }}
+          <span class="ops-count">{{ loading() || error() ? '—' : typeCounts()[type.value] }}</span>
         </button>
-      </div>
-      <div class="ops-detail-body">
-        <dl class="ops-detail-facts">
-          <div><dt>Tenant</dt><dd>{{ entry.resident?.name ?? 'Not selected yet' }}</dd></div>
-          <div><dt>Location</dt><dd>Unit {{ entry.unit.unitNo }} · {{ entry.property.name }}</dd></div>
-          <div><dt>{{ entry.type === 'BILL_DUE' ? 'Payment status' : 'Status' }}</dt><dd><app-status-badge [tone]="tone(entry)" [label]="entry.statusLabel" /></dd></div>
-          @if (entry.amount !== null) {
-            <div><dt>Bill amount</dt><dd class="tabular-nums">{{ entry.amount | phpCurrency }}</dd></div>
-            <div><dt>Outstanding</dt><dd class="tabular-nums">{{ entry.balance | phpCurrency }}</dd></div>
-          }
-        </dl>
-        <a class="ops-button ops-button-primary ops-detail-action" [routerLink]="source(entry).route" [queryParams]="source(entry).queryParams">
-          {{ source(entry).label }} <svg pIcon="arrow-up-right" [size]="14" aria-hidden="true"></svg>
-        </a>
-      </div>
-      @if (entry.type === 'MOVE_IN') {
-        <p class="mt-3 text-[13px] text-muted">
-          Planned from the onboarding start date. Complete the walk to confirm the lease.
-        </p>
       }
-    </aside>
+    </div>
+    @if (hasFilters()) {
+      <button type="button" class="ops-reset" (click)="resetFilters()">Reset filters</button>
+    }
+    <ul class="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted max-md:ml-0" aria-label="Status legend">
+      @for (item of legend; track item.label) {
+        <li class="inline-flex items-center gap-1.5 whitespace-nowrap"><span [class]="dotClass(item.tone)" aria-hidden="true"></span>{{ item.label }}</li>
+      }
+    </ul>
+  </section>
+  @if (propertiesError()) {
+    <p class="text-[13px] text-destructive" role="alert">
+      Property choices could not load.
+      <button type="button" class="font-medium underline underline-offset-2" (click)="loadProperties()">Retry properties</button>
+    </p>
   }
 
-  <section class="ops-calendar-panel" aria-label="Operations calendar" [attr.aria-busy]="loading()">
-    <div class="ops-toolbar">
-      <div class="ops-period">
+  <section class="min-w-0 rounded-base border border-border group-data-fit:flex group-data-fit:min-h-0 group-data-fit:flex-1 group-data-fit:flex-col"
+    aria-label="Operations calendar" [attr.aria-busy]="loading()">
+    <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 py-2.5 max-md:p-3">
+      <div class="flex items-center gap-2.5 max-md:w-full max-md:gap-2">
         <div class="ops-navigation" role="group" aria-label="Navigate calendar">
           <button type="button" class="ops-icon-button" aria-label="Previous period" (click)="navigate('prev')">
             <svg pIcon="chevron-left" [size]="14" aria-hidden="true"></svg>
@@ -96,8 +64,21 @@
             <svg pIcon="chevron-right" [size]="14" aria-hidden="true"></svg>
           </button>
         </div>
-        <h2 class="font-heading text-lg font-semibold" aria-live="polite">{{ title() }}</h2>
+        <h2 class="font-heading text-lg font-semibold max-md:text-[15px]" aria-live="polite">{{ title() }}</h2>
         <button type="button" class="ops-button ops-today" (click)="navigate('today')">Today</button>
+      </div>
+      <div class="flex flex-1 flex-wrap justify-end gap-x-3 gap-y-1 text-[12.5px] text-muted max-md:justify-start" role="status" aria-live="polite">
+        @if (loading()) {
+          <span>Loading calendar…</span>
+        } @else if (error()) {
+          <span>Calendar unavailable</span>
+        } @else {
+          <span>{{ filtered().length }} {{ filtered().length === 1 ? 'entry' : 'entries' }} in this {{ state().view === 'week' ? 'week' : 'month' }}</span>
+          @if (overdueCount()) {
+            <span class="ops-overdue-count">{{ overdueCount() }} past due or planned date</span>
+          }
+        }
+        <span>Manila time</span>
       </div>
       <div class="ops-views" role="group" aria-label="Calendar view">
         @for (view of viewOptions; track view.value) {
@@ -106,28 +87,6 @@
           </button>
         }
       </div>
-    </div>
-
-    <div class="ops-result-line" role="status" aria-live="polite">
-      @if (loading()) {
-        <span>Loading calendar…</span>
-      } @else if (error()) {
-        <span>Calendar unavailable</span>
-      } @else {
-        <span>{{ filtered().length }} {{ filtered().length === 1 ? 'entry' : 'entries' }} in this {{ state().view === 'week' ? 'week' : 'month' }}</span>
-        @if (overdueCount()) {
-          <span class="ops-overdue-count">{{ overdueCount() }} past due or planned date</span>
-        }
-      }
-      <span class="ops-timezone">Manila time</span>
-    </div>
-
-    <div class="ops-legend" aria-label="Bill status legend">
-      <span>Bill status</span>
-      <app-status-badge tone="warning" label="Due / Due today" />
-      <app-status-badge tone="destructive" label="Overdue" />
-      <app-status-badge tone="success" label="Paid" />
-      <span>Lease and move-in dates stay neutral.</span>
     </div>
 
     @if (error(); as message) {
@@ -149,11 +108,20 @@
       </div>
     }
 
-    <div class="ops-calendar-viewport" [class.ops-calendar-loading]="loading()" [class.ops-calendar-failed]="!!error()">
+    <div #viewport class="ops-calendar-viewport min-w-0 overflow-x-auto group-data-fit:min-h-0 group-data-fit:flex-1 group-data-fit:overflow-hidden"
+      [class.ops-calendar-loading]="loading()" [class.ops-calendar-failed]="!!error()">
       @for (key of [calendarKey()]; track key) {
         <full-calendar [options]="options" [events]="calendarEvents()">
           <ng-template #eventContent let-info>
             @let entry = eventEntry(info.event);
+            @if (info.view.type === 'dayGridMonth') {
+              <!-- Month: one line per entry. The dot shows the status; the words stay in the DOM for screen readers. -->
+              <div class="flex min-w-0 items-center gap-1.5 px-1 text-[12px] leading-4">
+                <span [class]="dotClass(tone(entry))" aria-hidden="true"></span>
+                <span class="ops-event-line-title min-w-0 truncate">{{ entry.title }} · {{ entry.unit.unitNo }}</span>
+                <span class="ops-event-status sr-only">{{ entry.statusLabel }}</span>
+              </div>
+            } @else {
             <div class="ops-event-content">
               <div class="ops-event-title">
                 <svg class="shrink-0" [pIcon]="entryIcon(entry.type)" [size]="12" aria-hidden="true"></svg>
@@ -168,14 +136,21 @@
                 }
               </div>
             </div>
+            }
           </ng-template>
         </full-calendar>
       }
     </div>
   </section>
 
-  <p class="flex items-baseline gap-2 text-[12.5px] text-muted">
-    <svg class="shrink-0" pIcon="link" [size]="13" aria-hidden="true"></svg>
-    Dates come from your records. Only issued bills appear; future rent is added when billed.
-  </p>
+  <!-- Floats beside the entry it was opened from, like Google Calendar's event card. -->
+  @if (selected(); as entry) {
+    <app-entry-popover
+      [entry]="entry"
+      [anchor]="anchor()"
+      [today]="today()"
+      [instant]="openedByKeyboard()"
+      (closed)="closeEntry($event)"
+    />
+  }
 </div>

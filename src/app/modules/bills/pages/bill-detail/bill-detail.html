@@ -116,6 +116,9 @@
             @if (rentBreakdown(); as breakdown) {
               <p class="mt-1 text-[12.5px] text-muted">{{ breakdown }}</p>
             }
+            @if (chargeLines(); as lines) {
+              <app-utility-charge-lines class="mt-2 block" [lines]="lines" />
+            }
           </div>
           <div>
             <dt class="text-[12px] text-muted">Paid</dt>

@@ -16,7 +16,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { MessageService } from 'primeng/api';
 import { DatePicker } from 'primeng/datepicker';
-import { InputNumber } from 'primeng/inputnumber';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -45,6 +44,7 @@ import { finiteAmount } from '../../utils/payment-amount.util';
 import { billSourceOf } from '../../../../shared/utils/bill-source.util';
 import { paymentMethodSummary } from '../../utils/payment-method-display.util';
 import type { PaymentCta, PaymentTarget } from './payment-target';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 const ACCEPTED_RECEIPT_TYPES = 'image/png,image/jpeg,image/webp';
 const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
@@ -57,13 +57,13 @@ const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
     ReactiveFormsModule,
     PIcon,
     DatePicker,
-    InputNumber,
     PaymentMethodFields,
     PhpCurrencyPipe,
     ErrorBanner,
     PrivateImage,
     ReasonDialog,
     StatusBadge,
+    PesoInput,
   ],
   templateUrl: './payment-workspace.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

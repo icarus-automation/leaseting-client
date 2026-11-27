@@ -33,6 +33,7 @@ import {
   unitFormPayload,
 } from '../../../../shared/utils/per-sqm-quote';
 import { UnitsService } from '../../services/units.service';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 export interface UnitFormTarget {
   id: string;
@@ -55,7 +56,7 @@ const BLANK_UNIT = {
 
 @Component({
   selector: 'app-unit-form-dialog',
-  imports: [ProgressSpinner, ReactiveFormsModule, InputNumber, SegmentedControl, ErrorBanner, FormDialog],
+  imports: [ProgressSpinner, ReactiveFormsModule, InputNumber, SegmentedControl, ErrorBanner, FormDialog, PesoInput],
   templateUrl: './unit-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

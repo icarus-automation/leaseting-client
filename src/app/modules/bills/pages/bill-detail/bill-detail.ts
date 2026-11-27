@@ -19,10 +19,17 @@ import { BillsService } from '../../services/bills.service';
 import { formatStoredPerSqmRent } from '../../../../shared/utils/per-sqm-quote';
 import { billStatusBadge } from '../../utils/bill-status.util';
 import { billSourceOf } from '../../../../shared/utils/bill-source.util';
+import { UtilityChargeLines } from '../../../../shared/ui/utility-charge-lines/utility-charge-lines';
+import {
+  UTILITY_TAX_BASIS_LABELS,
+  percentLabel,
+  storedUtilityAmounts,
+  utilityChargeLines,
+} from '../../../../shared/utils/utility-breakdown.util';
 
 @Component({
   selector: 'app-bill-detail',
-  imports: [DatePipe, RouterLink, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge, PaymentWorkspace],
+  imports: [DatePipe, RouterLink, PIcon, PhpCurrencyPipe, Skeleton, StatusBadge, PaymentWorkspace, UtilityChargeLines],
   templateUrl: './bill-detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -53,6 +60,13 @@ export class BillDetailPage {
   readonly target = computed<PaymentTarget | null>(() => {
     const bill = this.bill();
     return bill ? paymentTargetFromRow(bill) : null;
+  });
+
+  /** A utility bill's stored lines, Subtotal to Total. Null for other bills and ones sent without amounts. */
+  readonly chargeLines = computed(() => {
+    const bill = this.bill();
+    const amounts = bill ? storedUtilityAmounts(bill.utilityDetail, bill.amount) : null;
+    return amounts ? utilityChargeLines(amounts) : null;
   });
 
   readonly rentBreakdown = computed(() => {
@@ -114,21 +128,23 @@ export class BillDetailPage {
     if (id) this.load(id);
   }
 
-  asPercent(fraction: string): string {
-    const value = Number(fraction) * 100;
-    if (!Number.isFinite(value)) return fraction;
-    return `${Number.isInteger(value) ? value : value.toFixed(2)}%`;
-  }
-
+  /**
+   * The reading behind the bill. The amounts sit under Amounts; a bill sent
+   * without them (an older API) still shows its rates here.
+   */
   utilityRows(detail: UtilityDetail): { label: string; value: string }[] {
     const rows: { label: string; value: string }[] = [
       { label: 'Previous reading', value: detail.previousReading },
       { label: 'Present reading', value: detail.presentReading },
       { label: 'Rate', value: detail.multiplier },
     ];
-    if (detail.adminFeeRate) rows.push({ label: 'Admin fee', value: this.asPercent(detail.adminFeeRate) });
-    rows.push({ label: 'VAT', value: this.asPercent(detail.vatRate) });
-    rows.push({ label: 'Withholding tax', value: this.asPercent(detail.whtRate) });
+    if (detail.subtotal == null) {
+      if (detail.adminFeeRate) rows.push({ label: 'Admin fee', value: percentLabel(detail.adminFeeRate) });
+      rows.push({ label: 'VAT', value: percentLabel(detail.vatRate) });
+      rows.push({ label: 'Withholding tax', value: percentLabel(detail.whtRate) });
+    } else if ((Number(detail.vat ?? 0) !== 0 || Number(detail.wht ?? 0) !== 0) && detail.taxBasis) {
+      rows.push({ label: 'Taxes applied to', value: UTILITY_TAX_BASIS_LABELS[detail.taxBasis] });
+    }
     if (detail.totalBillAmount) rows.push({ label: 'Provider bill', value: detail.totalBillAmount });
     if (detail.totalConsumption) rows.push({ label: 'Provider consumption', value: detail.totalConsumption });
     return rows;

@@ -109,6 +109,9 @@
   --animate-error-in:  error-in 180ms ease-out both;
   --animate-row-flash: row-flash 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pop-in:    pop-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* An anchored card grows from the side facing its trigger; set transform-origin on it. */
+  --animate-popover-in: popover-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  --animate-fade-in:    fade-in 150ms ease-out both;
 
   --animate-kit-idle:  kit-idle 6s ease-in-out infinite;
   --animate-kit-hop:   kit-hop 780ms cubic-bezier(0.33, 0, 0.35, 1) 3;
@@ -129,6 +132,16 @@
 @keyframes pop-in {
   from { opacity: 0; transform: scale(0.98) translateY(-4px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes popover-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 

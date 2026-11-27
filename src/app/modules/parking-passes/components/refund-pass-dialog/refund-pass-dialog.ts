@@ -17,10 +17,11 @@ import {
   paymentsWithRemainder,
   refundErrorMessage,
 } from '../../utils/parking-pass.util';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 @Component({
   selector: 'app-refund-pass-dialog',
-  imports: [ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog],
+  imports: [ReactiveFormsModule, PIcon, Select, ErrorBanner, FormDialog, PesoInput],
   templateUrl: './refund-pass-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

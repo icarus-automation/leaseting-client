@@ -67,6 +67,18 @@ export function matchesCalendarFilters(entry: CalendarEntry, state: CalendarStat
   return state.q.toLocaleLowerCase().split(/\s+/).every((word) => haystack.includes(word));
 }
 
+/**
+ * Status colors for the month dots, the legend and the entry card's square.
+ * Amber gets a darker edge so it reads on white.
+ */
+export const TONE_FILLS: Record<BadgeTone, string> = {
+  warning: 'bg-warning ring-1 ring-[color-mix(in_oklab,var(--warning)_60%,var(--text-heading))]',
+  destructive: 'bg-destructive',
+  success: 'bg-success',
+  vacant: 'bg-vacant',
+  neutral: 'bg-muted',
+};
+
 export function entryTone(entry: CalendarEntry): BadgeTone {
   if (entry.type !== 'BILL_DUE') return 'neutral';
   if (entry.status === 'OVERDUE') return 'destructive';

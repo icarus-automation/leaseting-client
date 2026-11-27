@@ -3,6 +3,13 @@ import type { PaymentDestinationSummary } from './payment-destination.types';
 import type { PaymentMethodPayload } from './payment-method.types';
 import type { LeaseRentSnapshot } from './lease.types';
 
+/** What the landlord's VAT and withholding are both charged on: usage plus admin fee, or the admin fee alone. */
+export type UtilityTaxBasis = 'WHOLE_CHARGE' | 'ADMIN_FEE';
+
+/**
+ * A utility bill's reading, rates and amounts. The amounts are worked out once,
+ * when the bill is created. An API not deployed yet sends the rates only.
+ */
 export interface UtilityDetail {
   periodFrom: string;
   periodTo: string;
@@ -11,7 +18,13 @@ export interface UtilityDetail {
   multiplier: string;
   adminFeeRate?: string;
   vatRate: string;
+  taxBasis?: UtilityTaxBasis;
   whtRate: string;
+  consumed?: string;
+  subtotal?: string;
+  adminFee?: string;
+  vat?: string;
+  wht?: string;
   totalBillAmount?: string;
   totalConsumption?: string;
 }
@@ -104,6 +117,7 @@ export interface CreateBillPayload {
     multiplier: number;
     adminFeeRate?: number;
     vatRate: number;
+    taxBasis: UtilityTaxBasis;
     whtRate: number;
     totalBillAmount?: number;
     totalConsumption?: number;
@@ -159,6 +173,7 @@ export interface CreateUtilityRunPayload {
   periodTo: string;
   adminFeeRate: number;
   vatRate: number;
+  taxBasis: UtilityTaxBasis;
   whtRate: number;
   ratePerUnit?: number;
   totalBillAmount?: number;

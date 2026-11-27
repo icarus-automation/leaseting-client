@@ -27,6 +27,7 @@ import { ResidentConsentPanel } from '../../components/resident-consent-panel/re
 import { ResidentFormDialog } from '../../components/resident-form-dialog/resident-form-dialog';
 import { ResidentRiskPanel } from '../../components/resident-risk-panel/resident-risk-panel';
 import { ResidentsService } from '../../services/residents.service';
+import { documentFileError } from '../../utils/document-file-error';
 import { presentDocumentBlob } from '../../utils/present-document-blob';
 
 interface BillingHistoryRow extends ResidentLeaseBillItem {
@@ -188,7 +189,7 @@ export class ResidentDetailPage {
           this.toast.add({
             severity: 'error',
             summary: download ? 'Download failed' : 'Could not open the document',
-            detail: apiErrorMessage(error, 'Try again.'),
+            detail: documentFileError(error, 'Try again.'),
           });
         },
       });

@@ -71,15 +71,9 @@
             (valueChange)="setBasis($event)"
           />
           @if (basis() === 'FIXED') {
-            <p-inputnumber
+            <app-peso-input
               formControlName="amount"
               [readonly]="!canManage()"
-              mode="currency"
-              currency="PHP"
-              locale="en-PH"
-              [min]="0"
-              styleClass="w-full"
-              inputStyleClass="w-full"
               ariaLabel="Fixed late fee"
             />
           } @else {

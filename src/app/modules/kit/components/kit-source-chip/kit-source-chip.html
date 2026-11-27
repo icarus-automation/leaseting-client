@@ -34,29 +34,31 @@
     (onHide)="open.set(false)"
   >
     <div class="flex flex-col gap-1.5 text-[13px] leading-snug">
-      <div class="flex items-center gap-1">
-        <button
-          type="button"
-          class="rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent motion-reduce:transition-none"
-          aria-label="Previous source"
-          [disabled]="index() === 0"
-          (click)="previous()"
-        >
-          <svg pIcon="chevron-left" [size]="11" aria-hidden="true"></svg>
-        </button>
-        <span class="min-w-[2.5rem] text-center text-[12px] tabular-nums text-muted" aria-live="polite">
-          {{ index() + 1 }}/{{ docs().length }}
-        </span>
-        <button
-          type="button"
-          class="rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent motion-reduce:transition-none"
-          aria-label="Next source"
-          [disabled]="index() === docs().length - 1"
-          (click)="next()"
-        >
-          <svg pIcon="chevron-right" [size]="11" aria-hidden="true"></svg>
-        </button>
-      </div>
+      @if (more() > 0) {
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            class="rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent motion-reduce:transition-none"
+            aria-label="Previous source"
+            [disabled]="index() === 0"
+            (click)="previous()"
+          >
+            <svg pIcon="chevron-left" [size]="11" aria-hidden="true"></svg>
+          </button>
+          <span class="min-w-[2.5rem] text-center text-[12px] tabular-nums text-muted" aria-live="polite">
+            {{ index() + 1 }}/{{ docs().length }}
+          </span>
+          <button
+            type="button"
+            class="rounded-base p-1 text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent motion-reduce:transition-none"
+            aria-label="Next source"
+            [disabled]="index() === docs().length - 1"
+            (click)="next()"
+          >
+            <svg pIcon="chevron-right" [size]="11" aria-hidden="true"></svg>
+          </button>
+        </div>
+      }
 
       @if (current(); as source) {
         <a

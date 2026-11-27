@@ -34,11 +34,11 @@
   <div class="grid gap-3 sm:grid-cols-2">
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="ob-advance-paid">Advance received</label>
-      <p-inputnumber inputId="ob-advance-paid" formControlName="advanceAmount" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
+      <app-peso-input inputId="ob-advance-paid" formControlName="advanceAmount" />
     </div>
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="ob-deposit-paid">Deposit received</label>
-      <p-inputnumber inputId="ob-deposit-paid" formControlName="depositAmount" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
+      <app-peso-input inputId="ob-deposit-paid" formControlName="depositAmount" />
     </div>
     @if (terms(); as billed) {
       <ng-container formArrayName="oneTimeAmounts">
@@ -47,14 +47,9 @@
             <label class="text-[13px] font-medium text-heading" [attr.for]="'ob-one-time-' + index">
               {{ charge.name }} received <span class="font-normal text-muted">of {{ charge.amount | phpCurrency }}</span>
             </label>
-            <p-inputnumber
+            <app-peso-input
               [inputId]="'ob-one-time-' + index"
               [formControlName]="index"
-              mode="currency"
-              currency="PHP"
-              locale="en-PH"
-              [min]="0"
-              styleClass="w-full"
             />
           </div>
         }

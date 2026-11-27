@@ -43,15 +43,12 @@
         <label class="text-[13px] font-medium text-heading" for="unit-rent">
           Asking monthly rent <span class="font-normal text-muted">(optional, ₱)</span>
         </label>
-        <p-inputnumber
+        <app-peso-input
           inputId="unit-rent"
           formControlName="monthlyRent"
-          mode="currency"
-          currency="PHP"
-          locale="en-PH"
-          [min]="0"
-          placeholder="e.g. ₱3,900.00"
-          styleClass="w-full"
+          placeholder="e.g. 3,900.00"
+          [invalid]="!!errors.fieldError('monthlyRent')"
+          [ariaDescribedBy]="errors.fieldError('monthlyRent') ? 'unit-rent-error' : undefined"
         />
         <p class="text-[12px] text-muted">Listing price for vacant units. The lease sets the contracted rent.</p>
         @if (errors.fieldError('monthlyRent'); as message) {
@@ -80,18 +77,13 @@
         <label class="text-[13px] font-medium text-heading" for="unit-rate">
           Rate per sqm <span class="font-normal text-muted">(optional, ₱)</span>
         </label>
-        <p-inputnumber
+        <app-peso-input
           inputId="unit-rate"
           formControlName="ratePerSqmOverride"
-          mode="currency"
-          currency="PHP"
-          locale="en-PH"
-          [min]="0"
           [showClear]="true"
-          placeholder="e.g. ₱650.00"
-          styleClass="w-full"
-          [attr.aria-invalid]="!!errors.fieldError('ratePerSqmOverride', rateErrors)"
-          [attr.aria-describedby]="errors.fieldError('ratePerSqmOverride', rateErrors) ? 'unit-rate-error' : null"
+          placeholder="e.g. 650.00"
+          [invalid]="!!errors.fieldError('ratePerSqmOverride', rateErrors)"
+          [ariaDescribedBy]="errors.fieldError('ratePerSqmOverride', rateErrors) ? 'unit-rate-error' : undefined"
         />
         <p class="text-[12px] text-muted">Leave blank to use the property's default rate.</p>
         @if (errors.fieldError('ratePerSqmOverride', rateErrors); as message) {

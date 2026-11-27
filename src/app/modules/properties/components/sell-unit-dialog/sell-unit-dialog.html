@@ -61,15 +61,7 @@
       <label class="text-[13px] font-medium text-heading" for="sell-price">
         Price <span class="font-normal text-muted">(optional, ₱)</span>
       </label>
-      <input
-        id="sell-price"
-        type="number"
-        min="0"
-        step="0.01"
-        class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
-        formControlName="price"
-        placeholder="Leave blank if unknown"
-      />
+      <app-peso-input inputId="sell-price" formControlName="price" placeholder="Leave blank if unknown" />
     </div>
 
     <div class="flex flex-col gap-1.5">

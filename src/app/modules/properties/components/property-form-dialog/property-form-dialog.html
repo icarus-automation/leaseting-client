@@ -248,14 +248,26 @@
                 {{ selectedDuesBasis() === 'FIXED' ? 'Monthly amount' : 'Rate per sqm' }}
               </label>
               @if (selectedDuesBasis() === 'FIXED') {
-                <p-inputnumber inputId="property-dues-amount" formControlName="duesAmount" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
-                @if (errors.fieldError('duesAmount', { required: 'Enter the monthly dues amount.' }); as message) {
-                  <p class="text-[12px] text-destructive">{{ message }}</p>
+                @let duesAmountError = errors.fieldError('duesAmount', { required: 'Enter the monthly dues amount.' });
+                <app-peso-input
+                  inputId="property-dues-amount"
+                  formControlName="duesAmount"
+                  [invalid]="!!duesAmountError"
+                  [ariaDescribedBy]="duesAmountError ? 'property-dues-amount-error' : undefined"
+                />
+                @if (duesAmountError) {
+                  <p class="text-[12px] text-destructive" id="property-dues-amount-error">{{ duesAmountError }}</p>
                 }
               } @else {
-                <p-inputnumber inputId="property-dues-amount" formControlName="duesRatePerSqm" mode="currency" currency="PHP" locale="en-PH" [min]="0" styleClass="w-full" />
-                @if (errors.fieldError('duesRatePerSqm', { required: 'Enter the dues rate per sqm.' }); as message) {
-                  <p class="text-[12px] text-destructive">{{ message }}</p>
+                @let duesRateError = errors.fieldError('duesRatePerSqm', { required: 'Enter the dues rate per sqm.' });
+                <app-peso-input
+                  inputId="property-dues-amount"
+                  formControlName="duesRatePerSqm"
+                  [invalid]="!!duesRateError"
+                  [ariaDescribedBy]="duesRateError ? 'property-dues-amount-error' : undefined"
+                />
+                @if (duesRateError) {
+                  <p class="text-[12px] text-destructive" id="property-dues-amount-error">{{ duesRateError }}</p>
                 }
               }
             </div>
@@ -274,16 +286,13 @@
         <label class="text-[13px] font-medium text-heading" for="property-default-rate">
           Default rate per sqm <span class="font-normal text-muted">(optional, ₱)</span>
         </label>
-        <p-inputnumber
+        <app-peso-input
           inputId="property-default-rate"
           formControlName="defaultRatePerSqm"
-          mode="currency"
-          currency="PHP"
-          locale="en-PH"
-          [min]="0"
           [showClear]="true"
-          placeholder="e.g. ₱650.00"
-          styleClass="w-full"
+          placeholder="e.g. 650.00"
+          [invalid]="!!errors.fieldError('defaultRatePerSqm')"
+          [ariaDescribedBy]="errors.fieldError('defaultRatePerSqm') ? 'property-default-rate-error' : undefined"
         />
         <p class="text-[12px] text-muted">Units priced per sqm use this when they have no rate of their own.</p>
         @if (errors.fieldError('defaultRatePerSqm'); as message) {

@@ -1,0 +1,46 @@
+<app-form-dialog
+  #dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [heading]="copy().heading"
+  width="28rem"
+>
+  <div class="flex min-h-12 flex-col justify-center gap-1.5" aria-live="polite">
+    @if (loading()) {
+      <p class="flex items-center gap-2 text-[13px] text-muted">
+        <p-progress-spinner class="m-0 h-3.5 w-3.5" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
+        <span>Checking what's due…</span>
+      </p>
+    } @else if (error(); as message) {
+      <app-error-banner [message]="message" [retryable]="true" (retry)="loadCount()" />
+    } @else if (count() === 0) {
+      <p class="text-[13.5px] text-body" data-run-count="0">{{ copy().nothingDue }}</p>
+    } @else if (count(); as total) {
+      <p class="text-[13.5px] text-body" [attr.data-run-count]="total">
+        <strong class="font-semibold text-heading">{{ total }} {{ noun() }}</strong> will be created.
+      </p>
+      <p class="text-[12.5px] text-muted">{{ copy().covers }}</p>
+    }
+  </div>
+
+  <ng-container dialog-footer>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
+      (click)="dialog.requestClose()"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-9 items-center gap-2 rounded-base border-none bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 ease-out enabled:hover:bg-primary-hover enabled:active:bg-primary-active disabled:cursor-not-allowed disabled:opacity-[0.65] motion-reduce:transition-none"
+      [disabled]="!canRun()"
+      (click)="run()"
+    >
+      @if (running()) {
+        <p-progress-spinner class="m-0 h-3.5 w-3.5 text-primary-foreground" strokeWidth="6" animationDuration=".65s" aria-hidden="true" />
+      }
+      <span>Run</span>
+    </button>
+  </ng-container>
+</app-form-dialog>

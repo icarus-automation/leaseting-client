@@ -127,6 +127,29 @@ describe('Sidebar', () => {
     );
   }
 
+  it('lists Money as Bills, Statements, then Payment submissions', () => {
+    const labels = navLabels();
+    const start = labels.indexOf('Bills');
+    expect(labels.slice(start, start + 3)).toEqual(['Bills', 'Statements', 'Payment submissions']);
+    expect(navLink('Statements').getAttribute('href')).toBe('/bills/soa');
+  });
+
+  it('lights Statements, not Bills, on the statements page', async () => {
+    await TestBed.inject(Router).navigateByUrl('/bills/soa');
+    await fixture.whenStable();
+
+    expect(navLink('Statements').getAttribute('aria-current')).toBe('page');
+    expect(navLink('Bills').hasAttribute('aria-current')).toBe(false);
+  });
+
+  it('hides Statements without the statement permission', async () => {
+    held.set(['bills:view']);
+    await fixture.whenStable();
+
+    expect(navLabels()).toContain('Bills');
+    expect(navLabels()).not.toContain('Statements');
+  });
+
   it('hides the links, sections and Settings a role cannot open', async () => {
     held.set(['residents:view']);
     await fixture.whenStable();

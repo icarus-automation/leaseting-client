@@ -69,8 +69,8 @@ describe('operations calendar interactions', () => {
     expect(card.closest('[data-date]')?.getAttribute('data-date')).toBe('2026-09-05');
     expect(card.textContent).toContain('Due today');
     expect(fixture.nativeElement.querySelector('.fc-day-today')?.getAttribute('data-date')).toBe('2026-09-05');
-    const preview: HTMLElement = fixture.nativeElement.querySelector('[aria-label="Calendar entry details"]');
-    expect(preview.textContent).toContain('Saturday, September 5, 2026');
+    const preview: HTMLElement = fixture.nativeElement.querySelector('app-entry-popover');
+    expect(preview.textContent).toContain('Saturday, September 5');
     expect(preview.textContent).not.toContain('Friday, September 4, 2026');
     expect(preview.querySelector('time')?.getAttribute('datetime')).toBe('2026-09-05');
   });
@@ -146,13 +146,35 @@ describe('operations calendar interactions', () => {
     expect(fixture.nativeElement.querySelector('.fc-list-event')?.textContent).toContain('outstanding');
     component.selected.set(entry);
     await fixture.whenStable();
-    const preview: HTMLElement = fixture.nativeElement.querySelector('[aria-label="Calendar entry details"]');
+    const preview: HTMLElement = fixture.nativeElement.querySelector('app-entry-popover');
     expect(preview.textContent).toContain('Mina Santos');
-    expect(preview.textContent).toContain('Outstanding');
+    expect(preview.textContent).toContain('₱6,000.00 outstanding');
     expect(preview.querySelector('a')?.getAttribute('href')).toBe('/bills?billId=bill-1');
     component.closeEntry();
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('[aria-label="Calendar entry details"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-entry-popover')).toBeNull();
+  });
+
+  it('opens the entry card beside the clicked entry and returns focus to it on Escape', async () => {
+    document.body.appendChild(fixture.nativeElement);
+    requests[0].next(feed());
+    await fixture.whenStable();
+
+    const event: HTMLElement = fixture.nativeElement.querySelector('.fc-daygrid-event');
+    event.click();
+    await fixture.whenStable();
+
+    const card: HTMLElement = fixture.nativeElement.querySelector('app-entry-popover');
+    expect(card.getAttribute('role')).toBe('dialog');
+    expect(component.anchor()).toBe(event);
+    expect(document.activeElement).toBe(card);
+    expect(fixture.nativeElement.querySelector('.ops-details')).toBeNull();
+
+    card.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('app-entry-popover')).toBeNull();
+    expect(document.activeElement).toBe(event);
+    fixture.nativeElement.remove();
   });
 
   it('renders one bill status for paid and partly paid entries, matching the legend and preview', async () => {
@@ -166,18 +188,64 @@ describe('operations calendar interactions', () => {
     expect(labels).toContain('Paid');
     expect(labels).toContain('Due');
     expect(labels).not.toContain('Part paid');
-    const legend: HTMLElement = fixture.nativeElement.querySelector('[aria-label="Bill status legend"]');
-    expect(legend.textContent).toContain('Due / Due today');
-    expect(legend.textContent).toContain('Overdue');
-    expect(legend.textContent).toContain('Paid');
-    expect(legend.textContent).toContain('Lease and move-in dates stay neutral.');
+    const legend: HTMLElement = fixture.nativeElement.querySelector('[aria-label="Status legend"]');
+    expect([...legend.querySelectorAll('li')].map((item) => item.textContent?.trim())).toEqual([
+      'Due', 'Overdue', 'Paid', 'Lease or move-in',
+    ]);
     const partial = component.entries().find((item) => item.id === 'partial')!;
     component.selected.set(partial);
     await fixture.whenStable();
-    const preview: HTMLElement = fixture.nativeElement.querySelector('[aria-label="Calendar entry details"]');
+    const preview: HTMLElement = fixture.nativeElement.querySelector('app-entry-popover');
     expect(preview.querySelector('app-status-badge')?.textContent).toBe('Due');
     expect(preview.textContent).toContain('Payment status');
     expect(preview.textContent).toContain('₱6,000.00');
+  });
+
+  it('draws each month entry as one line with a status dot, not a card', async () => {
+    requests[0].next(feed([
+      entry,
+      { ...entry, id: 'paid', date: '2026-09-07', status: 'PAID', statusLabel: 'Paid', balance: '0.00' },
+      { ...entry, id: 'lease', type: 'LEASE_END', title: 'Lease ends', date: '2026-09-08', status: 'UPCOMING', statusLabel: 'Upcoming', amount: null, balance: null },
+    ]));
+    await fixture.whenStable();
+
+    const events: HTMLElement[] = [...fixture.nativeElement.querySelectorAll('.fc-daygrid-event')];
+    expect(events).toHaveLength(3);
+    for (const event of events) {
+      expect(event.querySelector('app-status-badge')).toBeNull();
+      expect(event.querySelector('.ops-event-meta')).toBeNull();
+      expect(event.querySelector('.ops-event-status')?.classList.contains('sr-only')).toBe(true);
+    }
+    const dot = (id: string) => events.find((event) => event.textContent?.includes(id))!.querySelector('[aria-hidden="true"]')!;
+    expect(events[0].querySelector('.ops-event-line-title')?.textContent).toBe('Rent due · 4B');
+    expect(dot('Overdue').classList).toContain('bg-destructive');
+    expect(dot('Paid').classList).toContain('bg-success');
+    expect(dot('Upcoming').classList).toContain('bg-muted');
+    expect(events[0].getAttribute('aria-label')).toContain('Overdue');
+  });
+
+  it('shows two entries a day then +N more, in month and in week', async () => {
+    const busy = ['a', 'b', 'c', 'd'].map((id) => ({ ...entry, id, title: `Rent due ${id}` }));
+    requests[0].next(feed(busy));
+    await fixture.whenStable();
+
+    expect(component.options.dayMaxEvents).toBe(2);
+    expect(component.options.views?.['dayGridWeek']?.dayMaxEvents).toBeUndefined();
+    const day = (): HTMLElement => fixture.nativeElement.querySelector('td.fc-daygrid-day[data-date="2026-09-04"]');
+    expect(day().querySelector('.fc-daygrid-more-link')?.textContent?.trim()).toBe('+2 more');
+
+    component.changeView('week');
+    await fixture.whenStable();
+    requests.at(-1)!.next(feed(busy));
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.fc-dayGridWeek-view')).toBeTruthy();
+    expect(day().querySelector('.fc-daygrid-more-link')?.textContent?.trim()).toBe('+2 more');
+  });
+
+  it('keeps its natural height on a small screen', () => {
+    expect(component.fit()).toBe(false);
+    expect(component.options.height).toBe('auto');
+    expect(fixture.nativeElement.querySelector('.ops-calendar').hasAttribute('data-fit')).toBe(false);
   });
 
   it('recomputes Today and refreshes an overnight calendar', async () => {
@@ -208,6 +276,27 @@ describe('operations calendar interactions', () => {
     expect(card.textContent).toContain('Overdue');
     expect(card.textContent).not.toContain('Due today');
     expect(fixture.nativeElement.querySelector('.fc-day-today')?.getAttribute('data-date')).toBe('2026-09-06');
+  });
+
+  it('fills the screen in month view on a roomy screen, and lets week and agenda grow', async () => {
+    fixture.destroy();
+    vi.stubGlobal('matchMedia', vi.fn((query: string) => ({
+      matches: query.includes('min-height'), addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    })));
+    fixture = TestBed.createComponent(OpsCalendar);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+    const root = (): HTMLElement => fixture.nativeElement.querySelector('.ops-calendar');
+
+    expect(component.fit()).toBe(true);
+    expect(component.options.height).toBe('100%');
+    expect(root().hasAttribute('data-fit')).toBe(true);
+
+    component.changeView('week');
+    await fixture.whenStable();
+    expect(component.fit()).toBe(false);
+    expect(component.options.height).toBe('auto');
+    expect(root().hasAttribute('data-fit')).toBe(false);
   });
 
   it('navigates to a week without inventing hour-based appointments', async () => {

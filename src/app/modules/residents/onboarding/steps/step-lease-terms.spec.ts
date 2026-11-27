@@ -7,6 +7,7 @@ import type { PropertyDetail } from '../../../../core/models/property.types';
 import { PropertiesService } from '../../../properties/services/properties.service';
 import { UnitsService } from '../../../properties/services/units.service';
 import { ChargeItemsService } from '../../../settings/services/charge-items.service';
+import { createChargeLineGroup } from '../components/charge-lines/charge-line-form';
 import { StepLeaseTerms } from './step-lease-terms';
 
 function property(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
@@ -134,5 +135,109 @@ describe('StepLeaseTerms utility billing', () => {
     await render(onboarding());
 
     expect(checkbox('billsWater').checked).toBe(true);
+  });
+});
+
+describe('StepLeaseTerms charge row', () => {
+  let fixture: ComponentFixture<StepLeaseTerms>;
+  let component: StepLeaseTerms;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [StepLeaseTerms],
+      providers: [
+        { provide: PropertiesService, useValue: { get: () => of(property()) } },
+        { provide: UnitsService, useValue: { get: () => of({ pricingBasis: 'FIXED', monthlyRent: '4500.00', computedMonthlyRent: null }) } },
+        { provide: ChargeItemsService, useValue: { list: () => of([]) } },
+        { provide: AuthService, useValue: { can: () => false } },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(StepLeaseTerms);
+    component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+    vi.clearAllMocks();
+  });
+
+  async function render(detail: OnboardingDetail): Promise<void> {
+    fixture.componentRef.setInput('detail', detail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  function field(id: string): HTMLElement | null {
+    return (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(`#${id}`);
+  }
+
+  it('orders the row Charge, Amount, then Description, with Description optional', async () => {
+    await render(onboarding({ dueDay: 5, charges: savedCharges }));
+
+    const charge = field('charge-item-0')!;
+    const amount = field('charge-amount-0')!;
+    const description = field('charge-note-0') as HTMLInputElement;
+    expect(charge.compareDocumentPosition(amount) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(amount.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(amount.tagName).toBe('INPUT');
+    expect(description.placeholder).toBe('e.g. Includes parking');
+
+    const labels = [...(fixture.nativeElement as HTMLElement).querySelectorAll('li label')].map((label) =>
+      label.textContent?.replace(/\s+/g, ' ').trim(),
+    );
+    expect(labels).toEqual(['Charge', 'Amount', 'Description (optional)']);
+  });
+
+  it('shows a missing amount on the Amount field, focuses it, and does not continue', async () => {
+    await render(onboarding({ dueDay: 5, charges: savedCharges }));
+    component.charges.at(0).controls.amount.setValue(null);
+    const emitted: LeaseTermsStepData[] = [];
+    component.next.subscribe((data) => emitted.push(data));
+
+    component.submit();
+    fixture.detectChanges();
+
+    expect(emitted).toHaveLength(0);
+    expect(field('charge-amount-0-error')?.textContent?.trim()).toBe('Enter an amount.');
+    expect(field('charge-amount-0')?.getAttribute('aria-describedby')).toBe('charge-amount-0-error');
+    expect(field('charge-item-0-error')).toBeNull();
+    expect(document.activeElement).toBe(field('charge-amount-0'));
+    expect(component.errorMessage()).toBe('Some charges are missing details.');
+  });
+
+  it('shows a missing charge on the Charge field', async () => {
+    await render(onboarding({ dueDay: 5, charges: savedCharges }));
+    component.charges.push(createChargeLineGroup({ amount: 500 }));
+    fixture.detectChanges();
+
+    component.submit();
+    fixture.detectChanges();
+
+    expect(field('charge-item-1-error')?.textContent?.trim()).toBe('Pick a charge.');
+    expect(field('charge-item-1')?.getAttribute('aria-describedby')).toBe('charge-item-1-error');
+    expect(field('charge-amount-1-error')).toBeNull();
+    expect(document.activeElement).toBe(field('charge-item-1'));
+  });
+
+  it('still sums every charge into the monthly rent', async () => {
+    await render(
+      onboarding({
+        dueDay: 5,
+        charges: [...savedCharges, { name: 'Parking', billType: 'OTHER', description: 'Includes parking', amount: 500 }],
+      }),
+    );
+    const emitted: LeaseTermsStepData[] = [];
+    component.next.subscribe((data) => emitted.push(data));
+
+    expect(component.monthlyTotal()).toBe(5000);
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('5,000.00');
+
+    component.submit();
+    expect(emitted[0].charges).toEqual([
+      { name: 'Monthly Rent', billType: 'RENT', amount: 4500 },
+      { name: 'Parking', billType: 'OTHER', description: 'Includes parking', amount: 500 },
+    ]);
   });
 });

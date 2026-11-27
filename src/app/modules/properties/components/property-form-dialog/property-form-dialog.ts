@@ -31,6 +31,7 @@ import { UtilityBillingFields, utilityBillingGroup } from '../../../../shared/ui
 import { MediaThumb } from '../media-thumb/media-thumb';
 import { PropertyTypesService } from '../../../settings/services/property-types.service';
 import { PropertiesService } from '../../services/properties.service';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 interface TypeOption {
   id: string;
@@ -57,6 +58,7 @@ function defaultRateOnCreate(rate: number | null): number | undefined {
     ImageDropzone,
     MediaThumb,
     UtilityBillingFields,
+    PesoInput,
   ],
   templateUrl: './property-form-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

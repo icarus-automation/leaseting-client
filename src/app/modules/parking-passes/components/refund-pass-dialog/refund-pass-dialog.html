@@ -34,16 +34,15 @@
     </div>
     <div class="flex flex-col gap-1.5">
       <label class="text-[13px] font-medium text-heading" for="refund-amount">Amount</label>
-      <input
-        id="refund-amount"
-        type="number"
-        min="0.01"
-        step="0.01"
+      @let amountError = errors.fieldError('amount', { min: 'Amount must be at least ₱0.01.' });
+      <app-peso-input
+        inputId="refund-amount"
         formControlName="amount"
-        class="h-9 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+        [invalid]="!!amountError"
+        [ariaDescribedBy]="amountError ? 'refund-amount-error' : undefined"
       />
-      @if (errors.fieldError('amount'); as message) {
-        <p class="text-[12.5px] text-destructive">{{ message }}</p>
+      @if (amountError) {
+        <p class="text-[12.5px] text-destructive" id="refund-amount-error">{{ amountError }}</p>
       }
     </div>
     <div class="flex flex-col gap-1.5">

@@ -20,10 +20,11 @@ import { SegmentedControl } from '../../../../shared/ui/segmented-control/segmen
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { ChargeItemsService } from '../../services/charge-items.service';
 import { LateFeeRuleService } from '../../services/late-fee-rule.service';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 @Component({
   selector: 'app-late-fee-settings',
-  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, SegmentedControl, Skeleton],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, SegmentedControl, Skeleton, PesoInput],
   templateUrl: './late-fee-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

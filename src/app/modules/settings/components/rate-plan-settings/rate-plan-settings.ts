@@ -42,6 +42,7 @@ import {
   toRatePlanPayload,
 } from '../../utils/parking-clock.util';
 import { billedHint, sortRatePlans } from '../../utils/rate-plan-order.util';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 interface PriceCell {
   id: string;
@@ -62,6 +63,7 @@ interface PriceCell {
     SegmentedControl,
     Skeleton,
     StatusBadge,
+    PesoInput,
   ],
   templateUrl: './rate-plan-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

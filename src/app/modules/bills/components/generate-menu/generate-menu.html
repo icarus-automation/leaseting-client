@@ -3,17 +3,17 @@
     type="button"
     class="inline-flex h-9 items-center gap-2 rounded-base border border-border bg-background px-3.5 text-[13px] font-medium text-body transition-colors duration-150 ease-out hover:bg-surface motion-reduce:transition-none"
     aria-haspopup="menu"
-    aria-controls="billing-tools-menu"
+    aria-controls="generate-menu"
     [attr.aria-expanded]="open()"
     (click)="toggle($event)"
   >
-    <span>Billing tools</span>
+    <span>Generate</span>
     <svg pIcon="chevron-down" [size]="12" aria-hidden="true"></svg>
   </button>
 
   <p-menu
     #menu
-    id="billing-tools-menu"
+    id="generate-menu"
     [model]="items()"
     [popup]="true"
     appendTo="body"
@@ -23,18 +23,15 @@
     <ng-template #item let-item>
       @if (item.routerLink) {
         <a
-          class="flex items-center gap-2 px-3 py-2 text-[13px] text-body no-underline hover:bg-surface"
+          class="flex items-center gap-2 px-3 py-2 text-[13px] text-body no-underline"
+          tabindex="-1"
           [routerLink]="item.routerLink"
         >
           <svg [pIcon]="iconOf(item)" [size]="14" aria-hidden="true"></svg>
           <span>{{ item.label }}</span>
         </a>
       } @else {
-        <button
-          type="button"
-          class="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-body disabled:cursor-not-allowed disabled:opacity-45"
-          [disabled]="item.disabled"
-        >
+        <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-body" tabindex="-1">
           <svg [pIcon]="iconOf(item)" [size]="14" aria-hidden="true"></svg>
           <span>{{ item.label }}</span>
         </button>

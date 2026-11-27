@@ -171,7 +171,7 @@
         } @else {
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-heading" for="run-total-bill">Provider bill total</label>
-            <p-inputnumber inputId="run-total-bill" formControlName="totalBillAmount" mode="currency" currency="PHP" locale="en-PH" [min]="0" placeholder="₱0.00" styleClass="w-full" />
+            <app-peso-input inputId="run-total-bill" formControlName="totalBillAmount" />
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-heading" for="run-total-consumption">Total consumption ({{ unitLabel() }})</label>
@@ -212,16 +212,26 @@
           Taxes (VAT and withholding), optional
         </button>
         @if (showTaxes()) {
-          <div class="mt-3 grid gap-4 min-[900px]:grid-cols-2">
+          <div class="mt-3 grid gap-4 min-[900px]:grid-cols-3">
             <div class="flex flex-col gap-1.5">
               <label class="text-[13px] font-medium text-heading" for="run-vat">VAT %</label>
-              <p-inputnumber inputId="run-vat" formControlName="vatPct" [min]="0" [max]="100" [maxFractionDigits]="2" styleClass="w-full" />
-              <p class="text-[11.5px] text-muted">Added on top of the subtotal. Most residential sub-meters leave this 0.</p>
+              <p-inputnumber inputId="run-vat" formControlName="vatPct" [min]="0" [max]="100" [maxFractionDigits]="2" styleClass="w-full" ariaDescribedBy="run-vat-help" />
+              <p class="text-[11.5px] text-muted" id="run-vat-help">Only if you're VAT-registered. The provider's VAT is already in the bill total.</p>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <span class="text-[13px] font-medium text-heading">Apply taxes to</span>
+              <app-segmented-control
+                ariaLabel="Apply taxes to"
+                [options]="taxBasisOptions"
+                [value]="rateValues().taxBasis ?? 'WHOLE_CHARGE'"
+                (valueChange)="rateForm.controls.taxBasis.setValue($event)"
+              />
+              <p class="text-[11.5px] text-muted">VAT and withholding both use it. Whole charge is the usage plus the admin fee. Ask your accountant which one you need.</p>
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-[13px] font-medium text-heading" for="run-wht">Withholding tax %</label>
-              <p-inputnumber inputId="run-wht" formControlName="whtPct" [min]="0" [max]="100" [maxFractionDigits]="2" styleClass="w-full" />
-              <p class="text-[11.5px] text-muted">Deducted from the subtotal. Leave 0 unless you withhold.</p>
+              <p-inputnumber inputId="run-wht" formControlName="whtPct" [min]="0" [max]="100" [maxFractionDigits]="2" styleClass="w-full" ariaDescribedBy="run-wht-help" />
+              <p class="text-[11.5px] text-muted" id="run-wht-help">Only if the tenant withholds, usually a company.</p>
             </div>
           </div>
         }
@@ -262,7 +272,7 @@
         </div>
       }
       <p class="text-[12.5px] text-muted">
-        Only leases and ownerships where Leaseting bills {{ utilityName() }} are listed.
+        Showing {{ rows().length }} unit{{ rows().length === 1 ? '' : 's' }} with an active lease or current owner that Leaseting bills for {{ utilityName() }}.
       </p>
       <section class="overflow-x-auto rounded-base border border-border">
         <table class="w-full border-collapse text-left">
@@ -277,25 +287,28 @@
           </thead>
           <tbody>
             @for (row of rows(); track row.leaseId ?? row.ownershipId; let i = $index) {
-              <tr
-                class="border-b border-border last:border-b-0"
-                [class.opacity-60]="rowMath()[i] === null"
-              >
+              @let status = rowStates()[i];
+              @let statusId = 'run-status-' + i;
+              @let needsPrevious = status.state === 'warning' && status.warning === 'No previous reading';
+              <tr class="border-b border-border last:border-b-0" [attr.data-row-state]="status.state">
                 <td class="px-4 py-2.5">
                   <p class="text-[13.5px] font-medium text-heading">Unit {{ row.unitNo }}</p>
                   <p class="text-[12px] text-muted">{{ row.residentName }} · due day {{ row.dueDay }}</p>
                 </td>
                 <td class="px-4 py-2.5">
                   <p-inputnumber
+                    [inputId]="'run-previous-' + i"
                     [ngModel]="row.previous"
                     [ngModelOptions]="{ standalone: true }"
                     (ngModelChange)="updateRow(i, { previous: $event })"
+                    (keydown.enter)="onPreviousEnter($event, i)"
                     [min]="0"
                     [maxFractionDigits]="2"
-                    placeholder="0"
-                    styleClass="w-28"
+                    placeholder="Enter reading"
+                    styleClass="w-32"
                     [inputStyleClass]="'text-right'"
-                    [attr.aria-label]="'Previous reading for unit ' + row.unitNo"
+                    [ariaLabel]="'Previous reading for unit ' + row.unitNo"
+                    [ariaDescribedBy]="needsPrevious ? statusId : undefined"
                   />
                   @if (row.lastPeriodTo) {
                     <p class="mt-0.5 text-[11.5px] text-muted">last read {{ row.lastPeriodTo | date: 'MMM d' }}</p>
@@ -303,28 +316,37 @@
                 </td>
                 <td class="px-4 py-2.5">
                   <p-inputnumber
+                    [inputId]="'run-present-' + i"
                     [ngModel]="row.present"
                     [ngModelOptions]="{ standalone: true }"
                     (ngModelChange)="updateRow(i, { present: $event })"
+                    (keydown.enter)="onPresentEnter($event, i)"
                     [min]="0"
                     [maxFractionDigits]="2"
-                    placeholder="-"
-                    styleClass="w-28"
+                    placeholder="Enter reading"
+                    styleClass="w-32"
                     [inputStyleClass]="'text-right'"
-                    [attr.aria-label]="'Present reading for unit ' + row.unitNo"
+                    [ariaLabel]="'Present reading for unit ' + row.unitNo"
+                    [ariaDescribedBy]="status.state === 'ready' ? undefined : statusId"
                   />
-                  @if (row.previous != null && row.present != null && row.present < row.previous) {
-                    <p class="mt-0.5 text-[11.5px] text-destructive">below previous</p>
-                  }
                 </td>
-                <td class="px-4 py-2.5 text-right text-[13px] text-body tabular-nums">
-                  {{ rowMath()[i]?.consumed ?? '-' }}
+                <td
+                  class="px-4 py-2.5 text-right text-[13px] tabular-nums"
+                  [class.text-body]="status.state === 'ready'"
+                  [class.text-muted]="status.state !== 'ready'"
+                >
+                  {{ consumed()[i] === null ? '-' : (consumed()[i] | number: '1.0-2') }}
                 </td>
-                <td class="px-4 py-2.5 text-right text-[13px] font-medium text-heading tabular-nums">
-                  @if (rowMath()[i]; as math) {
-                    {{ math.netDue | phpCurrency }}
+                <td class="px-4 py-2.5 text-right text-[13px] tabular-nums" [id]="statusId">
+                  @if (status.state === 'ready') {
+                    <span class="font-medium text-heading">{{ status.math.netDue | phpCurrency }}</span>
+                  } @else if (status.state === 'needs-reading') {
+                    <span class="text-muted">Needs reading</span>
                   } @else {
-                    <span class="font-normal text-muted">skipped</span>
+                    <span class="inline-flex items-center justify-end gap-1.5 text-[12.5px] text-body">
+                      <svg pIcon="exclamation-triangle" class="shrink-0 text-warning" [size]="13" aria-hidden="true"></svg>
+                      <span>{{ status.warning }}</span>
+                    </span>
                   }
                 </td>
               </tr>

@@ -28,7 +28,8 @@ import { watchCreateParam } from '../../shared/utils/create-param.util';
 import { showPopupMenu } from '../../shared/utils/popup-menu.util';
 import { billSourceOf } from '../../shared/utils/bill-source.util';
 import { BillFormDialog } from './components/bill-form-dialog/bill-form-dialog';
-import { BillsToolsMenu } from './components/bills-tools-menu/bills-tools-menu';
+import { BillingRunDialog, type BillingRunKind } from './components/billing-run-dialog/billing-run-dialog';
+import { GenerateMenu, type GenerateAction } from './components/generate-menu/generate-menu';
 import { GenerateSoaDialog } from './components/generate-soa-dialog/generate-soa-dialog';
 import { RecordPaymentDialog } from './components/record-payment-dialog/record-payment-dialog';
 import { BillsService } from './services/bills.service';
@@ -76,7 +77,8 @@ const TYPE_OPTIONS: { label: string; value: BillType | null }[] = [
     Skeleton,
     StatusBadge,
     BillFormDialog,
-    BillsToolsMenu,
+    BillingRunDialog,
+    GenerateMenu,
     GenerateSoaDialog,
     RecordPaymentDialog,
   ],
@@ -123,8 +125,8 @@ export class Bills {
   readonly paymentDialogVisible = signal(false);
   readonly paymentTarget = signal<BillListItem | null>(null);
   readonly soaDialogVisible = signal(false);
-  readonly generatingRent = signal(false);
-  readonly generatingDues = signal(false);
+  readonly runDialogVisible = signal(false);
+  readonly runKind = signal<BillingRunKind>('rent');
   readonly skeletons = Array.from({ length: 6 });
   readonly overflowItems = signal<MenuItem[]>([]);
   readonly overflowForId = signal<string | null>(null);
@@ -300,68 +302,18 @@ export class Bills {
     this.loadSummary();
   }
 
-  generateRentBills(): void {
-    if (this.generatingRent()) return;
-    this.generatingRent.set(true);
-    this.bills
-      .rentRun()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ created }) => {
-          this.generatingRent.set(false);
-          this.toast.add({
-            severity: created > 0 ? 'success' : 'info',
-            summary:
-              created > 0
-                ? `${created} rent bill${created === 1 ? '' : 's'} created`
-                : 'Rent bills are up to date',
-            detail: created > 0 ? undefined : 'Every active lease already has its upcoming rent bill.',
-          });
-          if (created > 0) {
-            this.load(1);
-            this.loadSummary();
-          }
-        },
-        error: (error: unknown) => {
-          this.generatingRent.set(false);
-          this.toast.add({
-            severity: 'error',
-            summary: 'Could not generate rent bills',
-            detail: apiErrorMessage(error),
-          });
-        },
-      });
+  openGenerate(action: GenerateAction): void {
+    if (action === 'soa') {
+      this.soaDialogVisible.set(true);
+      return;
+    }
+    this.runKind.set(action);
+    this.runDialogVisible.set(true);
   }
 
-  generateAssociationDues(): void {
-    if (this.generatingDues()) return;
-    this.generatingDues.set(true);
-    this.bills
-      .duesRun()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ created }) => {
-          this.generatingDues.set(false);
-          this.toast.add({
-            severity: created > 0 ? 'success' : 'info',
-            summary: created > 0
-              ? `${created} association dues bill${created === 1 ? '' : 's'} created`
-              : 'Association dues are up to date',
-          });
-          if (created > 0) {
-            this.load(1);
-            this.loadSummary();
-          }
-        },
-        error: (error: unknown) => {
-          this.generatingDues.set(false);
-          this.toast.add({
-            severity: 'error',
-            summary: 'Could not generate association dues',
-            detail: apiErrorMessage(error),
-          });
-        },
-      });
+  onRunCreated(): void {
+    this.load(1);
+    this.loadSummary();
   }
 
   billSource(bill: BillListItem) {

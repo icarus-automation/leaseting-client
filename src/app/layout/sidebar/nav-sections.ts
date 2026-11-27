@@ -59,6 +59,7 @@ export const NAV_SECTIONS: NavSection[] = [
     type: 'core',
     items: [
       { label: 'Bills', route: '/bills', icon: 'wallet', permissions: ['bills:view'] },
+      { label: 'Statements', route: '/bills/soa', icon: 'receipt', permissions: ['soa:view'] },
       {
         label: 'Payment submissions',
         route: '/bills/submissions',

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
 
 import { AuthService } from '../../../../core/auth/auth.service';
 import type { OnboardingDetail } from '../../../../core/models/onboarding.types';
@@ -117,8 +118,12 @@ describe('StepRequirements', () => {
     return buttons.find((button) => button.textContent?.includes('Next: Lease terms'))!;
   }
 
-  function checkbox(label: string): HTMLInputElement {
-    return (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(`input[type="checkbox"][aria-label^="${label}"]`)!;
+  function row(key: 'validId' | 'proofOfIncome' | 'priorAddress'): HTMLElement {
+    return (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(`[data-requirement="${key}"]`)!;
+  }
+
+  function status(key: 'validId' | 'proofOfIncome' | 'priorAddress'): string {
+    return row(key).querySelector('[data-status]')!.textContent!.trim();
   }
 
   function attachFile(key: 'validId' | 'proofOfIncome' | 'priorAddress', file = new File(['id'], 'id.png', { type: 'image/png' })): void {
@@ -128,32 +133,25 @@ describe('StepRequirements', () => {
     component.onFilePicked({ target: input } as unknown as Event);
   }
 
-  it('keeps required rows unchecked and Next blocked when no file is attached', async () => {
+  it('shows every requirement as Missing and blocks Next when no file is attached', async () => {
     await render();
 
-    expect(checkbox('Valid government ID').checked).toBe(false);
-    expect(checkbox('Proof of income').checked).toBe(false);
-    expect(checkbox('Prior address / references').checked).toBe(false);
+    expect(status('validId')).toBe('Missing');
+    expect(status('proofOfIncome')).toBe('Missing');
+    expect(status('priorAddress')).toBe('Missing');
     expect(component.canProceed()).toBe(false);
     expect(nextButton().disabled).toBe(true);
   });
 
-  it('does not let staff tick a requirement by hand', async () => {
+  it('shows a status instead of a checkbox, and keeps the Required and Optional tags', async () => {
     await render();
 
-    const box = checkbox('Valid government ID');
-    expect(box.classList.contains('pointer-events-none')).toBe(true);
-    expect(box.getAttribute('aria-readonly')).toBe('true');
-    expect(box.tabIndex).toBe(-1);
-
-    box.checked = true;
-    const event = new Event('change', { bubbles: true, cancelable: true });
-    Object.defineProperty(event, 'target', { value: box });
-    component.rejectManualCheck(event, 'validId');
-
-    expect(component.isAttached('validId')).toBe(false);
-    expect(checkbox('Valid government ID').checked).toBe(false);
-    expect(nextButton().disabled).toBe(true);
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('input[type="checkbox"]')).toBeNull();
+    expect(row('validId').querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    expect(row('validId').textContent).toContain('Required');
+    expect(row('proofOfIncome').textContent).toContain('Optional');
+    expect(row('priorAddress').textContent).toContain('Optional');
   });
 
   it('ignores a saved checked flag when no file is on the tenant profile', async () => {
@@ -173,7 +171,7 @@ describe('StepRequirements', () => {
     expect(nextButton().disabled).toBe(true);
   });
 
-  it('marks a requirement checked after a file is attached and enables Next for required items', async () => {
+  it('flips a requirement to Attached after a file is attached and enables Next for required items', async () => {
     residentsApi.uploadDocument.mockReturnValue(of(documentItem()));
     await render();
 
@@ -183,8 +181,8 @@ describe('StepRequirements', () => {
 
     expect(residentsApi.uploadDocument).toHaveBeenCalledWith('resident-1', expect.any(File), 'Onboarding · Valid ID');
     expect(component.isAttached('validId')).toBe(true);
-    expect(checkbox('Valid government ID').checked).toBe(true);
-    expect(checkbox('Proof of income').checked).toBe(false);
+    expect(status('validId')).toBe('Attached');
+    expect(status('proofOfIncome')).toBe('Missing');
     expect(component.canProceed()).toBe(true);
     expect(nextButton().disabled).toBe(false);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('philsys.png');
@@ -209,7 +207,7 @@ describe('StepRequirements', () => {
     expect(emitted).toEqual({ validId: true, proofOfIncome: false, priorAddress: false });
   });
 
-  it('clears the checked state and blocks Next when the required file is removed', async () => {
+  it('flips back to Missing and blocks Next when the required file is removed', async () => {
     residentsApi.uploadDocument.mockReturnValue(of(documentItem()));
     residentsApi.deleteDocument.mockReturnValue(of(documentItem()));
     await render();
@@ -227,18 +225,24 @@ describe('StepRequirements', () => {
 
     expect(residentsApi.deleteDocument).toHaveBeenCalledWith('doc-1');
     expect(component.isAttached('validId')).toBe(false);
-    expect(checkbox('Valid government ID').checked).toBe(false);
+    expect(status('validId')).toBe('Missing');
     expect(nextButton().disabled).toBe(true);
   });
 
-  it('pre-checks a requirement that is already on the tenant profile', async () => {
+  it('shows On file for a requirement already on the tenant profile, and Attached once a newer copy is added', async () => {
     residentsApi.get.mockReturnValue(of(residentDetail({ documents: [documentItem()] })));
+    residentsApi.uploadDocument.mockReturnValue(of(documentItem({ id: 'doc-2', fileName: 'newer.png' })));
     await render();
 
     expect(component.isAttached('validId')).toBe(true);
-    expect(checkbox('Valid government ID').checked).toBe(true);
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('On file');
+    expect(status('validId')).toBe('On file');
     expect(nextButton().disabled).toBe(false);
+
+    attachFile('validId');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(status('validId')).toBe('Attached');
   });
 
   function openButton(): HTMLButtonElement | undefined {
@@ -270,5 +274,21 @@ describe('StepRequirements', () => {
     await fixture.whenStable();
 
     expect(residentsApi.documentFile).toHaveBeenCalledWith('doc-1', false);
+  });
+
+  it('says File not found when the document file is gone', async () => {
+    auth.can.mockImplementation((code: string) => code === 'residents:view_documents');
+    residentsApi.get.mockReturnValue(of(residentDetail({ documents: [documentItem()] })));
+    residentsApi.documentFile.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 404, error: new Blob(['{}']) })),
+    );
+    await render();
+
+    openButton()!.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(component.errorMessage()).toBe('File not found.');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('File not found.');
   });
 });

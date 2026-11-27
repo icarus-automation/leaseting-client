@@ -141,6 +141,52 @@ describe('BillFormDialog utility types', () => {
     );
   });
 
+  it('applies taxes to the whole charge by default, lets staff pick the admin fee only, and sends the choice', () => {
+    component.form.controls.leaseId.setValue('lease-both');
+    component.form.controls.type.setValue('WATER');
+    component.form.controls.dueDate.setValue(new Date(2026, 10, 5));
+    component.toggleReadingMode(true);
+    component.readingForm.patchValue({
+      periodFrom: new Date(2026, 9, 1),
+      periodTo: new Date(2026, 9, 31),
+      previousReading: 520,
+      presentReading: 590,
+      multiplier: 13,
+      adminFeePct: 10,
+      vatPct: 12,
+      whtPct: 2,
+    });
+    fixture.detectChanges();
+
+    // The dialog renders its body outside the host element.
+    const basisButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[aria-label="Apply taxes to"] button'));
+    expect(basisButtons.map((button) => [button.textContent!.trim(), button.getAttribute('aria-pressed')])).toEqual([
+      ['Whole charge', 'true'],
+      ['Admin fee only', 'false'],
+    ]);
+    expect(component.breakdown()!.lines.map((line) => [line.label, line.amount])).toEqual([
+      ['Subtotal', 910],
+      ['Admin fee', 91],
+      ['VAT (12%)', 120.12],
+      ['Withholding (2%)', -20.02],
+      ['Total', 1101.1],
+    ]);
+
+    basisButtons[1].click();
+    fixture.detectChanges();
+    expect(component.breakdown()!.netDue).toBe(1010.1);
+
+    component.onSubmit();
+    expect(billsApi.create).toHaveBeenCalledWith(
+      'lease-both',
+      expect.objectContaining({
+        type: 'WATER',
+        amount: 1010.1,
+        utilityDetail: expect.objectContaining({ vatRate: 0.12, whtRate: 0.02, taxBasis: 'ADMIN_FEE' }) as object,
+      }),
+    );
+  });
+
   it("greys out electricity for a lease where Leaseting doesn't bill it", () => {
     component.form.controls.leaseId.setValue('lease-water-only');
 

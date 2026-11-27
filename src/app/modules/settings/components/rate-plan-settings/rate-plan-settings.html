@@ -101,16 +101,10 @@
                             <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                               {{ cell.name }}
                             </span>
-                            <p-inputnumber
+                            <app-peso-input
                               [inputId]="'rate-plan-edit-amount-' + cell.id"
                               [formControlName]="cell.id"
-                              mode="currency"
-                              currency="PHP"
-                              locale="en-PH"
-                              [min]="0"
                               placeholder="Not set"
-                              styleClass="w-full"
-                              inputStyleClass="w-full"
                               [ariaLabel]="'Succeeding amount for ' + cell.name"
                             />
                           </label>
@@ -187,16 +181,10 @@
                                     <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                                       {{ cell.name }}
                                     </span>
-                                    <p-inputnumber
+                                    <app-peso-input
                                       [inputId]="'rate-plan-edit-band-' + i + '-' + cell.id"
                                       [formControlName]="cell.id"
-                                      mode="currency"
-                                      currency="PHP"
-                                      locale="en-PH"
-                                      [min]="0"
                                       placeholder="Not set"
-                                      styleClass="w-full"
-                                      inputStyleClass="w-full"
                                       [ariaLabel]="'Opening band ' + (i + 1) + ' amount for ' + cell.name"
                                     />
                                   </label>
@@ -263,16 +251,10 @@
                                 <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                                   {{ cell.name }}
                                 </span>
-                                <p-inputnumber
+                                <app-peso-input
                                   [inputId]="'rate-plan-edit-overtime-' + cell.id"
                                   [formControlName]="cell.id"
-                                  mode="currency"
-                                  currency="PHP"
-                                  locale="en-PH"
-                                  [min]="0"
                                   placeholder="Not set"
-                                  styleClass="w-full"
-                                  inputStyleClass="w-full"
                                   [ariaLabel]="'Overtime amount for ' + cell.name"
                                 />
                               </label>
@@ -439,16 +421,10 @@
                       <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                         {{ type.name }}
                       </span>
-                      <p-inputnumber
+                      <app-peso-input
                         [inputId]="'rate-plan-new-amount-' + type.id"
                         [formControlName]="type.id"
-                        mode="currency"
-                        currency="PHP"
-                        locale="en-PH"
-                        [min]="0"
                         placeholder="Not set"
-                        styleClass="w-full"
-                        inputStyleClass="w-full"
                         [ariaLabel]="'Succeeding amount for ' + type.name"
                       />
                     </label>
@@ -515,16 +491,10 @@
                               <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                                 {{ type.name }}
                               </span>
-                              <p-inputnumber
+                              <app-peso-input
                                 [inputId]="'rate-plan-new-band-' + i + '-' + type.id"
                                 [formControlName]="type.id"
-                                mode="currency"
-                                currency="PHP"
-                                locale="en-PH"
-                                [min]="0"
                                 placeholder="Not set"
-                                styleClass="w-full"
-                                inputStyleClass="w-full"
                                 [ariaLabel]="'Opening band ' + (i + 1) + ' amount for ' + type.name"
                               />
                             </label>
@@ -591,16 +561,10 @@
                           <span class="text-[10.5px] font-semibold uppercase tracking-[0.055em] text-muted">
                             {{ type.name }}
                           </span>
-                          <p-inputnumber
+                          <app-peso-input
                             [inputId]="'rate-plan-new-overtime-' + type.id"
                             [formControlName]="type.id"
-                            mode="currency"
-                            currency="PHP"
-                            locale="en-PH"
-                            [min]="0"
                             placeholder="Not set"
-                            styleClass="w-full"
-                            inputStyleClass="w-full"
                             [ariaLabel]="'Overtime amount for ' + type.name"
                           />
                         </label>

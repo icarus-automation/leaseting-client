@@ -12,9 +12,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { startWith, switchMap } from 'rxjs';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
@@ -30,10 +30,11 @@ import {
   type ChargeLineGroup,
   type ChargeOption,
 } from './charge-line-form';
+import { PesoInput } from '../../../../../shared/ui/peso-input/peso-input';
 
 @Component({
   selector: 'app-charge-lines',
-  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, Select],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, Select, PesoInput],
   templateUrl: './charge-lines.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -42,6 +43,7 @@ export class ChargeLines {
   private readonly chargeItems = inject(ChargeItemsService);
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /** A new charge item joins the organization's catalog, which is settings:manage. */
   readonly canCreateItems = computed(() => this.auth.can('settings:manage'));
@@ -54,7 +56,7 @@ export class ChargeLines {
   readonly frequency = input<ChargeFrequency>('MONTHLY');
   /** Keeps field ids unique when two lists share a page. */
   readonly idPrefix = input('charge');
-  readonly descriptionPlaceholder = computed(() => (this.frequency() === 'MONTHLY' ? 'e.g. Slot B2' : 'e.g. 2 keys'));
+  readonly descriptionPlaceholder = computed(() => (this.frequency() === 'MONTHLY' ? 'e.g. Includes parking' : 'e.g. 2 keys'));
   readonly newItemHint = computed(() =>
     this.frequency() === 'MONTHLY'
       ? 'Added as a monthly charge. Deposits and other one-time charges are set up in Settings › Charge items.'
@@ -90,6 +92,15 @@ export class ChargeLines {
 
   readonly loadingCatalog = computed(() => this.catalog() === null && this.catalogError() === null);
 
+  /**
+   * Ticks on every touch, value and status change in the lines, so the inline
+   * errors show when the parent step marks the form touched on submit.
+   */
+  private readonly formTick = toSignal(
+    toObservable(this.lines).pipe(switchMap((lines) => lines.events.pipe(startWith(null)))),
+    { initialValue: null },
+  );
+
   constructor() {
     this.loadCatalog();
 
@@ -111,6 +122,31 @@ export class ChargeLines {
         error: (error: unknown) =>
           this.catalogError.set(apiErrorMessage(error, 'Could not load the charge items.')),
       });
+  }
+
+  /** The Charge field's error. The picked item sets `name`, so a line with no name has no charge. */
+  chargeError(group: ChargeLineGroup): string | null {
+    this.formTick();
+    const { name, chargeItemId } = group.controls;
+    if (name.valid || !(name.touched || chargeItemId.touched)) return null;
+    return 'Pick a charge.';
+  }
+
+  amountError(group: ChargeLineGroup): string | null {
+    this.formTick();
+    const { amount } = group.controls;
+    if (amount.valid || !amount.touched) return null;
+    return amount.hasError('min') ? 'Use 0 or more.' : 'Enter an amount.';
+  }
+
+  /** Moves focus to the first field with an error. False when every line is complete. */
+  focusFirstInvalid(): boolean {
+    const index = this.lines().controls.findIndex((group) => group.invalid);
+    if (index < 0) return false;
+    const group = this.lines().at(index);
+    const field = group.controls.name.invalid ? 'item' : group.controls.amount.invalid ? 'amount' : 'note';
+    this.host.nativeElement.querySelector<HTMLElement>(`#${this.idPrefix()}-${field}-${index}`)?.focus();
+    return true;
   }
 
   addLine(): void {

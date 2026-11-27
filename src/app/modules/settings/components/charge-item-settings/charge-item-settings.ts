@@ -12,7 +12,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 import { PIcon } from '@primeicons/angular/p-icon';
-import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { ProgressSpinner } from 'primeng/progressspinner';
 
@@ -32,10 +31,11 @@ import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { sortLookupRows } from '../../../../shared/utils/lookup-order.util';
 import { ChargeItemsService } from '../../services/charge-items.service';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 @Component({
   selector: 'app-charge-item-settings',
-  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, InputNumber, Select, PhpCurrencyPipe, Skeleton, StatusBadge],
+  imports: [ProgressSpinner, ReactiveFormsModule, PIcon, Select, PhpCurrencyPipe, Skeleton, StatusBadge, PesoInput],
   templateUrl: './charge-item-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

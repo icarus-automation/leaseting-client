@@ -1,0 +1,80 @@
+@let item = entry();
+<div class="flex min-h-0 flex-col gap-4 overflow-y-auto px-5 pb-5 pt-4">
+  <div class="grid grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-x-4">
+    <span class="mt-[0.4375rem] size-3.5 rounded-[3px]" [class]="square()" aria-hidden="true"></span>
+    <div class="min-w-0">
+      <h2 class="font-heading text-xl font-semibold leading-snug text-heading" [id]="titleId">{{ item.title }}</h2>
+      <!-- Anchor the literal day before formatting; Angular parses a bare date as local midnight. -->
+      <p class="mt-0.5 text-[13.5px] text-body" [id]="dateId">
+        <time class="whitespace-nowrap" [attr.datetime]="item.date">{{ item.date + 'T00:00:00Z' | date: dateFormat() : 'UTC' }}</time>
+        <span class="whitespace-nowrap text-muted"> · {{ when() }}</span>
+      </p>
+    </div>
+    <button
+      type="button"
+      class="-mr-2 -mt-1 flex size-9 items-center justify-center rounded-base text-muted transition-colors duration-150 ease-out hover:bg-surface hover:text-body motion-reduce:transition-none"
+      aria-label="Close"
+      (click)="dismiss(true)"
+    >
+      <svg pIcon="times" [size]="15" aria-hidden="true"></svg>
+    </button>
+  </div>
+
+  <ul class="flex flex-col gap-3.5">
+    <li class="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-4">
+      <svg pIcon="user" class="mt-0.5 text-muted" [size]="16" aria-hidden="true"></svg>
+      <div class="min-w-0">
+        @if (item.resident) {
+          <p class="text-[13.5px] font-medium text-heading">{{ item.resident.name }}</p>
+        } @else {
+          <p class="text-[13.5px] text-muted">No tenant selected yet</p>
+        }
+        <p class="text-[12.5px] text-muted">Tenant</p>
+      </div>
+    </li>
+    <li class="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-4">
+      <svg pIcon="map-marker" class="mt-0.5 text-muted" [size]="16" aria-hidden="true"></svg>
+      <div class="min-w-0">
+        <p class="text-[13.5px] font-medium text-heading">Unit {{ item.unit.unitNo }}</p>
+        <p class="text-[12.5px] text-muted [overflow-wrap:anywhere]">{{ item.property.name }}</p>
+      </div>
+    </li>
+    @if (item.amount !== null) {
+      <li class="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-4">
+        <svg pIcon="wallet" class="mt-0.5 text-muted" [size]="16" aria-hidden="true"></svg>
+        <div class="min-w-0 tabular-nums">
+          @if (paidInFull()) {
+            <p class="text-[13.5px] font-medium text-heading">Paid in full</p>
+            <p class="text-[12.5px] text-muted">{{ item.amount | phpCurrency }} billed</p>
+          } @else {
+            <p class="text-[13.5px] font-medium text-heading">{{ item.balance | phpCurrency }} outstanding</p>
+            <p class="text-[12.5px] text-muted">of {{ item.amount | phpCurrency }} billed</p>
+          }
+        </div>
+      </li>
+    }
+    @if (item.type === 'MOVE_IN') {
+      <li class="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-4">
+        <svg pIcon="align-left" class="mt-0.5 text-muted" [size]="16" aria-hidden="true"></svg>
+        <p class="text-[13px] leading-relaxed text-body">
+          Planned from the onboarding start date. Complete the walk to confirm the lease.
+        </p>
+      </li>
+    }
+  </ul>
+</div>
+
+<footer class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-surface px-5 py-3">
+  <p class="flex items-center gap-2 text-[13px] text-muted">
+    {{ isBill() ? 'Payment status' : 'Status' }}
+    <app-status-badge [tone]="tone()" [label]="item.statusLabel" />
+  </p>
+  <a
+    class="inline-flex h-9 items-center gap-2 rounded-base bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground no-underline transition-[background-color,transform] duration-150 ease-out hover:bg-primary-hover active:scale-[0.97] active:bg-primary-active motion-reduce:transition-none"
+    [routerLink]="source().route"
+    [queryParams]="source().queryParams"
+  >
+    {{ source().label }}
+    <svg pIcon="arrow-up-right" [size]="14" aria-hidden="true"></svg>
+  </a>
+</footer>

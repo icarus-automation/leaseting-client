@@ -22,9 +22,19 @@ import type { OnboardingDetail, RequirementsStepData } from '../../../../core/mo
 import type { ResidentDocumentItem } from '../../../../core/models/resident.types';
 import { ConfirmService } from '../../../../shared/ui/confirm/confirm.service';
 import { ResidentsService } from '../../services/residents.service';
+import { documentFileError } from '../../utils/document-file-error';
 import { presentDocumentBlob } from '../../utils/present-document-blob';
 
 type RequirementKey = 'validId' | 'proofOfIncome' | 'priorAddress';
+
+/** On file: already on the tenant's profile. Attached: uploaded in this step. */
+type RequirementStatus = 'on-file' | 'attached' | 'missing';
+
+const REQUIREMENT_STATUS_LABELS: Record<RequirementStatus, string> = {
+  'on-file': 'On file',
+  attached: 'Attached',
+  missing: 'Missing',
+};
 
 interface RequirementItem {
   key: RequirementKey;
@@ -90,6 +100,21 @@ export class StepRequirements {
   readonly uploads = signal<{ key: RequirementKey; document: ResidentDocumentItem }[]>([]);
   readonly errorMessage = signal<string | null>(null);
 
+  /** A fresh upload reads as Attached, even over a copy already on file. */
+  readonly statuses = computed(() => {
+    const filed = this.onFile();
+    const uploaded = new Set(this.uploads().map((upload) => upload.key));
+    const statuses = {} as Record<RequirementKey, RequirementStatus>;
+    for (const item of REQUIREMENTS) {
+      if (uploaded.has(item.key)) statuses[item.key] = 'attached';
+      else if ((filed[item.key]?.length ?? 0) > 0) statuses[item.key] = 'on-file';
+      else statuses[item.key] = 'missing';
+    }
+    return statuses;
+  });
+
+  readonly statusLabels = REQUIREMENT_STATUS_LABELS;
+
   readonly canProceed = computed(() =>
     REQUIREMENTS.filter((item) => item.required).every((item) => this.isAttached(item.key)),
   );
@@ -110,13 +135,7 @@ export class StepRequirements {
   }
 
   isAttached(key: RequirementKey): boolean {
-    return this.filedFor(key).length > 0 || this.uploadsFor(key).length > 0;
-  }
-
-  rejectManualCheck(event: Event, key: RequirementKey): void {
-    event.preventDefault();
-    event.stopPropagation();
-    (event.target as HTMLInputElement).checked = this.isAttached(key);
+    return this.statuses()[key] !== 'missing';
   }
 
   attach(key: RequirementKey): void {
@@ -167,7 +186,7 @@ export class StepRequirements {
       .subscribe({
         next: (blob) => presentDocumentBlob(blob, document.fileName, download),
         error: (error: unknown) => {
-          this.errorMessage.set(apiErrorMessage(error, 'Could not open the document.'));
+          this.errorMessage.set(documentFileError(error, 'Could not open the document.'));
         },
       });
   }

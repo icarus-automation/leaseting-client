@@ -17,7 +17,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PIcon } from '@primeicons/angular/p-icon';
 import { DatePicker } from 'primeng/datepicker';
-import { InputNumber } from 'primeng/inputnumber';
 
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from '../../../../core/models/enums';
@@ -38,6 +37,7 @@ import {
 import { effectiveDestinationsForProperty } from '../../../../shared/utils/payment-destination.util';
 import { PaymentDestinationsService } from '../../../settings/services/payment-destinations.service';
 import { ResidentsService } from '../../services/residents.service';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 const ACCEPTED_TYPES = 'application/pdf,image/png,image/jpeg,image/webp';
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -45,7 +45,7 @@ const RECEIPT_LABEL = 'Onboarding · Payment receipt';
 
 @Component({
   selector: 'app-step-move-in-payment',
-  imports: [ReactiveFormsModule, PIcon, DatePicker, InputNumber, PaymentMethodFields, PhpCurrencyPipe],
+  imports: [ReactiveFormsModule, PIcon, DatePicker, PaymentMethodFields, PhpCurrencyPipe, PesoInput],
   templateUrl: './step-move-in-payment.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -62,11 +62,17 @@ describe('KitSourceChip', () => {
     expect(chip().getAttribute('aria-label')).toBe(`Sources: ${GUIDE} and 2 more`);
   });
 
-  it('shows no count for a single source', async () => {
+  it('shows no count and no pager for a single source', async () => {
     await render(SOURCES.slice(0, 1));
 
     expect(chip().textContent?.trim()).toBe(GUIDE);
     expect(chip().getAttribute('aria-label')).toBe(`Source: ${GUIDE}`);
+
+    await open();
+    expect(link()?.getAttribute('href')).toBe(SOURCES[0].url);
+    expect(counter()).toBeUndefined();
+    expect(arrow('Previous source')).toBeNull();
+    expect(arrow('Next source')).toBeNull();
   });
 
   it('pages through every source in the popover, each opening in a new tab', async () => {

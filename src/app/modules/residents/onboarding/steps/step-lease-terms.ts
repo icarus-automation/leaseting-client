@@ -9,6 +9,7 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -54,6 +55,8 @@ export class StepLeaseTerms {
 
   readonly errorMessage = signal<string | null>(null);
 
+  private readonly chargeLines = viewChild(ChargeLines);
+
   readonly charges: ChargeLineArray = createChargeLineArray([STARTER_CHARGE]);
   readonly utilities = utilityBillingGroup();
   readonly form = this.fb.nonNullable.group({
@@ -93,7 +96,13 @@ export class StepLeaseTerms {
     }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.errorMessage.set('Give every charge a name and an amount.');
+      if (this.charges.invalid) {
+        // Each missing field says what it needs; the banner points there.
+        this.errorMessage.set('Some charges are missing details.');
+        this.chargeLines()?.focusFirstInvalid();
+      } else {
+        this.errorMessage.set('Enter a due day from 1 to 31.');
+      }
       return;
     }
     if (this.monthlyTotal() <= 0) {

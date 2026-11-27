@@ -5,13 +5,7 @@
       <p class="mt-0.5 text-sm text-muted">Rent, association dues, and utility charges: unpaid, overdue, and settled.</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
-      <app-bills-tools-menu
-        [generatingRent]="generatingRent()"
-        [generatingDues]="generatingDues()"
-        (generateSoa)="soaDialogVisible.set(true)"
-        (rentRun)="generateRentBills()"
-        (duesRun)="generateAssociationDues()"
-      />
+      <app-generate-menu (generate)="openGenerate($event)" />
       @if (canManageBills()) {
         <button
           type="button"
@@ -267,4 +261,11 @@
   [visible]="soaDialogVisible()"
   (visibleChange)="soaDialogVisible.set($event)"
   [presetLeaseId]="leaseIdFilter()"
+/>
+
+<app-billing-run-dialog
+  [kind]="runKind()"
+  [visible]="runDialogVisible()"
+  (visibleChange)="runDialogVisible.set($event)"
+  (created)="onRunCreated()"
 />

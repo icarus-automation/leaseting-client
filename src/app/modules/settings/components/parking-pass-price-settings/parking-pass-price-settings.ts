@@ -15,10 +15,11 @@ import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { PropertiesService } from '../../../properties/services/properties.service';
 import { ParkingPassesService } from '../../../parking-passes/services/parking-passes.service';
 import { VehicleTypesService } from '../../services/vehicle-types.service';
+import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
 
 @Component({
   selector: 'app-parking-pass-price-settings',
-  imports: [ReactiveFormsModule, RouterLink, Select, ErrorBanner, Skeleton],
+  imports: [ReactiveFormsModule, RouterLink, Select, ErrorBanner, Skeleton, PesoInput],
   templateUrl: './parking-pass-price-settings.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -46,8 +47,11 @@ export class ParkingPassPriceSettings {
   readonly form = this.fb.nonNullable.group({
     graceDays: [0, [Validators.required, Validators.min(0), Validators.max(366)]],
   });
+  /** One price per vehicle type: blank keeps the type off the pass list, otherwise at least 0.01. */
   readonly amounts = this.fb.group<Record<string, FormControl<number | null>>>({});
   readonly errors = createFormErrors(this.form);
+  readonly priceErrors = createFormErrors(this.amounts);
+  readonly priceMessages = { min: 'Enter a price above zero, or leave it blank.' };
 
   constructor() {
     forkJoin({ properties: this.propertiesApi.listAll(), vehicles: this.vehiclesApi.list() })
@@ -57,7 +61,7 @@ export class ParkingPassPriceSettings {
           const active = vehicles.filter((type) => !type.isArchived);
           this.types.set(active);
           for (const type of active) {
-            this.amounts.addControl(type.id, this.fb.control<number | null>(null));
+            this.amounts.addControl(type.id, this.fb.control<number | null>(null, [Validators.min(0.01)]));
           }
           this.properties.set(properties);
           if (!this.canManage()) {
@@ -107,16 +111,13 @@ export class ParkingPassPriceSettings {
   save(): void {
     const propertyId = this.propertyControl.value;
     this.errors.submitted.set(true);
-    if (!propertyId || this.form.invalid || this.saving() || !this.canManage()) return;
+    this.priceErrors.submitted.set(true);
+    if (!propertyId || this.form.invalid || this.amounts.invalid || this.saving() || !this.canManage()) return;
     const prices = this.types().flatMap((type) => {
       const amount = this.amountControl(type.id).value;
       if (amount === null || amount === undefined || Number.isNaN(amount)) return [];
       return [{ vehicleTypeId: type.id, amount: Math.round(amount * 100) / 100 }];
     });
-    if (prices.some((price) => price.amount < 0.01)) {
-      this.error.set('Enter a price above zero, or leave the vehicle type blank.');
-      return;
-    }
     this.saving.set(true);
     this.error.set(null);
     this.saved.set(false);
@@ -128,6 +129,7 @@ export class ParkingPassPriceSettings {
           this.saving.set(false);
           this.saved.set(true);
           this.errors.reset();
+          this.priceErrors.reset();
         },
         error: (error: unknown) => {
           this.saving.set(false);

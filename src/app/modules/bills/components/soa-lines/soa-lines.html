@@ -16,7 +16,11 @@
           </span>
         </div>
 
-        @if (line.kind === 'flat') {
+        @if (line.kind === 'utility') {
+          @if (utilityLines(line); as lines) {
+            <app-utility-charge-lines class="mt-2 block border-l border-border pl-3" [lines]="lines" />
+          }
+        } @else {
           @if (line.breakdown; as breakdown) {
             <div class="mt-2 flex flex-col gap-0.5 border-l border-border pl-3">
               <p class="mb-0.5 text-[11.5px] font-medium text-muted">Full monthly charge (before payments)</p>

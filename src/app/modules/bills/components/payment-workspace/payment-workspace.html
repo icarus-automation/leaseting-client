@@ -22,19 +22,15 @@
     <div class="grid gap-3 sm:grid-cols-2">
       <div class="flex flex-col gap-1.5">
         <label class="text-[13px] font-medium text-heading" for="payment-amount">Amount received</label>
-        <p-inputnumber
+        @let amountError = errors.fieldError('amount', { min: 'Amount must be at least ₱0.01.' });
+        <app-peso-input
           inputId="payment-amount"
           formControlName="amount"
-          mode="currency"
-          currency="PHP"
-          locale="en-PH"
-          [min]="0"
-          [maxFractionDigits]="2"
-          placeholder="₱0.00"
-          styleClass="w-full"
+          [invalid]="!!amountError"
+          [ariaDescribedBy]="amountError ? 'payment-amount-error' : undefined"
         />
-        @if (errors.fieldError('amount', { min: 'Amount must be at least ₱0.01.' }); as message) {
-          <p class="text-[12.5px] text-destructive">{{ message }}</p>
+        @if (amountError) {
+          <p class="text-[12.5px] text-destructive" id="payment-amount-error">{{ amountError }}</p>
         }
       </div>
       <div class="flex flex-col gap-1.5">

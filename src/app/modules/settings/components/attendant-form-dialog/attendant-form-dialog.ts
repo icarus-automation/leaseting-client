@@ -20,6 +20,7 @@ import type { ParkingAttendantResponse } from '../../../../core/models/parking-a
 import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
+import { tidyNameField } from '../../../../shared/utils/person-name.util';
 import { ParkingAttendantsService } from '../../services/parking-attendants.service';
 import {
   ATTENDANT_HANDHELD_NOTE,
@@ -62,6 +63,8 @@ export class AttendantFormDialog {
     propertyAccess: this.fb.nonNullable.control<PropertyAccessValue>(EVERY_PROPERTY_VALUE, [propertyAccessValidator]),
   });
   readonly errors = createFormErrors(this.form);
+  /** Shows a name in its saved form as its field is left. */
+  protected readonly tidyName = tidyNameField;
 
   readonly nameMessages = { required: 'Enter a name for this login.', minlength: 'Use at least 2 characters.' };
   readonly emailMessages = { required: 'Enter the login email.' };

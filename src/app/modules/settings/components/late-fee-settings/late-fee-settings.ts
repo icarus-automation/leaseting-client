@@ -21,6 +21,7 @@ import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { ChargeItemsService } from '../../services/charge-items.service';
 import { LateFeeRuleService } from '../../services/late-fee-rule.service';
 import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
+import { PESO_MAX_MESSAGE, hasPesoOverMax } from '../../../../shared/ui/peso-input/peso-text.util';
 
 @Component({
   selector: 'app-late-fee-settings',
@@ -135,6 +136,10 @@ export class LateFeeSettings {
 
   submit(): void {
     if (!this.canManage()) return;
+    if (hasPesoOverMax(this.form)) {
+      this.saveError.set(PESO_MAX_MESSAGE);
+      return;
+    }
     const payload = this.payload();
     if (!payload) {
       this.saveError.set('Enter a late fee above zero.');

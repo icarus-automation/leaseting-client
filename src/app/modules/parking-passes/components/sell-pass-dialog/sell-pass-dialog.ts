@@ -22,6 +22,7 @@ import {
   paymentMethodPayload,
 } from '../../../../shared/ui/payment-method-fields/payment-method-form';
 import { effectiveDestinationsForProperty } from '../../../../shared/utils/payment-destination.util';
+import { tidyNameField } from '../../../../shared/utils/person-name.util';
 import { LeasesService } from '../../../leases/services/leases.service';
 import { PropertiesService } from '../../../properties/services/properties.service';
 import { PaymentDestinationsService } from '../../../settings/services/payment-destinations.service';
@@ -72,6 +73,8 @@ export class SellPassDialog {
     payment: createPaymentMethodGroup(),
   });
   readonly errors = createFormErrors(this.form);
+  /** Shows a name in its saved form as its field is left. */
+  protected readonly tidyName = tidyNameField;
   private readonly propertyId = toSignal(this.form.controls.propertyId.valueChanges, { initialValue: '' });
 
   readonly propertyOptions = computed(() => this.properties().map((property) => ({ label: property.name, value: property.id })));

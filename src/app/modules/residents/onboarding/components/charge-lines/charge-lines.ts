@@ -31,6 +31,7 @@ import {
   type ChargeOption,
 } from './charge-line-form';
 import { PesoInput } from '../../../../../shared/ui/peso-input/peso-input';
+import { PESO_MAX_ERROR } from '../../../../../shared/ui/peso-input/peso-text.util';
 
 @Component({
   selector: 'app-charge-lines',
@@ -132,10 +133,11 @@ export class ChargeLines {
     return 'Pick a charge.';
   }
 
+  /** Null over the cap too: the peso field says that itself. */
   amountError(group: ChargeLineGroup): string | null {
     this.formTick();
     const { amount } = group.controls;
-    if (amount.valid || !amount.touched) return null;
+    if (amount.valid || !amount.touched || amount.hasError(PESO_MAX_ERROR)) return null;
     return amount.hasError('min') ? 'Use 0 or more.' : 'Enter an amount.';
   }
 
@@ -157,13 +159,19 @@ export class ChargeLines {
     this.lines().removeAt(index);
   }
 
+  /**
+   * Takes the item's name and type, and its default amount unless someone typed an amount
+   * on this line, so picking another item updates a filled-in default. The amount stays
+   * editable, and the line keeps its own copy: a later change to the default leaves it be.
+   */
   onChargePicked(group: ChargeLineGroup, chargeItemId: string): void {
     const option = this.options().find((candidate) => candidate.value === chargeItemId);
     if (!option) return;
     group.controls.name.setValue(option.name);
     group.controls.billType.setValue(option.billType);
-    if (group.controls.amount.value === null && option.defaultAmount !== null) {
-      group.controls.amount.setValue(option.defaultAmount);
+    const { amount } = group.controls;
+    if (option.defaultAmount !== null && (amount.value === null || amount.pristine)) {
+      amount.setValue(option.defaultAmount);
     }
   }
 

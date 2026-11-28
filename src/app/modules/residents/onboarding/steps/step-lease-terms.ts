@@ -19,6 +19,7 @@ import { InputNumber } from 'primeng/inputnumber';
 import type { ChargeLine } from '../../../../core/models/charge-item.types';
 import type { LeaseTermsStepData, OnboardingDetail, OverviewStepData } from '../../../../core/models/onboarding.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
+import { PESO_MAX_MESSAGE, hasPesoOverMax } from '../../../../shared/ui/peso-input/peso-text.util';
 import { UtilityBillingFields, utilityBillingGroup } from '../../../../shared/ui/utility-billing-fields/utility-billing-fields';
 import { ordinal } from '../../../../shared/utils/date.util';
 import { starterRentFill } from '../../../../shared/utils/per-sqm-quote';
@@ -98,7 +99,7 @@ export class StepLeaseTerms {
       this.form.markAllAsTouched();
       if (this.charges.invalid) {
         // Each missing field says what it needs; the banner points there.
-        this.errorMessage.set('Some charges are missing details.');
+        this.errorMessage.set(hasPesoOverMax(this.charges) ? PESO_MAX_MESSAGE : 'Some charges are missing details.');
         this.chargeLines()?.focusFirstInvalid();
       } else {
         this.errorMessage.set('Enter a due day from 1 to 31.');

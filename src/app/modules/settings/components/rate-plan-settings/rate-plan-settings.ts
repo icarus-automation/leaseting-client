@@ -43,6 +43,7 @@ import {
 } from '../../utils/parking-clock.util';
 import { billedHint, sortRatePlans } from '../../utils/rate-plan-order.util';
 import { PesoInput } from '../../../../shared/ui/peso-input/peso-input';
+import { PESO_MAX_MESSAGE, hasPesoOverMax } from '../../../../shared/ui/peso-input/peso-text.util';
 
 interface PriceCell {
   id: string;
@@ -170,6 +171,10 @@ export class RatePlanSettings {
       this.createError.set(built.error);
       return;
     }
+    if (hasPesoOverMax(this.createForm)) {
+      this.createError.set(PESO_MAX_MESSAGE);
+      return;
+    }
 
     this.creating.set(true);
     this.createError.set(null);
@@ -228,6 +233,10 @@ export class RatePlanSettings {
     const built = this.payloadOf(this.editForm);
     if (!built.ok) {
       this.editError.set(built.error);
+      return;
+    }
+    if (hasPesoOverMax(this.editForm)) {
+      this.editError.set(PESO_MAX_MESSAGE);
       return;
     }
 

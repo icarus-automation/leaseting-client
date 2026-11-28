@@ -92,6 +92,26 @@ describe('StepDeposit one-time charges', () => {
     expect(component.errorMessage()).toBe('Pick a charge and an amount above zero for each one-time charge, or remove it.');
   });
 
+  it('refuses a one-time charge over ₱99,999,999.99 and says so once, under the amount', async () => {
+    await render({
+      collectsAdvance: false,
+      advanceMonths: 0,
+      holdsDeposit: false,
+      depositMonths: 0,
+      oneTimeCharges: [{ ...KEY_DEPOSIT, amount: 500_000_000_000 }],
+    });
+
+    component.submit();
+    fixture.detectChanges();
+
+    expect(emitted).toEqual([]);
+    expect(component.errorMessage()).toBe('Max ₱99,999,999.99');
+    const amount = fixture.nativeElement.querySelector('#one-time-amount-0') as HTMLInputElement;
+    const describedBy = amount.getAttribute('aria-describedby') ?? '';
+    expect(fixture.nativeElement.querySelector(`#${describedBy}`)?.textContent?.trim()).toBe('Max ₱99,999,999.99');
+    expect(fixture.nativeElement.textContent).not.toContain('Enter an amount.');
+  });
+
   it('leaves the field out when there are none, so an older API still takes the step', async () => {
     await render();
 

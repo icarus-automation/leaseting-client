@@ -97,6 +97,7 @@
       <input
         id="pass-holder"
         formControlName="holderName"
+        (blur)="tidyName(form.controls.holderName)"
         maxlength="120"
         class="h-9 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
         placeholder="Required unless a lease is linked"

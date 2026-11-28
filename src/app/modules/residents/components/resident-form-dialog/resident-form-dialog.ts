@@ -20,6 +20,7 @@ import { createFormErrors } from '../../../../shared/forms/form-errors';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { FormDialog } from '../../../../shared/ui/form-dialog/form-dialog';
 import { ImageDropzone } from '../../../../shared/ui/image-dropzone/image-dropzone';
+import { tidyNameField } from '../../../../shared/utils/person-name.util';
 import { ResidentsService } from '../../services/residents.service';
 
 @Component({
@@ -45,6 +46,8 @@ export class ResidentFormDialog {
     notes: ['', [Validators.maxLength(2000)]],
   });
   readonly errors = createFormErrors(this.form);
+  /** Shows a name in its saved form as its field is left. */
+  protected readonly tidyName = tidyNameField;
 
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);

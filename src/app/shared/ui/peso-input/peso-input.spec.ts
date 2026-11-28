@@ -218,6 +218,46 @@ describe('PesoInput', () => {
     expect(fixture.nativeElement.querySelector('button[aria-label="Clear amount"]')).toBeNull();
   });
 
+  describe('the ₱99,999,999.99 cap', () => {
+    const message = () => fixture.nativeElement.querySelector('p.text-destructive') as HTMLElement | null;
+
+    it('marks a pasted amount over the cap invalid and says so under the field', () => {
+      focus();
+      type('500000000000', 'insertFromPaste');
+      blur();
+
+      expect(field.value).toBe('500,000,000,000.00');
+      expect(control().hasError('pesoMax')).toBe(true);
+      expect(control().invalid).toBe(true);
+      expect(message()?.textContent?.trim()).toBe('Max ₱99,999,999.99');
+      expect(field.getAttribute('aria-invalid')).toBe('true');
+      expect(field.getAttribute('aria-describedby')).toBe(message()?.id);
+    });
+
+    it('says so as soon as a typed amount goes over, and clears once it is back under', () => {
+      focus();
+      type('99999999.99');
+      expect(control().valid).toBe(true);
+      expect(message()).toBeNull();
+
+      type('100000000');
+      expect(control().hasError('pesoMax')).toBe(true);
+      expect(message()?.textContent?.trim()).toBe('Max ₱99,999,999.99');
+
+      type('10000000');
+      expect(control().valid).toBe(true);
+      expect(message()).toBeNull();
+      expect(field.hasAttribute('aria-describedby')).toBe(false);
+    });
+
+    it('flags an amount the form sets over the cap', () => {
+      control().setValue(123_456_789);
+      fixture.detectChanges();
+      expect(control().hasError('pesoMax')).toBe(true);
+      expect(message()).not.toBeNull();
+    });
+  });
+
   it('follows the control when it is disabled', () => {
     control().disable();
     fixture.detectChanges();

@@ -4,6 +4,19 @@
  * they leave it.
  */
 
+import type { AbstractControl } from '@angular/forms';
+
+/**
+ * The most any peso field takes. The API answers 400 above it. A field can still hold
+ * more, as typed or pasted, so the person sees the error instead of a clipped amount.
+ */
+export const MAX_PESO_AMOUNT = 99_999_999.99;
+
+/** The error a peso field sets above MAX_PESO_AMOUNT. The field shows PESO_MAX_MESSAGE itself. */
+export const PESO_MAX_ERROR = 'pesoMax';
+
+export const PESO_MAX_MESSAGE = 'Max ₱99,999,999.99';
+
 /** Twelve whole digits (₱999 billion) keeps every value an exact JS number. */
 const MAX_WHOLE_DIGITS = 12;
 const VALID_DRAFT = new RegExp(`^\\d{0,${MAX_WHOLE_DIGITS}}(\\.\\d{0,2})?$`);
@@ -63,4 +76,11 @@ export function formatPesoDisplay(amount: number | null): string {
 /** What the field holds while focused: `12000.50`, ready to retype or edit. */
 export function formatPesoDraft(amount: number | null): string {
   return amount === null ? '' : amount.toFixed(2);
+}
+
+/** Whether a control, or any control inside a group or array, holds an amount over the cap. */
+export function hasPesoOverMax(control: AbstractControl): boolean {
+  if (control.hasError(PESO_MAX_ERROR)) return true;
+  const children = (control as { controls?: Record<string, AbstractControl> | AbstractControl[] }).controls;
+  return children ? Object.values(children).some(hasPesoOverMax) : false;
 }

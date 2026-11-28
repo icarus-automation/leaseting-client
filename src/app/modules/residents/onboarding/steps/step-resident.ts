@@ -7,6 +7,7 @@ import { PIcon } from '@primeicons/angular/p-icon';
 import { apiErrorMessage } from '../../../../core/models/api.types';
 import type { OnboardingDetail, ResidentStepData } from '../../../../core/models/onboarding.types';
 import type { ResidentListItem } from '../../../../core/models/resident.types';
+import { tidyNameField } from '../../../../shared/utils/person-name.util';
 import { ResidentsService } from '../../services/residents.service';
 
 interface PickedResident {
@@ -55,6 +56,9 @@ export class StepResident {
     contactNo: ['', [Validators.required, Validators.pattern(/^\+?[0-9][0-9 -]{6,19}$/)]],
     email: ['', [Validators.email, Validators.maxLength(254)]],
   });
+
+  /** Shows a name in its saved form as its field is left. */
+  protected readonly tidyName = tidyNameField;
 
   onSearch(event: Event): void {
     this.search.set((event.target as HTMLInputElement).value);

@@ -19,6 +19,7 @@
           type="text"
           class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
           formControlName="firstName"
+          (blur)="tidyName(form.controls.firstName)"
           [attr.aria-invalid]="!!errors.fieldError('firstName')"
         />
         @if (errors.fieldError('firstName'); as message) {
@@ -32,6 +33,7 @@
           type="text"
           class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
           formControlName="lastName"
+          (blur)="tidyName(form.controls.lastName)"
           [attr.aria-invalid]="!!errors.fieldError('lastName')"
         />
         @if (errors.fieldError('lastName'); as message) {

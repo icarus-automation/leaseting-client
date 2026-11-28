@@ -23,6 +23,7 @@
         id="attendant-add-name"
         type="text"
         formControlName="name"
+        (blur)="tidyName(form.controls.name)"
         autocomplete="off"
         placeholder="e.g. Basement attendant"
         class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring aria-[invalid=true]:border-destructive motion-reduce:transition-none"

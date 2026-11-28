@@ -17,54 +17,57 @@
         @let amountId = idPrefix() + '-amount-' + index;
         @let chargeMessage = chargeError(group);
         @let amountMessage = amountError(group);
-        <li class="flex flex-wrap items-start gap-2" [formGroup]="group">
-          <div class="flex min-w-[11rem] flex-1 flex-col gap-1">
-            <label class="text-[11.5px] font-medium text-muted" [attr.for]="itemId">Charge</label>
-            <p-select
-              [inputId]="itemId"
-              formControlName="chargeItemId"
-              [options]="options()"
-              optionLabel="label"
-              optionValue="value"
-              [filter]="true"
-              [loading]="loadingCatalog()"
-              placeholder="Pick a charge"
-              styleClass="w-full"
-              appendTo="body"
-              [invalid]="!!chargeMessage"
-              [pt]="chargeMessage ? { label: { 'aria-invalid': 'true', 'aria-describedby': itemId + '-error' } } : undefined"
-              (onChange)="onChargePicked(group, $event.value)"
-            />
-            @if (chargeMessage) {
-              <p class="text-[12px] text-destructive" [id]="itemId + '-error'">{{ chargeMessage }}</p>
-            }
-          </div>
+        <!-- The fields wrap inside their own box, so the remove button stays beside the Charge field on a phone. -->
+        <li class="flex items-start gap-2" [formGroup]="group">
+          <div class="flex min-w-0 flex-1 flex-wrap items-start gap-2">
+            <div class="flex min-w-[11rem] flex-1 flex-col gap-1">
+              <label class="text-[11.5px] font-medium text-muted" [attr.for]="itemId">Charge</label>
+              <p-select
+                [inputId]="itemId"
+                formControlName="chargeItemId"
+                [options]="options()"
+                optionLabel="label"
+                optionValue="value"
+                [filter]="true"
+                [loading]="loadingCatalog()"
+                placeholder="Pick a charge"
+                styleClass="w-full"
+                appendTo="body"
+                [invalid]="!!chargeMessage"
+                [pt]="chargeMessage ? { label: { 'aria-invalid': 'true', 'aria-describedby': itemId + '-error' } } : undefined"
+                (onChange)="onChargePicked(group, $event.value)"
+              />
+              @if (chargeMessage) {
+                <p class="text-[12px] text-destructive" [id]="itemId + '-error'">{{ chargeMessage }}</p>
+              }
+            </div>
 
-          <div class="flex w-40 flex-col gap-1">
-            <label class="text-[11.5px] font-medium text-muted" [attr.for]="amountId">Amount</label>
-            <app-peso-input
-              [inputId]="amountId"
-              formControlName="amount"
-              [invalid]="!!amountMessage"
-              [ariaDescribedBy]="amountMessage ? amountId + '-error' : undefined"
-            />
-            @if (amountMessage) {
-              <p class="text-[12px] text-destructive" [id]="amountId + '-error'">{{ amountMessage }}</p>
-            }
-          </div>
+            <div class="flex w-40 flex-col gap-1">
+              <label class="text-[11.5px] font-medium text-muted" [attr.for]="amountId">Amount</label>
+              <app-peso-input
+                [inputId]="amountId"
+                formControlName="amount"
+                [invalid]="!!amountMessage"
+                [ariaDescribedBy]="amountMessage ? amountId + '-error' : undefined"
+              />
+              @if (amountMessage) {
+                <p class="text-[12px] text-destructive" [id]="amountId + '-error'">{{ amountMessage }}</p>
+              }
+            </div>
 
-          <div class="flex min-w-[10rem] flex-1 flex-col gap-1">
-            <label class="text-[11.5px] font-medium text-muted" [attr.for]="idPrefix() + '-note-' + index">
-              Description <span class="font-normal">(optional)</span>
-            </label>
-            <input
-              [id]="idPrefix() + '-note-' + index"
-              type="text"
-              formControlName="description"
-              maxlength="120"
-              [placeholder]="descriptionPlaceholder()"
-              class="h-10 w-full rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
-            />
+            <div class="flex min-w-[10rem] flex-1 flex-col gap-1">
+              <label class="text-[11.5px] font-medium text-muted" [attr.for]="idPrefix() + '-note-' + index">
+                Description <span class="font-normal">(optional)</span>
+              </label>
+              <input
+                [id]="idPrefix() + '-note-' + index"
+                type="text"
+                formControlName="description"
+                maxlength="120"
+                [placeholder]="descriptionPlaceholder()"
+                class="h-10 w-full rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
+              />
+            </div>
           </div>
 
           <button

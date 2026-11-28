@@ -126,22 +126,23 @@
     />
   </section>
 
-  <div class="grid grid-cols-2 gap-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-4">
-    <div class="flex flex-col">
+  <!-- min-w-0 and wrap-anywhere let a long amount wrap inside its cell instead of running into the next one. -->
+  <div class="grid grid-cols-2 gap-x-3 gap-y-2 rounded-base border border-border bg-surface px-4 py-3 sm:grid-cols-4">
+    <div class="flex min-w-0 flex-col">
       <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Advance</span>
-      <span class="font-heading text-[15px] font-semibold text-heading">{{ advanceTotal() | phpCurrency }}</span>
+      <span class="font-heading text-[15px] font-semibold text-heading wrap-anywhere">{{ advanceTotal() | phpCurrency }}</span>
     </div>
-    <div class="flex flex-col">
+    <div class="flex min-w-0 flex-col">
       <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Deposit</span>
-      <span class="font-heading text-[15px] font-semibold text-heading">{{ depositTotal() | phpCurrency }}</span>
+      <span class="font-heading text-[15px] font-semibold text-heading wrap-anywhere">{{ depositTotal() | phpCurrency }}</span>
     </div>
-    <div class="flex flex-col">
+    <div class="flex min-w-0 flex-col">
       <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">One-time</span>
-      <span class="font-heading text-[15px] font-semibold text-heading">{{ oneTimeTotal() | phpCurrency }}</span>
+      <span class="font-heading text-[15px] font-semibold text-heading wrap-anywhere">{{ oneTimeTotal() | phpCurrency }}</span>
     </div>
-    <div class="flex flex-col sm:items-end">
+    <div class="flex min-w-0 flex-col sm:items-end sm:text-right">
       <span class="text-[11.5px] font-medium uppercase tracking-wide text-muted">Due at move-in</span>
-      <span class="font-heading text-[15px] font-semibold text-primary">{{ moveInTotal() | phpCurrency }}</span>
+      <span class="font-heading text-[15px] font-semibold text-primary wrap-anywhere">{{ moveInTotal() | phpCurrency }}</span>
     </div>
   </div>
 

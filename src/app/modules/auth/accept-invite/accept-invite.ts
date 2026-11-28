@@ -23,6 +23,7 @@ import { apiErrorMessage } from '../../../core/models/api.types';
 import type { AcceptedInvitation, InvitationPreview } from '../../../core/models/invitation.types';
 import { createFormErrors } from '../../../shared/forms/form-errors';
 import { GoogleButton } from '../../../shared/ui/google-button/google-button';
+import { tidyNameField } from '../../../shared/utils/person-name.util';
 import { AuthLayout } from '../auth-layout/auth-layout';
 import { InvitationAcceptService } from '../services/invitation-accept.service';
 import {
@@ -71,6 +72,8 @@ export class AcceptInvite {
     password: ['', [Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH), Validators.maxLength(128)]],
   });
   readonly errors = createFormErrors(this.form);
+  /** Shows a name in its saved form as its field is left. */
+  protected readonly tidyName = tidyNameField;
   readonly showPassword = signal(false);
   readonly submitting = signal(false);
   readonly submitError = signal<string | null>(null);

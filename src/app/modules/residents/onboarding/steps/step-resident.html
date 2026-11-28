@@ -77,6 +77,7 @@
               id="ob-first-name"
               type="text"
               formControlName="firstName"
+              (blur)="tidyName(createForm.controls.firstName)"
               class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
             />
             @if (fieldError('firstName'); as error) {
@@ -89,6 +90,7 @@
               id="ob-last-name"
               type="text"
               formControlName="lastName"
+              (blur)="tidyName(createForm.controls.lastName)"
               class="h-10 rounded-base border border-border bg-background px-3 text-sm text-body outline-none transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:ring-[3px] focus:ring-ring motion-reduce:transition-none"
             />
             @if (fieldError('lastName'); as error) {

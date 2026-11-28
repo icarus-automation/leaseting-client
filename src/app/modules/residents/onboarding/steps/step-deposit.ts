@@ -8,6 +8,7 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -20,6 +21,7 @@ import type {
   OnboardingDetail,
 } from '../../../../core/models/onboarding.types';
 import { PhpCurrencyPipe } from '../../../../shared/pipes/php-currency-pipe';
+import { PESO_MAX_MESSAGE } from '../../../../shared/ui/peso-input/peso-text.util';
 import { ChargeLines } from '../components/charge-lines/charge-lines';
 import {
   createChargeLineArray,
@@ -38,6 +40,7 @@ const DEFAULT_DEPOSIT_MONTHS = 2;
 })
 export class StepDeposit {
   private readonly fb = inject(FormBuilder);
+  private readonly chargeLines = viewChild(ChargeLines);
 
   readonly detail = input.required<OnboardingDetail>();
   readonly busy = input(false);
@@ -107,6 +110,13 @@ export class StepDeposit {
     if (oneTimeCharges.some((line) => !line.chargeItemId || !(line.amount > 0))) {
       lines.markAllAsTouched();
       this.errorMessage.set('Pick a charge and an amount above zero for each one-time charge, or remove it.');
+      return;
+    }
+    if (lines.invalid) {
+      // Only an amount over the cap is left: the field says so, and the banner points there.
+      lines.markAllAsTouched();
+      this.errorMessage.set(PESO_MAX_MESSAGE);
+      this.chargeLines()?.focusFirstInvalid();
       return;
     }
 

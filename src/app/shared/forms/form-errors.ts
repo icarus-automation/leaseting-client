@@ -2,6 +2,8 @@ import { Signal, WritableSignal, computed, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type { FormGroup } from '@angular/forms';
 
+import { PESO_MAX_ERROR } from '../ui/peso-input/peso-text.util';
+
 export interface FormErrors {
   submitted: WritableSignal<boolean>;
   dirty: Signal<boolean>;
@@ -25,7 +27,10 @@ export function createFormErrors(form: FormGroup): FormErrors {
     if (!show) return null;
 
     const errors = control.errors ?? {};
-    for (const key of Object.keys(errors)) {
+    // A peso field shows its own over-the-cap message, so it is not repeated here.
+    const keys = Object.keys(errors).filter((key) => key !== PESO_MAX_ERROR);
+    if (keys.length === 0 && PESO_MAX_ERROR in errors) return null;
+    for (const key of keys) {
       const override = overrides?.[key];
       if (override) return override;
       switch (key) {
